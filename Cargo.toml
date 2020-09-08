@@ -1,0 +1,17 @@
+[package]
+name = "pyAnalyser"
+version = "0.1.0"
+edition = "2018"
+
+[lib]
+name = "pyAnalyser"
+crate-type = ["cdylib"]
+
+[dependencies]
+numpy = "0.11.0"
+ndarray =">= 0.12"
+hdf5 = "0.7.0"
+
+[dependencies.pyo3]
+version = "0.11.1"
+features = ["extension-module"]

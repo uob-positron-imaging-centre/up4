@@ -26,6 +26,7 @@ Python librarys:
   - pickle
   - h5py
   - numpy
+
 Rust dependencys will be installed before compilation
 
 

@@ -53,7 +53,7 @@ setup(
     long_description = long_description,
     long_description_content_type = "text/markdown",
     packages=["pyAnalyser"],
-    rust_extensions=[RustExtension("pyAnalyser.pyAnalyser")],
+    rust_extensions=[RustExtension("rustAnalyser")],
     install_requires=install_requires,
     setup_requires=setup_requires,
     include_package_data=True,

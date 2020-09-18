@@ -27,7 +27,11 @@ Python librarys:
   - h5py
   - numpy
 
-Rust dependencys will be installed before compilation
+you will need a rust compiler, see:
+
+https://www.rust-lang.org/tools/install
+
+Rust dependencys will be installed automatically before compilation
 
 
 

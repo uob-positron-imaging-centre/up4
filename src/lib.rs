@@ -221,7 +221,6 @@ fn occupancy_plot1D<'py>(py: Python<'py>,
             occu[cell_id] = occu[cell_id] + time_spent;
         }
 
-
     }
     if norm {
         let mut xmax = 0;
@@ -243,7 +242,7 @@ fn occupancy_plot1D<'py>(py: Python<'py>,
 
 fn check_id(id: usize, var: &Array1<i64>) -> bool {
     let mut ret_val = false;
-    if (var[0usize] == 0 && var[1usize] == 0) { ret_val = true; }
+    if (var[0usize] == -1 && var[1usize] == -1) { ret_val = true; }
     else {
         if id >= var[0usize] as usize && id <= var[1usize] as usize {
             ret_val = true;
@@ -255,13 +254,15 @@ fn check_id(id: usize, var: &Array1<i64>) -> bool {
 }
 fn check_radius(id: f64, var: &Array1<f64>) -> bool {
     let mut ret_val = false;
-    if (var[0usize] == 0.0 && var[1usize] == 0.0 ) { ret_val = true; }
+    //println!("{:?}",var[1usize]);
+    if (var[0usize] == -1.0 && var[1usize] == -1.0 ) { ret_val = true; }
     else {
-        if id >= var[0usize] && id <= var[1usize]{
+        if id >= var[0usize] && id < var[1usize]{
             ret_val = true;
         }
 
     }
+    //println!("{:?}",ret_val);
     ret_val
 
 

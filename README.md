@@ -12,8 +12,28 @@ scientists, but the core of it is implemented in RUST.
 
 ## Installation
 
-well i have no clue so far :D
+Download or clone this repository and run:
+
+    python3 -m pip install .
+
+this could take some time as it compiles the rust code on your machine. 
 
 ### Dependencies
 
+Python librarys:
+  - plotly
+  - os
+  - pickle
+  - h5py
+  - numpy
 
+you will need a rust compiler, see:
+
+https://www.rust-lang.org/tools/install
+
+Rust dependencys will be installed automatically before compilation
+
+
+
+### ToDo
+Still no conversion from any simulation tool to HDF5 

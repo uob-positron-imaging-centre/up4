@@ -21,7 +21,7 @@ def plot_occu_1D(
             xaxis_title= x_title,
             yaxis_title= y_title)
     fig.show()
-    
+    return fig
     
     
 def plot_vectorfield(sx,sy,vx,vy,y_max = None,x_max = None,width=500, height=900):
@@ -33,10 +33,14 @@ def plot_vectorfield(sx,sy,vx,vy,y_max = None,x_max = None,width=500, height=900
     fig.update_layout(
         autosize=False,
         width=width,
-        height=height)
+        height=height,
+        xaxis_title= "Width [m]",
+        yaxis_title= "Height [m]")
+    
     if y_max is not None:
         fig.update_yaxes(range=[0.0, y_max])
     if x_max is not None:
         fig.update_xaxes(range=[0.0, x_max])
         
     fig.show()
+    return fig

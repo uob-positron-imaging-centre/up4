@@ -9,6 +9,7 @@ import h5py
 inf = float('inf')
 from .recovery import Center
 from .plot import *
+from . import converter
 class Data():
     def __init__( self, filename, overwrite = False):
         # ckeck filename which format it has
@@ -37,8 +38,8 @@ class Data():
         dimensions = [inf, inf, inf],
         norm = False, 
         return_data = False, 
-        radius = 0.0,
-        particle_id = 0,
+        radius = -1.0,
+        particle_id = -1,
         plot = True
     ):
 
@@ -89,8 +90,8 @@ class Data():
         min_time =-inf,
         norm = False, 
         return_data = False, 
-        radius = 0.0,
-        particle_id = 0,
+        radius = -1.0,
+        particle_id = -1,
         clouds = False,
         axis=2,
         plot = True

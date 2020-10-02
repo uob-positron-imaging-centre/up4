@@ -197,12 +197,13 @@ fn occupancy_plot1D<'py>(py: Python<'py>,
         let positions = group.dataset("position").expect( "error").read_2d::<f64>().unwrap();
         let velocitys = group.dataset("velocity").expect( "error").read_2d::<f64>().unwrap();
 
+        let ID = group.dataset("particleid").expect( "error").read_1d::<f64>().unwrap();
         let rad_array = group.dataset("radius").expect( "error").read_1d::<f64>().unwrap();
         let particles = positions.len()/3;
         // loop over all particles in this timestep, calculate the velocity vector and add it to the
         // vectorfield array
         for particle in (0..particles){
-            //if !check_id(ID[particle] as usize ,&particle_id) {continue}
+            if !check_id(ID[particle] as usize ,&particle_id) {continue}
             if !check_radius(rad_array[particle] as f64 ,&radius) {continue}
             let position = positions.slice(s![particle,..]).to_owned();
             let velocity = velocitys.slice(s![particle,..]).to_owned();

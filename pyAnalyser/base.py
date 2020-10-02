@@ -40,7 +40,9 @@ class Data():
         return_data = False, 
         radius = -1.0,
         particle_id = -1,
-        plot = True
+        plot = True,
+        width = 500,
+        height = 900
     ):
 
         if isinstance(dimensions, (list, tuple, np.ndarray)):
@@ -80,7 +82,7 @@ class Data():
                                             )
         self.recovery.add(np.asarray([vx, vy, vz ,sx,sy]))
         if plot:
-            plot_vectorfield(sx,sy,vx,vz)
+            plot_vectorfield(sx,sy,vx,vz,width = width, height = height)
         return vx, vy, vz ,sx,sy
         
         

@@ -6,20 +6,31 @@ import plotly.figure_factory as ff
 def plot_occu_1D(
     occu,
     arr,
-    axis
+    axis,
+    height = 900,
+    width = 500,
+    y_max = None,
+    x_max = None,
+    fig = None
     ):
     y=arr if axis == 2 else occu
     x=occu if axis == 2 else arr
     x_title = "Particle Volume Fraction [%]" if axis ==2 else "Width [m]"
     y_title =  "Height [m]" if axis ==2 else "Particle Volume Fraction [%]"
-    fig = go.Figure()
+    if fig is None:
+        fig = go.Figure()
     fig.add_trace(go.Scatter(x=x,y=y))
     fig.update_layout(
             #autosize=False,
-            #width=width,
-            #height=height,
+            width=width,
+            height=height,
             xaxis_title= x_title,
             yaxis_title= y_title)
+    if y_max is not None:
+        fig.update_yaxes(range=[0.0, y_max])
+    if x_max is not None:
+        fig.update_xaxes(range=[0.0, x_max])
+        
     fig.show()
     return fig
     

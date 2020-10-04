@@ -2,6 +2,7 @@
 import rustAnalyser as rust
 
 import numpy as np
+from numpy.polynomial import Polynomial
 import os
 import pickle
 import h5py
@@ -153,7 +154,7 @@ class Data():
         for id,timestep in enumerate(data):
             time = timestep[0]
             particle_data  = timestep[1]
-            group = f.create_group("timestep "+str(id) )
+            group = f.create_group( "timestep "+str(id) )
             
             p_data = np.asarray(particle_data,dtype=float)
             pos = p_data[:,0:3]
@@ -202,5 +203,82 @@ class Data():
         f.create_dataset("dimensions", data = np.asarray([min_array,max_array]))
         f.close()
         
-    
-     
+    def surface_polynom(
+        self,
+        axis = 0,
+        step = 0,
+        
+        steps_per_image = 10,
+        threshold = 1.0,
+        return_data = False, 
+        plot = True,
+        width = 500,
+        height = 900
+    ):
+        fig = None
+        
+        image,cell_len = rust.surface_polynom(self.filename,
+                                            axis,
+                                            step,
+                                            steps_per_image,
+                                            threshold
+                                            )
+        
+        plot_image (image)
+        poly_surface, surface = self.extract_surface( image, cell_len [0])
+        fig = plot_polynom(poly_surface, surface,fig, plot = False)
+        return poly_surface
+        
+        
+    def extract_surface(self,occupancy, cell_length):
+        '''Extract the surface from a 2D occupancy plot (which is given as cells)
+        and return a fitted 3rd order polynomial with the zeroth order coefficient
+        set to 0.
+
+        Parameters
+        ----------
+        occupancy: (M, N) numpy.ndarray
+            Input occupancy plot - a 2D numpy array where 0 represents an empty
+            cell, and a 1 represents the surface.
+
+        cell_length: float
+            The length of a single cell in the x- and y-dimensions.
+
+        Returns
+        -------
+        numpy.polynomial.Polynomial
+            The fitted 3rd order Polynomial, **with the 0th order coefficient set
+            to zero**.
+        '''
+
+        # Extract the coordinates of the non-zero elements in `occupancy` and
+        # multiply them by the cell length to get x and y points
+        surface = np.argwhere(occupancy > 0.5)
+        surface = surface * cell_length
+
+        # Sort the points by the x coordinates, then y coordinates
+        surface = surface[
+            np.lexsort(
+                (surface[:, 1], surface[:, 0])
+            )
+        ]
+        
+        # Take the highest point on the surface and clip its sides
+        max_idx = surface[:, 1].argmax()
+
+        surface_clipped = np.delete(surface, np.s_[:max_idx], axis = 0)
+        surface_clipped = np.delete(surface_clipped, np.s_[-max_idx:], axis = 0)
+
+        # Fit a 3rd order polynomial to the clipped surface
+        surface_poly = Polynomial.fit(
+            surface_clipped[:, 0],
+            surface_clipped[:, 1],
+            3
+        )
+
+        # Set the zeroth-order coefficient to 0 to "lower" the surface
+        surface_poly.coef[0] = 0
+
+        return surface_poly, surface
+
+

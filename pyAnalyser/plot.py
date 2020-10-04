@@ -2,7 +2,7 @@ import plotly.graph_objects as go
 
 import plotly.figure_factory as ff
 
-
+import numpy as np
 def plot_occu_1D(
     occu,
     arr,
@@ -54,4 +54,24 @@ def plot_vectorfield(sx,sy,vx,vy,y_max = None,x_max = None,width=500, height=900
         fig.update_xaxes(range=[0.0, x_max])
         
     fig.show()
+    return fig
+    
+    
+    
+def plot_image(img):
+    import plotly.express as px
+    fig = px.imshow((img), color_continuous_scale='gray')
+    fig.show()
+    
+    
+    
+def plot_polynom( surface_poly, surface = None, fig=None, plot = True):
+    if fig is  None:
+        fig = go.Figure()
+    x = np.linspace(surface_poly.domain[0], surface_poly.domain[1], 1000) 
+    fig.add_trace(go.Scatter(x = x, y = surface_poly(x))) 
+    if surface is not None:
+        fig.add_trace(go.Scatter(x = surface[:, 0], y = surface[:, 1])) 
+    if plot:
+        fig.show()
     return fig

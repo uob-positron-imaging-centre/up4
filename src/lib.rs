@@ -1,5 +1,6 @@
 
 use pyo3::prelude::*;
+use pyo3::callback::IntoPyCallbackOutput;
 use pyo3::wrap_pyfunction;
 extern crate numpy;
 #[macro_use(s)]
@@ -16,6 +17,7 @@ fn rustAnalyser(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(vectorfield))?;
     m.add_wrapped(wrap_pyfunction!(alive))?;
     m.add_wrapped(wrap_pyfunction!(occupancy_plot1D))?;
+    m.add_wrapped(wrap_pyfunction!(surface_polynom))?;
     Ok(())
 }
 
@@ -236,6 +238,86 @@ fn occupancy_plot1D<'py>(py: Python<'py>,
     }
     file.close();
     (occu.to_pyarray(py).to_dyn(), array.to_pyarray(py).to_dyn())
+}
+
+#[pyfunction]
+fn surface_polynom<'py>(
+    _py: Python<'py>,
+    filename: &str,
+    axis:usize,
+    timestep:u64,
+    mut ntimesteps: u64,
+    threshold:f64
+) -> (&'py PyArrayDyn<f64>, &'py PyArrayDyn<f64>){
+    /*
+    function to calculate the time averaged occupancy plot of a particle system
+     */
+    let file =hdf5::File::open( filename ).expect("Error reading hdf5 file in rust");
+    let array_temp = file.dataset("dimensions").unwrap().read_2d::<f64>().unwrap();
+    let min_array: Array1<f64> = array_temp.slice(s![0,..]).to_owned();
+    let max_array:Array1<f64> = array_temp.slice(s![1,..]).to_owned();
+    let dt = get_dt(&file);
+    let cell_size = ( &max_array[0usize]-&min_array[0usize])/200.0;
+    let cells:Array1<f64> = (&max_array-&min_array)/cell_size;
+    let mut image : Array2<f64>  = ndarray::Array2::<f64>::zeros(( cells[0usize] as usize,cells[2usize] as usize ));
+    // loop over n timesteps and generate the image
+    // find the number of timesteps
+
+    if ntimesteps == 0{
+        let timesteps = timesteps(&file);
+        ntimesteps = timesteps - timestep -1;
+    }
+    for t in 0..ntimesteps-1 {
+        let curstep = t + timestep;
+        let name: String = "timestep ".to_string() + &curstep.to_string();
+        let group = file.group(&name).unwrap();
+        let positions = group.dataset("position").expect("error").read_2d::<f64>().unwrap();
+        let particles = positions.len() / 3;
+        // loop over all particles in this timestep, calculate the velocity vector and add it to the
+        // vectorfield array
+        for particle in (0..particles) {
+            let position = positions.slice(s![particle,..]).to_owned();
+            //reset the position. the lowest value should be at 0,0,0
+            let x: f64 = position[0usize] - min_array[0usize];
+            let y: f64 = position[2usize] - min_array[2usize];
+            let mut i: usize = (x / cell_size).floor() as usize;
+            let mut j: usize = (y / cell_size).floor() as usize;
+            if i >= cells[0usize] as usize{
+                i = cells[0usize] as usize -1;
+            }
+            if j >= cells[2usize] as usize{
+                j = cells[2usize] as usize -1 ;
+            }
+            //let k = (cells[2usize] as i64 - j - 1) as usize;
+            //println!("{:?},{:?}",i,j);
+            image[[i, j]] = image[[i, j]] + 1.0;
+
+        }
+    }
+
+    let rows = image.nrows();
+    let cols = image.ncols();
+    //find the highest value of each coloumn
+
+    for x in 0..rows{
+        let mut max_y :usize  = 0;
+        for y in (0..cols){
+            if image[[x,y]] > threshold{
+                image[[x,max_y]] = 0.0;
+                max_y = y;
+                image[[x,y]] = 1.0;
+                continue
+            }
+            image[[x,y]] = 0.0;
+        }
+
+    }
+    //return the current image
+    //solve this more elegant, return simple float
+    let mut arr = Array1::zeros(1);
+    arr[0]= cell_size;
+    (image.into_pyarray(_py).to_dyn(),arr.into_pyarray(_py).to_dyn())
+
 }
 
 

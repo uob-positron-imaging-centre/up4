@@ -17,7 +17,8 @@ fn rustAnalyser(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(vectorfield))?;
     m.add_wrapped(wrap_pyfunction!(alive))?;
     m.add_wrapped(wrap_pyfunction!(occupancy_plot1D))?;
-    m.add_wrapped(wrap_pyfunction!(surface_polynom))?;
+    //m.add_wrapped(wrap_pyfunction!(surface_polynom))?;
+    m.add_wrapped(wrap_pyfunction!(gran_temp))?;
     Ok(())
 }
 
@@ -125,8 +126,8 @@ fn rustAnalyser(py: Python, m: &PyModule) -> PyResult<()> {
         }
     }
 
-    v_x_grid = v_x_grid / n_x_grid;
-    v_y_grid = v_y_grid / n_y_grid;
+    v_x_grid = v_x_grid / &n_x_grid;
+    v_y_grid = v_y_grid / &n_y_grid;
     v_z_grid = v_z_grid / n_z_grid;
     let (sx,sy) = meshgrid(Array::linspace(0.0,cells[0usize]*cell_size[0usize],cells[0usize] as usize ),
                                                      Array::linspace(0.0,cells[2usize]*cell_size[2usize],cells[2usize] as usize));
@@ -139,7 +140,7 @@ fn rustAnalyser(py: Python, m: &PyModule) -> PyResult<()> {
     file.close();
 
     (v_x_grid.into_pyarray(_py).to_dyn(),
-            v_y_grid.into_pyarray(_py).to_dyn(),
+            n_x_grid.into_pyarray(_py).to_dyn(),
             v_z_grid.into_pyarray(_py).to_dyn(),
             sx.into_pyarray(_py).to_dyn(),
             sy.into_pyarray(_py).to_dyn()
@@ -239,7 +240,7 @@ fn occupancy_plot1D<'py>(py: Python<'py>,
     file.close();
     (occu.to_pyarray(py).to_dyn(), array.to_pyarray(py).to_dyn())
 }
-
+/**
 #[pyfunction]
 fn surface_polynom<'py>(
     _py: Python<'py>,
@@ -319,8 +320,57 @@ fn surface_polynom<'py>(
     (image.into_pyarray(_py).to_dyn(),arr.into_pyarray(_py).to_dyn())
 
 }
+**/
+
+#[pyfunction]
+fn gran_temp<'py>(
+    _py: Python<'py>,
+    filename: &str,
+    axis: usize,
+    min_time:f64,
 
 
+) -> (&'py PyArrayDyn<f64>){
+    /*
+    function to calculate the time averaged occupancy plot of a particle system
+     */
+    let file = hdf5::File::open( filename ).expect("Error reading hdf5 file in rust");
+    let array_temp = file.dataset("dimensions").unwrap().read_2d::<f64>().unwrap();
+    let min_array: Array1<f64> = array_temp.slice(s![0,..]).to_owned();
+    let max_array:Array1<f64> = array_temp.slice(s![1,..]).to_owned();
+    // loop over n timesteps and generate the image
+    // find the number of timesteps
+
+    let mut timesteps:u64 = timesteps(&file);
+    let mut result: Array1<f64> = Array1::<f64>::zeros(timesteps as usize);
+    for t in 0..timesteps  {
+        let name: String = "timestep ".to_string() + &t.to_string();
+        let group = file.group(&name).unwrap();
+        let time = group.dataset("time").unwrap().read_raw::<f64>().unwrap()[0];
+        if time < min_time { continue; }
+        let velocity = group.dataset("velocity").expect("error").read_2d::<f64>().unwrap();
+
+        let particles = velocity.len() / 3;
+        // loop over all particles in this timestep, calculate the velocity vector and add it to the
+        // vectorfield array
+        let mut sum_vel = 0.0;
+        let mut sum_vel_sq = 0.0 ;
+
+        for particle in 0.. particles {
+            let vel = velocity.slice(s![particle,..]).to_owned();
+            let abs_vel: f64 = (vel[0usize] * vel[0usize] + vel[1usize] * vel[1usize]+ vel[2usize] * vel[2usize] ).sqrt();
+            sum_vel += abs_vel ;
+            sum_vel_sq += abs_vel * abs_vel ;
+
+        }
+        let temp = 1.0/3.0 * 1.0/ particles as f64 * (sum_vel_sq - 1.0/particles as f64 * sum_vel * sum_vel) ;
+
+        result[t as usize] = temp ;
+
+    }
+    result.to_pyarray(_py).to_dyn()
+
+}
 
 
 fn check_id(id: usize, var: &Array1<i64>) -> bool {

@@ -138,7 +138,9 @@ class Data():
         if plot:
             plot_occu_1D(occu,array,axis)
         return occu, array
-        
+    
+    def gran_temp(self):
+         return rust.gran_temp(self.filename, 0, 0.0) 
         
     def transform_hdf5(self, file, overwrite = False):
         """ pickle data to HDF5
@@ -277,7 +279,7 @@ class Data():
         )
 
         # Set the zeroth-order coefficient to 0 to "lower" the surface
-        surface_poly.coef[0] = 0
+        #surface_poly.coef[0] = 0
 
         return surface_poly, surface
 

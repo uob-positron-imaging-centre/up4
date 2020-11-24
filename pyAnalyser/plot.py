@@ -11,7 +11,8 @@ def plot_occu_1D(
     width = 500,
     y_max = None,
     x_max = None,
-    fig = None
+    fig = None,
+    name = ""
     ):
     y=arr if axis == 2 else occu
     x=occu if axis == 2 else arr
@@ -19,7 +20,7 @@ def plot_occu_1D(
     y_title =  "Height [m]" if axis ==2 else "Particle Volume Fraction [%]"
     if fig is None:
         fig = go.Figure()
-    fig.add_trace(go.Scatter(x=x,y=y))
+    fig.add_trace(go.Scatter(x=x,y=y, name = name))
     fig.update_layout(
             #autosize=False,
             width=width,
@@ -35,7 +36,11 @@ def plot_occu_1D(
     return fig
     
     
-def plot_vectorfield(sx,sy,vx,vy,y_max = None,x_max = None,width=500, height=900):
+def plot_vectorfield(sx,sy,vx,vy,y_max = None,x_max = None,width=500, height=900, norm = False):
+    if norm:
+        norm = np.sqrt( vx*vx+vy*vy)
+        vx = vx/norm
+        vy = vy/norm
     fig = ff.create_quiver(sx, sy, vx, vy,
                    scale=.004,
                    arrow_scale=.4,

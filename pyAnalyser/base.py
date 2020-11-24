@@ -7,6 +7,7 @@ import os
 import pickle
 import h5py
 
+
 inf = float('inf')
 from .recovery import Center
 from .plot import *
@@ -17,8 +18,8 @@ class Data():
         if filename.endswith( ".hdf5" ) or filename.endswith( "h5" ):
             # filename is a hdf5 file and can be used directly
             if os.path.exists(filename):
-                self.filename = filename 
-            else: 
+                self.filename = filename
+            else:
                 raise ValueError("Could not find HDF5 file. Wrong name/direction ?")
         elif filename.endswith( ".pickle" ):
             if os.path.exists(filename):
@@ -28,17 +29,17 @@ class Data():
             self.filename = filename.split( ".pickle" )[0] + ".hdf5"
         else:
             raise ValueError("File format not known. Check input or transform data to DEM-hdf5")
-        
+
         self.recovery = Center(self.filename)
-    
+
     def vectorfield(
         self,
         cells=[30.0,30.0,30.0],
-        min_time =-inf, 
+        min_time =-inf,
         max_time = inf,
         dimensions = [inf, inf, inf],
-        norm = False, 
-        return_data = False, 
+        norm = False,
+        return_data = False,
         radius = -1.0,
         particle_id = -1,
         plot = True,
@@ -50,28 +51,28 @@ class Data():
             dimensions = np.asarray(dimensions, dtype=float)
         else:
             raise ValueError(f"dimensions should be a list/array not {type(dimensions)}")
-            
+
         if isinstance(cells, (list, tuple, np.ndarray)):
             cells = np.asarray(cells, dtype=float)
         else:
             raise ValueError(f"Cells should be a list/array not {type(cells)}")
-               
+
         if type(radius) == float or type(radius) == int:
             radius = np.asarray([radius, radius], dtype=float)
         elif isinstance(radius, (list, tuple, np.ndarray)):
             radius = np.asarray(radius, dtype=float)
         else:
             raise ValueError(f"radius should be a number or a list/array not {type(radius)}")
-            
-            
+
+
         if type(particle_id) == float or type(particle_id) == int:
             particle_id = np.asarray([int(particle_id), int(particle_id)], dtype=int)
         elif isinstance(particle_id, (list, tuple, np.ndarray)):
             particle_id = np.asarray(particle_id, dtype=int)
         else:
             raise ValueError(f"particle_id should be a number or a list/array not {type(particle_id)}")
-      
-            
+
+
         vx, vy, vz ,sx,sy = rust.vectorfield(self.filename,
                                             cells,
                                             min_time,
@@ -85,46 +86,46 @@ class Data():
         if plot:
             plot_vectorfield(sx,sy,vx,vz,width = width, height = height)
         return vx, vy, vz ,sx,sy
-        
-        
+
+
     def occupancyplot1D(
         self,
         cells=40,
         min_time =-inf,
-        norm = False, 
-        return_data = False, 
+        norm = False,
+        return_data = False,
         radius = -1.0,
         particle_id = -1,
         clouds = False,
         axis=2,
         plot = True
     ):
- 
+
         if type(cells) == float or type(cells) == int:
             cells = float(cells)
         else:
             raise ValueError(f"Cells should be a number not {type(cells)}")
-               
+
         if type(radius) == float or type(radius) == int:
             radius = np.asarray([radius, radius], dtype=float)
         elif isinstance(radius, (list, tuple, np.ndarray)):
             radius = np.asarray(radius, dtype=float)
         else:
             raise ValueError(f"radius should be a number or a list/array not {type(radius)}")
-            
-            
+
+
         if type(particle_id) == float or type(particle_id) == int:
             particle_id = np.asarray([int(particle_id), int(particle_id)], dtype=int)
         elif isinstance(particle_id, (list, tuple, np.ndarray)):
             particle_id = np.asarray(particle_id, dtype=int)
         else:
             raise ValueError(f"particle_id should be a number or a list/array not {type(particle_id)}")
-      
+
         if type(axis) == float or type (axis) == int:
             axis=int(axis)
         else:
             raise ValueError(f"Axis should be a number not {type(cells)}")
-            
+
         occu,array = rust.occupancy_plot1D(self.filename,
                                             radius,
                                             particle_id,
@@ -133,22 +134,23 @@ class Data():
                                             norm,
                                             min_time,
                                             cells
-                                         
+
                                             )
         if plot:
             plot_occu_1D(occu,array,axis)
+        print(occu)
         return occu, array
-    
+
     def gran_temp(self):
-         return rust.gran_temp(self.filename, 0, 0.0) 
-        
+        return rust.gran_temp(self.filename, 0, 0.0)
+
     def transform_hdf5(self, file, overwrite = False):
         """ pickle data to HDF5
         MUST be old DEM_analysis pickle format"""
         new_file = file.split(".pickle")[0]+".hdf5"
         if os.path.exists(file.split(".pickle")[0]+".hdf5") or os.path.exists(file.split(".pickle")[0]+".h5"):
             if not overwrite:
-                input(f"WARNING!!! using equally named filename \"{new_file}\" instead of \"{file}\"\nToggle overwrite to True to overwrite ")
+                print(f"WARNING!!! using equally named filename \"{new_file}\" instead of \"{file}\"\nInclude \"overwrite = True \" to overwrite data ")
         data, min_array, max_array = pickle.load(open(file,"rb"))
         data = np.asarray(data)
         f = h5py.File(new_file,"w")
@@ -157,7 +159,7 @@ class Data():
             time = timestep[0]
             particle_data  = timestep[1]
             group = f.create_group( "timestep "+str(id) )
-            
+
             p_data = np.asarray(particle_data,dtype=float)
             pos = p_data[:,0:3]
             vel = p_data[:,3:6]
@@ -172,9 +174,9 @@ class Data():
             group.create_dataset("spezies",data = spezies)
             group.create_dataset("particleid",data = particle_id)
             group.create_dataset("time",data = time)
-        
-    def maketestfile():    
-        
+
+    def maketestfile():
+
         f = h5py.File("mytestfile.hdf5","w")
 
         import numpy as np
@@ -204,34 +206,34 @@ class Data():
                 grp.create_dataset("time", data = timestep)
         f.create_dataset("dimensions", data = np.asarray([min_array,max_array]))
         f.close()
-        
+
     def surface_polynom(
         self,
         axis = 0,
         step = 0,
-        
+
         steps_per_image = 10,
         threshold = 1.0,
-        return_data = False, 
+        return_data = False,
         plot = True,
         width = 500,
         height = 900
     ):
         fig = None
-        
+
         image,cell_len = rust.surface_polynom(self.filename,
                                             axis,
                                             step,
                                             steps_per_image,
                                             threshold
                                             )
-        
+
         plot_image (image)
         poly_surface, surface = self.extract_surface( image, cell_len [0])
         fig = plot_polynom(poly_surface, surface,fig, plot = False)
         return poly_surface
-        
-        
+
+
     def extract_surface(self,occupancy, cell_length):
         '''Extract the surface from a 2D occupancy plot (which is given as cells)
         and return a fitted 3rd order polynomial with the zeroth order coefficient
@@ -264,7 +266,7 @@ class Data():
                 (surface[:, 1], surface[:, 0])
             )
         ]
-        
+
         # Take the highest point on the surface and clip its sides
         max_idx = surface[:, 1].argmax()
 
@@ -282,5 +284,3 @@ class Data():
         #surface_poly.coef[0] = 0
 
         return surface_poly, surface
-
-

@@ -5,52 +5,78 @@ import numpy as np
 from vtk import vtkDataSetReader
 from vtk.util.numpy_support import vtk_to_numpy
 from natsort import natsorted, ns
+import os
 
-
-def PEPT(filename):
-    data = np.genfromtxt(filename,skip_header=16)
+def PEPT(filename,header = 16):
+    data = np.genfromtxt(filename,skip_header=header)
+    dump = 2
+    while True:
+        filename2 = filename+ f"_0{dump}"
+        print(f"looking for file: \"{filename2}\"")
+        print(os.path.exists(filename2))
+        if os.path.exists(filename2):
+            print(f"Appending data {filename} with {filename2}")
+            data2 = np.genfromtxt(filename2,skip_header=header)
+            data= np.concatenate((data,data2)) 
+            dump+=1
+        else:
+            break
     file = h5py.File(filename.split("a01")[0]+"hdf5","w")
     data[1::] /= 1000
     data[0]/=1000000
     inf=float("inf")
-    min_val=[inf,inf,inf]
-    max_val=[-inf,-inf,-inf]
+    min_val=np.asarray([inf,inf,inf])
+    max_val=np.asarray([-inf,-inf,-inf])
     ###
     #needed variables
-    cur_step = -1
     
     
+    velocitys=[]
+    positions=[]
+    time = []
+    vel_calculation_steps = 4
     for id,timestep in enumerate(data):
-        if id == 0 or id == len(data)-1:
+        if id < vel_calculation_steps or id > len(data)- vel_calculation_steps -1:
             continue
-        cur_step +=1
-        grp = file.create_group("timestep "+str(cur_step))
-        
-        time = timestep[0]
-        grp.create_dataset("time", data = time)
+
+        time.append( timestep[0])
+       
         
         x = timestep[1]
         y = timestep[3]
         z = timestep[2]
-        position = np.asarray([[x,y,z]])
-        positions= [x,y,z]
+        position = np.asarray([x,y,z])
 
-        vx = (-data[id+1][1] + data[id-1][1])/(data[id-1][0]-data[id+1][0])
-        vy = (-data[id+1][3] + data[id-1][3])/(data[id-1][0]-data[id+1][0])
-        vz = (-data[id+1][2] + data[id-1][2])/(data[id-1][0]-data[id+1][0])
-        velocity = np.asarray([[vx,vy,vz]])
+
+        vx = (-data[id+ vel_calculation_steps ][1] + data[id- vel_calculation_steps ][1])/(data[id- vel_calculation_steps ][0]-data[id+ vel_calculation_steps ][0])
+        vy = (-data[id+ vel_calculation_steps ][3] + data[id- vel_calculation_steps ][3])/(data[id- vel_calculation_steps ][0]-data[id+ vel_calculation_steps ][0])
+        vz = (-data[id+ vel_calculation_steps ][2] + data[id- vel_calculation_steps ][2])/(data[id- vel_calculation_steps ][0]-data[id+ vel_calculation_steps ][0])
+        velocity = np.asarray([vx,vy,vz])
+        positions.append(position)
+        velocitys.append(velocity)
         
-        grp.create_dataset("position",data = position)
-        grp.create_dataset("velocity",data = velocity)
-        grp.create_dataset("radius",data = np.asarray([0]))
-        grp.create_dataset("ppcloud",data = np.asarray([0]))
-        grp.create_dataset("spezies",data = np.asarray([0]))
-        grp.create_dataset("particleid",data = np.asarray([0]))
+        min_mask = position < min_val
+        max_mask = position > max_val
+        min_val[min_mask] = position[min_mask]
+        max_val[max_mask]=position[max_mask]
+         
+    cur_step = 0
+    
+    print(np.asarray(positions).shape)
+    print(np.asarray(positions[0:1]).shape)
+    
+    print(np.asarray(positions[0]).shape)
+    grp = file.create_group("timestep "+str(cur_step))
+    grp.create_dataset("time", data = time[0])        
+    grp.create_dataset("position",data = np.asarray(positions))
+    grp.create_dataset("velocity",data = np.asarray(velocitys))
+    grp.create_dataset("radius",data = np.asarray([0]))
+    grp.create_dataset("ppcloud",data = np.asarray([0]))
+    grp.create_dataset("spezies",data = np.asarray([0]))
+    grp.create_dataset("particleid",data = np.asarray([0]))
         
-        for i in range(0,3):
-            min_val[i] = positions[i] if positions[i] < min_val[i] else min_val[i]
-            max_val[i] = positions[i] if positions[i] > max_val[i] else max_val[i]
-            
+    grp = file.create_group("timestep "+str(1))   
+    grp.create_dataset("time", data = time[10])         
             
             
     file.create_dataset("dimensions", data = np.asarray([min_val,max_val]))

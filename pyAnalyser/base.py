@@ -144,6 +144,9 @@ class Data():
     def gran_temp(self):
         return rust.gran_temp(self.filename, 0, 0.0)
 
+    def mean_velocity(self,min_time=0):
+        return rust.mean_velocity(self.filename, float(min_time))
+
     def transform_hdf5(self, file, overwrite = False):
         """ pickle data to HDF5
         MUST be old DEM_analysis pickle format"""
@@ -228,11 +231,39 @@ class Data():
                                             threshold
                                             )
 
-        plot_image (image)
+        #plot_image (image)
         poly_surface, surface = self.extract_surface( image, cell_len [0])
-        fig = plot_polynom(poly_surface, surface,fig, plot = False)
+        fig = plot_polynom(poly_surface, surface,fig, plot = True)
         return poly_surface
 
+    def velocity_distribution(
+            self,
+            bins = -1,
+            min_time = -inf,
+            max_time = inf,
+            plot = True,
+            width = 1000,
+            height = 1000
+            ):
+
+            if type(bins) == float:
+                raise ValueError(f"Bins should be a integer not {type(bins)}")
+
+            party_id, vel_dist, num_axis_array = rust.velocity_distribution(
+                    self.filename,
+                    bins = bins,
+                    min_time = min_time,
+                    max_time = max_time
+                    )
+
+            #self.recovery.add([party_id, vel_dist, num_axis_array])
+
+            if plot:
+                plot_velocity_distribution(vel_dist,
+                                           num_axis_array,
+                                           width = width,
+                                           height = height)
+            return vel_dist, num_axis_array
 
     def extract_surface(self,occupancy, cell_length):
         '''Extract the surface from a 2D occupancy plot (which is given as cells)

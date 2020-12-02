@@ -12,7 +12,7 @@ import sys
 from setuptools import setup
 
 try:
-    from setuptools_rust import RustExtension
+    from setuptools_rust import RustExtension, Binding
 except ImportError:
     import subprocess
 
@@ -21,7 +21,7 @@ except ImportError:
         print("Please install setuptools-rust package")
         raise SystemExit(errno)
     else:
-        from setuptools_rust import RustExtension
+        from setuptools_rust import RustExtension, Binding
 
 
 
@@ -53,7 +53,7 @@ setup(
     long_description = long_description,
     long_description_content_type = "text/markdown",
     packages=["pyAnalyser"],
-    rust_extensions=[RustExtension("rustAnalyser")],
+    rust_extensions=[RustExtension("rustAnalyser", binding=Binding.PyO3)],
     install_requires=install_requires,
     setup_requires=setup_requires,
     include_package_data=True,

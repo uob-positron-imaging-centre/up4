@@ -2,12 +2,14 @@
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
 extern crate numpy;
-#[macro_use(s)]
 extern crate ndarray;
+extern crate ndarray_linalg;
 use ndarray::prelude::*;
 use numpy::{IntoPyArray, PyArrayDyn, PyReadonlyArray1, PyReadonlyArrayDyn, ToPyArray};
 
-/// A Python module implemented in Rust.
+/// Directory Module
+/// The directory is responsible for connecting the python wrapper to rust
+/// [!] If a new function is added, it must be included in this Directory Module.
 #[pymodule]
 fn rustAnalyser(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(vectorfield))?;
@@ -15,10 +17,14 @@ fn rustAnalyser(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(occupancy_plot1D))?;
     m.add_wrapped(wrap_pyfunction!(surface_polynom))?;
     m.add_wrapped(wrap_pyfunction!(granular_temperature))?;
+    m.add_wrapped(wrap_pyfunction!(mean_velocity))?;
     m.add_wrapped(wrap_pyfunction!(dispersion))?;
+    m.add_wrapped(wrap_pyfunction!(surface_velocity))?;
+    m.add_wrapped(wrap_pyfunction!(velocity_distribution))?;
     Ok(())
 }
-
+/// [Vectorfield Function]:
+/// Calculate the velocity Vectorfiels of your System
 #[pyfunction]
 fn vectorfield<'py>(
     _py: Python<'py>,
@@ -42,7 +48,7 @@ fn vectorfield<'py>(
 
     //read the number of timesteps inside this hdf5file
     let timesteps: u64 = timesteps(&file);
-
+    //Extracting the min and max dimensions of the simulation
     let array = file
         .dataset("dimensions")
         .unwrap()
@@ -51,6 +57,7 @@ fn vectorfield<'py>(
     let min_array = array.slice(s![0, ..]).to_owned();
     let max_array = array.slice(s![1, ..]).to_owned();
 
+    // Extracting internal data of the HDF5 file
     let dimensions = dimensions.as_array().to_owned();
     let cells: Array1<f64> = cells.as_array().to_owned();
     let particle_id: Array1<i64> = particle_id.as_array().to_owned();
@@ -130,13 +137,12 @@ fn vectorfield<'py>(
         // vectorfield array
         for particle in 0..particles {
             //check if this particle is fitting the criteria
-            /**
             if !check_id(ID[particle] as usize, &particle_id) {
                 continue;
             }
             if !check_radius(rad_array[particle] as f64, &radius) {
                 continue;
-            }**/
+            }
             let position = positions.slice(s![particle, ..]).to_owned();
             let velocity = velocitys.slice(s![particle, ..]).to_owned();
             //reset the position. the lowest value should be at 0,0,0
@@ -196,7 +202,7 @@ fn vectorfield<'py>(
         ),
     );
     if norm_on {
-        let norm_arr = norm(&v_x_grid, &v_y_grid, &v_z_grid).to_owned();
+        let norm_arr = norm_three(&v_x_grid, &v_y_grid, &v_z_grid).to_owned();
         v_x_grid = v_x_grid / &norm_arr;
         v_y_grid = v_y_grid / &norm_arr;
         v_z_grid = v_z_grid / &norm_arr;
@@ -326,7 +332,269 @@ fn occupancy_plot1D<'py>(
     file.close();
     (occu.to_pyarray(py).to_dyn(), array.to_pyarray(py).to_dyn())
 }
+#[pyfunction]
+fn mean_velocity<'py>(
+    py: Python<'py>,
+    filename: &str,
+    min_time: f64,
 
+) -> (f64) {
+    /*
+    function to calculate the time averaged occupancy plot of a particle system
+
+
+     */
+    let file = hdf5::File::open(filename).expect("Error reading hdf5 file in rust");
+    let timesteps = timesteps(&file);
+
+    let array_temp = file
+        .dataset("dimensions")
+        .unwrap()
+        .read_2d::<f64>()
+        .unwrap();
+    let mut mean_velocity = 0.0;
+    let mut num_counts = 0.0;
+    for timestep in 0..timesteps - 1 {
+        let name: String = "timestep ".to_string() + &timestep.to_string();
+        let group = file.group(&name).unwrap();
+        let current_time = group.dataset("time").unwrap().read_raw::<f64>().unwrap()[0];
+        // check if timestep is in the timeframe given
+        if current_time < min_time {
+            continue;
+        }
+        let velocitys = group
+            .dataset("velocity")
+            .expect("error")
+            .read_2d::<f64>()
+            .unwrap();
+        // loop over all particles in this timestep, calculate the velocity vector and add it to the
+        // vectorfield array
+        mean_velocity= mean_velocity + velocitys.mean().expect("Error calculating the mean of the velocitys");
+        num_counts += 1.0;
+    }
+    mean_velocity /= num_counts;
+    file.close();
+    mean_velocity
+}
+/// [Velocity Distribution Function]:
+/// Calculate teh velocity distribution in your system
+#[pyfunction]
+fn velocity_distribution<'py>(
+    _py: Python<'py>,
+    filename: &str, // which contains vel & pos data
+    mut bins: i64,  // bins can be defined by the user, but the default value is */10 the amount
+    min_time: f64,  // where to start the averaging
+    max_time: f64,  // where to end the averaging
+) -> (
+    Vec<Vec<i64>>,
+    &'py PyArrayDyn<f64>,
+    &'py PyArrayDyn<f64>,
+) {
+    /*
+    Description:
+    This function to calculates the velocity distribution of a particle system.
+    The function takes into account all velocities defined between the user defined time period:
+        min_time
+        max_time
+
+    !n.b! This distribution has not been normalised.
+
+    Internals:
+    Particle velocity is normalised ('.norm()' -> sqrt(vx**2 + vy**2 + vz**2)) and placed into bins
+    Particle ID can be matched with the bins to find what particles are in each bin.
+
+     */
+    // Opening the file and defining the iterable (time-steps) - giving the num of timesteps
+    let file = hdf5::File::open(filename).expect("Error reading hdf5 file in rust");
+    let timesteps = timesteps(&file);
+
+    // finding the dimensions of the system,
+    let array_temp = file
+        .dataset("dimensions")
+        .unwrap()
+        .read_2d::<f64>()
+        .expect("Dimensions can not be read from the HDF5");
+
+    // arbitrary values set for variables - will be used later
+    let mut total_no_of_particles: i64 = 0;
+    let mut global_v_abs_min: f64 = 1000.0;
+    let mut global_v_abs_max: f64 = 0.0;
+
+    // Part 1
+    // for loop used to find the max and min vel's for the system
+    // this is used define the scale of the axis, which is used in the following loop.
+    for timestep in 0..timesteps - 1 {
+        let name: String = "timestep ".to_string() + &timestep.to_string();
+        let group = file
+            .group(&name)
+            .expect(&format!("Could not open group {:?}", &name));
+        let current_time = group
+            .dataset("time")
+            .expect(&format!(
+                "Couldn't open dataset time in dataset {:?}",
+                &name
+            ))
+            .read_raw::<f64>()
+            .expect(&format!(
+                "Couldn't read data from time-step:{:?}, check the raw data",
+                &timestep
+            ))[0];
+        // check if timestep is in the timeframe given
+        if current_time < min_time {
+            continue;
+        };
+        if current_time > max_time {
+            continue;
+        };
+
+        // pulling the data from the timestep's group
+        let positions = group
+            .dataset("position")
+            .expect(&format!(
+                "Expected Dataset 'Position':{:?}, failed to read",
+                &name
+            ))
+            .read_2d::<f64>()
+            .expect(&format!(
+                "Error: Data within 'Position':{:?}, dataset could not be read",
+                &timestep
+            ));
+
+        let velocities: Array2<f64> = group
+            .dataset("velocity")
+            .expect(&format!(
+                "Expected Dataset 'Velocity':{:?}, failed to read",
+                &name
+            ))
+            .read_2d::<f64>()
+            .expect(&format!(
+                "Error: Data within 'velocity':{:?}, dataset could not be read",
+                &timestep
+            ));
+
+        // finding the total no of particles in the system
+        total_no_of_particles = (positions.len() / 3 as usize) as i64;
+
+        // creating the absolute velocity array based on the prior 2D array
+        // norm -> sqrt(vx**2 + vy**2 + vz**2)
+        // collect -> forms the result into an array
+        let mut v_abs : Array1<f64> = Array1::zeros(velocities.len());
+
+
+        let mut v_abs:Array1<f64>= velocities.axis_iter(ndarray::Axis(0)).map(|xyz| norm_l2(&xyz.to_owned())).collect::<Array1<f64>>();
+
+        // to find max and min within the vel group
+        let (min_abs_vel, max_abs_vel) = minmax(&v_abs);
+
+        // Replacing the existing global value with the new local min & max,
+        // if the min or max is lower/higher they are replaced
+        if max_abs_vel > global_v_abs_max {
+            global_v_abs_max = max_abs_vel;
+        };
+
+        if min_abs_vel < global_v_abs_min {
+            global_v_abs_min = min_abs_vel;
+        };
+    }
+    // define the default no of bins, which is 10* less than the no of particles used
+    if bins == -1 as i64 {
+        bins = (&total_no_of_particles / 10) as i64;
+    };
+
+    // Converting bins i64 to f64 to allow f/f division
+    let bins = bins as f64;
+
+    // allow the user to define the number of bins for the vel distribution
+    let bin_scale = (global_v_abs_max - global_v_abs_min) / bins;
+
+    // ensuring that 'bins' is back in int form
+    let bins = bins.floor() as i64;
+
+    // creating the num axis for the bins
+    let num_axis_array: Array1<f64>=
+        Array::range(global_v_abs_min, global_v_abs_max, bin_scale);
+
+    // establish an empty array containing the vel distribution
+    let mut vel_dist = ndarray::Array1::<f64>::zeros((*&bins as usize));
+
+    // establish an empty nested array - for the particle ID data [timestep[particle]]
+    let mut party_id: Vec<Vec<i64>> = Vec::with_capacity(*&bins as usize);
+    party_id.resize(*&bins as usize,Vec::new());
+    // Part 2
+    // Assigning the particles to their bin, open the loop back up to access the data
+    for timestep in 0..timesteps - 1 {
+        let name: String = "timestep ".to_string() + &timestep.to_string();
+
+        let group = file
+            .group(&name)
+            .expect(&format!("Could not open group {:?}", &name));
+
+        let current_time = group
+            .dataset("time")
+            .expect(&format!("Couldn't open dataset: {:?}", &name))
+            .read_raw::<f64>()
+            .expect(&format!(
+                "Couldn't read data from time-step: {:?}, check the raw data",
+                &timestep
+            ))[0];
+
+        // check if timestep is in the timeframe given
+        if current_time < min_time {
+            continue;
+        };
+        if current_time > max_time {
+            continue;
+        };
+        // opening the data from the file
+        let velocities:Array2<f64> = group
+            .dataset("velocity")
+            .expect(&format!(
+                "Expected Dataset 'Velocity': {:?}, failed to read",
+                &name
+            ))
+            .read_2d::<f64>()
+            .expect(&format!(
+                "Error: Data within 'velocity': {:?}, dataset could not be read",
+                &timestep
+            ));
+        let particle_id = group
+            .dataset("particleid")
+            .expect(&format!(
+                "Expected Dataset 'particle_id': {:?}, failed to read",
+                &name
+            ))
+            .read_1d::<i64>()
+            .expect(&format!(
+                "Error: Data within 'particle_id': {:?}, dataset could not be read",
+                &timestep
+            ));
+        // assigning the data to arrays (and calculating the 'abs' value within)
+        println!("{:?},{:?}",particle_id,total_no_of_particles);
+        for particles in 0..&total_no_of_particles-1 {
+            println!("curr {:?},total {:?},len {:?}",particles,total_no_of_particles,particle_id.len());
+            let ID = particle_id[particles as usize]; // ID of particle0 = particle_id[0]
+            let veldata = norm_l2(&velocities.index_axis(ndarray::Axis(0), particles as usize).to_owned()); // Velocity data
+            let index:usize = (veldata / bin_scale).floor() as usize; // Calculating what bin the particle is in
+            if index >= vel_dist.len(){
+                continue;
+            }
+            // assigning the vel to the correct bin
+            vel_dist[index] = vel_dist[index] + 1.0; // +1, to count in vel_dist array, building the hist plot
+            // Assign the particle id to that bin
+            // this will be useful when trying to look at the free surface velocity
+            party_id[index].push(ID);
+        }
+        // Closing the loop for the specific time-step
+    }
+    // closing the HDF5 file
+    file.close();
+    // sending the data back to Python
+    (
+        party_id,
+        vel_dist.into_pyarray(_py).to_dyn(),
+        num_axis_array.into_pyarray(_py).to_dyn(),
+    )
+}
 #[pyfunction]
 fn surface_polynom<'py>(
     _py: Python<'py>,
@@ -436,15 +704,9 @@ fn granular_temperature<'py>(_py: Python<'py>, filename: &str) -> &'py PyArrayDy
 
      */
     let file = hdf5::File::open(filename).expect("Error reading hdf5 file in rust");
-    let array_temp = file
-        .dataset("dimensions")
-        .unwrap()
-        .read_2d::<f64>()
-        .unwrap();
-    let min_array: Array1<f64> = array_temp.slice(s![0, ..]).to_owned();
-    let max_array: Array1<f64> = array_temp.slice(s![1, ..]).to_owned();
+
     // loop over all timesteps
-    let mut timesteps: u64 = timesteps(&file);
+    let timesteps: u64 = timesteps(&file);
     let mut result: Array1<f64> = Array1::<f64>::zeros(timesteps as usize);
     for t in 0..timesteps {
         let name: String = "timestep ".to_string() + &t.to_string();
@@ -484,7 +746,6 @@ fn surface_velocity<'py>(
     min_time: f64,                       //where to start the averaging
     max_time: f64,                       //where to end the averaging
     dimensions: PyReadonlyArrayDyn<f64>, // Region where to look at, rest ignored
-    norm_on: bool,                       //normalise the size of the vectors
     radius: PyReadonlyArray1<f64>,       // include a radius, only available for sim-data
     particle_id: PyReadonlyArray1<i64>,
 ) -> (
@@ -641,7 +902,7 @@ fn surface_velocity<'py>(
             cells[2usize] as usize,
         ),
     );
-    let norm_arr = norm(&v_x_grid, &v_y_grid, &v_z_grid).to_owned();
+    let norm_arr = norm_three(&v_x_grid, &v_y_grid, &v_z_grid).to_owned();
     v_x_grid = v_x_grid / &norm_arr;
     v_y_grid = v_y_grid / &norm_arr;
     v_z_grid = v_z_grid / &norm_arr;
@@ -770,7 +1031,9 @@ fn meshgrid(
     return (xx, yy);
 }
 
-fn norm(arr1: &Array2<f64>, arr2: &Array2<f64>, arr3: &Array2<f64>) -> Array2<f64> {
+/// calculates the cartesian norm of 3 velocity Vectors
+/// representative for the velocity in x,y and z direction
+fn norm_three(arr1: &Array2<f64>, arr2: &Array2<f64>, arr3: &Array2<f64>) -> Array2<f64> {
     let mut norm_array: Array2<f64> = Array2::zeros((arr1.shape()[0usize], arr1.shape()[1usize]));
 
     for idx in (0..norm_array.shape()[0usize]) {
@@ -783,6 +1046,10 @@ fn norm(arr1: &Array2<f64>, arr2: &Array2<f64>, arr3: &Array2<f64>) -> Array2<f6
     }
 
     norm_array
+}
+
+fn norm_l2(arr: &Array1<f64>)-> f64{
+    arr.iter().map(|x| x*x).collect::<Array1<f64>>().sum().powf(0.5)
 }
 
 fn find_closest(arr: &Array1<f64>, num: f64) -> usize {
@@ -827,4 +1094,20 @@ fn get_dt(file: &hdf5::File) -> f64 {
         .unwrap()[0];
 
     t2 - t1
+}
+
+
+fn minmax(arr: &Array1<f64>)->(f64, f64){
+    let mut min = f64::MAX;
+    let mut max = f64::MIN;
+    for value in arr.iter(){
+        if value > &max {
+            max = value.clone();
+        }
+        if value < &min {
+            min = value.clone();
+        }
+
+    }
+    (min,max)
 }

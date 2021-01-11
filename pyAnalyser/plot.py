@@ -62,11 +62,19 @@ def plot_vectorfield(sx,sy,vx,vy,y_max = None,x_max = None,width=500, height=900
     return fig
 
 
-
 def plot_image(img):
     import plotly.express as px
     fig = px.imshow((img), color_continuous_scale='gray')
     fig.show()
+
+
+def plot_heatmap(array, plot=True):
+    array = np.flip(np.rot90(array,-1), axis =1)
+    fig = go.Figure(data=go.Heatmap(
+                    z=array))
+    if plot:
+        fig.show()
+    return fig
 
 def plot_velocity_distribution(
             vel_dist,
@@ -92,7 +100,7 @@ def plot_velocity_distribution(
 
     fig.show()
     return fig
-    
+
 def plot_polynom( surface_poly, surface = None, fig=None, plot = True):
     if fig is  None:
         fig = go.Figure()

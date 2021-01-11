@@ -4,29 +4,27 @@ import rustAnalyser as rust
 import numpy as np
 from numpy.polynomial import Polynomial
 import os
-import pickle
 import h5py
-
-
-inf = float('inf')
 from .recovery import Center
 from .plot import *
 from . import converter
+inf = float('inf')
+
 class Data():
-    def __init__( self, filename, overwrite = False):
+    def __init__(self, filename, overwrite=False):
         # ckeck filename which format it has
-        if filename.endswith( ".hdf5" ) or filename.endswith( "h5" ):
+        if filename.endswith(".hdf5") or filename.endswith("h5"):
             # filename is a hdf5 file and can be used directly
             if os.path.exists(filename):
                 self.filename = filename
             else:
                 raise ValueError("Could not find HDF5 file. Wrong name/direction ?")
-        elif filename.endswith( ".pickle" ):
+        elif filename.endswith(".pickle"):
             if os.path.exists(filename):
-                self.transform_hdf5(filename,overwrite)
+                converter.barracuda(filename,overwrite)
             else:
-                raise ValueError("Could not fine pickle file. Wrong name/direction ?" )
-            self.filename = filename.split( ".pickle" )[0] + ".hdf5"
+                raise ValueError("Could not fine pickle file. Wrong name/direction ?")
+            self.filename = filename.split(".pickle")[0] + ".hdf5"
         else:
             raise ValueError("File format not known. Check input or transform data to DEM-hdf5")
 
@@ -37,7 +35,7 @@ class Data():
         cells=[30.0,30.0,30.0],
         min_time =-inf,
         max_time = inf,
-        dimensions = [inf, inf, inf],
+        dimensions = [[inf], [inf], [inf]],
         norm = False,
         return_data = False,
         radius = -1.0,
@@ -63,8 +61,6 @@ class Data():
             radius = np.asarray(radius, dtype=float)
         else:
             raise ValueError(f"radius should be a number or a list/array not {type(radius)}")
-
-
         if type(particle_id) == float or type(particle_id) == int:
             particle_id = np.asarray([int(particle_id), int(particle_id)], dtype=int)
         elif isinstance(particle_id, (list, tuple, np.ndarray)):
@@ -142,41 +138,12 @@ class Data():
         return occu, array
 
     def gran_temp(self):
-        return rust.gran_temp(self.filename, 0, 0.0)
+        return rust.granular_temperature(self.filename)
 
     def mean_velocity(self,min_time=0):
         return rust.mean_velocity(self.filename, float(min_time))
 
-    def transform_hdf5(self, file, overwrite = False):
-        """ pickle data to HDF5
-        MUST be old DEM_analysis pickle format"""
-        new_file = file.split(".pickle")[0]+".hdf5"
-        if os.path.exists(file.split(".pickle")[0]+".hdf5") or os.path.exists(file.split(".pickle")[0]+".h5"):
-            if not overwrite:
-                print(f"WARNING!!! using equally named filename \"{new_file}\" instead of \"{file}\"\nInclude \"overwrite = True \" to overwrite data ")
-        data, min_array, max_array = pickle.load(open(file,"rb"))
-        data = np.asarray(data)
-        f = h5py.File(new_file,"w")
-        f.create_dataset("dimensions", data = np.asarray([min_array,max_array]))
-        for id,timestep in enumerate(data):
-            time = timestep[0]
-            particle_data  = timestep[1]
-            group = f.create_group( "timestep "+str(id) )
 
-            p_data = np.asarray(particle_data,dtype=float)
-            pos = p_data[:,0:3]
-            vel = p_data[:,3:6]
-            rad = p_data[:,9]
-            cloud = p_data[:,8]
-            spezies = p_data[:,6]
-            particle_id =p_data[:,7]
-            group.create_dataset("position",data = pos)
-            group.create_dataset("velocity",data = vel)
-            group.create_dataset("radius",data = rad)
-            group.create_dataset("ppcloud",data = cloud)
-            group.create_dataset("spezies",data = spezies)
-            group.create_dataset("particleid",data = particle_id)
-            group.create_dataset("time",data = time)
 
     def maketestfile():
 
@@ -315,3 +282,37 @@ class Data():
         #surface_poly.coef[0] = 0
 
         return surface_poly, surface
+
+    def dispersion(
+        self,
+        timestep = [0,100],
+        dt=10,
+        mesh_size=[0.0,0.0,0.0],
+        cells = [10,10,10],
+        plot = True
+        ):
+            mesh_size = np.asarray(mesh_size)
+            cells = np.asarray(cells)
+            timestep = np.asarray(timestep,dtype=np.uintp)
+            list = rust.dispersion(
+                self.filename,
+                timestep,
+                dt,
+                mesh_size,
+                cells,
+                )
+            if plot:
+                plot_heatmap(np.asarray(list)[:,0,:])
+            return list
+
+    def mean_squared_displacement(
+        self,
+        start_timestep = 0
+        ):
+            start_timestep = int(start_timestep)
+
+            msd_array, time_array = rust.mean_squared_displacement(
+                self.filename,
+                start_timestep
+                )
+            return msd_array, time_array

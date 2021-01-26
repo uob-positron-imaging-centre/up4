@@ -21,7 +21,7 @@ class Data():
                 raise ValueError("Could not find HDF5 file. Wrong name/direction ?")
         elif filename.endswith(".pickle"):
             if os.path.exists(filename):
-                converter.barracuda(filename,overwrite)
+                converter.barracuda(filename, overwrite)
             else:
                 raise ValueError("Could not fine pickle file. Wrong name/direction ?")
             self.filename = filename.split(".pickle")[0] + ".hdf5"
@@ -35,14 +35,14 @@ class Data():
         cells=[30.0,30.0,30.0],
         min_time =-inf,
         max_time = inf,
-        dimensions = [[inf], [inf], [inf]],
+        dimensions = [[-inf, -inf, -inf], [inf, inf, inf]],
         norm = False,
         return_data = False,
         radius = -1.0,
         particle_id = -1,
         plot = True,
-        width = 500,
-        height = 900
+        width = 1000,
+        height = 1000
     ):
 
         if isinstance(dimensions, (list, tuple, np.ndarray)):
@@ -84,7 +84,7 @@ class Data():
         return vx, vy, vz ,sx,sy
 
 
-    def occupancyplot1D(
+    def occupancyplot1d(
         self,
         cells=40,
         min_time =-inf,
@@ -122,7 +122,7 @@ class Data():
         else:
             raise ValueError(f"Axis should be a number not {type(cells)}")
 
-        occu,array = rust.occupancy_plot1D(self.filename,
+        occu,array = rust.occupancy_plot1d(self.filename,
                                             radius,
                                             particle_id,
                                             clouds,
@@ -134,12 +134,14 @@ class Data():
                                             )
         if plot:
             plot_occu_1D(occu,array,axis)
-        print(occu)
         return occu, array
 
-    def gran_temp(self):
-        return rust.granular_temperature(self.filename)
-
+    def gran_temp(self,min_time = -inf, plot = True):
+        min_time = float(min_time)
+        gt = rust.granular_temperature(self.filename, min_time)
+        if plot:
+            plot_linear(y=gt,x_lable="Timestep", y_lable="Granular Temperature")
+        return gt
     def mean_velocity(self,min_time=0):
         return rust.mean_velocity(self.filename, float(min_time))
 
@@ -199,7 +201,7 @@ class Data():
                                             )
 
         #plot_image (image)
-        poly_surface, surface = self.extract_surface( image, cell_len [0])
+        poly_surface, surface = self.extract_surface( image, cell_len)
         fig = plot_polynom(poly_surface, surface,fig, plot = True)
         return poly_surface
 
@@ -285,12 +287,12 @@ class Data():
 
     def dispersion(
         self,
-        timestep = [0,100],
+        timestep=[0, np.iinfo(np.uint64()).max ],
         dt=10,
         mesh_size=[0.0,0.0,0.0],
         cells = [10,10,10],
         plot = True
-        ):
+    ):
             mesh_size = np.asarray(mesh_size)
             cells = np.asarray(cells)
             timestep = np.asarray(timestep,dtype=np.uintp)
@@ -307,7 +309,8 @@ class Data():
 
     def mean_squared_displacement(
         self,
-        start_timestep = 0
+        start_timestep = 0,
+        plot = True
         ):
             start_timestep = int(start_timestep)
 
@@ -315,4 +318,19 @@ class Data():
                 self.filename,
                 start_timestep
                 )
+            if plot:
+                plot_MSD(msd_array,time_array)
             return msd_array, time_array
+
+    def number_of_timesteps(self):
+        return rust.timesteps(self.filename)
+
+    def power_draw(self, min_time = 0, plot = True):
+        power = rust.power_draw(self.filename, min_time)
+        if plot:
+            plot_linear(
+            y = power,
+            x_lable = "timestep",
+            y_lable = "Power [W]"
+            )
+        return power

@@ -88,8 +88,9 @@ def barracuda(file, overwrite=False):
         os.path.exists(file.split(".pickle")[0]+".h5"):
             if not overwrite:
                 print(f"WARNING!!! using equally named filename \"{new_file}\" instead of \"{file}\"\nInclude \"overwrite = True \" to overwrite data ")
+                return None
         data, min_array, max_array = pickle.load(open(file,"rb"))
-        data = np.asarray(data)
+        data = np.asarray(data, dtype=object)
         f = h5py.File(new_file,"w")
         f.create_dataset("dimensions", data=np.asarray([min_array, max_array]))
         for id,timestep in enumerate(data):
@@ -104,6 +105,11 @@ def barracuda(file, overwrite=False):
             cloud = p_data[:,8]
             spezies = p_data[:,6]
             particle_id =p_data[:,7]
+            try:
+                dens = p_data[:,10]
+                group.create_dataset("density", data=dens)
+            except:
+                pass
             group.create_dataset("position", data=pos)
             group.create_dataset("velocity", data=vel)
             group.create_dataset("radius", data=rad)
@@ -147,15 +153,20 @@ def liggghts(files, dt=1):
             ID = vtk_to_numpy(p.GetArray("id"))
             radius = vtk_to_numpy(p.GetArray("radius"))
             type_ = vtk_to_numpy(p.GetArray("type"))
+            if p.HasArray("f"):
+                force = vtk_to_numpy(p.GetArray("f"))
+                grp.create_dataset("force", data = force )
 
             # create datasets for each variables
             grp.create_dataset("time", data = time)
-            grp.create_dataset("position",data = position)
-            grp.create_dataset("velocity",data = velocity )
-            grp.create_dataset("radius",data = radius )
-            grp.create_dataset("ppcloud",data = np.zeros(len(type_)) )
-            grp.create_dataset("spezies",data = type_ )
-            grp.create_dataset("particleid",data = ID )
+            grp.create_dataset("position", data = position)
+            grp.create_dataset("velocity", data = velocity )
+            grp.create_dataset("radius", data = radius )
+            grp.create_dataset("ppcloud", data = np.zeros(len(type_)) )
+            grp.create_dataset("spezies", data = type_ )
+            grp.create_dataset("particleid", data = ID )
+
+
 
             #checking the min and ma position
             pos_min = np.min(position,axis = 0)

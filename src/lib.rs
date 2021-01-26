@@ -16,7 +16,7 @@ use numpy::{IntoPyArray, PyArrayDyn, PyReadonlyArray1,PyReadonlyArray2, PyReadon
 #[pymodule]
 fn rustAnalyser(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(vectorfield))?;
-    m.add_wrapped(wrap_pyfunction!(alive))?;
+    m.add_wrapped(wrap_pyfunction!(timesteps))?;
     m.add_wrapped(wrap_pyfunction!(occupancy_plot1d))?;
     m.add_wrapped(wrap_pyfunction!(surface_polynom))?;
     m.add_wrapped(wrap_pyfunction!(granular_temperature))?;
@@ -25,6 +25,7 @@ fn rustAnalyser(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(surface_velocity))?;
     m.add_wrapped(wrap_pyfunction!(velocity_distribution))?;
     m.add_wrapped(wrap_pyfunction!(mean_squared_displacement))?;
+    m.add_wrapped(wrap_pyfunction!(power_draw))?;
     Ok(())
 }
 /// [Vectorfield Function]:
@@ -69,9 +70,13 @@ fn vectorfield<'py>(
 
 
 #[pyfunction]
-fn alive() {
-    //chekc if rust is "alive"
-    println!("True");
+fn timesteps(filename:&str)->(usize) {
+    //get the number of timesteps
+    let file = hdf5::File::open(filename).expect("Error reading hdf5 file in rust");
+    let t = functions::timesteps(&file);
+    file.close();
+    // return
+    t as usize
 }
 
 #[pyfunction]
@@ -121,13 +126,14 @@ fn occupancy_plot1d<'py>(
 /// let Array = granular_temperature(file)
 /// '''
 #[pyfunction]
-fn granular_temperature<'py>(_py: Python<'py>, filename: &str) -> &'py PyArrayDyn<f64> {
+fn granular_temperature<'py>(_py: Python<'py>, filename: &str,min_time: f64) -> &'py PyArrayDyn<f64> {
     /*
     function to calculate the granular temperature of a system for a amount of timesteps
 
      */
     let result = functions::granular_temperature(
         filename,
+        min_time
     );
     result.to_pyarray(_py).to_dyn()
 }
@@ -269,4 +275,10 @@ fn mean_squared_displacement<'py>(
         MSD.into_pyarray(_py).to_dyn(),
         time.into_pyarray(_py).to_dyn(),
     )
+}
+
+#[pyfunction]
+fn power_draw<'py>(_py: Python<'py>, filename:&str, min_time:f64)->&'py PyArrayDyn<f64> {
+    functions::power_draw(filename,min_time).into_pyarray(_py).to_dyn()
+
 }

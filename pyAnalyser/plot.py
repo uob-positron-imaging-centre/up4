@@ -12,7 +12,8 @@ def plot_occu_1D(
     y_max = None,
     x_max = None,
     fig = None,
-    name = ""
+    name = "",
+    plot = True
     ):
     y=arr if axis == 2 else occu
     x=occu if axis == 2 else arr
@@ -32,11 +33,12 @@ def plot_occu_1D(
     if x_max is not None:
         fig.update_xaxes(range=[0.0, x_max])
 
-    fig.show()
+    if plot:
+        fig.show()
     return fig
 
 
-def plot_vectorfield(sx,sy,vx,vy,y_max = None,x_max = None,width=500, height=900, norm = False):
+def plot_vectorfield(sx,sy,vx,vy,y_max = None,x_max = None,width=1000, height=1000, norm = False, plot = True):
     if norm:
         norm = np.sqrt( vx*vx+vy*vy)
         vx = vx/norm
@@ -57,15 +59,16 @@ def plot_vectorfield(sx,sy,vx,vy,y_max = None,x_max = None,width=500, height=900
         fig.update_yaxes(range=[0.0, y_max])
     if x_max is not None:
         fig.update_xaxes(range=[0.0, x_max])
-
-    fig.show()
+    if plot:
+        fig.show()
     return fig
 
 
-def plot_image(img):
+def plot_image(img, plot = True):
     import plotly.express as px
     fig = px.imshow((img), color_continuous_scale='gray')
-    fig.show()
+    if plot:
+        fig.show()
 
 
 def plot_heatmap(array, plot=True):
@@ -81,7 +84,8 @@ def plot_velocity_distribution(
             num_axis_array,
             fig = True,
             width = 1000,
-            height = 1000
+            height = 1000,
+            plot = True
             ):
 
     # Axis Titles
@@ -98,7 +102,9 @@ def plot_velocity_distribution(
             yaxis_title = y_title,
             )
 
-    fig.show()
+    #fig.update_yaxes(type="log")
+    if plot:
+        fig.show()
     return fig
 
 def plot_polynom( surface_poly, surface = None, fig=None, plot = True):
@@ -108,6 +114,39 @@ def plot_polynom( surface_poly, surface = None, fig=None, plot = True):
     fig.add_trace(go.Scatter(x = x, y = surface_poly(x)))
     if surface is not None:
         fig.add_trace(go.Scatter(x = surface[:, 0], y = surface[:, 1]))
+    if plot:
+        fig.show()
+    return fig
+
+def plot_MSD(msd, time, fig=None, plot = True):
+    if fig is None:
+        fig = go.Figure()
+    fig.add_trace(go.Scatter(x = time, y = msd, mode="markers"))
+    fig.update_xaxes(type="log")
+    fig.update_yaxes(type="log")
+    fig.update_layout(
+        xaxis_title="Time [s]",
+        yaxis_title="Mean Squared Displacement [m²]"
+    )
+    if plot:
+        fig.show()
+    return fig
+
+def plot_linear(
+x = None,
+y = None,
+x_lable = "",
+y_lable = "",
+fig = None,
+plot = True
+):
+    if fig is None:
+        fig = go.Figure()
+    fig.add_trace(go.Scatter(x = x, y = y))
+    fig.update_layout(
+        xaxis_title=x_lable,
+        yaxis_title=y_lable
+    )
     if plot:
         fig.show()
     return fig

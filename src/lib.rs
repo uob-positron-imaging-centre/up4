@@ -41,15 +41,15 @@ fn vectorfield<'py>(
     norm_on: bool,                       //normalise the size of the vectors
     radius: PyReadonlyArray1<f64>,       // include a radius, only available for sim-data
     particle_id: PyReadonlyArray1<i64>,
+    axis: usize,
 ) -> (
-    &'py PyArrayDyn<f64>,
     &'py PyArrayDyn<f64>,
     &'py PyArrayDyn<f64>,
     &'py PyArrayDyn<f64>,
     &'py PyArrayDyn<f64>,
 ) {
 
-    let (vx, vy, vz, sx,sy) = functions::vectorfield(
+    let (vx, vy, sx, sy) = functions::vectorfield(
         filename,
         cells.as_array().to_owned(),
         min_time,
@@ -57,12 +57,12 @@ fn vectorfield<'py>(
         dimensions.as_array().to_owned(),
         norm_on,
         radius.as_array().to_owned(),
-        particle_id.as_array().to_owned()
+        particle_id.as_array().to_owned(),
+        axis,
     );
     (
     vx.into_pyarray(_py).to_dyn(),
     vy.into_pyarray(_py).to_dyn(),
-    vz.into_pyarray(_py).to_dyn(),
     sx.into_pyarray(_py).to_dyn(),
     sy.into_pyarray(_py).to_dyn(),
 )

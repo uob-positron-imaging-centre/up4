@@ -42,7 +42,8 @@ class Data():
         particle_id = -1,
         plot = True,
         width = 1000,
-        height = 1000
+        height = 1000,
+        axis = 0,
     ):
 
         if isinstance(dimensions, (list, tuple, np.ndarray)):
@@ -69,19 +70,20 @@ class Data():
             raise ValueError(f"particle_id should be a number or a list/array not {type(particle_id)}")
 
 
-        vx, vy, vz ,sx,sy = rust.vectorfield(self.filename,
+        vx, vz ,sx,sy = rust.vectorfield(self.filename,
                                             cells,
                                             min_time,
                                             max_time,
                                             dimensions,
                                             norm,
                                             radius,
-                                            particle_id
+                                            particle_id,
+                                            axis,
                                             )
-        self.recovery.add(np.asarray([vx, vy, vz ,sx,sy]))
+        self.recovery.add(np.asarray([vx, vz, sx, sy]))
         if plot:
             plot_vectorfield(sx,sy,vx,vz,width = width, height = height)
-        return vx, vy, vz ,sx,sy
+        return vx, vz, sx, sy
 
 
     def occupancyplot1d(
@@ -202,7 +204,8 @@ class Data():
 
         #plot_image (image)
         poly_surface, surface = self.extract_surface( image, cell_len)
-        fig = plot_polynom(poly_surface, surface,fig, plot = True)
+        if plot:
+            fig = plot_polynom(poly_surface, surface,fig, plot = True)
         return poly_surface
 
     def velocity_distribution(

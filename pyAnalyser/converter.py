@@ -134,10 +134,9 @@ def liggghts(files, dt=1):
     inf=float("inf")
     min_val=np.asarray([inf,inf,inf])
     max_val=np.asarray([-inf,-inf,-inf])
+    timestep = 0
     with h5py.File("_".join(filenames[0].split("_")[0:-1])+".hdf5","w") as file:
         for id,filename in tqdm(enumerate(filenames)):
-            #create group for current timestep
-            grp = file.create_group("timestep "+str(id))
             ##### read the ligghts file
             reader = vtkDataSetReader()
             reader.SetFileName(filename)
@@ -146,7 +145,12 @@ def liggghts(files, dt=1):
             reader.Update()
             data = reader.GetOutput()
             p = data.GetPointData()
-
+            # if there is no data, continue
+            if not p.HasArray("v"):
+                continue
+            #create group for current timestep
+            grp = file.create_group("timestep "+str(timestep))
+            timestep+=1
             time = int(filename.split(".vtk")[0].split("_")[-1]) * dt
             position = vtk_to_numpy(data.GetPoints().GetData())
             velocity = vtk_to_numpy(p.GetArray("v"))

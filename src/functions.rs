@@ -1,7 +1,9 @@
 extern crate ndarray;
 extern crate ndarray_linalg;
 extern crate numpy;
-use ndarray::prelude::*;
+
+
+use core::panic;use ndarray::prelude::*;
 
 /// [Vectorfield Function]:
 /// Calculate the velocity Vectorfiels of your System
@@ -43,16 +45,18 @@ pub fn vectorfield(
     norm: bool,              //normalise the size of the vectors
     radius: Array1<f64>,     // include a radius
     particle_id: Array1<i64>,
+    axis: usize,
 ) -> (
-    Array2<f64>,
     Array2<f64>,
     Array2<f64>,
     Array2<f64>,
     Array2<f64>,
 ) {
     // Opening hdf5 file
-    let file = hdf5::File::open(&filename).expect("Error reading hdf5 file in rust");
-
+    let file = hdf5::File::open(&filename).expect(&format!(
+        "Can not open HDF5 file {:?}",
+        &filename
+    ));
     //read the number of timesteps inside this hdf5file
     let timesteps: u64 = timesteps(&file);
     //Extracting the min and max dimensions of the simulation
@@ -87,10 +91,6 @@ pub fn vectorfield(
         cells[2usize].floor() as usize,
         cells[0usize].floor() as usize,
     ));
-    let mut v_y_grid = ndarray::Array2::<f64>::zeros((
-        cells[2usize].floor() as usize,
-        cells[1usize].floor() as usize,
-    ));
     let mut v_z_grid = ndarray::Array2::<f64>::zeros((
         cells[2usize].floor() as usize,
         cells[0usize].floor() as usize,
@@ -101,18 +101,34 @@ pub fn vectorfield(
         cells[2usize].floor() as usize,
         cells[0usize].floor() as usize,
     ));
-    let mut n_y_grid = ndarray::Array2::<f64>::zeros((
-        cells[2usize].floor() as usize,
-        cells[1usize].floor() as usize,
-    ));
     let mut n_z_grid = ndarray::Array2::<f64>::zeros((
         cells[2usize].floor() as usize,
         cells[0usize].floor() as usize,
     ));
 
+    // find the two axis indizes which we want to "see"
+    let mut first_axis = 4;
+    let mut sec_axis = 4;
+    for x in 0..3{
+        if x == axis{continue};
+        if first_axis == 4{ first_axis = x;
+        }else if sec_axis ==4{
+            sec_axis =x ;
+        }else{
+            panic!(&format!(
+                "variable axis in vectorfield must be between 0 and 2 ! Currently it is {:?}",
+                axis,
+            ))
+        }
+    }
+    println!("{:?}, {:?}",first_axis,sec_axis);
     for timestep in 0..timesteps - 1 {
         let name: String = "timestep ".to_string() + &timestep.to_string();
-        let group = file.group(&name).unwrap();
+        let group = file.group(&name).expect(&format!(
+                "Could not find group {:?} in file {:?}",
+                &name,
+                &filename
+            ));
         let current_time = group
             .dataset("time")
             .expect(&format!(
@@ -192,70 +208,56 @@ pub fn vectorfield(
         for particle in 0..particles {
             //check if this particle is fitting the criteria
             if !check_id(particle_ids[particle] as usize, &particle_id) {
+                println!("skipping because of ID");
                 continue;
             }
             if !check_radius(rad_array[particle] as f64, &radius) {
+                println!("Skipping cause of radius");
                 continue;
             }
             let position = positions.slice(s![particle, ..]).to_owned();
             let velocity = velocities.slice(s![particle, ..]).to_owned();
             //reset the position. the lowest value should be at 0,0,0
-            let x: f64 = position[0usize] - min_array[0usize];
-            let y: f64 = position[1usize] - min_array[1usize];
-            let z: f64 = position[2usize] - min_array[2usize];
+            let x: f64 = position[first_axis] - min_array[first_axis];
+            let z: f64 = position[sec_axis] - min_array[sec_axis];
 
             //velocities
-            let vx: f64 = velocity[0usize];
-            let vy: f64 = velocity[1usize];
-            let vz: f64 = velocity[2usize];
+            let vx: f64 = velocity[first_axis];
+            let vz: f64 = velocity[sec_axis];
 
             // check if the current particle position falls into the specified dimension
-            /**
-            println!("pos: {:?}\ndim:{:?}",position,dimensions);
-            println!("{:?}", x < dimensions[[0usize, 0]]);
-            println!("{:?}", x > dimensions[[1usize, 0]]);
-            println!("{:?}", y < dimensions[[0usize, 1]]);
-            println!("{:?}", y > dimensions[[1usize, 1]]);
-            println!("{:?}", z < dimensions[[0usize, 2]]);
-            println!("{:?}", z > dimensions[[1usize, 2]]);
-            **/
-            if     x < dimensions[[0usize, 0]]
-                || x > dimensions[[1usize, 0]]
-                || y < dimensions[[0usize, 1]]
-                || y > dimensions[[1usize, 1]]
-                || z < dimensions[[0usize, 2]]
-                || z > dimensions[[1usize, 2]]
+            if     x < dimensions[[0usize, first_axis]]
+                || x > dimensions[[1usize, first_axis]]
+                || z < dimensions[[0usize, sec_axis]]
+                || z > dimensions[[1usize, sec_axis]]
             {
                 // the particle is out of the field of view
-                //println!("Skipping a particle as it is out of system");
+                println!("Skipping a particle as it is out of system");
                 continue;
             }
             // find the cell indice where particle is right now
 
-            let i: usize = (x / cell_size[0usize]).floor() as usize;
-            let j: usize = (y / cell_size[1usize]).floor() as usize;
-            let k: usize = (z / cell_size[2usize]).floor() as usize;
-            if i == cells[0usize] as usize
-                || j == cells[1usize] as usize
-                || k == cells[2usize] as usize
+            let i: usize = (x / cell_size[first_axis]).floor() as usize;
+            let k: usize = (z / cell_size[sec_axis]).floor() as usize;
+            // check if indexes are higher then maximum
+            if i == cells[first_axis] as usize
+                || k == cells[sec_axis] as usize
             {
                 continue;
             }
 
+
             v_x_grid[[k, i]] = v_x_grid[[k, i]] + vx;
             v_z_grid[[k, i]] = v_z_grid[[k, i]] + vz;
-            v_y_grid[[k, j]] = v_y_grid[[k, j]] + vy;
 
             n_x_grid[[k, i]] = n_x_grid[[k, i]] + 1.0;
             n_z_grid[[k, i]] = n_z_grid[[k, i]] + 1.0;
-            n_y_grid[[k, j]] = n_y_grid[[k, j]] + 1.0;
         }
-        break;
+
     }
 
     v_x_grid = v_x_grid / &n_x_grid;
-    v_y_grid = v_y_grid / &n_y_grid;
-    v_z_grid = v_z_grid / n_z_grid;
+    v_z_grid = v_z_grid / &n_z_grid;
     let (sx, sy) = meshgrid(
         Array::linspace(
             0.0,
@@ -269,14 +271,13 @@ pub fn vectorfield(
         ),
     );
     if norm {
-        let norm_arr = norm_three(&v_x_grid, &v_y_grid, &v_z_grid).to_owned();
+        let norm_arr = norm_two(&v_x_grid, &v_z_grid).to_owned();
         v_x_grid = v_x_grid / &norm_arr;
-        v_y_grid = v_y_grid / &norm_arr;
         v_z_grid = v_z_grid / &norm_arr;
     }
     file.close();
 
-    (v_x_grid, v_y_grid, v_z_grid, sx, sy)
+    (v_x_grid, v_z_grid, sx, sy)
 }
 
 pub fn occupancy_plot1d(
@@ -988,7 +989,7 @@ pub fn dispersion(
     let mut own_cells: Array1<usize> = cells.mapv(|x| x as usize);
     if own_mesh_size[0] == 0.0 {
         if own_cells[0] == 0usize {
-            panic!(format!(
+            panic!(&format!(
                 "No clear instuctions in how to make Mesh for dispersion calculation. Aborting!"
             ))
         } else {
@@ -1000,7 +1001,7 @@ pub fn dispersion(
     } else {
         //check if own_cells is also valid
         if own_cells[0] != 0usize {
-            panic!(format!(
+            panic!(&format!(
                 "Unclear instructions in building mesh for Dispersion. Check inputs!"
             ))
         } else {
@@ -1458,14 +1459,13 @@ fn meshgrid(
 
 /// calculates the cartesian norm of 3 velocity Vectors
 /// representative for the velocity in x,y and z direction
-fn norm_three(arr1: &Array2<f64>, arr2: &Array2<f64>, arr3: &Array2<f64>) -> Array2<f64> {
+fn norm_two(arr1: &Array2<f64>, arr2: &Array2<f64>) -> Array2<f64> {
     let mut norm_array: Array2<f64> = Array2::zeros((arr1.shape()[0usize], arr1.shape()[1usize]));
 
     for idx in (0..norm_array.shape()[0usize]) {
         for idy in (0..norm_array.shape()[1usize]) {
             norm_array[[idx, idy]] = (arr1[[idx, idy]].powf(2.0)
-                + arr2[[idx, idy]].powf(2.0)
-                + arr3[[idx, idy]].powf(2.0))
+                + arr2[[idx, idy]].powf(2.0))
             .sqrt()
         }
     }
@@ -1537,4 +1537,21 @@ fn minmax(arr: &Array1<f64>) -> (f64, f64) {
         }
     }
     (min, max)
+}
+
+/// calculates the cartesian norm of 3 velocity Vectors
+/// representative for the velocity in x,y and z direction
+fn norm_three(arr1: &Array2<f64>, arr2: &Array2<f64>, arr3: &Array2<f64>) -> Array2<f64> {
+    let mut norm_array: Array2<f64> = Array2::zeros((arr1.shape()[0usize], arr1.shape()[1usize]));
+
+    for idx in (0..norm_array.shape()[0usize]) {
+        for idy in (0..norm_array.shape()[1usize]) {
+            norm_array[[idx, idy]] = (arr1[[idx, idy]].powf(2.0)
+                + arr2[[idx, idy]].powf(2.0)
+                + arr3[[idx, idy]].powf(2.0))
+            .sqrt()
+        }
+    }
+
+    norm_array
 }

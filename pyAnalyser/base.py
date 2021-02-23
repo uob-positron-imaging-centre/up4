@@ -147,6 +147,10 @@ class Data():
     def mean_velocity(self,min_time=0):
         return rust.mean_velocity(self.filename, float(min_time))
 
+    def mean_angular_velocity(self,min_time=0):
+        print("lol")
+        return rust.mean_angular_velocity(self.filename, float(min_time))
+
 
 
     def maketestfile():
@@ -236,6 +240,54 @@ class Data():
                                            width = width,
                                            height = height)
             return vel_dist, num_axis_array
+    def rotational_velocity_distribution(
+            self,
+            timestep,
+            bins = -1,
+            min_time = -inf,
+            max_time = inf,
+            rotation_speed = 45,
+            drum_center =[0.0, 0., 0.],
+            plot = True,
+            width = 1000,
+            height = 1000
+            ):
+
+            if type(bins) == float:
+                raise ValueError(f"Bins should be a integer not {type(bins)}")
+
+            party_id, vel_dist, num_axis_array = rust.rotational_velocity_distribution(
+                    self.filename,
+                    bins = bins,
+                    min_time = min_time,
+                    max_time = max_time,
+                    rot_speed = rotation_speed,
+                    drum_center = np.asarray(drum_center),
+                    timestep=timestep
+                    )
+
+            #self.recovery.add([party_id, vel_dist, num_axis_array])
+
+            if plot:
+                plot_velocity_distribution(vel_dist,
+                                           num_axis_array,
+                                           width = width,
+                                           height = height)
+            return vel_dist, num_axis_array
+
+    def mean_surface_velocity(
+    self,
+    bins = -1,
+    min_time = -inf,
+    max_time = inf,
+    rotation_speed = 45,
+    drum_center =[0.0, 0., 0.],):
+        rust.mean_surface_velocity(self.filename,
+        bins = bins,
+        min_time = min_time,
+        max_time = max_time,
+        rot_speed = rotation_speed,
+        drum_center = np.asarray(drum_center))
 
     def extract_surface(self,occupancy, cell_length):
         '''Extract the surface from a 2D occupancy plot (which is given as cells)
@@ -290,7 +342,7 @@ class Data():
 
     def dispersion(
         self,
-        timestep=[0, np.iinfo(np.uint64()).max ],
+        timestep=[0, 100 ],
         dt=10,
         mesh_size=[0.0,0.0,0.0],
         cells = [10,10,10],
@@ -299,7 +351,7 @@ class Data():
             mesh_size = np.asarray(mesh_size)
             cells = np.asarray(cells)
             timestep = np.asarray(timestep,dtype=np.uintp)
-            list = rust.dispersion(
+            list, mixing_efficiency = rust.dispersion(
                 self.filename,
                 timestep,
                 dt,
@@ -308,7 +360,7 @@ class Data():
                 )
             if plot:
                 plot_heatmap(np.asarray(list)[:,0,:])
-            return list
+            return list, mixing_efficiency
 
     def mean_squared_displacement(
         self,

@@ -16,6 +16,7 @@ use numpy::{IntoPyArray, PyArrayDyn, PyReadonlyArray1,PyReadonlyArray2, PyReadon
 #[pymodule]
 fn rustAnalyser(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(vectorfield))?;
+    m.add_wrapped(wrap_pyfunction!(mean_angular_velocity))?;
     m.add_wrapped(wrap_pyfunction!(timesteps))?;
     m.add_wrapped(wrap_pyfunction!(occupancy_plot1d))?;
     m.add_wrapped(wrap_pyfunction!(surface_polynom))?;
@@ -23,9 +24,11 @@ fn rustAnalyser(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(mean_velocity))?;
     m.add_wrapped(wrap_pyfunction!(dispersion))?;
     m.add_wrapped(wrap_pyfunction!(surface_velocity))?;
+    m.add_wrapped(wrap_pyfunction!(rotational_velocity_distribution))?;
     m.add_wrapped(wrap_pyfunction!(velocity_distribution))?;
     m.add_wrapped(wrap_pyfunction!(mean_squared_displacement))?;
     m.add_wrapped(wrap_pyfunction!(power_draw))?;
+    m.add_wrapped(wrap_pyfunction!(mean_surface_velocity))?;
     Ok(())
 }
 /// [Vectorfield Function]:
@@ -167,7 +170,7 @@ fn surface_velocity<'py>(
 
 ///Function to calculate the disperson of a system in a given point
 /// Output:
-///     Dispersion: PyArray1<f64>
+///     dispersionion: PyArray1<f64>
 /// Input:
 ///     delta_t: timestep difference for the dispersion calculation
 ///     time: timestep where to start the calculation
@@ -185,8 +188,8 @@ fn dispersion<'py>(
     delta_t: usize,
     mesh_size: PyReadonlyArray1<f64>,
     cells: PyReadonlyArray1<i64>,
-) -> Vec<Vec<Vec<f64>>> {
-    let dispersion_cells = functions::dispersion(
+) -> (Vec<Vec<Vec<f64>>>,f64) {
+    let (dispersion_cells, mixing_efficiency) = functions::dispersion(
         file,
         timestep.as_array().to_owned(),
         delta_t,
@@ -195,7 +198,7 @@ fn dispersion<'py>(
     );
 
     // return dispersion
-    dispersion_cells
+    (dispersion_cells, mixing_efficiency)
 
 }
 
@@ -207,6 +210,17 @@ fn mean_velocity<'py>(
 
 ) -> (f64) {
     let mean_velocity = functions::mean_velocity(filename, min_time);
+    mean_velocity
+}
+
+#[pyfunction]
+fn mean_angular_velocity<'py>(
+    py: Python<'py>,
+    filename: &str,
+    min_time: f64,
+
+) -> (f64) {
+    let mean_velocity = functions::mean_angular_velocity(filename, min_time);
     mean_velocity
 }
 
@@ -236,6 +250,60 @@ fn velocity_distribution<'py>(
         num_axis_array.into_pyarray(_py).to_dyn(),
     )
 }
+
+/// [Velocity Distribution Function]:
+/// Calculate teh velocity distribution in your system
+#[pyfunction]
+fn rotational_velocity_distribution<'py>(
+    _py: Python<'py>,
+    filename: &str, // which contains vel & pos data
+    bins: i64,  // bins can be defined by the user, but the default value is */10 the amount
+    min_time: f64,  // where to start the averaging
+    max_time: f64,  // where to end the averaging
+    rot_speed: f64,  // rotation of the drum in rpm
+    drum_center: PyReadonlyArray1<f64>, // center of the drum
+    timestep: usize
+) -> (
+    Vec<Vec<i64>>,
+    &'py PyArrayDyn<f64>,
+    &'py PyArrayDyn<f64>,
+) {
+    let (party_id, vel_dist, num_axis_array) = functions::rotational_velocity_distribution(
+        filename,
+        bins,
+        min_time,
+        max_time,
+        rot_speed,
+        drum_center.as_array().to_owned(),
+        timestep
+    );
+    (
+        party_id,
+        vel_dist.into_pyarray(_py).to_dyn(),
+        num_axis_array.into_pyarray(_py).to_dyn(),
+    )
+}
+
+#[pyfunction]
+fn mean_surface_velocity(
+    filename: &str, // which contains vel & pos data
+    mut bins: i64,  // bins can be defined by the user, but the default value is */10 the amount
+    min_time: f64,  // where to start the averaging
+    max_time: f64,  // where to end the averaging
+    rot_speed: f64,  // rotation of the drum in rpm
+    drum_center: PyReadonlyArray1<f64>, // center of the drum
+
+)->f64{
+    functions::mean_surface_velocity(
+        filename,
+        bins,
+        min_time,
+        max_time,
+        rot_speed,
+        drum_center.as_array().to_owned()
+    )
+}
+
 
 #[pyfunction]
 fn surface_polynom<'py>(

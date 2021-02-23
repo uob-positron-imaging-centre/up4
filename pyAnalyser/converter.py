@@ -11,8 +11,8 @@ from tqdm import tqdm
 import pickle
 
 
-def pept(filename, header=16):
-    data = np.genfromtxt(filename, skip_header=header)
+def pept(filename, header=16,delimiter=","):
+    data = np.genfromtxt(filename, skip_header=header,delimiter=delimiter)
     dump = 2
     while True:
         filename2 = filename + f"_0{dump}"
@@ -26,6 +26,7 @@ def pept(filename, header=16):
         else:
             break
     file = h5py.File(filename.split("a01")[0]+"hdf5", "w")
+    #data.reshape((-1,6))
     data[1::] /= 1000
     data[0] /= 1000000
     inf = float("inf")
@@ -41,7 +42,6 @@ def pept(filename, header=16):
         if id < vel_calculation_steps or \
            id > len(data) - vel_calculation_steps - 1:
             continue
-
         time.append(timestep[0])
 
         x = timestep[1]
@@ -71,10 +71,10 @@ def pept(filename, header=16):
     grp.create_dataset("time", data=time[0])
     grp.create_dataset("position", data=np.asarray(positions))
     grp.create_dataset("velocity", data=np.asarray(velocitys))
-    grp.create_dataset("radius", data=np.asarray([0]))
-    grp.create_dataset("ppcloud", data=np.asarray([0]))
-    grp.create_dataset("spezies", data=np.asarray([0]))
-    grp.create_dataset("particleid", data=np.asarray([0]))
+    grp.create_dataset("radius", data=np.zeros(len(positions)))
+    grp.create_dataset("ppcloud", data=np.zeros(len(positions)))
+    grp.create_dataset("spezies", data=np.zeros(len(positions)))
+    grp.create_dataset("particleid", data=np.zeros(len(positions)))
 
     grp = file.create_group("timestep "+str(1))
     grp.create_dataset("time", data=time[10])
@@ -127,9 +127,10 @@ def liggghts(files, dt=1):
             raise ValueError(("Files supplyed don't have the accepted "
                 "VTK format!"))
     elif isinstance(files,str):
-        files = [x for x in  glob(files+"*.vtk") if not "bound" in x]
-        if len(files) < 1:
-            raise ValueError("No files found in this directory")
+        file_arr = [x for x in  glob(files+"*.vtk") if not "bound" in x]
+        if len(file_arr) < 1:
+            raise ValueError(f"No files found in directory {files}")
+        files = file_arr
     filenames = natsorted(files,key=lambda y: y.lower())
     inf=float("inf")
     min_val=np.asarray([inf,inf,inf])
@@ -160,6 +161,9 @@ def liggghts(files, dt=1):
             if p.HasArray("f"):
                 force = vtk_to_numpy(p.GetArray("f"))
                 grp.create_dataset("force", data = force )
+            if p.HasArray("omega"):
+                omega = vtk_to_numpy(p.GetArray("omega"))
+                grp.create_dataset("angular_velocity", data = omega )
 
             # create datasets for each variables
             grp.create_dataset("time", data = time)

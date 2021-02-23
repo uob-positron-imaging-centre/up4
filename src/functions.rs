@@ -206,6 +206,7 @@ pub fn vectorfield(
         // loop over all particles in this timestep, calculate the velocity vector and add it to the
         // vectorfield array
         for particle in 0..particles {
+
             //check if this particle is fitting the criteria
             if !check_id(particle_ids[particle] as usize, &particle_id) {
                 println!("skipping because of ID");
@@ -240,8 +241,8 @@ pub fn vectorfield(
             let i: usize = (x / cell_size[first_axis]).floor() as usize;
             let k: usize = (z / cell_size[sec_axis]).floor() as usize;
             // check if indexes are higher then maximum
-            if i == cells[first_axis] as usize
-                || k == cells[sec_axis] as usize
+            if i >= cells[first_axis] as usize
+                || k >= cells[sec_axis] as usize
             {
                 continue;
             }
@@ -369,7 +370,7 @@ pub fn occupancy_plot1d(
             if time_spent > dt {
                 time_spent = dt;
             }
-            occu[cell_id] = occu[cell_id] + time_spent;
+            occu[cell_id] = occu[cell_id] + 1.0;//time_spent;
         }
     }
     if norm {
@@ -408,11 +409,42 @@ pub fn mean_velocity(filename: &str, min_time: f64) -> f64 {
             .unwrap();
         // loop over all particles in this timestep, calculate the velocity vector and add it to the
         // vectorfield array
-        mean_velocity = mean_velocity
-            + velocities
-                .mean()
-                .expect("Error calculating the mean of the velocities");
-        num_counts += 1.0;
+        for vel in velocities.outer_iter(){
+            mean_velocity += (vel[0]*vel[0] + vel[1]*vel[1] +vel[2]*vel[2]).sqrt();
+            num_counts += 1.0;
+        }
+
+    }
+    mean_velocity /= num_counts;
+    file.close();
+    mean_velocity
+}
+
+pub fn mean_angular_velocity(filename: &str, min_time: f64) -> f64 {
+    let file = hdf5::File::open(filename).expect("Error reading hdf5 file in rust");
+    let timesteps = timesteps(&file);
+    let mut mean_velocity = 0.0;
+    let mut num_counts = 0.0;
+    for timestep in 0..timesteps - 1 {
+        let name: String = "timestep ".to_string() + &timestep.to_string();
+        let group = file.group(&name).unwrap();
+        let current_time = group.dataset("time").unwrap().read_raw::<f64>().unwrap()[0];
+        // check if timestep is in the timeframe given
+        if current_time < min_time {
+            continue;
+        }
+        let velocities = group
+            .dataset("angular_velocity")
+            .expect("This dataset does not contain angular velocity data")
+            .read_2d::<f64>()
+            .unwrap();
+        // loop over all particles in this timestep, calculate the velocity vector and add it to the
+        // vectorfield array
+        for vel in velocities.outer_iter(){
+            mean_velocity += (vel[0]*vel[0] + vel[1]*vel[1] +vel[2]*vel[2]).sqrt();
+            num_counts += 1.0;
+        }
+
     }
     mean_velocity /= num_counts;
     file.close();
@@ -630,6 +662,356 @@ pub fn velocity_distribution(
     file.close();
     // sending the data back to Python
     (party_id, vel_dist, num_axis_array)
+}
+
+/// [Velocity Distribution Function]:
+/// Calculate teh velocity distribution in your system
+
+pub fn rotational_velocity_distribution(
+    filename: &str, // which contains vel & pos data
+    mut bins: i64,  // bins can be defined by the user, but the default value is */10 the amount
+    min_time: f64,  // where to start the averaging
+    max_time: f64,  // where to end the averaging
+    rot_speed: f64,  // rotation of the drum in rpm
+    drum_center: Array1<f64>, // center of the drum
+    timestep: usize,
+) -> ( Vec<Vec<i64>>, Array1<f64>, Array1<f64>) {
+    /*
+    Description:
+    This function to calculates the velocity distribution of a particle system.
+    The function takes into account all velocities defined between the user defined time period:
+        min_time
+        max_time
+
+    !n.b! This distribution has not been normalised.
+
+    Internals:
+    Particle velocity is normalised ('.norm()' -> sqrt(vx**2 + vy**2 + vz**2)) and placed into bins
+    Particle particle_ids can be matched with the bins to find what particles are in each bin.
+
+     */
+    // Opening the file and defining the iterable (time-steps) - giving the num of timesteps
+    let file = hdf5::File::open(filename).expect("Error reading hdf5 file in rust");
+    let timesteps = timesteps(&file);
+
+    // finding the dimensions of the system,
+    let array_temp = file
+        .dataset("dimensions")
+        .unwrap()
+        .read_2d::<f64>()
+        .expect("Dimensions can not be read from the HDF5");
+
+    // arbitrary values set for variables - will be used later
+    let mut total_no_of_particles: i64 = 0;
+    let mut global_v_abs_min: f64 = f64::MAX;
+    let mut global_v_abs_max: f64 = f64::MIN;
+
+    // Part 1
+    // for loop used to find the max and min vel's for the system
+    // this is used define the scale of the axis, which is used in the following loop.
+        let name: String = "timestep ".to_string() + &timestep.to_string();
+        let group = file
+            .group(&name)
+            .expect(&format!("Could not open group {:?}", &name));
+        let current_time = group
+            .dataset("time")
+            .expect(&format!(
+                "Couldn't open dataset time in dataset {:?}",
+                &name
+            ))
+            .read_raw::<f64>()
+            .expect(&format!(
+                "Couldn't read data from time-step:{:?}, check the raw data",
+                &timestep
+            ))[0];
+
+        // pulling the data from the timestep's group
+        let positions = group
+            .dataset("position")
+            .expect(&format!(
+                "Expected Dataset 'Position':{:?}, failed to read",
+                &name
+            ))
+            .read_2d::<f64>()
+            .expect(&format!(
+                "Error: Data within 'Position':{:?}, dataset could not be read",
+                &timestep
+            ));
+
+        let velocities: Array2<f64> = group
+            .dataset("velocity")
+            .expect(&format!(
+                "Expected Dataset 'Velocity':{:?}, failed to read",
+                &name
+            ))
+            .read_2d::<f64>()
+            .expect(&format!(
+                "Error: Data within 'velocity':{:?}, dataset could not be read",
+                &timestep
+            ));
+
+        // finding the total no of particles in the system
+        total_no_of_particles = (positions.len() / 3 as usize) as i64;
+
+        // creating the absolute velocity array based on the prior 2D array
+        // norm -> sqrt(vx**2 + vy**2 + vz**2)
+        // collect -> forms the result into an array
+
+        // to find max and min within the vel group
+        let (min_abs_vel, max_abs_vel) = minmax_rot(&velocities,&positions,rot_speed, &drum_center);
+
+        // Replacing the existing global value with the new local min & max,
+        // if the min or max is lower/higher they are replaced
+        if max_abs_vel > global_v_abs_max {
+            global_v_abs_max = max_abs_vel;
+        };
+
+        if min_abs_vel < global_v_abs_min {
+            global_v_abs_min = min_abs_vel;
+        };
+
+    // define the default no of bins, which is 10* less than the no of particles used
+    if bins == -1 as i64 {
+        bins = (&total_no_of_particles / 10) as i64;
+    };
+
+    // Converting bins irray2<f64>64 to f64 to allow f/f division
+    let bins = bins as f64;
+
+    // allow the user to define the number of bins for the vel distribution
+    let bin_scale = (global_v_abs_max - global_v_abs_min) / bins;
+
+    // ensuring that 'bins' is back in int form
+    let bins = bins.floor() as i64;
+
+    // creating the num axis for the bins
+    let num_axis_array: Array1<f64> = Array::range(global_v_abs_min, global_v_abs_max, bin_scale);
+
+    // establish an empty array containing the vel distribution
+    let mut vel_dist = ndarray::Array1::<f64>::zeros(bins as usize);
+
+    // establish an empty nested array - for the particle particle_ids data [timestep[particle]]
+    let mut party_id: Vec<Vec<i64>> = Vec::with_capacity(bins as usize);
+    party_id.resize(*&bins as usize, Vec::new());
+
+    // Part 2
+    // Assigning the particles to their bin, open the loop back up to access the data
+
+        let name: String = "timestep ".to_string() + &timestep.to_string();
+
+        let group = file
+            .group(&name)
+            .expect(&format!("Could not open group {:?}", &name));
+
+        let current_time = group
+            .dataset("time")
+            .expect(&format!("Couldn't open dataset: {:?}", &name))
+            .read_raw::<f64>()
+            .expect(&format!(
+                "Couldn't read data from time-step: {:?}, check the raw data",
+                &timestep
+            ))[0];
+
+
+        // opening the data from the file
+        let velocities: Array2<f64> = group
+            .dataset("velocity")
+            .expect(&format!(
+                "Expected Dataset 'Velocity': {:?}, failed to read",
+                &name
+            ))
+            .read_2d::<f64>()
+            .expect(&format!(
+                "Error: Data within 'velocity': {:?}, dataset could not be read",
+                &timestep
+            ));
+        let positions: Array2<f64> = group
+                .dataset("position")
+                .expect(&format!(
+                    "Expected Dataset 'Position': {:?}, failed to read",
+                    &name
+                ))
+                .read_2d::<f64>()
+                .expect(&format!(
+                    "Error: Data within 'Position': {:?}, dataset could not be read",
+                    &timestep
+                ));
+        let particle_id = group
+            .dataset("particleid")
+            .expect(&format!(
+                "Expected Dataset 'particle_id': {:?}, failed to read",
+                &name
+            ))
+            .read_1d::<i64>()
+            .expect(&format!(
+                "Error: Data within 'particle_id': {:?}, dataset could not be read",
+                &timestep
+            ));
+        // assigning the data to arrays (and calculating the 'abs' value within)
+
+        for particles in 0..&total_no_of_particles - 1 {
+            let particle_ids = particle_id[particles as usize]; // particle_ids of particle0 = particle_id[0]
+            let vel = velocities.slice(s![particles as usize, ..]).to_owned();
+            let position = positions.slice(s![particles as usize , ..]).to_owned();
+            let distance = ((position[0usize]-drum_center[0]) * (position[0usize]-drum_center[0])
+            //+ (position[1usize]-drum_center[1]) * (position[1usize]-drum_center[1])
+            + (position[2usize]-drum_center[2]) * (position[2usize]-drum_center[2])).sqrt();
+            let alpha = ((position[0usize]-drum_center[0])/(position[2usize]-drum_center[2])).atan();
+
+            let rot_vel_at_dist = distance  * (2.0 * std::f64::consts::PI *rot_speed / 60.0);
+            let rot_vec = array![alpha.cos()*rot_vel_at_dist,0.0,alpha.sin()*rot_vel_at_dist];
+            // see notes at 13.feb 2021 (orange note book)
+
+            //here we can do it better! save these values as array and return them
+            //later
+            let veldata = ((rot_vec[0]-vel[0])*(rot_vec[0]-vel[0])//(norm_l2(&vel) / distance-2.*std::f64::consts::PI *rot_speed / 60.0);
+            +(rot_vec[1]-vel[1])*(rot_vec[1]-vel[1])
+            +(rot_vec[2]-vel[2])*(rot_vec[2]-vel[2])
+            ).sqrt();
+
+            let index: usize = (veldata.abs() / bin_scale).floor() as usize; // Calculating what bin the particle is in
+            if index >= vel_dist.len() {
+            //   println!("{:?},{:?}", index,veldata);
+                continue;
+            }
+            // assigning the vel to the correct bin
+            vel_dist[index] = vel_dist[index] + 1.0; // +1, to count in vel_dist array, building the hist plot                                    // Assign the particle id to that bin
+                                                     // this will be useful when trying to look at the free surface velocity
+            party_id[index].push(particle_ids);
+        }
+        // Closing the loop for the specific time-step
+
+    // closing the HDF5 file
+    //file.close();
+    // sending the data back to Python
+    (party_id, vel_dist, num_axis_array)
+}
+
+pub fn mean_surface_velocity(
+    filename: &str, // which contains vel & pos data
+    mut bins: i64,  // bins can be defined by the user, but the default value is */10 the amount
+    min_time: f64,  // where to start the averaging
+    max_time: f64,  // where to end the averaging
+    rot_speed: f64,  // rotation of the drum in rpm
+    drum_center: Array1<f64>, // center of the drum
+
+)->f64{
+    // Opening the file and defining the iterable (time-steps) - giving the num of timesteps
+    let file = hdf5::File::open(filename).expect("Error reading hdf5 file in rust");
+    let timesteps = timesteps(&file);
+    let mut mean_velocity = 0.0;
+    let mut mean_velocity_bulk = 0.0;
+    let mut num =0;
+    let mut num_bulk = 0;
+
+    for timestep in 0..timesteps-1{
+        let name: String = "timestep ".to_string() + &timestep.to_string();
+        let group = file.group(&"timestep 0".to_string()).expect(&format!("Can not open timestep {:?} in file {:?}",timestep,filename));
+
+        let current_time = group
+            .dataset("time")
+            .expect(&format!("Couldn't open dataset: {:?}", &name))
+            .read_raw::<f64>()
+            .expect(&format!(
+                "Couldn't read data from time-step: {:?}, check the raw data",
+                &timestep
+            ))[0];
+
+
+        // opening the data from the file
+        let velocities: Array2<f64> = group
+            .dataset("velocity")
+            .expect(&format!(
+                "Expected Dataset 'Velocity': {:?}, failed to read",
+                &name
+            ))
+            .read_2d::<f64>()
+            .expect(&format!(
+                "Error: Data within 'velocity': {:?}, dataset could not be read",
+                &timestep
+            ));
+        let positions: Array2<f64> = group
+                .dataset("position")
+                .expect(&format!(
+                    "Expected Dataset 'Position': {:?}, failed to read",
+                    &name
+                ))
+                .read_2d::<f64>()
+                .expect(&format!(
+                    "Error: Data within 'Position': {:?}, dataset could not be read",
+                    &timestep
+                ));
+        let particle_ids = group
+            .dataset("particleid")
+            .expect(&format!(
+                "Expected Dataset 'particle_id': {:?}, failed to read",
+                &name
+            ))
+            .read_1d::<i64>()
+            .expect(&format!(
+                "Error: Data within 'particle_id': {:?}, dataset could not be read",
+                &timestep
+            ));
+        let total_no_of_particles = (positions.len() / 3 as usize) as i64;
+        let (party_id, vel_dist, num_axis_array) = rotational_velocity_distribution(
+            filename, // which contains vel & pos data
+            bins,  // bins can be defined by the user, but the default value is */10 the amount
+            min_time,  // where to start the averaging
+            max_time,  // where to end the averaging
+            rot_speed,  // rotation of the drum in rpm
+            drum_center.clone() , // center of the drum
+            timestep as usize,
+        );
+        let mut max_diff = 0.0;
+        let mut max_diff_id = 0;
+        let mut diff= Array1::<f64>::zeros(vel_dist.len()-2);
+
+        let mut smooth = Array1::<f64>::zeros(vel_dist.len()-2);
+        for id in 0..vel_dist.len()-2{
+             smooth[id] = vel_dist[id]+vel_dist[id+1]+vel_dist[id+2]/3.;
+        }
+
+        for id in 0..smooth.len()-1{
+             diff[id] = smooth[id]-smooth[id+1];
+             if diff[id] > max_diff{
+                 max_diff = diff[id];
+                 max_diff_id = id;
+             }
+        }
+        let mut particles_to_use = Vec::new();
+        for x in max_diff_id..party_id.len(){
+            for id in party_id[x].iter(){
+                particles_to_use.push(id);
+            }
+        }
+        for particle in 0..total_no_of_particles{
+            let particle_id = particle_ids[particle as usize];
+            let mut flag:bool = false;
+            for use_id in particles_to_use.iter(){
+                if particle_id == use_id.to_owned().to_owned(){
+                        flag = true;
+                        break;
+                }
+                else{
+                    flag = false;
+                }
+            }
+            if !flag {
+                mean_velocity_bulk += norm_l2(&velocities.slice(s![particle as usize, ..]).to_owned());
+                num_bulk +=1;
+                continue;
+            }
+            mean_velocity += norm_l2(&velocities.slice(s![particle as usize, ..]).to_owned());
+            num +=1;
+        }
+    }
+
+
+    mean_velocity /= num as f64;
+    mean_velocity_bulk /= num_bulk as f64;
+    println!("Surface: {}/nBulk: {}",mean_velocity,mean_velocity_bulk);
+    file.close();
+    mean_velocity
 }
 
 pub fn surface_polynom(
@@ -966,7 +1348,7 @@ pub fn dispersion(
     delta_t: usize,
     mesh_size: Array1<f64>,
     cells: Array1<i64>,
-) -> Vec<Vec<Vec<f64>>> {
+) -> (Vec<Vec<Vec<f64>>>,f64) {
     // opening file
     let file = hdf5::File::open(file).expect(&format!("Could not open file {:?}", file));
     //extract system dimensions from current datafile
@@ -1076,15 +1458,18 @@ pub fn dispersion(
             // position of particle in ARrray 2 is assumed to be
             // in the same spot first
             let mut position_in_array_2 = position_in_array; // this might be not true as LIGGHTS is stupid
-                                                             // find the current cell of this particle
+                      // find the current cell of this particle
             let p_id = particle_ids[position_in_array];
             let pos = positions.slice(s![position_in_array, ..]).to_owned() - &min_array;
-
-            let p_id_2 = particle_ids2[position_in_array_2];
-
+            let p_id_2;
+            if position_in_array_2 >= particle_ids2.len(){
+                p_id_2 =0;
+            }else{
+                p_id_2 = particle_ids2[position_in_array_2];
+            };
             if p_id_2 != p_id {
                 // if they are not the same, the right particle position must be found
-                for x in 0..particles {
+                for x in 0..particle_ids2.len()-1 {
                     // loop though every particle in the second timestep and
                     // check if particle particle_ids matches
                     if particle_ids2[x] == p_id {
@@ -1109,25 +1494,25 @@ pub fn dispersion(
             }
             // add to calculate how many particles have been in this scell
             n_cells[cellx][celly][cellz] += 1.0;
-
             // calculate the sum of all positions
             cells_sum_x[cellx][celly][cellz] += pos_2[0];
             cells_sum_y[cellx][celly][cellz] += pos_2[1];
             cells_sum_z[cellx][celly][cellz] += pos_2[2];
-
             //calculate the square of all positions
             cells_sqsum_x[cellx][celly][cellz] += pos_2[0] * pos_2[0];
             cells_sqsum_y[cellx][celly][cellz] += pos_2[1] * pos_2[1];
             cells_sqsum_z[cellx][celly][cellz] += pos_2[2] * pos_2[2];
         }
     }
+    let mut mixing_efficiency = 0.0;
+    let mut total_passes = 0.0;
     //go through all cells and calculaate the dispersion number
     for cellx in 0..own_cells[0] {
         for celly in 0..own_cells[1] {
             for cellz in 0..own_cells[2] {
                 let n = n_cells[cellx][celly][cellz];
                 // skipp this cell if the number of particles is small
-                if n_cells[cellx][celly][cellz] <= 10.0 {
+                if n <= 10.0 {
                     continue;
                 }
                 //varianze in x direction
@@ -1141,12 +1526,14 @@ pub fn dispersion(
                     - cells_sum_z[cellx][celly][cellz] / n * cells_sum_z[cellx][celly][cellz] / n;
 
                 dispersion_cells[cellx][celly][cellz] = (x + y + z) * n / (n - 1.0);
+                total_passes += n;
+                mixing_efficiency += dispersion_cells[cellx][celly][cellz];
             }
         }
     }
-
+    mixing_efficiency /= total_passes;
     // return dispersion
-    dispersion_cells
+    (dispersion_cells, mixing_efficiency)
 }
 
 pub fn mean_squared_displacement(
@@ -1416,6 +1803,257 @@ pub fn power_draw(filename: &str, min_time: f64) -> Array1<f64> {
     power
 }
 
+
+/**
+pub fn residence_time_distribution(
+    filename: &str,          //filename of hdf5 file
+    cells: Array1<f64>,      //number of cells to store vec-data
+    min_time: f64,           //where to start the averaging
+    max_time: f64,           //where to end the averaging
+    dimensions: Array2<f64>, // Region where to look at, rest ignored
+    norm: bool,              //normalise the size of the vectors
+    radius: Array1<f64>,     // include a radius
+    particle_id: Array1<i64>,
+) -> (
+    Array1<f64>,
+) {
+    // Opening hdf5 file
+    let file = hdf5::File::open(&filename).expect(&format!(
+        "Can not open HDF5 file {:?}",
+        &filename
+    ));
+    //read the number of timesteps inside this hdf5file
+    let timesteps: u64 = timesteps(&file);
+    //Extracting the min and max dimensions of the simulation
+    let array = file
+        .dataset("dimensions")
+        .expect(&format!(
+            "Can not find dataset \"dimensions\" in HDF5 file \"{:?}\"",
+            &filename
+        ))
+        .read_2d::<f64>()
+        .expect(&format!(
+            "Can not read data from \"dimensions\" dataset. \
+            Data type or data format might be wrong. \
+            Check creation of HDF5 file  \"{:?}\"",
+            &filename
+        ));
+    let min_array = array.slice(s![0, ..]).to_owned();
+    let max_array = array.slice(s![1, ..]).to_owned();
+
+
+
+    //initiate needed arrays:
+    let mut rtd = ndarray::Array1::<i64>::zeros((
+        cells[2usize].floor() as usize,
+        cells[0usize].floor() as usize,
+    ));
+    let mut v_z_grid = ndarray::Array2::<f64>::zeros((
+        cells[2usize].floor() as usize,
+        cells[0usize].floor() as usize,
+    ));
+
+    //array to count how many particles found per cell
+    let mut n_x_grid = ndarray::Array2::<f64>::zeros((
+        cells[2usize].floor() as usize,
+        cells[0usize].floor() as usize,
+    ));
+    let mut n_z_grid = ndarray::Array2::<f64>::zeros((
+        cells[2usize].floor() as usize,
+        cells[0usize].floor() as usize,
+    ));
+
+    // find the two axis indizes which we want to "see"
+    let mut first_axis = 4;
+    let mut sec_axis = 4;
+    for x in 0..3{
+        if x == axis{continue};
+        if first_axis == 4{ first_axis = x;
+        }else if sec_axis ==4{
+            sec_axis =x ;
+        }else{
+            panic!(&format!(
+                "variable axis in vectorfield must be between 0 and 2 ! Currently it is {:?}",
+                axis,
+            ))
+        }
+    }
+    println!("{:?}, {:?}",first_axis,sec_axis);
+    for timestep in 0..timesteps - 1 {
+        let name: String = "timestep ".to_string() + &timestep.to_string();
+        let group = file.group(&name).expect(&format!(
+                "Could not find group {:?} in file {:?}",
+                &name,
+                &filename
+            ));
+        let current_time = group
+            .dataset("time")
+            .expect(&format!(
+                "Can not find dataset \"time\" in HDF5 file \"{:?}\"",
+                &filename
+            ))
+            .read_raw::<f64>()
+            .expect(&format!(
+                "Can not read data from \"time\" dataset. \
+                Data type or data format might be wrong. \
+                Check creation of HDF5 file  \"{:?}\"",
+                &filename
+            ))[0];
+        // check if timestep is in the timeframe given
+        if current_time < min_time {
+            continue;
+        }
+        if current_time > max_time {
+            continue;
+        }
+        //let dataset = group.dataset("position").expect( "error");
+        let positions = group
+            .dataset("position")
+            .expect(&format!(
+                "Can not find dataset \"position\" in HDF5 file \"{:?}\"",
+                &filename
+            ))
+            .read_2d::<f64>()
+            .expect(&format!(
+                "Can not read data from \"position\" dataset. \
+                Data type or data format might be wrong. \
+                Check creation of HDF5 file  \"{:?}\"",
+                &filename
+            ));
+        let velocities = group
+            .dataset("velocity")
+            .expect(&format!(
+                "Can not find dataset \"velocity\" in HDF5 file \"{:?}\"",
+                &filename
+            ))
+            .read_2d::<f64>()
+            .expect(&format!(
+                "Can not read data from \"velocity\" dataset. \
+                Data type or data format might be wrong. \
+                Check creation of HDF5 file  \"{:?}\"",
+                &filename
+            ));
+        let particle_ids = group
+            .dataset("particleid")
+            .expect(&format!(
+                "Can not find dataset \"particleid\" in HDF5 file \"{:?}\"",
+                &filename
+            ))
+            .read_1d::<f64>()
+            .expect(&format!(
+                "Can not read data from \"particleid\" dataset. \
+                Data type or data format might be wrong. \
+                Check creation of HDF5 file  \"{:?}\"",
+                &filename
+            ));
+        let rad_array = group
+            .dataset("radius")
+            .expect(&format!(
+                "Can not find dataset \"radius\" in HDF5 file \"{:?}\"",
+                &filename
+            ))
+            .read_1d::<f64>()
+            .expect(&format!(
+                "Can not read data from \"dimensions\" dataset. \
+                Data type or data format might be wrong. \
+                Check creation of HDF5 file  \"{:?}\"",
+                &filename
+            ));
+        let particles = positions.len() / 3;
+        // loop over all particles in this timestep, calculate the velocity vector and add it to the
+        // vectorfield array
+        for particle in 0..particles {
+            //check if this particle is fitting the criteria
+            if !check_id(particle_ids[particle] as usize, &particle_id) {
+                println!("skipping because of ID");
+                continue;
+            }
+            if !check_radius(rad_array[particle] as f64, &radius) {
+                println!("Skipping cause of radius");
+                continue;
+            }
+            let position = positions.slice(s![particle, ..]).to_owned();
+            let velocity = velocities.slice(s![particle, ..]).to_owned();
+            //reset the position. the lowest value should be at 0,0,0
+            let x: f64 = position[first_axis] - min_array[first_axis];
+            let z: f64 = position[sec_axis] - min_array[sec_axis];
+
+            //velocities
+            let vx: f64 = velocity[first_axis];
+            let vz: f64 = velocity[sec_axis];
+
+            // check if the current particle position falls into the specified dimension
+            if     x < dimensions[[0usize, first_axis]]
+                || x > dimensions[[1usize, first_axis]]
+                || z < dimensions[[0usize, sec_axis]]
+                || z > dimensions[[1usize, sec_axis]]
+            {
+                // the particle is out of the field of view
+                println!("Skipping a particle as it is out of system");
+                continue;
+            }
+            // find the cell indice where particle is right now
+
+            let i: usize = (x / cell_size[first_axis]).floor() as usize;
+            let k: usize = (z / cell_size[sec_axis]).floor() as usize;
+            // check if indexes are higher then maximum
+            if i == cells[first_axis] as usize
+                || k == cells[sec_axis] as usize
+            {
+                continue;
+            }
+
+
+            v_x_grid[[k, i]] = v_x_grid[[k, i]] + vx;
+            v_z_grid[[k, i]] = v_z_grid[[k, i]] + vz;
+
+            n_x_grid[[k, i]] = n_x_grid[[k, i]] + 1.0;
+            n_z_grid[[k, i]] = n_z_grid[[k, i]] + 1.0;
+        }
+
+    }
+
+    v_x_grid = v_x_grid / &n_x_grid;
+    v_z_grid = v_z_grid / &n_z_grid;
+    let (sx, sy) = meshgrid(
+        Array::linspace(
+            0.0,
+            cells[0usize] * cell_size[0usize],
+            cells[0usize] as usize,
+        ),
+        Array::linspace(
+            0.0,
+            cells[2usize] * cell_size[2usize],
+            cells[2usize] as usize,
+        ),
+    );
+    if norm {
+        let norm_arr = norm_two(&v_x_grid, &v_z_grid).to_owned();
+        v_x_grid = v_x_grid / &norm_arr;
+        v_z_grid = v_z_grid / &norm_arr;
+    }
+    file.close();
+
+    (v_x_grid, v_z_grid, sx, sy)
+}
+**/
+fn derivative(x:Array1<f64>,y : Array1<f64>,avg: usize)->(Array1<f64>, Array1<f64>){
+    if x.len() != y.len(){
+        panic!("X and y should have the same len");
+    }
+
+    let mut result_x = Array1::<f64>::zeros(x.len());
+    let mut diffy = Array1::<f64>::zeros(y.len());
+    let mut diffx = Array1::<f64>::zeros(x.len());
+    for id in 0..x.len()-1{
+        diffx[id] = x[id+1]-x[id];
+        diffy[id] = y[id+1]-y[id];
+        result_x[id] = 0.5 * (x[id+1]+x[id]);
+    }
+    let result_y = diffx/diffy;//Array1::<f64>::zeros(y.len());
+
+    (result_x,result_y)
+}
 fn check_id(id: usize, var: &Array1<i64>) -> bool {
     let mut ret_val = false;
     if var[0usize] == -1 && var[1usize] == -1 {
@@ -1537,6 +2175,51 @@ fn minmax(arr: &Array1<f64>) -> (f64, f64) {
         }
     }
     (min, max)
+}
+fn minidx(arr: &Array1<f64>) -> (f64, usize) {
+    let mut min = f64::MAX;
+    let mut idx = 0;
+    for id in 0..arr.len() {
+        let value = arr[id];
+        if value < min {
+            min = value;
+            idx = id;
+        }
+    }
+    (min, idx)
+}
+
+fn minmax_rot(vel: &Array2<f64> ,pos: &Array2<f64> , rot_speed: f64, drum_center: &Array1<f64>) -> (f64, f64) {
+    let mut min = f64::MAX;
+    let mut max = f64::MIN;
+    let mut count = 0;
+    for vel in vel.outer_iter(){
+        let position = pos.slice(s![count, ..]).to_owned();
+        let distance = ((position[0usize]-drum_center[0]) * (position[0usize]-drum_center[0])
+        + (position[1usize]-drum_center[1]) * (position[1usize]-drum_center[1])
+        + (position[2usize]-drum_center[2]) * (position[2usize]-drum_center[2])).sqrt();
+        let alpha = ((position[0usize]-drum_center[0])/(position[2usize]-drum_center[2])).atan();
+        let rot_vel_at_dist = distance  * (2.0 * std::f64::consts::PI  *rot_speed / 60.0);
+        let rot_vec = array![alpha.cos()*rot_vel_at_dist,0.0,alpha.sin()*rot_vel_at_dist];
+        // see notes at 13.feb 2021 (orange book)
+
+        //here we can do it better! save these values as array and return them
+        //later
+        let part_rot_val = ((rot_vec[0]-vel[0])*(rot_vec[0]-vel[0])
+        +(rot_vec[1]-vel[1])*(rot_vec[1]-vel[1])
+        +(rot_vec[2]-vel[2])*(rot_vec[2]-vel[2]))
+        .sqrt();
+
+        // now finnalyy check the velocitys
+        if part_rot_val < min{
+            min = part_rot_val;
+        }
+        if part_rot_val > max{
+            max = part_rot_val;
+        }
+
+    }
+    (min,max)
 }
 
 /// calculates the cartesian norm of 3 velocity Vectors

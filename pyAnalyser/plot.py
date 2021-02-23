@@ -17,8 +17,8 @@ def plot_occu_1D(
     ):
     y=arr if axis == 2 else occu
     x=occu if axis == 2 else arr
-    x_title = "Particle Volume Fraction [%]" if axis ==2 else "Width [m]"
-    y_title =  "Height [m]" if axis ==2 else "Particle Volume Fraction [%]"
+    x_title = "Particle Volume Fraction Normalized [-]" if axis ==2 else "Width [m]"
+    y_title =  "Height [m]" if axis ==2 else "Particle Volume Fraction Normalized [-]"
     if fig is None:
         fig = go.Figure()
     fig.add_trace(go.Scatter(x=x,y=y, name = name))

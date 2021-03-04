@@ -362,6 +362,28 @@ class Data():
                 plot_heatmap(np.asarray(list)[:,0,:])
             return list, mixing_efficiency
 
+    def dispersion_pept(
+        self,
+        timestep=[0, 100 ],
+        dt=10,
+        mesh_size=[0.0,0.0,0.0],
+        cells = [10,10,10],
+        plot = True
+    ):
+            mesh_size = np.asarray(mesh_size)
+            cells = np.asarray(cells)
+            timestep = np.asarray(timestep,dtype=np.uintp)
+            list, mixing_efficiency = rust.dispersion_pept(
+                self.filename,
+                timestep,
+                dt,
+                mesh_size,
+                cells,
+                )
+            if plot:
+                plot_heatmap(np.asarray(list)[:,0,:])
+            return list, mixing_efficiency
+
     def mean_squared_displacement(
         self,
         start_timestep = 0,
@@ -389,3 +411,164 @@ class Data():
             y_lable = "Power [W]"
             )
         return power
+
+    def circulation_time_boundary(self, boundary = [0.0,1.0], axis = 2,plot = True,min_time=0):
+            (up_times,down_times,times) = rust.circulation_time_boundary(self.filename, np.asarray(boundary),int(axis),float(min_time))
+            if plot:
+                plot_linear(
+                y = up_times,
+                x_lable = "up-cycle number",
+                y_lable = "time to go "
+                )
+                plot_linear(
+                y = down_times,
+                x_lable = "down-cycle number",
+                y_lable = "time to go "
+                )
+                plot_linear(
+                y = times,
+                x_lable = "cycle number",
+                y_lable = "time to go "
+                )
+            return up_times,down_times,times
+
+    def circulation_time_boundary_pept(self, boundary = [0.0,1.0], axis = 2,plot = True):
+            (up_times,down_times,times) = rust.circulation_time_boundary_pept(self.filename, np.asarray(boundary),int(axis))
+            if plot:
+                plot_linear(
+                y = up_times,
+                x_lable = "up-cycle number",
+                y_lable = "time to go "
+                )
+                plot_linear(
+                y = down_times,
+                x_lable = "down-cycle number",
+                y_lable = "time to go "
+                )
+                plot_linear(
+                y = times,
+                x_lable = "cycle number",
+                y_lable = "time to go "
+                )
+            return up_times,down_times,times
+
+    def shear_rate(
+        self,
+        cells=[30.0,30.0,30.0],
+        min_time =-inf,
+        max_time = inf,
+        dimensions = [[-inf, -inf, -inf], [inf, inf, inf]],
+        norm = False,
+        return_data = False,
+        radius = -1.0,
+        particle_id = -1,
+        plot = True,
+        width = 1000,
+        height = 1000,
+        axis = 0,
+        c=-1.0,
+        m=-1.0,
+    ):
+
+        if isinstance(dimensions, (list, tuple, np.ndarray)):
+            dimensions = np.asarray(dimensions, dtype=float)
+        else:
+            raise ValueError(f"dimensions should be a list/array not {type(dimensions)}")
+
+        if isinstance(cells, (list, tuple, np.ndarray)):
+            cells = np.asarray(cells, dtype=float)
+        else:
+            raise ValueError(f"Cells should be a list/array not {type(cells)}")
+
+        if type(radius) == float or type(radius) == int:
+            radius = np.asarray([radius, radius], dtype=float)
+        elif isinstance(radius, (list, tuple, np.ndarray)):
+            radius = np.asarray(radius, dtype=float)
+        else:
+            raise ValueError(f"radius should be a number or a list/array not {type(radius)}")
+        if type(particle_id) == float or type(particle_id) == int:
+            particle_id = np.asarray([int(particle_id), int(particle_id)], dtype=int)
+        elif isinstance(particle_id, (list, tuple, np.ndarray)):
+            particle_id = np.asarray(particle_id, dtype=int)
+        else:
+            raise ValueError(f"particle_id should be a number or a list/array not {type(particle_id)}")
+
+
+        vx, vz ,sx,sy,x,y,tau = rust.shear_rate(self.filename,
+                                            cells,
+                                            min_time,
+                                            max_time,
+                                            dimensions,
+                                            radius,
+                                            particle_id,
+                                            axis,
+                                            float(c),
+                                            float(m)
+                                            )
+        self.recovery.add(np.asarray([vx, vz, sx, sy]))
+        if plot:
+            fig = plot_vectorfield(sx,sy,vx,vz,width = width, height = height,plot = False)
+            dx =-sx[0][0]+sx[0][1]
+            dy =-sy[0][0]+sy[1][0]
+            minx=np.nanmin(sx)
+            miny=np.nanmin(sy)
+            fig.add_trace(go.Scatter(x=x*dx+minx,y=y*dy+miny))
+
+            #fig.add_trace(go.Scatter(x=x*dx+minx,y=y))
+            fig.show()
+        return x,y,tau
+
+    def granular_temperature_2d(
+        self,
+        cells=[30.0,30.0,30.0],
+        min_time =-inf,
+        max_time = inf,
+        dimensions = [[-inf, -inf, -inf], [inf, inf, inf]],
+        norm = False,
+        return_data = False,
+        radius = -1.0,
+        particle_id = -1,
+        plot = True,
+        width = 1000,
+        height = 1000,
+        axis = 0,
+    ):
+
+        if isinstance(dimensions, (list, tuple, np.ndarray)):
+            dimensions = np.asarray(dimensions, dtype=float)
+        else:
+            raise ValueError(f"dimensions should be a list/array not {type(dimensions)}")
+
+        if isinstance(cells, (list, tuple, np.ndarray)):
+            cells = np.asarray(cells, dtype=float)
+        else:
+            raise ValueError(f"Cells should be a list/array not {type(cells)}")
+
+        if type(radius) == float or type(radius) == int:
+            radius = np.asarray([radius, radius], dtype=float)
+        elif isinstance(radius, (list, tuple, np.ndarray)):
+            radius = np.asarray(radius, dtype=float)
+        else:
+            raise ValueError(f"radius should be a number or a list/array not {type(radius)}")
+        if type(particle_id) == float or type(particle_id) == int:
+            particle_id = np.asarray([int(particle_id), int(particle_id)], dtype=int)
+        elif isinstance(particle_id, (list, tuple, np.ndarray)):
+            particle_id = np.asarray(particle_id, dtype=int)
+        else:
+            raise ValueError(f"particle_id should be a number or a list/array not {type(particle_id)}")
+
+
+        temp, ngrid ,sx,sy = rust.granular_temperature_2d(self.filename,
+                                            cells,
+                                            min_time,
+                                            max_time,
+                                            dimensions,
+                                            norm,
+                                            radius,
+                                            particle_id,
+                                            axis,
+                                            )
+
+        if plot:
+            plot_heatmap(temp)
+        return temp, ngrid, sx, sy

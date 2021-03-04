@@ -69,6 +69,7 @@ def pept(filename, header=16,delimiter=","):
     print(np.asarray(positions[0]).shape)
     grp = file.create_group("timestep "+str(cur_step))
     grp.create_dataset("time", data=time[0])
+    grp.create_dataset("time_pept", data=time)
     grp.create_dataset("position", data=np.asarray(positions))
     grp.create_dataset("velocity", data=np.asarray(velocitys))
     grp.create_dataset("radius", data=np.zeros(len(positions)))

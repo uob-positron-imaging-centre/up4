@@ -23,12 +23,17 @@ fn rustAnalyser(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(granular_temperature))?;
     m.add_wrapped(wrap_pyfunction!(mean_velocity))?;
     m.add_wrapped(wrap_pyfunction!(dispersion))?;
+    m.add_wrapped(wrap_pyfunction!(dispersion_pept))?;
     m.add_wrapped(wrap_pyfunction!(surface_velocity))?;
     m.add_wrapped(wrap_pyfunction!(rotational_velocity_distribution))?;
     m.add_wrapped(wrap_pyfunction!(velocity_distribution))?;
     m.add_wrapped(wrap_pyfunction!(mean_squared_displacement))?;
     m.add_wrapped(wrap_pyfunction!(power_draw))?;
     m.add_wrapped(wrap_pyfunction!(mean_surface_velocity))?;
+    m.add_wrapped(wrap_pyfunction!(circulation_time_boundary))?;
+    m.add_wrapped(wrap_pyfunction!(circulation_time_boundary_pept))?;
+    m.add_wrapped(wrap_pyfunction!(shear_rate))?;
+    m.add_wrapped(wrap_pyfunction!(granular_temperature_2d))?;      
     Ok(())
 }
 /// [Vectorfield Function]:
@@ -203,6 +208,28 @@ fn dispersion<'py>(
 }
 
 #[pyfunction]
+fn dispersion_pept<'py>(
+    _py: Python<'py>,
+    file: &str,
+    timestep: PyReadonlyArray1<usize>,
+    delta_t: usize,
+    mesh_size: PyReadonlyArray1<f64>,
+    cells: PyReadonlyArray1<i64>,
+) -> (Vec<Vec<Vec<f64>>>,f64) {
+    let (dispersion_cells, mixing_efficiency) = functions::dispersion_pept(
+        file,
+        timestep.as_array().to_owned(),
+        delta_t,
+        mesh_size.as_array().to_owned(),
+        cells.as_array().to_owned(),
+    );
+
+    // return dispersion
+    (dispersion_cells, mixing_efficiency)
+
+}
+
+#[pyfunction]
 fn mean_velocity<'py>(
     py: Python<'py>,
     filename: &str,
@@ -348,5 +375,99 @@ fn mean_squared_displacement<'py>(
 #[pyfunction]
 fn power_draw<'py>(_py: Python<'py>, filename:&str, min_time:f64)->&'py PyArrayDyn<f64> {
     functions::power_draw(filename,min_time).into_pyarray(_py).to_dyn()
+}
 
+
+#[pyfunction]
+fn circulation_time_boundary<'py>(_py: Python<'py>, filename:&str, boundary:PyReadonlyArray1<f64>, axis: usize,min_time:f64)->(Vec<f64>, Vec<f64>, Vec<f64>) {
+    functions::circulation_time_boundary(filename,boundary.as_array().to_owned(),axis,min_time)
+
+}
+#[pyfunction]
+fn circulation_time_boundary_pept<'py>(_py: Python<'py>, filename:&str, boundary:PyReadonlyArray1<f64>, axis: usize)->(Vec<f64>, Vec<f64>, Vec<f64>) {
+    functions::circulation_time_boundary_pept(filename,boundary.as_array().to_owned(),axis)
+
+}
+
+
+#[pyfunction]
+fn shear_rate<'py>(_py: Python<'py>,
+    filename: &str,          //filename of hdf5 file
+    cells: PyReadonlyArray1<f64>,      //number of cells to store vec-data
+    min_time: f64,           //where to start the averaging
+    max_time: f64,           //where to end the averaging
+    dimensions: PyReadonlyArray2<f64>, // Region where to look at, rest ignored
+    radius: PyReadonlyArray1<f64>,     // include a radius
+    particle_id: PyReadonlyArray1<i64>,
+    axis: usize,
+    line_offset: f64,
+    line_gradient: f64,
+) -> (
+    &'py PyArrayDyn<f64>,
+    &'py PyArrayDyn<f64>,
+    &'py PyArrayDyn<f64>,
+    &'py PyArrayDyn<f64>,
+    &'py PyArrayDyn<i64>,
+    &'py PyArrayDyn<i64>,
+    f64
+) {
+    let (px,py,sx,sy,x,y,tau) =functions::shear_rate(
+        filename,
+        cells.as_array().to_owned(),
+        min_time,
+        max_time,
+        dimensions.as_array().to_owned(),
+        radius.as_array().to_owned(),
+        particle_id.as_array().to_owned(),
+        axis,
+        line_offset,
+        line_gradient
+    );
+    (px.into_pyarray(_py).to_dyn(),
+    py.into_pyarray(_py).to_dyn(),
+    sx.into_pyarray(_py).to_dyn(),
+    sy.into_pyarray(_py).to_dyn(),
+    x.into_pyarray(_py).to_dyn(),
+    y.into_pyarray(_py).to_dyn(),
+    tau
+)
+}
+
+
+#[pyfunction]
+fn granular_temperature_2d<'py>(
+    _py: Python<'py>,
+    filename: &str,                      //filename of hdf5 file
+    cells: PyReadonlyArray1<f64>,        //number of cells to store vec-data
+    min_time: f64,                       //where to start the averaging
+    max_time: f64,                       //where to end the averaging
+    dimensions: PyReadonlyArray2<f64>, // Region where to look at, rest ignored
+    norm_on: bool,                       //normalise the size of the vectors
+    radius: PyReadonlyArray1<f64>,       // include a radius, only available for sim-data
+    particle_id: PyReadonlyArray1<i64>,
+    axis: usize,
+) -> (
+    &'py PyArrayDyn<f64>,
+    &'py PyArrayDyn<f64>,
+    &'py PyArrayDyn<f64>,
+    &'py PyArrayDyn<f64>,
+) {
+
+    let (temp, ngrid, sx, sy) = functions::granular_temperature_2d(
+        filename,
+        cells.as_array().to_owned(),
+        min_time,
+        max_time,
+        dimensions.as_array().to_owned(),
+        norm_on,
+        radius.as_array().to_owned(),
+        particle_id.as_array().to_owned(),
+        axis,
+    );
+    (
+    temp.into_pyarray(_py).to_dyn(),
+    ngrid.into_pyarray(_py).to_dyn(),
+    sx.into_pyarray(_py).to_dyn(),
+    sy.into_pyarray(_py).to_dyn(),
+)
 }

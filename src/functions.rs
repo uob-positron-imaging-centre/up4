@@ -2710,7 +2710,8 @@ pub fn shear_rate(
         velocitys[id_x] = v_rel;
         if velocitys[id_x] == 0. {velocitys[id_x]=f64::NAN }
     }
-    let (_,dy) = derivative(x1*( &sx[[0,1]]- &sx[[0,0]]),velocitys.clone(),1);
+    let step = (( &sx[[0,1]]- &sx[[0,0]])*( &sx[[0,1]]- &sx[[0,0]]) + ( &sy[[1,0]]- &sy[[0,0]])*( &sy[[1,0]]- &sy[[0,0]])).sqrt();
+    let (_,dy) = derivative(x1*step,velocitys.clone(),1);
     let (_,tau) = minmax(&dy);
     (vx,vy,sx,sy,x,y,tau)
 }

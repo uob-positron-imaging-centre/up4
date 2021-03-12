@@ -22,10 +22,12 @@ this could take some time as it compiles the rust code on your machine.
 
 Python librarys:
   - plotly
-  - os
-  - pickle
   - h5py
   - numpy
+  - vtk 
+  - natsort 
+  - tqdm
+  
 
 you will need a rust compiler, see:
 

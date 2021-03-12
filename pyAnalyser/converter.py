@@ -12,7 +12,7 @@ import pickle
 
 
 def pept(filename, header=16,delimiter=","):
-    data = np.genfromtxt(filename, skip_header=header,delimiter=delimiter)
+    data = np.genfromtxt(filename, skip_header=header,delimiter=delimiter,invalid_raise = False)
     dump = 2
     while True:
         filename2 = filename + f"_0{dump}"
@@ -20,7 +20,7 @@ def pept(filename, header=16,delimiter=","):
         print(os.path.exists(filename2))
         if os.path.exists(filename2):
             print(f"Appending data {filename} with {filename2}")
-            data2 = np.genfromtxt(filename2, skip_header=header)
+            data2 = np.genfromtxt(filename2, skip_header=header,invalid_raise = False)
             data = np.concatenate((data, data2))
             dump += 1
         else:

@@ -73,12 +73,32 @@ pub fn vectorfield(
             Check creation of HDF5 file  \"{:?}\"",
             &filename
         ));
-    let min_array = array.slice(s![0, ..]).to_owned();
-    let max_array = array.slice(s![1, ..]).to_owned();
+    let mut min_array = array.slice(s![0, ..]).to_owned();
+    let mut  max_array = array.slice(s![1, ..]).to_owned();
 
     //let cells_int =
     //before going through timestep, implement:
     // dimension check?
+
+    if dimensions.slice(s![0, ..]).to_owned()[0usize] > min_array[0usize]  {
+        min_array[0usize] = dimensions.slice(s![0, ..]).to_owned()[0usize]
+    }
+    if dimensions.slice(s![0, ..]).to_owned()[1usize] > min_array[1usize]  {
+        min_array[1usize] = dimensions.slice(s![0, ..]).to_owned()[1usize]
+    }
+    if dimensions.slice(s![0, ..]).to_owned()[2usize] > min_array[2usize]  {
+        min_array[2usize] = dimensions.slice(s![0, ..]).to_owned()[2usize]
+    }
+
+    if dimensions.slice(s![1, ..]).to_owned()[0usize] < max_array[0usize]  {
+        max_array[0usize] = dimensions.slice(s![1, ..]).to_owned()[0usize]
+    }
+    if dimensions.slice(s![1, ..]).to_owned()[1usize] < max_array[1usize]  {
+        max_array[1usize] = dimensions.slice(s![1, ..]).to_owned()[1usize]
+    }
+    if dimensions.slice(s![1, ..]).to_owned()[2usize] < max_array[2usize]  {
+        max_array[2usize] = dimensions.slice(s![1, ..]).to_owned()[2usize]
+    }
 
     let cell_size: Array1<f64> = array![
         (max_array[0usize] - min_array[0usize]) / (cells[0usize]),
@@ -121,7 +141,7 @@ pub fn vectorfield(
             ))
         }
     }
-    println!("{:?}, {:?}",first_axis,sec_axis);
+    //println!("{:?}, {:?}",first_axis,sec_axis);
     for timestep in 0..timesteps - 1 {
         let name: String = "timestep ".to_string() + &timestep.to_string();
         let group = file.group(&name).expect(&format!(
@@ -221,19 +241,24 @@ pub fn vectorfield(
             //reset the position. the lowest value should be at 0,0,0
             let x: f64 = position[first_axis] - min_array[first_axis];
             let z: f64 = position[sec_axis] - min_array[sec_axis];
+            let x_abs: f64 = position[first_axis];
+            let z_abs: f64 = position[sec_axis];
 
             //velocities
             let vx: f64 = velocity[first_axis];
             let vz: f64 = velocity[sec_axis];
 
-            // check if the current particle position falls into the specified dimension
-            if     x < dimensions[[0usize, first_axis]]
-                || x > dimensions[[1usize, first_axis]]
-                || z < dimensions[[0usize, sec_axis]]
-                || z > dimensions[[1usize, sec_axis]]
+            let pos_abs = position;
+
+            if     pos_abs[0] < dimensions[[0usize, 0]]
+                || pos_abs[0] > dimensions[[1usize, 0]]
+                || pos_abs[1] < dimensions[[0usize, 1]]
+                || pos_abs[1] > dimensions[[1usize, 1]]
+                || pos_abs[2] < dimensions[[0usize, 2]]
+                || pos_abs[2] > dimensions[[1usize, 2]]
             {
                 // the particle is out of the field of view
-                println!("Skipping a particle as it is out of system");
+                //println!("Skipping a particle as it is out of system");
                 continue;
             }
             // find the cell indice where particle is right now
@@ -387,6 +412,107 @@ pub fn occupancy_plot1d(
     }
     file.close();
     (occu, array)
+}
+
+pub fn velocity_plot1d(
+    filename: &str,
+    radius: Array1<f64>,
+    particle_id: Array1<i64>,
+    clouds: bool,
+    axis: usize,
+    norm: bool,
+    min_time: f64,
+    cells: f64,
+) -> (Array1<f64>, Array1<f64>) {
+    /*
+    function to calculate the time averaged occupancy plot of a particle system
+
+
+     */
+    let file = hdf5::File::open(filename).expect("Error reading hdf5 file in rust");
+    let timesteps = timesteps(&file);
+
+    let array_temp = file
+        .dataset("dimensions")
+        .expect(&format!(
+            "Can not find dataset \"dimensions\" in HDF5 file \"{:?}\"",
+            &filename
+        ))
+        .read_2d::<f64>()
+        .expect(&format!(
+            "Can not read data from \"dimensions\" dataset. \
+            Data type or data format might be wrong. \
+            Check creation of HDF5 file  \"{:?}\"",
+            &filename
+        ));
+    let min_array: Array1<f64> = array_temp.slice(s![0, ..]).to_owned();
+    let max_array: Array1<f64> = array_temp.slice(s![1, ..]).to_owned();
+    let cell_size: Array1<f64> = (&max_array - &min_array) / cells;
+    let mut norm_array: Array1<f64> = Array1::zeros(cells as usize);
+    let mut vel_array: Array1<f64> = Array1::zeros(cells as usize);
+    let array: Array1<f64> =
+        Array1::linspace(0.0, &max_array[axis] - &min_array[axis], cells as usize);
+    let dt = get_dt(&file);
+    for timestep in 0..timesteps - 1 {
+        let name: String = "timestep ".to_string() + &timestep.to_string();
+        let group = file.group(&name).expect(&format!("Can not open timestep {:?} in file {:?}",timestep,filename));
+        let current_time = group.dataset("time").unwrap().read_raw::<f64>().unwrap()[0];
+        // check if timestep is in the timeframe given
+        if current_time < min_time {
+            continue;
+        }
+        let positions = group
+            .dataset("position")
+            .expect("error")
+            .read_2d::<f64>()
+            .unwrap();
+        let velocities = group
+            .dataset("velocity")
+            .expect("error")
+            .read_2d::<f64>()
+            .unwrap();
+        let particle_ids = group
+            .dataset("particleid")
+            .expect("error")
+            .read_1d::<f64>()
+            .unwrap();
+        let rad_array = group
+            .dataset("radius")
+            .expect("error")
+            .read_1d::<f64>()
+            .unwrap();
+        let particles = positions.len() / 3;
+        // loop over all particles in this timestep, calculate the velocity vector and add it to the
+        // vectorfield array
+        for particle in 0..particles {
+            /**if !check_id(particle_ids[particle] as usize, &particle_id) {
+                continue;
+            }
+            if !check_radius(rad_array[particle] as f64, &radius) {
+                continue;
+            }
+            **/
+            let position = positions.slice(s![particle, ..]).to_owned();
+            let velocity = velocities.slice(s![particle, ..]).to_owned();
+            //reset the position. the lowest value should be at 0,0,0
+            let x: f64 = position[axis] - min_array[axis];
+            //find current cell location
+            let cell_id = find_closest(&array, x);
+            //calculate the time this particle spent in the cell
+            let vel = velocity[0];
+            if vel > 0. {continue}
+
+            norm_array[cell_id] = norm_array[cell_id] + 1.0;//time_spent;
+            vel_array[cell_id] = vel_array[cell_id] -vel;//norm_l2(&velocity);//(velocity[1]*velocity[1]+velocity[0]*velocity[0]).sqrt();// norm_l2(&velocity);
+        }
+    }
+    if norm {
+        vel_array= vel_array/norm_array;
+    }
+    file.close();
+    //let(x,y )= derivative(array,vel_array,2);
+    //(y, x)
+    (vel_array,array)
 }
 
 pub fn mean_velocity(filename: &str, min_time: f64) -> f64 {
@@ -1588,8 +1714,9 @@ pub fn dispersion(
     timestep: Array1<usize>,
     delta_t: usize,
     mesh_size: Array1<f64>,
+    dimensions: Array2<f64>,
     cells: Array1<i64>,
-) -> (Vec<Vec<Vec<f64>>>,f64) {
+) -> (Array3<f64>,f64) {
     // opening file
     let file = hdf5::File::open(file).expect(&format!("Could not open file {:?}", file));
     //extract system dimensions from current datafile
@@ -1604,8 +1731,28 @@ pub fn dispersion(
             "Could not read data from dataset \"dimensions\" in file {:?}",
             file
         ));
-    let min_array = temporary_array.slice(s![0, ..]).to_owned();
-    let max_array = temporary_array.slice(s![1, ..]).to_owned();
+    let mut min_array = temporary_array.slice(s![0, ..]).to_owned();
+    let mut max_array = temporary_array.slice(s![1, ..]).to_owned();
+    if dimensions.slice(s![0, ..]).to_owned()[0usize] > min_array[0usize]  {
+        min_array[0usize] = dimensions.slice(s![0, ..]).to_owned()[0usize]
+    }
+    if dimensions.slice(s![0, ..]).to_owned()[1usize] > min_array[1usize]  {
+        min_array[1usize] = dimensions.slice(s![0, ..]).to_owned()[1usize]
+    }
+    if dimensions.slice(s![0, ..]).to_owned()[2usize] > min_array[2usize]  {
+        min_array[2usize] = dimensions.slice(s![0, ..]).to_owned()[2usize]
+    }
+
+    if dimensions.slice(s![1, ..]).to_owned()[0usize] < max_array[0usize]  {
+        max_array[0usize] = dimensions.slice(s![1, ..]).to_owned()[0usize]
+    }
+    if dimensions.slice(s![1, ..]).to_owned()[1usize] < max_array[1usize]  {
+        max_array[1usize] = dimensions.slice(s![1, ..]).to_owned()[1usize]
+    }
+    if dimensions.slice(s![1, ..]).to_owned()[2usize] < max_array[2usize]  {
+        max_array[2usize] = dimensions.slice(s![1, ..]).to_owned()[2usize]
+    }
+
     let system_length = &max_array - &min_array;
     // Initialize mesh
     let mut own_mesh_size: Array1<f64> = mesh_size;
@@ -1633,26 +1780,19 @@ pub fn dispersion(
         }
     }
 
-    let mut cells_sqsum_x: Vec<Vec<Vec<f64>>> =
-        vec![vec![vec![0.0; own_cells.clone()[2]]; own_cells.clone()[1]]; own_cells.clone()[0]];
-    let mut cells_sum_x: Vec<Vec<Vec<f64>>> =
-        vec![vec![vec![0.0; own_cells.clone()[2]]; own_cells.clone()[1]]; own_cells.clone()[0]];
+    let mut cells_sqsum_x = Array3::<f64>::zeros((own_cells.clone()[0],own_cells.clone()[1],own_cells.clone()[2]));
+        //vec![vec![vec![0.0; own_cells.clone()[2]]; own_cells.clone()[1]]; own_cells.clone()[0]];
+    let mut cells_sum_x = Array3::<f64>::zeros((own_cells.clone()[0],own_cells.clone()[1],own_cells.clone()[2]));
 
-    let mut cells_sqsum_y: Vec<Vec<Vec<f64>>> =
-        vec![vec![vec![0.0; own_cells.clone()[2]]; own_cells.clone()[1]]; own_cells.clone()[0]];
-    let mut cells_sum_y: Vec<Vec<Vec<f64>>> =
-        vec![vec![vec![0.0; own_cells.clone()[2]]; own_cells.clone()[1]]; own_cells.clone()[0]];
+    let mut cells_sqsum_y = Array3::<f64>::zeros((own_cells.clone()[0],own_cells.clone()[1],own_cells.clone()[2]));
+    let mut cells_sum_y = Array3::<f64>::zeros((own_cells.clone()[0],own_cells.clone()[1],own_cells.clone()[2]));
 
-    let mut cells_sqsum_z: Vec<Vec<Vec<f64>>> =
-        vec![vec![vec![0.0; own_cells.clone()[2]]; own_cells.clone()[1]]; own_cells.clone()[0]];
-    let mut cells_sum_z: Vec<Vec<Vec<f64>>> =
-        vec![vec![vec![0.0; own_cells.clone()[2]]; own_cells.clone()[1]]; own_cells.clone()[0]];
+    let mut cells_sqsum_z = Array3::<f64>::zeros((own_cells.clone()[0],own_cells.clone()[1],own_cells.clone()[2]));
+    let mut cells_sum_z = Array3::<f64>::zeros((own_cells.clone()[0],own_cells.clone()[1],own_cells.clone()[2]));
 
-    let mut n_cells: Vec<Vec<Vec<f64>>> =
-        vec![vec![vec![0.0; own_cells.clone()[2]]; own_cells.clone()[1]]; own_cells.clone()[0]];
+    let mut n_cells = Array3::<f64>::zeros((own_cells.clone()[0],own_cells.clone()[1],own_cells.clone()[2]));
 
-    let mut dispersion_cells: Vec<Vec<Vec<f64>>> =
-        vec![vec![vec![0.0; own_cells.clone()[2]]; own_cells.clone()[1]]; own_cells.clone()[0]];
+    let mut dispersion_cells = Array3::<f64>::zeros((own_cells.clone()[0],own_cells.clone()[1],own_cells.clone()[2]));
     // Get all necessery information
     // for the first timestep:
     let timesteps = timesteps(&file) as usize;
@@ -1702,7 +1842,22 @@ pub fn dispersion(
                       // find the current cell of this particle
             let p_id = particle_ids[position_in_array];
             let pos = positions.slice(s![position_in_array, ..]).to_owned() - &min_array;
+            let pos_abs = positions.slice(s![position_in_array, ..]).to_owned();
+
+            if     pos_abs[0] < dimensions[[0usize, 0]]
+                || pos_abs[0] > dimensions[[1usize, 0]]
+                || pos_abs[1] < dimensions[[0usize, 1]]
+                || pos_abs[1] > dimensions[[1usize, 1]]
+                || pos_abs[2] < dimensions[[0usize, 2]]
+                || pos_abs[2] > dimensions[[1usize, 2]]
+            {
+                // the particle is out of the field of view
+                //println!("Skipping a particle as it is out of system");
+                continue;
+            }
+
             let p_id_2;
+            let mut true_id = false;
             if position_in_array_2 >= particle_ids2.len(){
                 p_id_2 =0;
             }else{
@@ -1716,9 +1871,15 @@ pub fn dispersion(
                     if particle_ids2[x] == p_id {
                         // if it matches save the new array postiion and breack the loop
                         position_in_array_2 = x;
+                        true_id = true;
                         break;
                     }
                 }
+            }else {true_id = true;}
+
+            if !true_id{
+                // particle dissapeared
+                continue ;
             }
             //now we can for sure get the right position in second timesteps
             let pos_2 = positions2.slice(s![position_in_array_2, ..]).to_owned() - &min_array;
@@ -1734,15 +1895,15 @@ pub fn dispersion(
                 continue;
             }
             // add to calculate how many particles have been in this scell
-            n_cells[cellx][celly][cellz] += 1.0;
+            n_cells[[cellx,celly,cellz]] += 1.0;
             // calculate the sum of all positions
-            cells_sum_x[cellx][celly][cellz] += pos_2[0];
-            cells_sum_y[cellx][celly][cellz] += pos_2[1];
-            cells_sum_z[cellx][celly][cellz] += pos_2[2];
+            cells_sum_x[[cellx,celly,cellz]] += pos_2[0];
+            cells_sum_y[[cellx,celly,cellz]] += pos_2[1];
+            cells_sum_z[[cellx,celly,cellz]] += pos_2[2];
             //calculate the square of all positions
-            cells_sqsum_x[cellx][celly][cellz] += pos_2[0] * pos_2[0];
-            cells_sqsum_y[cellx][celly][cellz] += pos_2[1] * pos_2[1];
-            cells_sqsum_z[cellx][celly][cellz] += pos_2[2] * pos_2[2];
+            cells_sqsum_x[[cellx,celly,cellz]] += pos_2[0] * pos_2[0];
+            cells_sqsum_y[[cellx,celly,cellz]]+= pos_2[1] * pos_2[1];
+            cells_sqsum_z[[cellx,celly,cellz]] += pos_2[2] * pos_2[2];
         }
     }
     let mut mixing_efficiency = 0.0;
@@ -1751,24 +1912,24 @@ pub fn dispersion(
     for cellx in 0..own_cells[0] {
         for celly in 0..own_cells[1] {
             for cellz in 0..own_cells[2] {
-                let n = n_cells[cellx][celly][cellz];
+                let n = n_cells[[cellx,celly,cellz]];
                 // skipp this cell if the number of particles is small
                 if n <= 10.0 {
                     continue;
                 }
                 //varianze in x direction
-                let x = cells_sqsum_x[cellx][celly][cellz] / n
-                    - cells_sum_x[cellx][celly][cellz] / n * cells_sum_x[cellx][celly][cellz] / n;
+                let x = cells_sqsum_x[[cellx,celly,cellz]] / n
+                    - cells_sum_x[[cellx,celly,cellz]] / n * cells_sum_x[[cellx,celly,cellz]] / n;
                 //varianze in y direction
-                let y = cells_sqsum_y[cellx][celly][cellz] / n
-                    - cells_sum_y[cellx][celly][cellz] / n * cells_sum_y[cellx][celly][cellz] / n;
-                //varianze in x direction
-                let z = cells_sqsum_z[cellx][celly][cellz] / n
-                    - cells_sum_z[cellx][celly][cellz] / n * cells_sum_z[cellx][celly][cellz] / n;
+                let y = cells_sqsum_y[[cellx,celly,cellz]] / n
+                    - cells_sum_y[[cellx,celly,cellz]] / n * cells_sum_y[[cellx,celly,cellz]]/ n;
+                //varianze in z direction
+                let z = cells_sqsum_z[[cellx,celly,cellz]] / n
+                    - cells_sum_z[[cellx,celly,cellz]] / n * cells_sum_z[[cellx,celly,cellz]] / n;
 
-                dispersion_cells[cellx][celly][cellz] = (x + y + z) * n / (n - 1.0);
+                dispersion_cells[[cellx,celly,cellz]] = (x + y + z) * n / (n - 1.0);
                 total_passes += n;
-                mixing_efficiency += dispersion_cells[cellx][celly][cellz];
+                mixing_efficiency += dispersion_cells[[cellx,celly,cellz]] * n;
             }
         }
     }
@@ -1780,11 +1941,12 @@ pub fn dispersion(
 
 pub fn dispersion_pept(
     file: &str,
-    timestep: Array1<usize>,
-    delta_t: usize,
+    delta_t: f64,
     mesh_size: Array1<f64>,
+    dimensions: Array2<f64>,
     cells: Array1<i64>,
-) -> (Vec<Vec<Vec<f64>>>,f64) {
+    max_error: f64,
+) -> (Array3<f64>,f64) {
     // opening file
     let file = hdf5::File::open(file).expect(&format!("Could not open file {:?}", file));
     //extract system dimensions from current datafile
@@ -1799,8 +1961,28 @@ pub fn dispersion_pept(
             "Could not read data from dataset \"dimensions\" in file {:?}",
             file
         ));
-    let min_array = temporary_array.slice(s![0, ..]).to_owned();
-    let max_array = temporary_array.slice(s![1, ..]).to_owned();
+    let mut min_array = temporary_array.slice(s![0, ..]).to_owned();
+    let mut  max_array = temporary_array.slice(s![1, ..]).to_owned();
+
+    if dimensions.slice(s![0, ..]).to_owned()[0usize] > min_array[0usize]  {
+        min_array[0usize] = dimensions.slice(s![0, ..]).to_owned()[0usize]
+    }
+    if dimensions.slice(s![0, ..]).to_owned()[1usize] > min_array[1usize]  {
+        min_array[1usize] = dimensions.slice(s![0, ..]).to_owned()[1usize]
+    }
+    if dimensions.slice(s![0, ..]).to_owned()[2usize] > min_array[2usize]  {
+        min_array[2usize] = dimensions.slice(s![0, ..]).to_owned()[2usize]
+    }
+
+    if dimensions.slice(s![1, ..]).to_owned()[0usize] < max_array[0usize]  {
+        max_array[0usize] = dimensions.slice(s![1, ..]).to_owned()[0usize]
+    }
+    if dimensions.slice(s![1, ..]).to_owned()[1usize] < max_array[1usize]  {
+        max_array[1usize] = dimensions.slice(s![1, ..]).to_owned()[1usize]
+    }
+    if dimensions.slice(s![1, ..]).to_owned()[2usize] < max_array[2usize]  {
+        max_array[2usize] = dimensions.slice(s![1, ..]).to_owned()[2usize]
+    }
     let system_length = &max_array - &min_array;
     // Initialize mesh
     let mut own_mesh_size: Array1<f64> = mesh_size;
@@ -1828,26 +2010,19 @@ pub fn dispersion_pept(
         }
     }
 
-    let mut cells_sqsum_x: Vec<Vec<Vec<f64>>> =
-        vec![vec![vec![0.0; own_cells.clone()[2]]; own_cells.clone()[1]]; own_cells.clone()[0]];
-    let mut cells_sum_x: Vec<Vec<Vec<f64>>> =
-        vec![vec![vec![0.0; own_cells.clone()[2]]; own_cells.clone()[1]]; own_cells.clone()[0]];
+    let mut cells_sqsum_x = Array3::<f64>::zeros((own_cells.clone()[0],own_cells.clone()[1],own_cells.clone()[2]));
+        //vec![vec![vec![0.0; own_cells.clone()[2]]; own_cells.clone()[1]]; own_cells.clone()[0]];
+    let mut cells_sum_x = Array3::<f64>::zeros((own_cells.clone()[0],own_cells.clone()[1],own_cells.clone()[2]));
 
-    let mut cells_sqsum_y: Vec<Vec<Vec<f64>>> =
-        vec![vec![vec![0.0; own_cells.clone()[2]]; own_cells.clone()[1]]; own_cells.clone()[0]];
-    let mut cells_sum_y: Vec<Vec<Vec<f64>>> =
-        vec![vec![vec![0.0; own_cells.clone()[2]]; own_cells.clone()[1]]; own_cells.clone()[0]];
+    let mut cells_sqsum_y = Array3::<f64>::zeros((own_cells.clone()[0],own_cells.clone()[1],own_cells.clone()[2]));
+    let mut cells_sum_y = Array3::<f64>::zeros((own_cells.clone()[0],own_cells.clone()[1],own_cells.clone()[2]));
 
-    let mut cells_sqsum_z: Vec<Vec<Vec<f64>>> =
-        vec![vec![vec![0.0; own_cells.clone()[2]]; own_cells.clone()[1]]; own_cells.clone()[0]];
-    let mut cells_sum_z: Vec<Vec<Vec<f64>>> =
-        vec![vec![vec![0.0; own_cells.clone()[2]]; own_cells.clone()[1]]; own_cells.clone()[0]];
+    let mut cells_sqsum_z = Array3::<f64>::zeros((own_cells.clone()[0],own_cells.clone()[1],own_cells.clone()[2]));
+    let mut cells_sum_z = Array3::<f64>::zeros((own_cells.clone()[0],own_cells.clone()[1],own_cells.clone()[2]));
 
-    let mut n_cells: Vec<Vec<Vec<f64>>> =
-        vec![vec![vec![0.0; own_cells.clone()[2]]; own_cells.clone()[1]]; own_cells.clone()[0]];
+    let mut n_cells = Array3::<f64>::zeros((own_cells.clone()[0],own_cells.clone()[1],own_cells.clone()[2]));
 
-    let mut dispersion_cells: Vec<Vec<Vec<f64>>> =
-        vec![vec![vec![0.0; own_cells.clone()[2]]; own_cells.clone()[1]]; own_cells.clone()[0]];
+    let mut dispersion_cells = Array3::<f64>::zeros((own_cells.clone()[0],own_cells.clone()[1],own_cells.clone()[2]));
     // Get all necessery information
     // for the first timestep:
 
@@ -1860,6 +2035,11 @@ pub fn dispersion_pept(
             .expect("Can not find dataset \"position\" in the group")
             .read_2d::<f64>()
             .unwrap();
+        let times = group
+            .dataset("time_pept")
+            .expect("Can not find dataset \"time_pept\" in the group")
+            .read_1d::<f64>()
+            .unwrap();
 
 
         let max_time_step = positions.len() / 3;
@@ -1867,11 +2047,44 @@ pub fn dispersion_pept(
 
         //particles might not be sorted by particle_ids!
         // loop over particle. find its cell and store pparticle_ids in cell
-        for position_in_array in 0..max_time_step-delta_t {
-            // position of particle in ARrray 2 is assumed to be
-            // in the same spot first
-            let position_in_array_2 = position_in_array +delta_t; // this might be not true as LIGGHTS is stupid
-                      // find the current cell of this particle
+        for position_in_array in 0..max_time_step-1 {
+            // check if particle is in FoV
+            let pos_abs = positions.slice(s![position_in_array, ..]).to_owned();
+
+            if     pos_abs[0] < dimensions[[0usize, 0]]
+                || pos_abs[0] > dimensions[[1usize, 0]]
+                || pos_abs[1] < dimensions[[0usize, 1]]
+                || pos_abs[1] > dimensions[[1usize, 1]]
+                || pos_abs[2] < dimensions[[0usize, 2]]
+                || pos_abs[2] > dimensions[[1usize, 2]]
+            {
+                // the particle is out of the field of view
+                //println!("Skipping a particle as it is out of system");
+                continue;
+            }
+            // find the next particle
+            // looking into the future
+            let mut position_in_array_2 = 0;
+            let mut error = f64::MAX;
+            let time_now = times[position_in_array] + delta_t;
+            for position_2 in position_in_array..max_time_step{
+                let new_error = (times[position_2] - time_now).abs();
+                if new_error < error{
+
+                    error = new_error;
+                    position_in_array_2 = position_2;
+                }
+
+                if new_error - error > 0.{
+                    // next error is bigger than it was before, end loop
+
+                    break;
+                }
+            }
+            //
+            if error > max_error {continue}
+            if position_in_array_2 == 0 {continue}
+
 
             let pos = positions.slice(s![position_in_array, ..]).to_owned() - &min_array;
             let pos_2 = positions.slice(s![position_in_array_2, ..]).to_owned() - &min_array;
@@ -1887,15 +2100,15 @@ pub fn dispersion_pept(
                 continue;
             }
             // add to calculate how many particles have been in this scell
-            n_cells[cellx][celly][cellz] += 1.0;
+            n_cells[[cellx,celly,cellz]] += 1.0;
             // calculate the sum of all positions
-            cells_sum_x[cellx][celly][cellz] += pos_2[0];
-            cells_sum_y[cellx][celly][cellz] += pos_2[1];
-            cells_sum_z[cellx][celly][cellz] += pos_2[2];
+            cells_sum_x[[cellx,celly,cellz]] += pos_2[0];
+            cells_sum_y[[cellx,celly,cellz]] += pos_2[1];
+            cells_sum_z[[cellx,celly,cellz]] += pos_2[2];
             //calculate the square of all positions
-            cells_sqsum_x[cellx][celly][cellz] += pos_2[0] * pos_2[0];
-            cells_sqsum_y[cellx][celly][cellz] += pos_2[1] * pos_2[1];
-            cells_sqsum_z[cellx][celly][cellz] += pos_2[2] * pos_2[2];
+            cells_sqsum_x[[cellx,celly,cellz]] += pos_2[0] * pos_2[0];
+            cells_sqsum_y[[cellx,celly,cellz]] += pos_2[1] * pos_2[1];
+            cells_sqsum_z[[cellx,celly,cellz]] += pos_2[2] * pos_2[2];
         }
 
     let mut mixing_efficiency = 0.0;
@@ -1904,24 +2117,24 @@ pub fn dispersion_pept(
     for cellx in 0..own_cells[0] {
         for celly in 0..own_cells[1] {
             for cellz in 0..own_cells[2] {
-                let n = n_cells[cellx][celly][cellz];
+                let n = n_cells[[cellx,celly,cellz]];
                 // skipp this cell if the number of particles is small
                 if n <= 10.0 {
                     continue;
                 }
                 //varianze in x direction
-                let x = cells_sqsum_x[cellx][celly][cellz] / n
-                    - cells_sum_x[cellx][celly][cellz] / n * cells_sum_x[cellx][celly][cellz] / n;
+                let x = cells_sqsum_x[[cellx,celly,cellz]] / n
+                    - cells_sum_x[[cellx,celly,cellz]] / n * cells_sum_x[[cellx,celly,cellz]] / n;
                 //varianze in y direction
-                let y = cells_sqsum_y[cellx][celly][cellz] / n
-                    - cells_sum_y[cellx][celly][cellz] / n * cells_sum_y[cellx][celly][cellz] / n;
-                //varianze in x direction
-                let z = cells_sqsum_z[cellx][celly][cellz] / n
-                    - cells_sum_z[cellx][celly][cellz] / n * cells_sum_z[cellx][celly][cellz] / n;
+                let y = cells_sqsum_y[[cellx,celly,cellz]] / n
+                    - cells_sum_y[[cellx,celly,cellz]] / n * cells_sum_y[[cellx,celly,cellz]]/ n;
+                //varianze in z direction
+                let z = cells_sqsum_z[[cellx,celly,cellz]] / n
+                    - cells_sum_z[[cellx,celly,cellz]] / n * cells_sum_z[[cellx,celly,cellz]] / n;
 
-                dispersion_cells[cellx][celly][cellz] = (x + y + z) * n / (n - 1.0);
+                dispersion_cells[[cellx,celly,cellz]] = (x + y + z) * n / (n - 1.0);
                 total_passes += n;
-                mixing_efficiency += dispersion_cells[cellx][celly][cellz];
+                mixing_efficiency += dispersion_cells[[cellx,celly,cellz]] * n;
             }
         }
     }
@@ -2060,6 +2273,88 @@ pub fn mean_squared_displacement(
     }
     //return
     (MSD_result, times_result)
+}
+
+pub fn mean_squared_displacement_pept(
+    filename: &str,
+    start_timestep: usize,
+    max_msd: f64,
+    bins: usize,
+) -> (Array1<f64>, Array1<f64>) {
+    // Calculate the MSD for all times and return the array containing its values and
+    // one array with the time shifts
+
+    let file = hdf5::File::open(filename).expect("Error reading hdf5 file in rust");
+
+
+
+    //initiation of MSD
+    let name: String = "timestep ".to_string() + &start_timestep.to_string();
+    let group = file.group(&name).expect(&format!(
+        "Could not find group \"{:?}\" in file {:?}",
+        &name, filename
+    ));
+    // save the initial position
+    let positions = group
+        .dataset("position")
+        .expect(&format!(
+            "Could not find dataset \"position\" in file {:?}",
+            filename
+        ))
+        .read_2d::<f64>()
+        .expect(&format!(
+            "Could not read dataset \"position\" in file {:?}\nCheck datatype in file",
+            filename
+        ));
+    // we need the ID of the particles as they might mix during the run
+
+    let times: Array1<f64> = group
+        .dataset("time_pept")
+        .expect(&format!(
+            "Can not find dataset \"time\" in HDF5 file \"{:?}\"",
+            &filename
+        ))
+        .read_1d::<f64>()
+        .expect(&format!(
+            "Can not read data from \"time\" dataset. \
+            Data type or data format might be wrong. \
+            Check creation of HDF5 file  \"{:?}\"",
+            &filename
+        ));
+
+    let timesteps = times.len();
+
+    //let (min_time,max_time) = minmax(&times);
+
+    let mut MSD_result: Array1<f64> = Array1::<f64>::zeros(bins);
+    let mut norm_array: Array1<f64> = Array1::<f64>::zeros(bins);
+    let times_result: Array1<f64> = Array1::<f64>::linspace(0.,max_msd,bins);
+    for start in start_timestep..timesteps as usize - 1 {
+        let init_pos = positions.slice(s![start, ..]).to_owned();
+        let init_time = times[start];
+        for t in start..timesteps as usize {
+                let dt =  times[t]-init_time;
+                if dt > max_msd{break;}
+                //println!("{}",dt);
+                //println!("{}",max_msd);
+                //println!("{:?}",times_result);
+                // find incex of the current dt
+                let id = find_closest(&times_result,dt);
+
+                // calculate the distance travled from init to now
+                let pos = positions.slice(s![t, ..]).to_owned();
+                let distance = (pos[0usize] - init_pos[0usize]) * (pos[0usize] - init_pos[0usize])
+                    + (pos[1usize] - init_pos[1usize]) * (pos[1usize] - init_pos[1usize])
+                    + (pos[2usize] - init_pos[2usize]) * (pos[2usize] - init_pos[2usize]);
+                // sum distance in array
+                MSD_result[id] += distance;
+                norm_array[id] += 1.;
+
+        }
+
+    }
+    //return
+    (MSD_result/norm_array, times_result)
 }
 
 pub fn power_draw(filename: &str, min_time: f64) -> Array1<f64> {

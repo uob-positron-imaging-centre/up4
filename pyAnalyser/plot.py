@@ -118,12 +118,13 @@ def plot_polynom( surface_poly, surface = None, fig=None, plot = True):
         fig.show()
     return fig
 
-def plot_MSD(msd, time, fig=None, plot = True):
+def plot_MSD(msd, time, fig=None, plot = True,log = True):
     if fig is None:
         fig = go.Figure()
     fig.add_trace(go.Scatter(x = time, y = msd, mode="markers"))
-    fig.update_xaxes(type="log")
-    fig.update_yaxes(type="log")
+    if log:
+        fig.update_xaxes(type="log")
+        fig.update_yaxes(type="log")
     fig.update_layout(
         xaxis_title="Time [s]",
         yaxis_title="Mean Squared Displacement [m²]"

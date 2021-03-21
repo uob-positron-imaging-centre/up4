@@ -138,6 +138,58 @@ class Data():
             plot_occu_1D(occu,array,axis)
         return occu, array
 
+    def velocityplot1d(
+            self,
+            cells=40,
+            min_time =-inf,
+            norm = False,
+            return_data = False,
+            radius = -1.0,
+            particle_id = -1,
+            clouds = False,
+            axis=2,
+            plot = True
+        ):
+
+            if type(cells) == float or type(cells) == int:
+                cells = float(cells)
+            else:
+                raise ValueError(f"Cells should be a number not {type(cells)}")
+
+            if type(radius) == float or type(radius) == int:
+                radius = np.asarray([radius, radius], dtype=float)
+            elif isinstance(radius, (list, tuple, np.ndarray)):
+                radius = np.asarray(radius, dtype=float)
+            else:
+                raise ValueError(f"radius should be a number or a list/array not {type(radius)}")
+
+
+            if type(particle_id) == float or type(particle_id) == int:
+                particle_id = np.asarray([int(particle_id), int(particle_id)], dtype=int)
+            elif isinstance(particle_id, (list, tuple, np.ndarray)):
+                particle_id = np.asarray(particle_id, dtype=int)
+            else:
+                raise ValueError(f"particle_id should be a number or a list/array not {type(particle_id)}")
+
+            if type(axis) == float or type (axis) == int:
+                axis=int(axis)
+            else:
+                raise ValueError(f"Axis should be a number not {type(cells)}")
+
+            occu,array = rust.velocity_plot1d(self.filename,
+                                                radius,
+                                                particle_id,
+                                                clouds,
+                                                axis,
+                                                norm,
+                                                min_time,
+                                                cells
+
+                                                )
+            if plot:
+                plot_occu_1D(occu,array,axis)
+            return occu, array
+
     def gran_temp(self,min_time = -inf, plot = True):
         min_time = float(min_time)
         gt = rust.granular_temperature(self.filename, min_time)
@@ -345,17 +397,20 @@ class Data():
         timestep=[0, 100 ],
         dt=10,
         mesh_size=[0.0,0.0,0.0],
+        dimensions = [[-inf, -inf, -inf], [inf, inf, inf]],
         cells = [10,10,10],
         plot = True
     ):
             mesh_size = np.asarray(mesh_size)
             cells = np.asarray(cells)
             timestep = np.asarray(timestep,dtype=np.uintp)
+            dimensions = np.asarray(dimensions)
             list, mixing_efficiency = rust.dispersion(
                 self.filename,
                 timestep,
                 dt,
                 mesh_size,
+                dimensions,
                 cells,
                 )
             if plot:
@@ -367,7 +422,9 @@ class Data():
         timestep=[0, 100 ],
         dt=10,
         mesh_size=[0.0,0.0,0.0],
+        dimensions = [[-inf, -inf, -inf], [inf, inf, inf]],
         cells = [10,10,10],
+        max_error = 1e-2,
         plot = True
     ):
             mesh_size = np.asarray(mesh_size)
@@ -378,7 +435,9 @@ class Data():
                 timestep,
                 dt,
                 mesh_size,
+                dimensions,
                 cells,
+                max_error
                 )
             if plot:
                 plot_heatmap(np.asarray(list)[:,0,:])
@@ -387,7 +446,8 @@ class Data():
     def mean_squared_displacement(
         self,
         start_timestep = 0,
-        plot = True
+        plot = True,
+        log=True,
         ):
             start_timestep = int(start_timestep)
 
@@ -396,7 +456,27 @@ class Data():
                 start_timestep
                 )
             if plot:
-                plot_MSD(msd_array,time_array)
+                plot_MSD(msd_array,time_array,log)
+            return msd_array, time_array
+
+    def mean_squared_displacement_pept(
+        self,
+        start_timestep = 0,
+        max_msd = 10,
+        bins = 100,
+        plot = True,
+        log = True,
+        ):
+            start_timestep = int(start_timestep)
+
+            msd_array, time_array = rust.mean_squared_displacement_pept(
+                self.filename,
+                start_timestep,
+                max_msd,
+                bins,
+                )
+            if plot:
+                plot_MSD(msd_array,time_array,log=log)
             return msd_array, time_array
 
     def number_of_timesteps(self):

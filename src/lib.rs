@@ -19,6 +19,7 @@ fn rustAnalyser(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(mean_angular_velocity))?;
     m.add_wrapped(wrap_pyfunction!(timesteps))?;
     m.add_wrapped(wrap_pyfunction!(occupancy_plot1d))?;
+    m.add_wrapped(wrap_pyfunction!(velocity_plot1d))?;
     m.add_wrapped(wrap_pyfunction!(surface_polynom))?;
     m.add_wrapped(wrap_pyfunction!(granular_temperature))?;
     m.add_wrapped(wrap_pyfunction!(mean_velocity))?;
@@ -28,12 +29,13 @@ fn rustAnalyser(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(rotational_velocity_distribution))?;
     m.add_wrapped(wrap_pyfunction!(velocity_distribution))?;
     m.add_wrapped(wrap_pyfunction!(mean_squared_displacement))?;
+    m.add_wrapped(wrap_pyfunction!(mean_squared_displacement_pept))?;
     m.add_wrapped(wrap_pyfunction!(power_draw))?;
     m.add_wrapped(wrap_pyfunction!(mean_surface_velocity))?;
     m.add_wrapped(wrap_pyfunction!(circulation_time_boundary))?;
     m.add_wrapped(wrap_pyfunction!(circulation_time_boundary_pept))?;
     m.add_wrapped(wrap_pyfunction!(shear_rate))?;
-    m.add_wrapped(wrap_pyfunction!(granular_temperature_2d))?;      
+    m.add_wrapped(wrap_pyfunction!(granular_temperature_2d))?;
     Ok(())
 }
 /// [Vectorfield Function]:
@@ -105,6 +107,39 @@ fn occupancy_plot1d<'py>(
 
      */
     let (image, arr) = functions::occupancy_plot1d(
+        filename,
+        radius.as_array().to_owned(),
+        particle_id.as_array().to_owned(),
+        clouds,
+        axis,
+        norm,
+        min_time,
+        cells,
+    );
+    (
+        image.into_pyarray(py).to_dyn(),
+        arr.into_pyarray(py).to_dyn(),
+    )
+}
+
+#[pyfunction]
+fn velocity_plot1d<'py>(
+    py: Python<'py>,
+    filename: &str,
+    radius: PyReadonlyArray1<f64>,
+    particle_id: PyReadonlyArray1<i64>,
+    clouds: bool,
+    axis: usize,
+    norm: bool,
+    min_time: f64,
+    cells: f64,
+) -> (&'py PyArrayDyn<f64>, &'py PyArrayDyn<f64>) {
+    /*
+    function to calculate the time averaged occupancy plot of a particle system
+
+
+     */
+    let (image, arr) = functions::velocity_plot1d(
         filename,
         radius.as_array().to_owned(),
         particle_id.as_array().to_owned(),
@@ -192,18 +227,20 @@ fn dispersion<'py>(
     timestep: PyReadonlyArray1<usize>,
     delta_t: usize,
     mesh_size: PyReadonlyArray1<f64>,
+    dimensions:PyReadonlyArray2<f64>,
     cells: PyReadonlyArray1<i64>,
-) -> (Vec<Vec<Vec<f64>>>,f64) {
+) -> (&'py PyArrayDyn<f64>,f64) {
     let (dispersion_cells, mixing_efficiency) = functions::dispersion(
         file,
         timestep.as_array().to_owned(),
         delta_t,
         mesh_size.as_array().to_owned(),
+        dimensions.as_array().to_owned(),
         cells.as_array().to_owned(),
     );
 
     // return dispersion
-    (dispersion_cells, mixing_efficiency)
+    (dispersion_cells.into_pyarray(_py).to_dyn(), mixing_efficiency)
 
 }
 
@@ -212,20 +249,23 @@ fn dispersion_pept<'py>(
     _py: Python<'py>,
     file: &str,
     timestep: PyReadonlyArray1<usize>,
-    delta_t: usize,
+    delta_t: f64,
     mesh_size: PyReadonlyArray1<f64>,
+    dimensions:PyReadonlyArray2<f64>,
     cells: PyReadonlyArray1<i64>,
-) -> (Vec<Vec<Vec<f64>>>,f64) {
+    max_error: f64
+) -> (&'py PyArrayDyn<f64>,f64) {
     let (dispersion_cells, mixing_efficiency) = functions::dispersion_pept(
         file,
-        timestep.as_array().to_owned(),
         delta_t,
         mesh_size.as_array().to_owned(),
+        dimensions.as_array().to_owned(),
         cells.as_array().to_owned(),
+        max_error,
     );
 
     // return dispersion
-    (dispersion_cells, mixing_efficiency)
+    (dispersion_cells.into_pyarray(_py).to_dyn(), mixing_efficiency)
 
 }
 
@@ -365,6 +405,22 @@ fn mean_squared_displacement<'py>(
     start_timestep: usize,
 )->(&'py PyArrayDyn<f64>, &'py PyArrayDyn<f64>) {
     let ( MSD, time ) = functions::mean_squared_displacement(filename, start_timestep);
+    // return to Python
+    (
+        MSD.into_pyarray(_py).to_dyn(),
+        time.into_pyarray(_py).to_dyn(),
+    )
+}
+
+#[pyfunction]
+fn mean_squared_displacement_pept<'py>(
+    _py: Python<'py>,
+    filename: &str,
+    start_timestep: usize,
+    max_msd: f64,
+    bins: usize,
+)->(&'py PyArrayDyn<f64>, &'py PyArrayDyn<f64>) {
+    let ( MSD, time ) = functions::mean_squared_displacement_pept(filename, start_timestep,max_msd,bins);
     // return to Python
     (
         MSD.into_pyarray(_py).to_dyn(),

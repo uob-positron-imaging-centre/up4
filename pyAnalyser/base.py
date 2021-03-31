@@ -292,6 +292,35 @@ class Data():
                                            width = width,
                                            height = height)
             return vel_dist, num_axis_array
+
+    def force_distribution(
+        self,
+        bins = -1,
+        min_time = -inf,
+        max_time = inf,
+        plot = True,
+        width = 1000,
+        height = 1000
+        ):
+
+        if type(bins) == float:
+            raise ValueError(f"Bins should be a integer not {type(bins)}")
+
+        party_id, force_dist, num_axis_array = rust.force_distribution(
+                self.filename,
+                bins = bins,
+                min_time = min_time,
+                max_time = max_time
+                )
+
+        #self.recovery.add([party_id, vel_dist, num_axis_array])
+
+        if plot:
+            plot_velocity_distribution(force_dist,
+                                       num_axis_array,
+                                       width = width,
+                                       height = height)
+        return force_dist, num_axis_array
     def rotational_velocity_distribution(
             self,
             timestep,

@@ -28,6 +28,7 @@ fn rustAnalyser(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(surface_velocity))?;
     m.add_wrapped(wrap_pyfunction!(rotational_velocity_distribution))?;
     m.add_wrapped(wrap_pyfunction!(velocity_distribution))?;
+    m.add_wrapped(wrap_pyfunction!(force_distribution))?;
     m.add_wrapped(wrap_pyfunction!(mean_squared_displacement))?;
     m.add_wrapped(wrap_pyfunction!(mean_squared_displacement_pept))?;
     m.add_wrapped(wrap_pyfunction!(power_draw))?;
@@ -314,6 +315,33 @@ fn velocity_distribution<'py>(
     (
         party_id,
         vel_dist.into_pyarray(_py).to_dyn(),
+        num_axis_array.into_pyarray(_py).to_dyn(),
+    )
+}
+
+/// [Force Distribution Function]:
+/// Calculate teh velocity distribution in your system
+#[pyfunction]
+fn force_distribution<'py>(
+    _py: Python<'py>,
+    filename: &str, // which contains vel & pos data
+    mut bins: i64,  // bins can be defined by the user, but the default value is */10 the amount
+    min_time: f64,  // where to start the averaging
+    max_time: f64,  // where to end the averaging
+) -> (
+    Vec<Vec<i64>>,
+    &'py PyArrayDyn<f64>,
+    &'py PyArrayDyn<f64>,
+) {
+    let (party_id, force_dist, num_axis_array) = functions::force_distribution(
+        filename,
+        bins,
+        min_time,
+        max_time,
+    );
+    (
+        party_id,
+        force_dist.into_pyarray(_py).to_dyn(),
         num_axis_array.into_pyarray(_py).to_dyn(),
     )
 }

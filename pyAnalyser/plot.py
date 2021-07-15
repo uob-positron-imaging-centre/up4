@@ -38,11 +38,7 @@ def plot_occu_1D(
     return fig
 
 
-def plot_vectorfield(sx,sy,vx,vy,y_max = None,x_max = None,width=1000, height=1000, norm = False, plot = True):
-    if norm:
-        norm = np.sqrt( vx*vx+vy*vy)
-        vx = vx/norm
-        vy = vy/norm
+def plot_vectorfield(sx,sy,vx,vy,y_max = None,x_max = None,width=1000, height=1000, plot = True):
     fig = ff.create_quiver(sx, sy, vx, vy,
                    scale=.004,
                    arrow_scale=.4,
@@ -71,10 +67,19 @@ def plot_image(img, plot = True):
         fig.show()
 
 
-def plot_heatmap(array, plot=True):
+def plot_heatmap(
+    array,
+    plot=True,
+    width=1000,
+    height=800,
+    ):
     array = np.flip(np.rot90(array,-1), axis =1)
     fig = go.Figure(data=go.Heatmap(
                     z=array))
+    fig.update_layout(
+        width = width,
+        height = height,
+        )
     if plot:
         fig.show()
     return fig
@@ -82,7 +87,7 @@ def plot_heatmap(array, plot=True):
 def plot_velocity_distribution(
             vel_dist,
             num_axis_array,
-            fig = True,
+            fig = None,
             width = 1000,
             height = 1000,
             plot = True
@@ -90,10 +95,11 @@ def plot_velocity_distribution(
 
     # Axis Titles
     x_title = ' Velocity (m/s) '
-    y_title = ' Number of Particles '
+    y_title = ' Velocity Probability Distribution (-) '
 
     # Plotting the Figure
-    fig = go.Figure()
+    if fig is None:
+        fig = go.Figure()
     fig.add_trace(go.Scatter(x=num_axis_array,y=vel_dist))
     fig.update_layout(
             width = width,
@@ -132,6 +138,33 @@ def plot_MSD(msd, time, fig=None, plot = True,log = True):
     if plot:
         fig.show()
     return fig
+
+def plot_field(
+    sx,sy,
+    field,
+    fig = None,
+    colorscale = "Jet",
+    opacity = 1,
+    zsmooth = "best",
+    plot = True,
+    width= 1000,
+    height = 1000,
+):
+    if fig is None:
+        fig = go.Figure()
+    fig.add_trace(
+        go.Heatmap(x=sx,y=sy,z=field, opacity = opacity, colorscale=colorscale, zsmooth = zsmooth)
+        )
+    fig.update_layout(
+            width = width,
+            height = height,
+            xaxis_title="Time [s]",
+            yaxis_title="Mean Squared Displacement [m²]"
+        )
+    if plot:
+        fig.show()
+    return fig
+
 
 def plot_linear(
 x = None,

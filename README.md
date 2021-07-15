@@ -27,7 +27,7 @@ Python librarys:
   - vtk 
   - natsort 
   - tqdm
-  
+  - pandas >= 1.3
 
 you will need a rust compiler, see:
 

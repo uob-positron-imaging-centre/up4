@@ -138,6 +138,58 @@ class Data():
             plot_occu_1D(occu,array,axis)
         return occu, array
 
+    def occupancyplot1d_pept(
+        self,
+        cells=40,
+        min_time =-inf,
+        norm = False,
+        return_data = False,
+        radius = -1.0,
+        particle_id = -1,
+        clouds = False,
+        axis=2,
+        plot = True
+    ):
+
+        if type(cells) == float or type(cells) == int:
+            cells = float(cells)
+        else:
+            raise ValueError(f"Cells should be a number not {type(cells)}")
+
+        if type(radius) == float or type(radius) == int:
+            radius = np.asarray([radius, radius], dtype=float)
+        elif isinstance(radius, (list, tuple, np.ndarray)):
+            radius = np.asarray(radius, dtype=float)
+        else:
+            raise ValueError(f"radius should be a number or a list/array not {type(radius)}")
+
+
+        if type(particle_id) == float or type(particle_id) == int:
+            particle_id = np.asarray([int(particle_id), int(particle_id)], dtype=int)
+        elif isinstance(particle_id, (list, tuple, np.ndarray)):
+            particle_id = np.asarray(particle_id, dtype=int)
+        else:
+            raise ValueError(f"particle_id should be a number or a list/array not {type(particle_id)}")
+
+        if type(axis) == float or type (axis) == int:
+            axis=int(axis)
+        else:
+            raise ValueError(f"Axis should be a number not {type(cells)}")
+
+        occu,array = rust.occupancy_plot1d_pept(self.filename,
+                                            radius,
+                                            particle_id,
+                                            clouds,
+                                            axis,
+                                            norm,
+                                            min_time,
+                                            cells
+
+                                            )
+        if plot:
+            plot_occu_1D(occu,array,axis)
+        return occu, array
+
     def velocityplot1d(
             self,
             cells=40,
@@ -448,7 +500,6 @@ class Data():
 
     def dispersion_pept(
         self,
-        timestep=[0, 100 ],
         dt=10,
         mesh_size=[0.0,0.0,0.0],
         dimensions = [[-inf, -inf, -inf], [inf, inf, inf]],
@@ -456,12 +507,13 @@ class Data():
         max_error = 1e-2,
         plot = True
     ):
-            mesh_size = np.asarray(mesh_size)
-            cells = np.asarray(cells)
-            timestep = np.asarray(timestep,dtype=np.uintp)
+            mesh_size = np.asarray(mesh_size,dtype=np.float64)
+            dimensions = np.asarray(dimensions,dtype=np.float64)
+            cells = np.asarray(cells,dtype=np.int64)
+            dt = float(dt)
+            max_error = float(max_error)
             list, mixing_efficiency = rust.dispersion_pept(
                 self.filename,
-                timestep,
                 dt,
                 mesh_size,
                 dimensions,
@@ -681,3 +733,171 @@ class Data():
         if plot:
             plot_heatmap(temp)
         return temp, ngrid, sx, sy
+
+    def trajectory(self,ID):
+        return rust.trajectory( self.filename, ID )
+    def trajectory_pept(self):
+        return rust.trajectory_pept(self.filename )
+    def velocity_pept(self):
+        return rust.velocity_pept(self.filename )
+    def time(self):
+        return rust.time( self.filename )
+    def time_pept(self):
+        return rust.time_pept(self.filename )
+
+    def jumps(self, min_velocity = 0.001, min_distance = 0.001):
+        return rust.jumps(self.filename, min_velocity, min_distance)
+
+    def numberfield(
+            self,
+            cells=[30.0,30.0,30.0],
+            min_time =-inf,
+            max_time = inf,
+            dimensions = [[-inf, -inf, -inf], [inf, inf, inf]],
+            return_data = False,
+            radius = -1.0,
+            particle_id = -1,
+            plot = True,
+            width = 1000,
+            height = 1000,
+            axis = 0,
+        ):
+
+            if isinstance(dimensions, (list, tuple, np.ndarray)):
+                dimensions = np.asarray(dimensions, dtype=float)
+            else:
+                raise ValueError(f"dimensions should be a list/array not {type(dimensions)}")
+
+            if isinstance(cells, (list, tuple, np.ndarray)):
+                cells = np.asarray(cells, dtype=float)
+            else:
+                raise ValueError(f"Cells should be a list/array not {type(cells)}")
+
+            if type(radius) == float or type(radius) == int:
+                radius = np.asarray([radius, radius], dtype=float)
+            elif isinstance(radius, (list, tuple, np.ndarray)):
+                radius = np.asarray(radius, dtype=float)
+            else:
+                raise ValueError(f"radius should be a number or a list/array not {type(radius)}")
+            if type(particle_id) == float or type(particle_id) == int:
+                particle_id = np.asarray([int(particle_id), int(particle_id)], dtype=int)
+            elif isinstance(particle_id, (list, tuple, np.ndarray)):
+                particle_id = np.asarray(particle_id, dtype=int)
+            else:
+                raise ValueError(f"particle_id should be a number or a list/array not {type(particle_id)}")
+
+            sx,sy,field= rust.numberfield(self.filename,
+                                                cells,
+                                                min_time,
+                                                max_time,
+                                                dimensions,
+                                                radius,
+                                                particle_id,
+                                                axis,
+                                                )
+            if plot:
+                plot_field(sx,sy,field,width = width, height = height)
+            return field
+
+
+    def velocityfield(
+            self,
+            cells=[30.0,30.0,30.0],
+            min_time =-inf,
+            max_time = inf,
+            dimensions = [[-inf, -inf, -inf], [inf, inf, inf]],
+            return_data = False,
+            radius = -1.0,
+            particle_id = -1,
+            plot = True,
+            width = 1000,
+            height = 1000,
+            axis = 0,
+        ):
+
+            if isinstance(dimensions, (list, tuple, np.ndarray)):
+                dimensions = np.asarray(dimensions, dtype=float)
+            else:
+                raise ValueError(f"dimensions should be a list/array not {type(dimensions)}")
+
+            if isinstance(cells, (list, tuple, np.ndarray)):
+                cells = np.asarray(cells, dtype=float)
+            else:
+                raise ValueError(f"Cells should be a list/array not {type(cells)}")
+
+            if type(radius) == float or type(radius) == int:
+                radius = np.asarray([radius, radius], dtype=float)
+            elif isinstance(radius, (list, tuple, np.ndarray)):
+                radius = np.asarray(radius, dtype=float)
+            else:
+                raise ValueError(f"radius should be a number or a list/array not {type(radius)}")
+            if type(particle_id) == float or type(particle_id) == int:
+                particle_id = np.asarray([int(particle_id), int(particle_id)], dtype=int)
+            elif isinstance(particle_id, (list, tuple, np.ndarray)):
+                particle_id = np.asarray(particle_id, dtype=int)
+            else:
+                raise ValueError(f"particle_id should be a number or a list/array not {type(particle_id)}")
+
+            sx,sy,field= rust.velocityfield(self.filename,
+                                                cells,
+                                                min_time,
+                                                max_time,
+                                                dimensions,
+                                                radius,
+                                                particle_id,
+                                                axis,
+                                                )
+            if plot:
+                plot_field(sx,sy,field,width = width, height = height)
+            return field
+
+    def occupancyfield(
+        self,
+        cells=[30.0,30.0,30.0],
+        min_time =-inf,
+        max_time = inf,
+        dimensions = [[-inf, -inf, -inf], [inf, inf, inf]],
+        return_data = False,
+        radius = -1.0,
+        particle_id = -1,
+        plot = True,
+        width = 1000,
+        height = 1000,
+        axis = 0,
+    ):
+
+        if isinstance(dimensions, (list, tuple, np.ndarray)):
+            dimensions = np.asarray(dimensions, dtype=float)
+        else:
+            raise ValueError(f"dimensions should be a list/array not {type(dimensions)}")
+
+        if isinstance(cells, (list, tuple, np.ndarray)):
+            cells = np.asarray(cells, dtype=float)
+        else:
+            raise ValueError(f"Cells should be a list/array not {type(cells)}")
+
+        if type(radius) == float or type(radius) == int:
+            radius = np.asarray([radius, radius], dtype=float)
+        elif isinstance(radius, (list, tuple, np.ndarray)):
+            radius = np.asarray(radius, dtype=float)
+        else:
+            raise ValueError(f"radius should be a number or a list/array not {type(radius)}")
+        if type(particle_id) == float or type(particle_id) == int:
+            particle_id = np.asarray([int(particle_id), int(particle_id)], dtype=int)
+        elif isinstance(particle_id, (list, tuple, np.ndarray)):
+            particle_id = np.asarray(particle_id, dtype=int)
+        else:
+            raise ValueError(f"particle_id should be a number or a list/array not {type(particle_id)}")
+
+        sx,sy,field= rust.occupancyfield(self.filename,
+                                            cells,
+                                            min_time,
+                                            max_time,
+                                            dimensions,
+                                            radius,
+                                            particle_id,
+                                            axis,
+                                            )
+        if plot:
+            plot_field(sx,sy,field,width = width, height = height)
+        return field

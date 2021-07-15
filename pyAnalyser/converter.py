@@ -6,13 +6,14 @@ from vtk import vtkDataSetReader
 from vtk.util.numpy_support import vtk_to_numpy
 from natsort import natsorted, ns
 import os
+import pandas as pd
 from glob import glob
 from tqdm import tqdm
 import pickle
-
+import tecplot as tc
 
 def pept(filename, header=16,delimiter=","):
-    data = np.genfromtxt(filename, skip_header=header,delimiter=delimiter,invalid_raise = False)
+    data = np.genfromtxt(filename, skip_header=header,delimiter=delimiter,invalid_raise = True)
     dump = 2
     while True:
         filename2 = filename + f"_0{dump}"
@@ -37,7 +38,7 @@ def pept(filename, header=16,delimiter=","):
     velocitys = []
     positions = []
     time = []
-    vel_calculation_steps = 4
+    vel_calculation_steps = 2
     for id, timestep in enumerate(data):
         if id < vel_calculation_steps or \
            id > len(data) - vel_calculation_steps - 1:
@@ -82,8 +83,213 @@ def pept(filename, header=16,delimiter=","):
 
     file.create_dataset("dimensions", data=np.asarray([min_val, max_val]))
 
+def csv(
+    filename,
+    header=0,
+    delimiter=None,
+    columns = (0,1, 2, 3),
+    chunksize = 1000,
+    velocity_averaging = 2,
+    ):
+    """Reads a CSV or text file and converts particle data within that file
+    to a HDF5 file readable for uPPPP.
+    Parameters
+    ----------
+    filename : str, required
+        filename of the csv file
 
-def barracuda(file, overwrite=False):
+    header : int, optional
+        number of lines to skip due to the header
+        default:0
+
+    delimiter: float, optional
+        Delimiter of the data in the csv files
+        default: None
+
+    columns: tuple of ints, optional
+        coloumns to use as the time and position columns
+        (Time, X-Position, Y-Position, Z-Position) or
+        (Time, X-Position, Y-Position, Z-Position. X-vel, Y-vel, Z-vel)
+        if first one is used the Velocity is calculated using the position and
+        the time.
+
+    chunksize: int, optional
+        size of the chunks read. Lower if you get any memory error
+        default: 1000
+
+    velocity_averaging: int, optional
+        number of positions to use to calculate the particle velocity.
+        v[i] = (pos[i-velocity_averaging]- pos[i+velocity_averaging])/
+            (time[i+velocity_averaging]- time[i-velocity_averaging])
+    """
+    if len(columns) == 4:
+        calculate_velocities = True
+    elif len(columns) == 7:
+        calculate_velocities = False
+    else:
+        raise ValueError("Length of columns is not correct. Please check inputs")
+    inf = float("inf")
+    min_val = np.asarray([inf, inf, inf])
+    max_val = np.asarray([-inf, -inf, -inf])
+    velocitys = []
+    positions = []
+    time = []
+    with  pd.read_csv(filename,header = header, chunksize = chunksize, usecols = columns,delimiter=delimiter,delim_whitespace=True, comment = "#") as reader:
+        for chunk in reader:
+            for id, timestep in enumerate(chunk.to_numpy(dtype=np.float)):
+                #print(timestep)
+                time.append(timestep[columns[0]])
+
+                x = timestep[columns[1]]
+                y = timestep[columns[2]]
+                z = timestep[columns[3]]
+                position = np.asarray([x, y, z])
+                if calculate_velocities:
+                    raise ValueError("Calculating the velocities is not implemented yet!")
+                else:
+                    vx = timestep[columns[4]]
+                    vy = timestep[columns[5]]
+                    vz = timestep[columns[6]]
+                velocity = np.asarray([vx, vy, vz])
+                positions.append(position)
+                velocitys.append(velocity)
+                try:
+                    min_mask = position < min_val
+                    max_mask = position > max_val
+                except:
+                    print(position)
+                    input()
+                min_val[min_mask] = position[min_mask]
+                max_val[max_mask] = position[max_mask]
+
+    cur_step = 0
+
+    print(np.asarray(positions).shape)
+    print(np.asarray(positions[0:1]).shape)
+
+    print(np.asarray(positions[0]).shape)
+    with h5py.File(filename.split("a01")[0]+"hdf5", "w") as file:
+        grp = file.create_group("timestep "+str(cur_step))
+        grp.create_dataset("time", data=time[0])
+        grp.create_dataset("time_pept", data=time)
+        grp.create_dataset("position", data=np.asarray(positions))
+        grp.create_dataset("velocity", data=np.asarray(velocitys))
+        grp.create_dataset("radius", data=np.zeros(len(positions)))
+        grp.create_dataset("ppcloud", data=np.zeros(len(positions)))
+        grp.create_dataset("spezies", data=np.zeros(len(positions)))
+        grp.create_dataset("particleid", data=np.zeros(len(positions)))
+
+        grp = file.create_group("timestep "+str(1))
+        grp.create_dataset("time", data=time[10])
+
+        file.create_dataset("dimensions", data=np.asarray([min_val, max_val]))
+
+def read_plt(filename, variables = None, Zone = "Particles" ):
+
+    # check filetype
+    if not tc.session.connected():
+        tc.session.connect()
+    if not filename.endswith(".plt"):
+        print(filename)
+        raise ValueError("File should be a tecplot plt file not {}".format(filename.split(".")[-1]))
+
+
+
+    # opening data from plt file
+    # read_data_option defines if data should be replaced or addet to the tecplot engine
+    # tc.constant.ReadDataOption.Replace avoids ram issues
+    tc.session.suspend_enter()
+    data = tc.data.load_tecplot( filename , read_data_option = tc.constant.ReadDataOption.Replace)
+    tc.session.suspend_exit()
+    #check if user wants specivic data, if not use all
+    if variables is None:
+        variables = data.variable_names
+    data_variable_names = data.variable_names
+    # define end data array:
+    data_arrays=[]
+    # The zone defines which type of data one wants
+    # Typically "Particles" or "Cells"
+    data = data.zone(Zone)
+    data_arrays.append(data.solution_time)
+    min_arr=[]
+    max_arr=[]
+
+    for variable in variables:
+        if variable not in data_variable_names:
+            raise ValueError("Variable {} is not in dataset!\nReview your input. Available Variables are:\n{}".format(variable,data_variable_names))
+
+        data_arrays.append(data.values(variable).as_numpy_array())
+        max_arr.append(data.values(variable).max())
+        min_arr.append(data.values(variable).min())
+    return np.transpose(np.asarray(data_arrays)),  max_arr,  min_arr
+
+def get_tecplot_data(file,variables, Zone = "Particles"):
+    import tecplot as tc
+
+
+
+    data , maxa, mina = read_plt(file, variables, Zone)
+    time = data[0]
+    data = np.asarray([ np.asarray(x) for x in data[1::] ])
+    data= np.transpose(data)
+
+    #get min and max of the sytsem
+
+    return time,data,mina,maxa
+
+
+
+def barracuda(file_array,filename = "temp.hdf5", overwrite=False, variables = None):
+    min_pos=np.asarray([1,1,1])
+    max_pos=np.asarray([0,0,0])
+    tc.session.connect(quiet=True)
+    if variables == None:
+        variables=[ "x",
+                    "y",
+                    "z",
+                    "Particle Velocity-x",
+                    "Particle Velocity-y",
+                    "Particle Velocity-z",
+                    "SpeciesIndex",
+                    "Particle Id",
+                    "Particles Per Cloud",
+                    "Radius"]
+    if os.path.exists(filename):
+        if not overwrite:
+            print(f"WARNING!!! using equally named filename \"{filename}\" instead of \"{filename}\"\nInclude \"overwrite = True \" to overwrite data ")
+            return None
+    f = h5py.File(filename,"w")
+
+    for id,file in enumerate(file_array):
+        time,data, mina, maxa= get_tecplot_data(file,variables)
+        particle_data  = data
+        group = f.create_group( "timestep "+str(id) )
+
+        p_data = np.asarray(particle_data,dtype=float)
+        pos = p_data[:,0:3]
+        vel = p_data[:,3:6]
+        rad = p_data[:,9]
+        cloud = p_data[:,8]
+        spezies = p_data[:,6]
+        particle_id =p_data[:,7]
+        min_pos = [mina[id] if mina[id] < min_pos[id] else min_pos[id] for id in range(len(min_pos)) ]
+
+        max_pos = [maxa[id] if maxa[id] > max_pos[id] else max_pos[id] for id in range(len(max_pos)) ]
+        try:
+            dens = p_data[:,10]
+            group.create_dataset("density", data=dens)
+        except:
+            pass
+        group.create_dataset("position", data=pos)
+        group.create_dataset("velocity", data=vel)
+        group.create_dataset("radius", data=rad)
+        group.create_dataset("ppcloud", data=cloud)
+        group.create_dataset("spezies", data=spezies)
+        group.create_dataset("particleid", data=particle_id)
+        group.create_dataset("time", data=time)
+    f.create_dataset("dimensions", data=np.asarray([min_pos, max_pos]))
+
+def barracuda_old(file, overwrite=False):
         new_file = file.split(".pickle")[0]+".hdf5"
         if os.path.exists(file.split(".pickle")[0]+".hdf5") or \
         os.path.exists(file.split(".pickle")[0]+".h5"):

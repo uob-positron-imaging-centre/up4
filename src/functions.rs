@@ -1,9 +1,12 @@
+pub mod fields;
+
 extern crate ndarray;
 extern crate ndarray_linalg;
 extern crate numpy;
 
 
-use core::panic;use ndarray::prelude::*;
+use core::panic;
+use ndarray::prelude::*;
 
 /// [Vectorfield Function]:
 /// Calculate the velocity Vectorfiels of your System
@@ -25,7 +28,7 @@ use core::panic;use ndarray::prelude::*;
 ///     sy          Array2,             Mesh data for plotting in y Dimension
 ///
 ///’’’
-///vx,vy,vz = vectorfield(
+///sx,sy,vx,vy = vectorfield(
 ///           "test.hdf5".
 ///           array![10,10,10],
 ///           0.0,
@@ -341,9 +344,11 @@ pub fn occupancy_plot1d(
     let max_array: Array1<f64> = array_temp.slice(s![1, ..]).to_owned();
     let cell_size: Array1<f64> = (&max_array - &min_array) / cells;
     let mut occu: Array1<f64> = Array1::zeros(cells as usize);
+    let mut norm_arr: Array1<f64> = Array1::zeros(cells as usize);
     let array: Array1<f64> =
         Array1::linspace(0.0, &max_array[axis] - &min_array[axis], cells as usize);
     let dt = get_dt(&file);
+    let mut time = 0.0;
     for timestep in 0..timesteps - 1 {
         let name: String = "timestep ".to_string() + &timestep.to_string();
         let group = file.group(&name).expect(&format!("Can not open timestep {:?} in file {:?}",timestep,filename));
@@ -372,6 +377,11 @@ pub fn occupancy_plot1d(
             .expect("error")
             .read_1d::<f64>()
             .unwrap();
+        let ppcloud = group
+            .dataset("ppcloud")
+            .expect("error")
+            .read_1d::<f64>()
+            .unwrap();
         let particles = positions.len() / 3;
         // loop over all particles in this timestep, calculate the velocity vector and add it to the
         // vectorfield array
@@ -395,9 +405,146 @@ pub fn occupancy_plot1d(
             if time_spent > dt {
                 time_spent = dt;
             }
-            occu[cell_id] = occu[cell_id] + 1.;// time_spent;
+            let mut cloud = 1.;
+            if clouds{
+                cloud = ppcloud[particle];
+            }
+            norm_arr[cell_id] = norm_arr[cell_id] + 1. * cloud;// time_spent;
+            occu[cell_id] = occu[cell_id] + time_spent * cloud;
+
+        }
+        time += dt;
+    }
+    occu = occu.clone() / occu.sum();
+    if norm {
+        let mut xmax = 0;
+        for x in 0..occu.len() {
+            if occu[x] > occu[xmax] {
+                xmax = x;
+            }
+        }
+        let max_num = occu[xmax];
+        for x in 0..occu.len() {
+            occu[x] = occu[x] / max_num;
         }
     }
+    file.close();
+    (occu, array)
+}
+
+pub fn occupancy_plot1d_pept(
+    filename: &str,
+    radius: Array1<f64>,
+    particle_id: Array1<i64>,
+    clouds: bool,
+    axis: usize,
+    norm: bool,
+    min_time: f64,
+    cells: f64,
+) -> (Array1<f64>, Array1<f64>) {
+    /*
+    function to calculate the time averaged occupancy plot of a particle system
+
+
+     */
+    let file = hdf5::File::open(filename).expect("Error reading hdf5 file in rust");
+    let timesteps = timesteps(&file);
+
+    let array_temp = file
+        .dataset("dimensions")
+        .expect(&format!(
+            "Can not find dataset \"dimensions\" in HDF5 file \"{:?}\"",
+            &filename
+        ))
+        .read_2d::<f64>()
+        .expect(&format!(
+            "Can not read data from \"dimensions\" dataset. \
+            Data type or data format might be wrong. \
+            Check creation of HDF5 file  \"{:?}\"",
+            &filename
+        ));
+    let min_array: Array1<f64> = array_temp.slice(s![0, ..]).to_owned();
+    let max_array: Array1<f64> = array_temp.slice(s![1, ..]).to_owned();
+    let cell_size: Array1<f64> = (&max_array - &min_array) / cells;
+    let mut occu: Array1<f64> = Array1::zeros(cells as usize);
+    let mut norm_arr: Array1<f64> = Array1::zeros(cells as usize);
+    let array: Array1<f64> =
+        Array1::linspace(0.0, &max_array[axis] - &min_array[axis], cells as usize);
+    let dt = get_dt(&file);
+    let mut time = 0.0;
+    let mut old_cell =0;
+    for timestep in 0..timesteps - 1 {
+        let name: String = "timestep ".to_string() + &timestep.to_string();
+        let group = file.group(&name).expect(&format!("Can not open timestep {:?} in file {:?}",timestep,filename));
+        let current_time = group.dataset("time").unwrap().read_raw::<f64>().unwrap()[0];
+        // check if timestep is in the timeframe given
+        if current_time < min_time {
+            continue;
+        }
+        let positions = group
+            .dataset("position")
+            .expect("error")
+            .read_2d::<f64>()
+            .unwrap();
+        let velocities = group
+            .dataset("velocity")
+            .expect("error")
+            .read_2d::<f64>()
+            .unwrap();
+        let particle_ids = group
+            .dataset("particleid")
+            .expect("error")
+            .read_1d::<f64>()
+            .unwrap();
+        let rad_array = group
+            .dataset("radius")
+            .expect("error")
+            .read_1d::<f64>()
+            .unwrap();
+        let time_pept = group
+            .dataset("time_pept")
+            .expect("error")
+            .read_1d::<f64>()
+            .unwrap();
+        let particles = positions.len() / 3;
+        // loop over all particles in this timestep, calculate the velocity vector and add it to the
+        // vectorfield array
+        for particle in 1..particles -2 {
+            /**if !check_id(particle_ids[particle] as usize, &particle_id) {
+                continue;
+            }
+            if !check_radius(rad_array[particle] as f64, &radius) {
+                continue;
+            }
+            **/
+            let position = positions.slice(s![particle, ..]).to_owned();
+            let position_next = positions.slice(s![particle+1, ..]).to_owned();
+            let velocity = velocities.slice(s![particle, ..]).to_owned();
+            let dt = time_pept[particle +1 ] - time_pept[particle];
+            //reset the position. the lowest value should be at 0,0,0
+            let x: f64 = position[axis] - min_array[axis];
+            let x_next: f64 = position_next[axis] - min_array[axis];
+            let vel: f64 = velocity[axis].abs();
+            //find current cell location
+            let cell_id = find_closest(&array, (x+x_next)/2.);
+            let cell_id_next = find_closest(&array, x);
+            //calculate the time this particle spent in the cell
+            //let mut time_spent = cell_size[axis] / vel;
+            //if time_spent > dt {
+            //    time_spent = dt;
+            //}
+            let number_of_cells = (cell_id as i64 - cell_id_next as i64 ).abs() +1;
+            for id in cell_id..cell_id_next+1{
+                norm_arr[id] = norm_arr[id] + 1.;// time_spent;
+                occu[id] = occu[id] + dt; //(position[axis] - positions.slice(s![particle+2, ..]).to_owned()[axis]).abs();//time_spent;//(( cell_id as i64 - old_cell as i64 ) as f64).abs();
+            }
+            time += dt;
+            old_cell = cell_id
+        }
+
+    }
+    println!("{}, {}",time, occu.sum());
+    occu = occu.clone() / occu.sum();
     if norm {
         let mut xmax = 0;
         for x in 0..occu.len() {
@@ -2159,6 +2306,7 @@ pub fn dispersion_pept(
     cells: Array1<i64>,
     max_error: f64,
 ) -> (Array3<f64>,f64) {
+    //println!("Starting Algorithm for PEPT dispersion calculation:");
     // opening file
     let file = hdf5::File::open(file).expect(&format!("Could not open file {:?}", file));
     //extract system dimensions from current datafile
@@ -2849,18 +2997,24 @@ pub fn circulation_time_boundary(
         for position_in_array in 0..particle_number{
 
             let mut position_in_array_2 = position_in_array; // this might be not true as LIGGHTS is stupid
-                      // find the current cell of this particle
+
             let p_id = particle_ids[position_in_array];
             let pos = (positions.slice(s![position_in_array, ..]).to_owned() - &min_array)[axis];
             let p_id_2;
+            // check if the access id is larger then the actuall one
+            // Necessery as particles might be lost
             if position_in_array_2 >= particle_ids2.len(){
+                // give random number, checked later
                 p_id_2 =0;
             }else{
                 p_id_2 = particle_ids2[position_in_array_2];
             };
+            // Particle arrays might be mixed between 2 timesteps
+            // finding the real particle id is necessery
             if p_id_2 != p_id {
                 // if they are not the same, the right particle position must be found
                 let mut flag = false;
+                position_in_array_2 = particle_ids2.len()-1 ;
                 for x in 0..particle_ids2.len()-1 {
 
                     // loop though every particle in the second timestep and
@@ -2870,7 +3024,7 @@ pub fn circulation_time_boundary(
                         position_in_array_2 = x;
                         break;
                     }
-                        if x == particle_ids2.len()-1{
+                    if x == particle_ids2.len()-1{
                             flag = true;
                         }
 
@@ -2891,7 +3045,7 @@ pub fn circulation_time_boundary(
             // we are only checking the axis "axis"
 
             // particle crosses into upper border
-
+            //if p_id != 10{continue}
             if pos  > boundary[1] && pos_old  < boundary[1]{
                 count +=1;
                 //println!("particle inside upper ");
@@ -2899,11 +3053,14 @@ pub fn circulation_time_boundary(
                 // if particle before was below
                 if start_flag_array[p_id] == 2{
                     // say " particle was in the other region"
+                    if mid_flag_array[p_id] == 0{
+                        down_times.push(current_time - time_flag_array[p_id]);
+                    }
                     mid_flag_array[p_id] = 1;
-                    up_times.push(current_time - time_flag_array[p_id]);
 
                 }else if start_flag_array[p_id] == 1 && mid_flag_array[p_id] == 1 {
                     up_times.push(current_time - mid_time_flag_array[p_id]);
+                    // One more flag to make shure up time only counted once
                 }
 
             }
@@ -2920,6 +3077,7 @@ pub fn circulation_time_boundary(
                 }else if start_flag_array[p_id] == 1 && mid_flag_array[p_id] == 1{
                     // end of one circulation
                     times.push(current_time - time_flag_array[p_id]);
+                    //if current_time - time_flag_array[p_id] <= 0.0 {println!("Out of higher")};
                     // restart the run
                     mid_flag_array[p_id] = 0;
                     time_flag_array[p_id] = current_time;
@@ -2941,8 +3099,11 @@ pub fn circulation_time_boundary(
                 // if particle before was below
                 if start_flag_array[p_id] == 1{
                     // say " particle was in the other region"
+                    if mid_flag_array[p_id] == 0{
+                        down_times.push(current_time - time_flag_array[p_id]);
+                    }
                     mid_flag_array[p_id] = 1;
-                    down_times.push(current_time - time_flag_array[p_id]);
+
                 }else if start_flag_array[p_id] == 2  && mid_flag_array[p_id] == 1  {
                     down_times.push(current_time - mid_time_flag_array[p_id]);
                 }
@@ -2960,6 +3121,7 @@ pub fn circulation_time_boundary(
                     // end of one circulation
                     times.push(current_time - time_flag_array[p_id]);
                     // restart the run
+                    //if current_time - time_flag_array[p_id] <= 0.0 {println!("Out of lower")};
                     mid_flag_array[p_id] = 0;
                     time_flag_array[p_id] = current_time;
                 }else if start_flag_array[p_id] == 2 {
@@ -3078,7 +3240,7 @@ pub fn circulation_time_boundary_pept(
         for position_in_array in 1..particle_number{
 
             let mut position_in_array_2 = position_in_array-1; // this might be not true as LIGGHTS is stupid
-                      // find the current cell of this particle
+
             let pos = (positions.slice(s![position_in_array, ..]).to_owned() )[axis];
 
             //now we can for sure get the right position in second timesteps
@@ -3222,6 +3384,302 @@ pub fn shear_rate(
     let (_,tau) = minmax(&dy);
     (vx,vy,sx,sy,x,y,tau)
 }
+
+pub fn jumps(
+    filename: &str,
+    min_velocity: f64,
+    min_distance: f64,
+)-> (Vec<f64>, Vec<f64>, Vec<f64>, Vec<f64>, Vec<f64>)
+{
+    //This function returns data and statistic of "jumps"
+    // As descirbed in the PHD thesis of Lam Cheun
+    // Opening hdf5 file
+    let file = hdf5::File::open(&filename).expect(&format!(
+        "Can not open HDF5 file {:?}",
+        &filename
+    ));
+    //read the number of timesteps inside this hdf5file
+    let timesteps: u64 = timesteps(&file);
+    let result = Array2::<f64>::zeros((10,10));
+    // result vectors:
+    let mut jump_distance: Vec<f64> = Vec::with_capacity(0);
+    let mut jump_time: Vec<f64> = Vec::with_capacity(0);
+    let mut jump_velocity: Vec<f64> = Vec::with_capacity(0);
+    let mut jump_start: Vec<f64> = Vec::with_capacity(0);
+    let mut jump_start_time: Vec<f64> = Vec::with_capacity(0);
+
+    // i really need to find a better way to calculate the number of particles
+    let name = "timestep 0";
+    let particle_number = file.group(&name).expect(&format!(
+            "Could not find group {:?} in file {:?}",
+            &name,
+            &filename
+        ))
+        .dataset("position")
+        .expect(&format!(
+            "Can not find dataset \"position\" in HDF5 file \"{:?}\"",
+            &filename
+        ))
+        .read_2d::<f64>()
+        .expect(&format!(
+            "Can not read data from \"position\" dataset. \
+            Data type or data format might be wrong. \
+            Check creation of HDF5 file  \"{:?}\"",
+            &filename
+        ))
+        .len()/3;
+
+    //storage array for each particle:
+    let mut flag = Array1::<i64>::zeros(particle_number); // flags if particle is jumping
+    let mut position_start = Array1::<f64>::zeros(particle_number); // remember the start position
+    let mut time_start = Array1::<f64>::zeros(particle_number); // remember the start time
+
+    // main loop
+    for timestep in 0..timesteps{
+        // for each timestep aquire the data
+        let name: String = "timestep ".to_string() + &timestep.to_string();
+        let group = file.group(&name).expect(&format!(
+                "Could not find group {:?} in file {:?}",
+                &name,
+                &filename
+            ));
+        let current_time = group
+            .dataset("time")
+            .expect(&format!(
+                "Can not find dataset \"time\" in HDF5 file \"{:?}\"",
+                &filename
+            ))
+            .read_raw::<f64>()
+            .expect(&format!(
+                "Can not read data from \"time\" dataset. \
+                Data type or data format might be wrong. \
+                Check creation of HDF5 file  \"{:?}\"",
+                &filename
+            ))[0];
+        //let dataset = group.dataset("position").expect( "error");
+        let positions = group
+            .dataset("position")
+            .expect(&format!(
+                "Can not find dataset \"position\" in HDF5 file \"{:?}\"",
+                &filename
+            ))
+            .read_2d::<f64>()
+            .expect(&format!(
+                "Can not read data from \"position\" dataset. \
+                Data type or data format might be wrong. \
+                Check creation of HDF5 file  \"{:?}\"",
+                &filename
+            ));
+
+        let velocities = group
+            .dataset("velocity")
+            .expect(&format!(
+                "Can not find dataset \"velocity\" in HDF5 file \"{:?}\"",
+                &filename
+            ))
+            .read_2d::<f64>()
+            .expect(&format!(
+                "Can not read data from \"velocity\" dataset. \
+                Data type or data format might be wrong. \
+                Check creation of HDF5 file  \"{:?}\"",
+                &filename
+            ));
+
+
+        let particle_ids = group
+            .dataset("particleid")
+            .expect("Can not find dataset \"particleid\" in the group")
+            .read_1d::<usize>()
+            .unwrap();
+        // After data extraction loop over all particles
+        for particle in 0..particle_number{
+            // extract z-velocity
+            let vz = velocities.slice(s![particle, ..]).to_owned()[2];
+            let posz = positions.slice(s![particle, ..]).to_owned()[2];
+            // extract particle ID
+            // particle IDs are used as an index into the memorise arrays
+            let particle_id = particle_ids[particle];
+            // referencees to the flag/time/position memory arrays
+            let pflag = &mut flag[particle_id];
+            let pstart_pos = &mut position_start[particle_id];
+            let pstart_time = &mut time_start[particle_id];
+            // first case: Particle unflagged and moving Upwards
+            // --> jump starting now
+            if vz > 0.0 && *pflag == 0{
+                *pflag = 1;
+                *pstart_pos = posz;
+                *pstart_time = current_time;
+            }else
+            // next case: particle stops jump
+            if vz < 0.0 && *pflag == 1{
+                if min_velocity > (*pstart_pos - posz).abs()/(current_time - *pstart_time ){
+                    continue
+                }
+                if min_distance > (*pstart_pos - posz).abs(){
+                    continue
+                }
+                jump_time.push(current_time- *pstart_time );
+                jump_start.push(*pstart_pos);
+                jump_start_time.push(*pstart_time);
+                jump_distance.push((*pstart_pos - posz).abs());
+                jump_velocity.push((*pstart_pos - posz).abs()/(current_time- *pstart_time ));
+                *pflag = 0;
+            }
+
+            // We could ad some statistics during the run. e.g
+            // std of velocity
+            //
+
+
+        }
+
+    }
+
+    // return results
+    (
+        jump_time,
+        jump_distance,
+        jump_velocity,
+        jump_start,
+        jump_start_time
+    )
+}
+
+pub fn trajectory(
+    filename: &str,          //filename of hdf5 file
+    ID: usize,      //number of cells to store vec-data
+)-> Array2<f64>{
+    // Opening hdf5 file
+    let file = hdf5::File::open(&filename).expect(&format!(
+        "Can not open HDF5 file {:?}",
+        &filename
+    ));
+    let timesteps: u64 = timesteps(&file);
+    let name = "timestep 0";
+    let mut trajectory = Array2::<f64>::zeros((timesteps as usize,3));
+    trajectory.fill(f64::NAN);
+    for dt in 0..timesteps -1 {
+        let name: String = "timestep ".to_string() + &dt.to_string();
+        let group = file.group(&name).expect(&format!("Can not open timestep {:?} in file {:?}",dt,filename));
+        let particle_ids = group
+            .dataset("particleid")
+            .expect(&format!(
+                "Can not find dataset \"particleid\" in HDF5 file \"{:?}\"",
+                &filename
+            ))
+            .read_1d::<f64>()
+            .expect(&format!(
+                "Can not read data from \"particleid\" dataset. \
+                Data type or data format might be wrong. \
+                Check creation of HDF5 file  \"{:?}\"",
+                &filename
+            ));
+        let mut count = 0;
+        let mut particle_position = -1;
+        for id in particle_ids.iter(){
+            count+=1;
+            if id.to_owned() as usize == ID  {
+                particle_position = count;
+                break;
+            }
+        }
+        if particle_position == -1{
+            continue
+        }
+
+        let positions = group
+            .dataset("position")
+            .expect("error")
+            .read_2d::<f64>()
+            .expect("Error");
+        let pos = positions.slice(s![particle_position as usize, ..]);
+        trajectory.slice_mut(s![dt as usize ,0..]).assign( &pos );
+    }
+
+
+    trajectory
+
+}
+pub fn trajectory_pept(
+    filename: &str,          //filename of hdf5 file
+)-> Array2<f64>{
+    // Opening hdf5 file
+    let file = hdf5::File::open(&filename).expect(&format!(
+        "Can not open HDF5 file {:?}",
+        &filename
+    ));
+    let group = file.group("timestep 0").expect(&format!("Can not open timestep 0 in file {:?}",filename));
+    let trajectory = group
+            .dataset("position")
+            .expect("error")
+            .read_2d::<f64>()
+            .unwrap();
+
+    trajectory
+
+}
+
+pub fn velocity_pept(
+    filename: &str,          //filename of hdf5 file
+)-> Array2<f64>{
+    // Opening hdf5 file
+    let file = hdf5::File::open(&filename).expect(&format!(
+        "Can not open HDF5 file {:?}",
+        &filename
+    ));
+    let group = file.group("timestep 0").expect(&format!("Can not open timestep 0 in file {:?}",filename));
+    let vel = group
+            .dataset("velocity")
+            .expect("error")
+            .read_2d::<f64>()
+            .unwrap();
+
+    vel
+
+}
+
+pub fn time(
+    filename: &str,          //filename of hdf5 file
+)-> Array1<f64>{
+    // Opening hdf5 file
+    let file = hdf5::File::open(&filename).expect(&format!(
+        "Can not open HDF5 file {:?}",
+        &filename
+    ));
+    let timesteps: u64 = timesteps(&file);
+    let name = "timestep 0";
+    let mut time_array = Array1::<f64>::zeros((timesteps as usize));
+    for dt in 0..timesteps -1 {
+        let name: String = "timestep ".to_string() + &dt.to_string();
+        let group = file.group(&name).expect(&format!("Can not open timestep {:?} in file {:?}",dt,filename));
+        let current_time = group.dataset("time").unwrap().read_raw::<f64>().unwrap()[0];
+        time_array[dt as usize] = current_time ;
+    }
+
+
+    time_array
+
+}
+pub fn time_pept(
+    filename: &str,          //filename of hdf5 file
+)-> Array1<f64>{
+    // Opening hdf5 file
+    let file = hdf5::File::open(&filename).expect(&format!(
+        "Can not open HDF5 file {:?}",
+        &filename
+    ));
+    let group = file.group("timestep 0").expect(&format!("Can not open timestep 0 in file {:?}",filename));
+    let time_arr = group
+            .dataset("time_pept")
+            .expect("error")
+            .read_1d::<f64>()
+            .unwrap();
+
+    time_arr
+
+}
+
+
 
 fn round_array_to_int(arr: Array1<f64>)->Array1<i64>{
     let mut int_arr = arr.iter().map(|x| x.round() as i64).collect();
@@ -3639,6 +4097,7 @@ fn minmax_rot(vel: &Array2<f64> ,pos: &Array2<f64> , rot_speed: f64, drum_center
         if part_rot_val < min{
             min = part_rot_val;
         }
+
         if part_rot_val > max{
             max = part_rot_val;
         }

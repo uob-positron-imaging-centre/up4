@@ -19,6 +19,7 @@ fn rustAnalyser(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(mean_angular_velocity))?;
     m.add_wrapped(wrap_pyfunction!(timesteps))?;
     m.add_wrapped(wrap_pyfunction!(occupancy_plot1d))?;
+    m.add_wrapped(wrap_pyfunction!(occupancy_plot1d_pept))?;
     m.add_wrapped(wrap_pyfunction!(velocity_plot1d))?;
     m.add_wrapped(wrap_pyfunction!(surface_polynom))?;
     m.add_wrapped(wrap_pyfunction!(granular_temperature))?;
@@ -37,6 +38,15 @@ fn rustAnalyser(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pyfunction!(circulation_time_boundary_pept))?;
     m.add_wrapped(wrap_pyfunction!(shear_rate))?;
     m.add_wrapped(wrap_pyfunction!(granular_temperature_2d))?;
+    m.add_wrapped(wrap_pyfunction!(trajectory))?;
+    m.add_wrapped(wrap_pyfunction!(trajectory_pept))?;
+    m.add_wrapped(wrap_pyfunction!(velocity_pept))?;
+    m.add_wrapped(wrap_pyfunction!(time))?;
+    m.add_wrapped(wrap_pyfunction!(time_pept))?;
+    m.add_wrapped(wrap_pyfunction!(jumps))?;
+    m.add_wrapped(wrap_pyfunction!(occupancyfield))?;
+    m.add_wrapped(wrap_pyfunction!(velocityfield))?;
+    m.add_wrapped(wrap_pyfunction!(numberfield))?;
     Ok(())
 }
 /// [Vectorfield Function]:
@@ -81,7 +91,7 @@ fn vectorfield<'py>(
 
 
 #[pyfunction]
-fn timesteps(filename:&str)->(usize) {
+fn timesteps(filename:&str)->usize {
     //get the number of timesteps
     let file = hdf5::File::open(filename).expect("Error reading hdf5 file in rust");
     let t = functions::timesteps(&file);
@@ -108,6 +118,39 @@ fn occupancy_plot1d<'py>(
 
      */
     let (image, arr) = functions::occupancy_plot1d(
+        filename,
+        radius.as_array().to_owned(),
+        particle_id.as_array().to_owned(),
+        clouds,
+        axis,
+        norm,
+        min_time,
+        cells,
+    );
+    (
+        image.into_pyarray(py).to_dyn(),
+        arr.into_pyarray(py).to_dyn(),
+    )
+}
+
+#[pyfunction]
+fn occupancy_plot1d_pept<'py>(
+    py: Python<'py>,
+    filename: &str,
+    radius: PyReadonlyArray1<f64>,
+    particle_id: PyReadonlyArray1<i64>,
+    clouds: bool,
+    axis: usize,
+    norm: bool,
+    min_time: f64,
+    cells: f64,
+) -> (&'py PyArrayDyn<f64>, &'py PyArrayDyn<f64>) {
+    /*
+    function to calculate the time averaged occupancy plot of a particle system
+
+
+     */
+    let (image, arr) = functions::occupancy_plot1d_pept(
         filename,
         radius.as_array().to_owned(),
         particle_id.as_array().to_owned(),
@@ -249,13 +292,13 @@ fn dispersion<'py>(
 fn dispersion_pept<'py>(
     _py: Python<'py>,
     file: &str,
-    timestep: PyReadonlyArray1<usize>,
     delta_t: f64,
     mesh_size: PyReadonlyArray1<f64>,
     dimensions:PyReadonlyArray2<f64>,
     cells: PyReadonlyArray1<i64>,
     max_error: f64
 ) -> (&'py PyArrayDyn<f64>,f64) {
+
     let (dispersion_cells, mixing_efficiency) = functions::dispersion_pept(
         file,
         delta_t,
@@ -554,4 +597,155 @@ fn granular_temperature_2d<'py>(
     sx.into_pyarray(_py).to_dyn(),
     sy.into_pyarray(_py).to_dyn(),
 )
+}
+
+#[pyfunction]
+fn trajectory<'py>(
+    _py: Python<'py>,
+    filename: &str,          //filename of hdf5 file
+    ID: usize,      //number of cells to store vec-data
+)-> &'py PyArrayDyn<f64>{
+functions::trajectory(filename, ID).into_pyarray(_py).to_dyn()
+
+}
+
+#[pyfunction]
+fn trajectory_pept<'py>(
+    _py: Python<'py>,
+    filename: &str,          //filename of hdf5 file
+)-> &'py PyArrayDyn<f64>{
+functions::trajectory_pept(filename).into_pyarray(_py).to_dyn()
+
+}
+
+#[pyfunction]
+fn velocity_pept<'py>(
+    _py: Python<'py>,
+    filename: &str,          //filename of hdf5 file
+)-> &'py PyArrayDyn<f64>{
+functions::velocity_pept(filename).into_pyarray(_py).to_dyn()
+
+}
+
+#[pyfunction]
+fn time<'py>(
+    _py: Python<'py>,
+    filename: &str,          //filename of hdf5 file
+)-> &'py PyArrayDyn<f64>{
+functions::time(filename).into_pyarray(_py).to_dyn()
+
+}
+
+#[pyfunction]
+fn time_pept<'py>(
+    _py: Python<'py>,
+    filename: &str,          //filename of hdf5 file
+)-> &'py PyArrayDyn<f64>{
+functions::time_pept(filename).into_pyarray(_py).to_dyn()
+
+}
+
+#[pyfunction]
+fn jumps<'py>(
+    _py: Python<'py>,
+    filename: &str,          //filename of hdf5 file
+    min_velocity: f64,
+    min_distance: f64,
+)-> (Vec<f64>, Vec<f64>, Vec<f64>, Vec<f64>, Vec<f64>){
+functions::jumps(filename, min_velocity, min_distance)
+
+}
+
+
+/// [Vectorfield Function]:
+/// Calculate the velocity Vectorfiels of your System
+#[pyfunction]
+fn occupancyfield<'py>(
+    _py: Python<'py>,
+    filename: &str,                      //filename of hdf5 file
+    cells: PyReadonlyArray1<f64>,        //number of cells to store vec-data
+    min_time: f64,                       //where to start the averaging
+    max_time: f64,                       //where to end the averaging
+    dimensions: PyReadonlyArray2<f64>, // Region where to look at, rest ignored
+    radius: PyReadonlyArray1<f64>,       // include a radius, only available for sim-data
+    particle_id: PyReadonlyArray1<i64>,
+    axis: usize,
+) ->
+    (&'py PyArrayDyn<f64>,&'py PyArrayDyn<f64>,&'py PyArrayDyn<f64>)
+     {
+
+    let (sx,sy,field) = functions::fields::occupancyfield(
+        filename,
+        cells.as_array().to_owned(),
+        min_time,
+        max_time,
+        dimensions.as_array().to_owned(),
+        radius.as_array().to_owned(),
+        particle_id.as_array().to_owned(),
+        axis,
+    );
+
+    (sx.into_pyarray(_py).to_dyn(),sy.into_pyarray(_py).to_dyn(),field.into_pyarray(_py).to_dyn())
+}
+
+/// [Vectorfield Function]:
+/// Calculate the velocity Vectorfiels of your System
+#[pyfunction]
+fn velocityfield<'py>(
+    _py: Python<'py>,
+    filename: &str,                      //filename of hdf5 file
+    cells: PyReadonlyArray1<f64>,        //number of cells to store vec-data
+    min_time: f64,                       //where to start the averaging
+    max_time: f64,                       //where to end the averaging
+    dimensions: PyReadonlyArray2<f64>, // Region where to look at, rest ignored
+    radius: PyReadonlyArray1<f64>,       // include a radius, only available for sim-data
+    particle_id: PyReadonlyArray1<i64>,
+    axis: usize,
+) ->
+    (&'py PyArrayDyn<f64>,&'py PyArrayDyn<f64>,&'py PyArrayDyn<f64>)
+     {
+
+    let (sx,sy,field) = functions::fields::velocityfield(
+        filename,
+        cells.as_array().to_owned(),
+        min_time,
+        max_time,
+        dimensions.as_array().to_owned(),
+        radius.as_array().to_owned(),
+        particle_id.as_array().to_owned(),
+        axis,
+    );
+
+    (sx.into_pyarray(_py).to_dyn(),sy.into_pyarray(_py).to_dyn(),field.into_pyarray(_py).to_dyn())
+}
+
+/// [Vectorfield Function]:
+/// Calculate the velocity Vectorfiels of your System
+#[pyfunction]
+fn numberfield<'py>(
+    _py: Python<'py>,
+    filename: &str,                      //filename of hdf5 file
+    cells: PyReadonlyArray1<f64>,        //number of cells to store vec-data
+    min_time: f64,                       //where to start the averaging
+    max_time: f64,                       //where to end the averaging
+    dimensions: PyReadonlyArray2<f64>, // Region where to look at, rest ignored
+    radius: PyReadonlyArray1<f64>,       // include a radius, only available for sim-data
+    particle_id: PyReadonlyArray1<i64>,
+    axis: usize,
+) ->
+    (&'py PyArrayDyn<f64>,&'py PyArrayDyn<f64>,&'py PyArrayDyn<f64>)
+     {
+
+    let (sx,sy,field) = functions::fields::numberfield(
+        filename,
+        cells.as_array().to_owned(),
+        min_time,
+        max_time,
+        dimensions.as_array().to_owned(),
+        radius.as_array().to_owned(),
+        particle_id.as_array().to_owned(),
+        axis,
+    );
+
+    (sx.into_pyarray(_py).to_dyn(),sy.into_pyarray(_py).to_dyn(),field.into_pyarray(_py).to_dyn())
 }

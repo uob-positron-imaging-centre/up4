@@ -119,10 +119,6 @@ impl PyData {
             sx.into_pyarray(_py).to_dyn(),
             sy.into_pyarray(_py).to_dyn(),
         )
-
-
-
-
     }
 
 }

@@ -4,3 +4,6 @@ pyAnalyser.egg-info
 pyAnalyser/__pycache__
 rustAnalyser.cpython*
 src/functions_gpu.rs_old
+*.zip
+TEST
+.idea

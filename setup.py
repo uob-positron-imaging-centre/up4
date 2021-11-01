@@ -8,8 +8,15 @@
 
 
 import sys
-
+from setuptools.command.install import install
 from setuptools import setup
+import numpy as np
+import os
+debug = os.getenv("UPPP_DEBUG")
+if debug == "true":
+    features=["uPPPP_debug","python"]
+else:
+    features=["python"]
 
 try:
     from setuptools_rust import RustExtension, Binding
@@ -32,7 +39,7 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 setup(
-    name="pyAnalyser",
+    name="uPPPP",
     version="0.1.0",
     author = (
         "Dominik Werner <d.wer2@gmx.de>"
@@ -52,8 +59,8 @@ setup(
     description = "analysing toolset for particle data",
     long_description = long_description,
     long_description_content_type = "text/markdown",
-    packages=["pyAnalyser"],
-    rust_extensions=[RustExtension("rustAnalyser", binding=Binding.PyO3)],
+    packages=["uPPPP"],
+    rust_extensions=[RustExtension("upppp_rust",features = features ,binding=Binding.PyO3)],
     install_requires=install_requires,
     setup_requires=setup_requires,
     include_package_data=True,

@@ -1,4 +1,4 @@
-# pyAnalyser
+# uPPPP
 
 A fast flexible analysing toolset for particle data of all kinds.
 

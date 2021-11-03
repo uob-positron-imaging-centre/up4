@@ -1,19 +1,34 @@
 [package]
-name = "rustAnalyser"
+name = "upppp_rust"
 version = "0.1.0"
 edition = "2018"
+authors = ["Kit's little helpers"]
 
 [lib]
-name = "rustAnalyser"
-crate-type = ["cdylib"]
+name = "upppp_rust"
+crate-type = ["cdylib","rlib"]
 
 [dependencies]
-numpy = "0.11.0"
-hdf5 = "0.7.0"
-ndarray = "0.13"
-ndarray-linalg = "0.12"
+numpy = "0.14.0"
+#hdf5 = "0.7.0"
+hdf5 = {git="https://github.com/aldanor/hdf5-rust.git"}
+ndarray = "0.15"
+ndarray-stats="0.5.0"
+derive-getters = "0.2.0"
+plotly = "0.6.0"
+dyn-clone = "1.0"
+#num-traits = "0.2"
+#ndarray-linalg = "0.12"
 #em = { git = "https://github.com/calebwin/emu", branch = "master" }
+itertools = "0.10.1"
 
 [dependencies.pyo3]
-version = "0.11.1"
+version = ">0.11.1"
 features = ["extension-module"]
+
+[features]
+# Debuging feature to print statements
+# if activated
+uPPPP_debug = []
+uPPPP_warning = []
+python = []

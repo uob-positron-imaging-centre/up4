@@ -178,7 +178,7 @@ impl PData{
     }
 
     pub fn reset_buffer(){
-
+        //TODO
     }
 
     pub fn update(&mut self,mut range: ( usize, usize) ){
@@ -385,8 +385,6 @@ impl DataManager for PData {
             // use mem::swap to swap it with a option(None)
             &self.buffer[timestep-self.range.0]
         }
-
-
     }
 
     fn global_stats(&self)-> GlobalStats {

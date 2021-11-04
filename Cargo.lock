@@ -147,8 +147,7 @@ checksum = "ab5ef0d4909ef3724cc8cce6ccc8572c5c817592e9285f5464f8e86f8bd3726e"
 [[package]]
 name = "hdf5"
 version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b5c31bb899c52eef31a924a99bea231f3330890ef4dd074776fb6e77327d74ab"
+source = "git+https://github.com/aldanor/hdf5-rust.git#5b7ab7a5c89ad50af7dbf6e364e19bdb72c6ee1a"
 dependencies = [
  "bitflags",
  "cfg-if 1.0.0",
@@ -165,8 +164,7 @@ dependencies = [
 [[package]]
 name = "hdf5-derive"
 version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "16d8f70301b7d879dfd719c62ee7d37d95d36db7e217641e56154da3799dc263"
+source = "git+https://github.com/aldanor/hdf5-rust.git#5b7ab7a5c89ad50af7dbf6e364e19bdb72c6ee1a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -176,8 +174,7 @@ dependencies = [
 [[package]]
 name = "hdf5-sys"
 version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "740ac0d726cce2e93d4c7716d2d53fa744130d51618ea217cd133fd4c02b95f4"
+source = "git+https://github.com/aldanor/hdf5-rust.git#5b7ab7a5c89ad50af7dbf6e364e19bdb72c6ee1a"
 dependencies = [
  "libc",
  "libloading",
@@ -191,8 +188,7 @@ dependencies = [
 [[package]]
 name = "hdf5-types"
 version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67b5b368aeaeba724e006807d8535659bf31ecd605292b372d7e01feb4035b28"
+source = "git+https://github.com/aldanor/hdf5-rust.git#5b7ab7a5c89ad50af7dbf6e364e19bdb72c6ee1a"
 dependencies = [
  "ascii",
  "cfg-if 1.0.0",
@@ -766,6 +762,7 @@ dependencies = [
  "derive-getters",
  "dyn-clone",
  "hdf5",
+ "itertools",
  "ndarray",
  "ndarray-stats",
  "numpy",

@@ -1,3 +1,6 @@
+//! Plots 2D quivers given a grid of arrow starting positions and corresponding vector components
+//! This code adapts the quiver plot from plotly.py, improving both the speed of execution and arrow
+//! visual appearance.
 use ndarray;
 use itertools;
 use itertools::izip;
@@ -6,7 +9,16 @@ use std::f64::consts::PI;
 use plotly::common::{Fill, Line, Marker, Mode, Title};
 use plotly::layout::{Axis, Layout};
 use plotly::{NamedColor, Plot, Scatter};
-//define struct to contain raw data for plotting quivers
+
+
+/// Define struct to contain raw data for plotting 2D quivers with content:
+/// xdata: arrow starting x coordinates
+/// ydata: arrow starting y coordinates
+/// udata: vector x components
+/// vdata: vector y components
+/// The following 2 fields are defined through the use of associated function "scale"
+/// xdata_end: arrow ending x coordinates
+/// ydata_end: arrow ending y coordinates
 pub struct ArrowData {
     xdata: Array1<f64>,
     ydata: Array1<f64>,
@@ -16,19 +28,27 @@ pub struct ArrowData {
     ydata_end: Array1<f64>,
 }
 
+
+pub enum ScaleMode{
+    Global(f64),
+    Elementwise(Array2<f64>),
+    Default,
+    None,
+}
+
 impl ArrowData {
 //constructor for ArrowData struct
-    pub fn new(x:Array2<f64>, y:Array2<f64>, u:Array2<f64>, v:Array2<f64>) -> ArrowData {
+    pub fn new(x:Array2<f64>, y:Array2<f64>, u:Array2<f64>, v:Array2<f64>, scale_mode: ScaleMode) -> ArrowData {
         ArrowData {
             xdata: ArrowData::flatten(&x),
             ydata: ArrowData::flatten(&y),
-            udata: ArrowData::flatten(&ArrowData::scale(0.3,&u)), 
-            vdata: ArrowData::flatten(&ArrowData::scale(0.3,&v)),
-            xdata_end: ArrowData::flatten(&x) + ArrowData::flatten(&ArrowData::scale(0.3,&u)), 
-            ydata_end: ArrowData::flatten(&y) + ArrowData::flatten(&ArrowData::scale(0.3,&v))
+            udata: ArrowData::flatten(&ArrowData::scale(&scale_mode,&u)), 
+            vdata: ArrowData::flatten(&ArrowData::scale(&scale_mode,&v)),
+            xdata_end: ArrowData::flatten(&x) + ArrowData::flatten(&ArrowData::scale(&scale_mode,&u)), 
+            ydata_end: ArrowData::flatten(&y) + ArrowData::flatten(&ArrowData::scale(&scale_mode,&v))
             }
         }
-    pub fn flatten(arr:&Array2<f64>) -> Array1<f64>{
+    fn flatten(arr:&Array2<f64>) -> Array1<f64>{
     //helper associated function for constructor - flattens a 2D array into a 1D array
         return arr.slice(s![0..arr.shape()[0], 0..arr.shape()[1]]) //create slice of all elements
                 .iter() //create iterable
@@ -36,13 +56,35 @@ impl ArrowData {
                 .collect::<Array1<f64>>() //collect into array
     }
     //helper associated function for constructor - scales u and v
-    pub fn scale(scale: f64, arr:&Array2<f64>) ->  Array2<f64> {
-        //default barb length is 30% of arrow length
-        //TODO add different scaling modes
-        return scale*arr
+    fn scale(scale_mode: &ScaleMode, arr:&Array2<f64>) ->  Array2<f64> {
+            //use match enum to decide whether to apply global, elementwise, default or no arrow scaling
+            match scale_mode{
+                ScaleMode::Global(scale_factor) => {
+                    let scale_factor = *scale_factor;
+                    return arr*scale_factor
+                },
+    
+                ScaleMode::Elementwise(scale_array) => {
+                    let scale_array = scale_array;
+                    println!("original\n{:?})", arr);
+                    println!("scaled\n{:?}", arr*scale_array) ;
+                    return arr*scale_array
+                },
+            
+                ScaleMode::Default => { 
+                    //default to global scaling, with scale factor = 0.3
+                    let default_scale = 0.3;
+                    return arr*default_scale
+                },
+                ScaleMode::None => {
+                    //perform no scaling
+                    return arr*1.0
+                }
+            }
+        }
+        
     }
     
-}
 
 pub fn quiver_barbs(data: &ArrowData) -> (Vec<(f64, f64)>, Vec<(f64, f64)>) {
     //create quiver barbs
@@ -147,8 +189,9 @@ pub fn plot_arrows(data: ArrowData, n: f64) {
      }      
       let layout = Layout::new()
         .title("oh wow it works!!!".into())
-        .x_axis(Axis::new().title("Effort".into()).range(vec![0., 2.*PI+PI/pts]))
-        .y_axis(Axis::new().title("Reward".into()).range(vec![0., 2.*PI+PI/pts]));
+        //.x_axis(Axis::new().title("Effort".into()).range(vec![0., 2.*PI+PI/pts]))
+        //.y_axis(Axis::new().title("Reward".into()).range(vec![0., 2.*PI+PI/pts]))
+        ;
     plot.set_layout(layout);
     plot.show();
 }

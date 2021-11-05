@@ -46,7 +46,7 @@ fn main() {
      3) get my code called rubbish and learn how to improve it!!!");
      //time for some shitty hardcoded test data
      const PI: f64 = consts::PI;
-     const PTS: f64 = 4.; //number of points
+     const PTS: f64 = 20.; //number of points
      let valx: Array1<f64> = Array::range(0.,2.*PI+PI/PTS,2.*PI/PTS);
      let valy: Array1<f64> = Array::range(0.,2.*PI+PI/PTS,2.*PI/PTS);
      let (x, y) = meshgrid(valx,valy);
@@ -63,6 +63,7 @@ fn main() {
                            [4., 4., 4., 4., 4.]];*/
                            
      let u: Array2<f64> = &x.mapv(f64::sin)*&y.mapv(f64::cos);
+     //let u: Array2<f64> = array![[1.,2.]];
      let v: Array2<f64> = -&y.mapv(f64::sin)*&x.mapv(f64::cos);
      //let arrows = quiver_funcs::ArrowData::new(x,y,u,v,quiver_funcs::ScaleMode::Global(0.5));
      //let arrows = quiver_funcs::ArrowData::new(x,y,u,v,quiver_funcs::ScaleMode::Elementwise(sf));

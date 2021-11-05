@@ -161,12 +161,10 @@ pub fn gen_quiver_arrows(data: &ArrowData) -> (Vec<(f64, f64, f64, f64)>, Vec<(f
     return (arrow_x, arrow_y)
 }
 
-pub fn plot_arrows(data: ArrowData, n: f64) {
-     let pts: f64 = n;
+pub fn plot_arrows(data: ArrowData) -> Vec<Box<Scatter<f64,f64>>>  {
      let (barb_x, barb_y) = quiver_barbs(&data);
      let (arrow_x, arrow_y) = gen_quiver_arrows(&data);
-     let mut plot = Plot::new();
-     plot.use_local_plotly();
+     let mut traces = Vec::new();
      //janky unpacking
      for (x_line, y_line, x_head, y_head) in izip!(barb_x, barb_y, arrow_x, arrow_y) {
         //*_head.1 is the None which i could include if you don't like filled arrowheads...
@@ -190,15 +188,23 @@ pub fn plot_arrows(data: ArrowData, n: f64) {
                         .fill(Fill::ToSelf)
                         .fill_color(NamedColor::Blue)
                         .line(Line::new().color(NamedColor::Blue));
-        plot.add_trace(trace);
+        traces.push(trace);
+        
      }      
-      let layout = Layout::new()
-        .title("oh wow it works!!!".into())
-        //.x_axis(Axis::new().title("Effort".into()).range(vec![0., 2.*PI+PI/pts]))
-        //.y_axis(Axis::new().title("Reward".into()).range(vec![0., 2.*PI+PI/pts]))
-        ;
-    plot.set_layout(layout);
-    plot.show();
+      
+    //plot.set_layout(layout);
+    return traces
 }
 
+pub fn plot(traces:Vec<Box<Scatter<f64,f64>>>, layout:Layout) -> Plot {
+    //create a generic quiver plot and return the plot and layout objects for the user to further customise as they wish
+    let mut plot = Plot::new();
+    //use quicker render version
+    plot.use_local_plotly();
+    for trace in traces{
+        plot.add_trace(trace);
+    }
+    plot.set_layout(layout);
+    return (plot)
+}
 

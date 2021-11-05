@@ -16,6 +16,7 @@ use plotly::{Plot, Scatter};
 use ndarray::{Array, Ix1, Ix2};
 use plotly::ndarray::ArrayTraces;
 use functions::meshgrid;
+use plotly::Layout;
 /*
 fn main() {
 
@@ -69,5 +70,9 @@ fn main() {
      //let arrows = quiver_funcs::ArrowData::new(x,y,u,v,quiver_funcs::ScaleMode::Elementwise(sf));
      //let arrows = quiver_funcs::ArrowData::new(x,y,u,v,quiver_funcs::ScaleMode::Default);
      let arrows = quiver_funcs::ArrowData::new(x,y,u,v,quiver_funcs::ScaleMode::None);
-     quiver_funcs::plot_arrows(arrows, PTS);
+     let traces = quiver_funcs::plot_arrows(arrows);
+     let layout = Layout::new()
+       .title("oh wow it works!!!".into());
+     let plot = quiver_funcs::plot(traces, layout);
+     plot.show();
 }

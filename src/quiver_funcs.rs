@@ -9,7 +9,7 @@ use std::f64::consts::PI;
 use plotly::common::{Fill, Line, Marker, Mode, Title};
 use plotly::layout::{Axis, Layout};
 use plotly::{NamedColor, Plot, Scatter};
-
+use core::panic;
 
 /// Define struct to contain raw data for plotting 2D quivers with content:
 /// xdata: arrow starting x coordinates
@@ -39,15 +39,20 @@ pub enum ScaleMode{
 impl ArrowData {
 //constructor for ArrowData struct
     pub fn new(x:Array2<f64>, y:Array2<f64>, u:Array2<f64>, v:Array2<f64>, scale_mode: ScaleMode) -> ArrowData {
-        ArrowData {
-            xdata: ArrowData::flatten(&x),
-            ydata: ArrowData::flatten(&y),
-            udata: ArrowData::flatten(&ArrowData::scale(&scale_mode,&u)), 
-            vdata: ArrowData::flatten(&ArrowData::scale(&scale_mode,&v)),
-            xdata_end: ArrowData::flatten(&x) + ArrowData::flatten(&ArrowData::scale(&scale_mode,&u)), 
-            ydata_end: ArrowData::flatten(&y) + ArrowData::flatten(&ArrowData::scale(&scale_mode,&v))
+        //supercede the default error message for shape mismatch as it doesn't identify the offending array
+        assert!(&x.dim() == &y.dim(),"Array dimension mismatch!\nx has dimensions {:?}\ny has dimensions {:?}", &x.dim(), &y.dim());
+        assert!(&x.dim() == &u.dim(),"Array dimension mismatch!\nx has dimensions {:?}\nu has dimensions {:?}", &x.dim(), &u.dim());
+        assert!(&x.dim() == &v.dim(),"Array dimension mismatch!\nx has dimensions {:?}\nv has dimensions {:?}", &x.dim(), &v.dim());
+        return ArrowData {
+        xdata: ArrowData::flatten(&x),
+        ydata: ArrowData::flatten(&y),
+        udata: ArrowData::flatten(&ArrowData::scale(&scale_mode,&u)), 
+        vdata: ArrowData::flatten(&ArrowData::scale(&scale_mode,&v)),
+        xdata_end: ArrowData::flatten(&x) + ArrowData::flatten(&ArrowData::scale(&scale_mode,&u)), 
+        ydata_end: ArrowData::flatten(&y) + ArrowData::flatten(&ArrowData::scale(&scale_mode,&v))
             }
-        }
+    }
+        
     fn flatten(arr:&Array2<f64>) -> Array1<f64>{
     //helper associated function for constructor - flattens a 2D array into a 1D array
         return arr.slice(s![0..arr.shape()[0], 0..arr.shape()[1]]) //create slice of all elements

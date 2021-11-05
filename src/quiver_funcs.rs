@@ -197,7 +197,7 @@ pub fn plot_arrows(data: ArrowData) -> Vec<Box<Scatter<f64,f64>>>  {
 }
 
 pub fn plot(traces:Vec<Box<Scatter<f64,f64>>>, layout:Layout) -> Plot {
-    //create a generic quiver plot and return the plot and layout objects for the user to further customise as they wish
+    //create a quiver plot based on user defined layout and return the plot object for the user to further customise as they wish
     let mut plot = Plot::new();
     //use quicker render version
     plot.use_local_plotly();

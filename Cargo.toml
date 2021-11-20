@@ -10,8 +10,8 @@ crate-type = ["cdylib","rlib"]
 
 [dependencies]
 numpy = "0.14.0"
-#hdf5 = "0.7.0"
-hdf5 = {git="https://github.com/aldanor/hdf5-rust.git"}
+hdf5 = "0.8.0"
+#hdf5 = {git="https://github.com/aldanor/hdf5-rust.git"}
 ndarray = "0.15"
 ndarray-stats="0.5.0"
 derive-getters = "0.2.0"

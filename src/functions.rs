@@ -205,7 +205,7 @@ fn check_radius(id: f64, var: &Array1<f64>) -> bool {
     ret_val
 }
 
-fn meshgrid(
+pub fn meshgrid(
     x: ndarray::Array1<f64>,
     y: ndarray::Array1<f64>,
 ) -> (ndarray::Array2<f64>, ndarray::Array2<f64>) {

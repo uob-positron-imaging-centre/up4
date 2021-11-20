@@ -154,8 +154,6 @@ pub trait Granular: DataManager {
 
         (v_x_grid, v_z_grid, sx, sy)
     }
-
-
 }
 
 
@@ -209,13 +207,13 @@ pub fn meshgrid(
     x: ndarray::Array1<f64>,
     y: ndarray::Array1<f64>,
 ) -> (ndarray::Array2<f64>, ndarray::Array2<f64>) {
-    let mut xx = ndarray::Array2::<f64>::zeros((y.len(), x.len()));
-    let mut yy = ndarray::Array2::<f64>::zeros((y.len(), x.len()));
+    let mut xx = ndarray::Array2::<f64>::zeros((x.len(), y.len()));
+    let mut yy = ndarray::Array2::<f64>::zeros((x.len(), y.len()));
 
-    for idx in (0..x.len()) {
-        for idy in (0..y.len()) {
-            xx[[idy, idx]] = x[idx];
-            yy[[idy, idx]] = y[idy];
+    for idx in 0..x.len() {
+        for idy in 0..y.len() {
+            xx[[idx, idy]] = x[idx];
+            yy[[idx, idy]] = y[idy];
         }
     }
     return (xx, yy);

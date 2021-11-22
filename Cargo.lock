@@ -766,6 +766,7 @@ dependencies = [
  "derive-getters",
  "dyn-clone",
  "hdf5",
+ "itertools",
  "ndarray",
  "ndarray-stats",
  "numpy",

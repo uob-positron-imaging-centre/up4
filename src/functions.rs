@@ -78,11 +78,8 @@ pub trait Granular: DataManager {
             if !selector.timestep_valid(current_time){
                 continue
             }
-
             let positions = timestep_data.position();
-
             let velocities = timestep_data.velocity();
-
             let particle_ids = timestep_data.particleid();
             let rad_array = timestep_data.radius();
             let clouds = timestep_data.clouds();
@@ -153,8 +150,67 @@ pub trait Granular: DataManager {
         }
 
         (v_x_grid, v_z_grid, sx, sy)
-    }
-}
+    }//end vectorfield
+
+
+    /// Calculate the mean velocity of the valid particles within the system.
+    ///
+    /// # Examples
+    ///
+    /// Calculate the mean velocity of all particles.
+    ///’’’
+    ///mean_velocity = data.mean_velocity_showcase(particleselector)
+    ///'''
+    fn mean_velocity_showcase(
+        &mut self,
+        selector: &ParticleSelector,
+    ) -> f64 {
+        let global_stats = self.global_stats();
+        let timesteps = global_stats.timesteps();
+        let mut mean_velocity = 0.0;
+        let mut num_counts = 0.0;
+        for timestep in 0..timesteps - 1 {
+            let timestep_data = self.get_timestep(timestep);
+            let current_time = *timestep_data.time();
+            // check if timestep is in the timeframe given
+            if !selector.timestep_valid(current_time){
+                continue
+            }
+            let velocities = timestep_data.velocity();
+            for vel in velocities.outer_iter(){
+                let velocity = (vel[0]*vel[0] + vel[1]*vel[1] +vel[2]*vel[2]).sqrt();
+                if  f64::is_nan(velocity){
+                    continue
+                }
+                mean_velocity += velocity;
+                num_counts += 1.0;
+            }
+            // checking for kill signals
+            check_signals!()
+
+        }
+        mean_velocity /= num_counts;
+
+        mean_velocity
+    }//end mean velocity
+
+    /// Calculate the mean velocity of the valid particles within the system.
+    ///
+    /// # Examples
+    ///
+    /// Calculate the mean velocity of all particles.
+    ///’’’
+    ///mean_velocity = data.mean_velocity(particleselector)
+    ///'''
+    fn mean_velocity(
+        &mut self,
+        selector: &ParticleSelector,
+    ) -> f64 {
+        let global_stats = self.global_stats();
+        global_stats.velocity_mag()[1]
+    }//end mean velocity
+
+}//End Granular trait
 
 
 impl<T> Granular for T where T: DataManager {}

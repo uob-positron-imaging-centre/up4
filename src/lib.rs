@@ -68,24 +68,7 @@ impl PyData {
     ) {
         self.data.stats();
     }
-    #[staticmethod]
-    fn line_and_scatter_plot() -> String{
-        let trace1 = Scatter::new(vec![1, 2, 3, 4], vec![10, 15, 13, 17])
-            .name("trace1")
-            .mode(Mode::Markers);
-        let trace2 = Scatter::new(vec![2, 3, 4, 5], vec![16, 5, 11, 9])
-            .name("trace2")
-            .mode(Mode::Lines);
-        let trace3 = Scatter::new(vec![1, 2, 3, 4], vec![12, 9, 15, 12]).name("trace3");
 
-        let mut plot= Plot::new();
-        plot.add_trace(trace1);
-        plot.add_trace(trace2);
-        plot.add_trace(trace3);
-        plot.show();
-        let string = plot.to_json();
-        string
-    }
 
 
     #[args(norm_on=false, axis=0)]
@@ -118,9 +101,45 @@ impl PyData {
             sx.into_pyarray(_py).to_dyn(),
             sy.into_pyarray(_py).to_dyn(),
         )
-    }
+    }//End vectorfield
 
-}
+    fn mean_velocity_showcase<'py>(
+        &mut self,
+        _py: Python<'py>,
+    ) -> (
+        f64
+    ) {
+        print_debug!("Starting mean velocity calculation on dataset {}", self.file.filename);
+        let selector: &ParticleSelector = match self.selector.as_any().downcast_ref::<ParticleSelector>(){
+            Some(b) => b,
+            None => panic!("Can not convert PyGrid to Grid1D as ")
+        };
+        let mean_velocity = self.data.mean_velocity_showcase(
+            selector
+        );
+        // return
+        mean_velocity
+    }//End mean_velocity
+
+    fn mean_velocity<'py>(
+        &mut self,
+        _py: Python<'py>,
+    ) -> (
+        f64
+    ) {
+        print_debug!("Starting mean velocity calculation on dataset {}", self.file.filename);
+        let selector: &ParticleSelector = match self.selector.as_any().downcast_ref::<ParticleSelector>(){
+            Some(b) => b,
+            None => panic!("Can not convert PyGrid to Grid1D as ")
+        };
+        let mean_velocity = self.data.mean_velocity(
+            selector
+        );
+        // return
+        mean_velocity
+    }//End mean_velocity
+
+}// ENd PyData
 
 /// A Python module implemented in Rust. The name of this function must match
 /// the `lib.name` setting in the `Cargo.toml`, else Python will not be able to

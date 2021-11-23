@@ -11,8 +11,8 @@
 import uPPPP as p
 import time
 import numpy as np
-
-
+from glob import glob
+import pytest
 # add your function to this command list
 cmds=[]
 
@@ -42,6 +42,17 @@ def test_mean_velocity_showcase(data):
     assert type(v)==type(0.1), "Wrong return type"
 cmds.append(test_mean_velocity_showcase)
 
+def test_vtkio(data):
+    filenames = glob("fixtures/post/drum*.vtk")
+    try:
+        data.test_vtk(filenames)
+    except:
+        print("Test failed successfully!")
+    filenames = [x for x in glob("fixtures/post/drum*.vtk") if not "bound" in x]
+    data.test_vtk(filenames)
+    data = p.Data.from_tdata("output.hdf5")
+    test_vectorfield(data)
+cmds.append(test_vtkio)
 
 def test(data):
     result=[]

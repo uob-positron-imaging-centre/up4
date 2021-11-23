@@ -139,6 +139,17 @@ impl PyData {
         mean_velocity
     }//End mean_velocity
 
+    #[staticmethod]
+    fn test_vtk(mut filenames: Vec<&str>,){
+        base::vtk(
+            filenames,
+            1e-5,
+            "output.hdf5",
+            r"drum_(\d+).vtk"
+
+        )
+    }
+
 }// ENd PyData
 
 /// A Python module implemented in Rust. The name of this function must match

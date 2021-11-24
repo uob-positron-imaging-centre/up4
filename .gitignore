@@ -5,6 +5,6 @@ pyAnalyser/__pycache__
 rustAnalyser.cpython*
 src/functions_gpu.rs_old
 *.zip
-tests/output.hdf5
+tests/fixtures/drum.hdf5
 tests/text.txt
 .idea

@@ -33,12 +33,12 @@ use datamanager::{GlobalStats,Manager,TData,PData};
 use base::{PyGrid,Selector,ParticleSelector};
 
 
-
 #[pyclass(name="Data")]
 struct PyData {
     data: Box<dyn Manager + Send>,
     selector: Box<dyn Selector + Send>,
 }
+
 
 
 #[pymethods]
@@ -106,10 +106,9 @@ impl PyData {
     fn mean_velocity_showcase<'py>(
         &mut self,
         _py: Python<'py>,
-    ) -> (
-        f64
-    ) {
-        print_debug!("Starting mean velocity calculation on dataset {}", self.file.filename);
+    ) -> f64
+     {
+        print_debug!("Starting mean velocity calculation on dataset ");
         let selector: &ParticleSelector = match self.selector.as_any().downcast_ref::<ParticleSelector>(){
             Some(b) => b,
             None => panic!("Can not convert PyGrid to Grid1D as ")
@@ -124,10 +123,8 @@ impl PyData {
     fn mean_velocity<'py>(
         &mut self,
         _py: Python<'py>,
-    ) -> (
-        f64
-    ) {
-        print_debug!("Starting mean velocity calculation on dataset {}", self.file.filename);
+    ) -> f64 {
+        print_debug!("Starting mean velocity calculation on dataset");
         let selector: &ParticleSelector = match self.selector.as_any().downcast_ref::<ParticleSelector>(){
             Some(b) => b,
             None => panic!("Can not convert PyGrid to Grid1D as ")
@@ -139,18 +136,28 @@ impl PyData {
         mean_velocity
     }//End mean_velocity
 
-    #[staticmethod]
-    fn test_vtk(mut filenames: Vec<&str>,){
-        base::vtk(
-            filenames,
-            1e-5,
-            "output.hdf5",
-            r"drum_(\d+).vtk"
-
-        )
-    }
 
 }// ENd PyData
+
+
+#[pyclass(name="Converter")]
+struct PyConverter{}
+
+
+#[pymethods]
+impl PyConverter{
+    #[args(filter="r\"(\\d+).vtk\"")]
+    #[staticmethod]
+    fn vtk(
+        filenames: Vec<&str>,
+        timestep: f64,
+        outname: &str,
+        filter: &str, // example r"vtk_(\d+).vtk"
+    ){
+        base::vtk(filenames,timestep,outname,filter);
+    }
+}
+
 
 /// A Python module implemented in Rust. The name of this function must match
 /// the `lib.name` setting in the `Cargo.toml`, else Python will not be able to
@@ -159,5 +166,6 @@ impl PyData {
 fn upppp_rust(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<PyData>()?;
     m.add_class::<PyGrid>()?;
+    m.add_class::<PyConverter>()?;
     Ok(())
 }

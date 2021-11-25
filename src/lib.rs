@@ -34,7 +34,6 @@ use datamanager::{GlobalStats,Manager,TData,PData};
 use base::{PyGrid,Selector,ParticleSelector};
 
 
-
 #[pyclass(name="Data")]
 struct PyData {
     data: Box<dyn Manager + Send>,

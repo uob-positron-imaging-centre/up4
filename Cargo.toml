@@ -15,7 +15,8 @@ hdf5 = {git="https://github.com/aldanor/hdf5-rust.git"}
 ndarray = "0.15"
 ndarray-stats="0.5.0"
 derive-getters = "0.2.0"
-plotly = "0.6.0"
+#plotly = "0.6.0"
+plotly = {path = "../Rust/plotly/plotly"}
 dyn-clone = "1.0"
 #num-traits = "0.2"
 #ndarray-linalg = "0.12"

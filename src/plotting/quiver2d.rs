@@ -1,13 +1,13 @@
 //! Plots 2D quivers given a grid of arrow starting positions and corresponding vector components
 //! This code adapts the quiver plot from plotly.py, improving both the speed of execution and arrow
-//! visual appearance.
+//! visual appearance and the speed of execution.
 use ndarray;
 use itertools;
 use itertools::izip;
 use ndarray::prelude::*;
 use std::f64::consts::PI;
-use plotly::common::{Fill, Line, Marker, Mode, Title};
-use plotly::layout::{Axis, Layout};
+use plotly::common::{Fill, Line, Mode};
+use plotly::layout::{Layout};
 use plotly::{NamedColor, Plot, Scatter};
 use core::panic;
 
@@ -38,7 +38,7 @@ pub enum ScaleMode{
 
 impl ArrowData {
 //constructor for ArrowData struct
-    pub fn new(x:Array2<f64>, y:Array2<f64>, u:Array2<f64>, v:Array2<f64>, scale_mode: ScaleMode) -> ArrowData {
+    pub fn new(x:Array2<f64>, y:Array2<f64>, u:Array2<f64>, v:Array2<f64>, scale_mode: ScaleMode) -> ArrowData { //TODO: add Options struct that contains either bounds input tuple that enforces max and min size or just do nothing
         //supercede the default error message for shape mismatch as it doesn't identify the offending array
         assert!(&x.dim() == &y.dim(),"Array dimension mismatch!\nx has dimensions {:?}\ny has dimensions {:?}", &x.dim(), &y.dim());
         assert!(&x.dim() == &u.dim(),"Array dimension mismatch!\nx has dimensions {:?}\nu has dimensions {:?}", &x.dim(), &u.dim());
@@ -107,7 +107,7 @@ pub fn quiver_barbs(data: &ArrowData) -> (Vec<(f64, f64)>, Vec<(f64, f64)>) {
     return (barb_x, barb_y)
 }
 
-pub fn gen_quiver_arrows(data: &ArrowData) -> (Vec<(f64, f64, f64, f64)>, Vec<(f64, f64, f64, f64)>) {
+pub fn gen_quiver_arrows(data: &ArrowData) -> (Vec<(f64, f64, f64)>, Vec<(f64, f64, f64)>) {
 //gen the list of x and y values to plot arrows
     
     //default angle is pi/9
@@ -116,8 +116,7 @@ pub fn gen_quiver_arrows(data: &ArrowData) -> (Vec<(f64, f64, f64, f64)>, Vec<(f
     //let default scale be 0.5
     const ARROW_SCALE: f64 = 0.5;
     
-    //length is simply (x+u) - x = u etc
-    //TODO add scaling options/ match what happens to the actual arrow length   
+    //length is simply (x+u) - x = u etc   
     let arrow_len: Array1<f64> = izip!(&data.vdata,&data.udata).map(|(u,v)| f64::hypot(*u,*v)).collect::<Array1<f64>>()*ARROW_SCALE; 
     
     // get barb angles
@@ -148,20 +147,19 @@ pub fn gen_quiver_arrows(data: &ArrowData) -> (Vec<(f64, f64, f64, f64)>, Vec<(f
     //finally, combine this data into something usable
     let mut arrow_x = Vec::new();
     let mut arrow_y = Vec::new();
-    const NAN: f64 = f64::NAN;
     
     for (start, mid, end) in izip!(point_1_x, point_2_x, &data.xdata_end) {
-        let tup: (f64, f64, f64, f64) = (start, NAN, mid, *end);
+        let tup: (f64, f64, f64) = (start, mid, *end);
         arrow_x.push(tup);    
     }
     for (start, mid, end) in izip!(point_1_y, point_2_y, &data.ydata_end) {
-        let tup: (f64, f64, f64, f64) = (start, NAN, mid, *end);
+        let tup: (f64, f64, f64) = (start, mid, *end);
         arrow_y.push(tup);    
     }
     return (arrow_x, arrow_y)
 }
 
-pub fn plot_arrows(data: ArrowData) -> Vec<Box<Scatter<f64,f64>>>  {
+pub fn trace_arrows(data: ArrowData) -> Vec<Box<Scatter<f64,f64>>>  {
      let (barb_x, barb_y) = quiver_barbs(&data);
      let (arrow_x, arrow_y) = gen_quiver_arrows(&data);
      let mut traces = Vec::new();
@@ -171,16 +169,14 @@ pub fn plot_arrows(data: ArrowData) -> Vec<Box<Scatter<f64,f64>>>  {
         let xpl = vec![x_line.0, 
                        x_line.1, 
                        x_head.0,
-                       //x_head.1,
-                       x_head.2,
-                       x_head.3];
+                       x_head.1,
+                       x_head.2];
                        
         let ypl = vec![y_line.0, 
                        y_line.1, 
                        y_head.0,
-                       //y_head.1,
-                       y_head.2,
-                       y_head.3];
+                       y_head.1,
+                       y_head.2];
 
         let trace = Scatter::new(xpl, ypl)
                         .mode(Mode::Lines)
@@ -205,6 +201,6 @@ pub fn plot(traces:Vec<Box<Scatter<f64,f64>>>, layout:Layout) -> Plot {
         plot.add_trace(trace);
     }
     plot.set_layout(layout);
-    return (plot)
+    return plot
 }
 

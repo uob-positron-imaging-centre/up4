@@ -8,7 +8,7 @@
  this skript tests given functions and returns its speed and
  if it failed or not
 """
-import uPPPP as p
+import up4 as p
 import time
 import numpy as np
 from glob import glob

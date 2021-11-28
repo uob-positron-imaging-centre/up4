@@ -39,7 +39,7 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 setup(
-    name="uPPPP",
+    name="up4",
     version="0.1.0",
     author = (
         "Dominik Werner <d.wer2@gmx.de>"
@@ -59,7 +59,7 @@ setup(
     description = "analysing toolset for particle data",
     long_description = long_description,
     long_description_content_type = "text/markdown",
-    packages=["uPPPP"],
+    packages=["up4"],
     rust_extensions=[RustExtension("upppp_rust",features = features ,binding=Binding.PyO3)],
     install_requires=install_requires,
     setup_requires=setup_requires,

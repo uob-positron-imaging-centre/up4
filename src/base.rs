@@ -6,6 +6,9 @@
 pub mod grid;
 pub use grid::*;
 
-/// Module that implements the `ParticleSelector`, a struct deciding if a particle is valid or not 
+/// Module that implements the `ParticleSelector`, a struct deciding if a particle is valid or not
 pub mod particleselector;
 pub use particleselector::*;
+
+pub mod converter;
+pub use converter::*;

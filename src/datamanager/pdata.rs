@@ -390,7 +390,7 @@ impl DataManager for PData {
 
     fn global_stats(&self)-> GlobalStats {
         let dimensions = self.file
-            .dataset("dimensions")
+            .attr("dimensions")
             .expect(&format!(
                 "Can not find dataset \"dimensions\" in HDF5 file \"{:?}\"",
                 self.file.filename()

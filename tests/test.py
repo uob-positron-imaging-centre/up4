@@ -11,11 +11,31 @@
 import uPPPP as p
 import time
 import numpy as np
-
-
+from glob import glob
+import pytest
+from natsort import natsorted as sorted
 # add your function to this command list
 cmds=[]
 
+def test_vtkio():
+    # wrong filenames:
+    filenames = glob("fixtures/post/drum*.vtk")
+    try:
+        p.Converter.vtk(filenames, 1e-5, "fixtures/drum.hdf5")
+    except:
+        print("Test failed successfully!")
+    filenames = sorted([x for x in glob("fixtures/post/drum*.vtk") if not "bound" in x])
+    #wrong filter:
+    try:
+        p.Converter.vtk(filenames, 1e-5, "fixtures/drum.hdf5",r"a(\d+).test")
+    except:
+        print("Test failed successfully!")
+    #right filter:
+    p.Converter.vtk(filenames, 1e-5, "fixtures/drum.hdf5")
+    # test created dataset
+    data = p.Data.from_tdata("fixtures/drum.hdf5")
+    test_vectorfield(data)
+#cmds.append(test_vtkio)
 
 def test_vectorfield(data):
     grid = p.Grid.create2d(
@@ -43,6 +63,7 @@ def test_mean_velocity_showcase(data):
 cmds.append(test_mean_velocity_showcase)
 
 
+
 def test(data):
     result=[]
     for cmd in cmds:
@@ -68,10 +89,11 @@ def test(data):
 
 
 if __name__=="__main__":
+    test_vtkio()
     print("Testing Simulation Data")
     data = p.Data.from_tdata("fixtures/drum.hdf5")
     test(data)
-
+    exit()
     print("\n\nTesting Experimental Data")
     data = p.Data.from_pdata("fixtures/HSM_Glass_2l_250.hdf5")
     test(data)

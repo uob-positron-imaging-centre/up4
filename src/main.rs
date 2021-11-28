@@ -1,6 +1,7 @@
 mod datamanager;
 use std::time::{Duration, Instant};
 mod base;
+
 pub mod utilities;
 pub mod functions;
 use functions::Granular;

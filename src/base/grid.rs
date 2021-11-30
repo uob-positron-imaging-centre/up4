@@ -14,6 +14,8 @@ use std::fmt::Debug;
 use std::any::Any;
 use derive_getters::Getters;
 use dyn_clone::{clone_trait_object, DynClone};
+
+mod grid2dpolar;
 /// Provides a generic way to send ranges to nD-Grid struct.
 ///
 /// Each Dimenion is defined by n - tuples of n*2 numbers to define the range in each dimension

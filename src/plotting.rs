@@ -1,9 +1,6 @@
-//! Parent Module for plotting functions that keeps them organised within the
-//! base module
+//! Parent Module for plotting functions
 
-// Module for creating 2D quiver plots
-pub mod quiver2d;
+/// Module for creating 2D quiver plots
+pub mod vector2d;
 
-pub mod quiver3d;
-
-pub mod slice3d;
+pub mod vector3d;

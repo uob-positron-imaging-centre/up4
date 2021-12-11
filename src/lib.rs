@@ -14,8 +14,7 @@
 //!    but few particles such as [PEPT](https://www.birmingham.ac.uk/research/activity/physics/particle-nuclear/positron-imaging-centre/positron-emission-particle-tracking-pept/pept-overview.aspx)
 //! - **`TData`**: A timestep based saving of data, for simulational data from different engines such
 //!    as [LIGGGHTS](https://www.cfdem.com/liggghtsr-open-source-discrete-element-method-particle-simulation-code)
-//!
-//
+
 
 
 
@@ -31,14 +30,16 @@ pub mod datamanager;
 pub mod base;
 mod utilities;
 use datamanager::{GlobalStats,Manager,TData,PData};
-use base::{PyGrid,Selector,ParticleSelector};
+use base::{Grid,Selector,ParticleSelector};
+pub mod plotting;
 
-
+/*
 #[pyclass(name="Data")]
 struct PyData {
     data: Box<dyn Manager + Send>,
     selector: Box<dyn Selector + Send>,
 }
+
 
 
 #[pymethods]
@@ -68,31 +69,14 @@ impl PyData {
     ) {
         self.data.stats();
     }
-    #[staticmethod]
-    fn line_and_scatter_plot() -> String{
-        let trace1 = Scatter::new(vec![1, 2, 3, 4], vec![10, 15, 13, 17])
-            .name("trace1")
-            .mode(Mode::Markers);
-        let trace2 = Scatter::new(vec![2, 3, 4, 5], vec![16, 5, 11, 9])
-            .name("trace2")
-            .mode(Mode::Lines);
-        let trace3 = Scatter::new(vec![1, 2, 3, 4], vec![12, 9, 15, 12]).name("trace3");
 
-        let mut plot= Plot::new();
-        plot.add_trace(trace1);
-        plot.add_trace(trace2);
-        plot.add_trace(trace3);
-        plot.show();
-        let string = plot.to_json();
-        string
-    }
 
 
     #[args(norm_on=false, axis=0)]
     fn vectorfield<'py>(
         &mut self,
         _py: Python<'py>,
-        grid: PyGrid,
+        grid: Grid,
         norm_on: bool,                       //normalise the size of the vectors
         axis: usize,
     ) -> (
@@ -118,9 +102,63 @@ impl PyData {
             sx.into_pyarray(_py).to_dyn(),
             sy.into_pyarray(_py).to_dyn(),
         )
-    }
+    }//End vectorfield
 
+    fn mean_velocity_showcase<'py>(
+        &mut self,
+        _py: Python<'py>,
+    ) -> f64
+     {
+        print_debug!("Starting mean velocity calculation on dataset ");
+        let selector: &ParticleSelector = match self.selector.as_any().downcast_ref::<ParticleSelector>(){
+            Some(b) => b,
+            None => panic!("Can not convert PyGrid to Grid1D as ")
+        };
+        let mean_velocity = self.data.mean_velocity_showcase(
+            selector
+        );
+        // return
+        mean_velocity
+    }//End mean_velocity
+
+    fn mean_velocity<'py>(
+        &mut self,
+        _py: Python<'py>,
+    ) -> f64 {
+        print_debug!("Starting mean velocity calculation on dataset");
+        let selector: &ParticleSelector = match self.selector.as_any().downcast_ref::<ParticleSelector>(){
+            Some(b) => b,
+            None => panic!("Can not convert PyGrid to Grid1D as ")
+        };
+        let mean_velocity = self.data.mean_velocity(
+            selector
+        );
+        // return
+        mean_velocity
+    }//End mean_velocity
+
+
+}// ENd PyData
+
+
+#[pyclass(name="Converter")]
+struct PyConverter{}
+
+
+#[pymethods]
+impl PyConverter{
+    #[args(filter="r\"(\\d+).vtk\"")]
+    #[staticmethod]
+    fn vtk(
+        filenames: Vec<&str>,
+        timestep: f64,
+        outname: &str,
+        filter: &str, // example r"vtk_(\d+).vtk"
+    ){
+        base::vtk(filenames,timestep,outname,filter);
+    }
 }
+
 
 /// A Python module implemented in Rust. The name of this function must match
 /// the `lib.name` setting in the `Cargo.toml`, else Python will not be able to
@@ -129,5 +167,7 @@ impl PyData {
 fn upppp_rust(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<PyData>()?;
     m.add_class::<PyGrid>()?;
+    m.add_class::<PyConverter>()?;
     Ok(())
 }
+*/

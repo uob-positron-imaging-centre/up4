@@ -33,8 +33,7 @@ use datamanager::{GlobalStats,Manager,TData,PData};
 use base::{Grid,Selector,ParticleSelector};
 pub mod plotting;
 
-/*
-#[pyclass(name="Data")]
+
 struct PyData {
     data: Box<dyn Manager + Send>,
     selector: Box<dyn Selector + Send>,
@@ -76,7 +75,7 @@ impl PyData {
     fn vectorfield<'py>(
         &mut self,
         _py: Python<'py>,
-        grid: Grid,
+        grid: PyGrid,
         norm_on: bool,                       //normalise the size of the vectors
         axis: usize,
     ) -> (
@@ -170,4 +169,3 @@ fn upppp_rust(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<PyConverter>()?;
     Ok(())
 }
-*/

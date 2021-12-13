@@ -8,7 +8,7 @@ use functions::Granular;
 use datamanager::{GlobalStats,DataManager, Manager,Timestep};
 use datamanager::pdata::PData;
 use datamanager::tdata::TData;
-use base::{ParticleSelector,Grid2D,Dim};
+use base::{ParticleSelector,Grid2DPolar,Dim};
 mod quiver_funcs;
 use ndarray::prelude::*;
 use core::panic;
@@ -51,7 +51,7 @@ fn main() {
      const PI: f64 = consts::PI;
      const PTS: f64 = 20.; //number of points
      let now = Instant::now();
-     let mut data = TData::new("test/drum.hdf5");
+     let mut data = TData::new("tests/fixtures/drum.hdf5");
      let grid = Grid2D::new(array![30,30], Dim::TwoD((-0.04,0.04),(-0.04,0.04)));
      let selector = ParticleSelector::new((f64::MIN,f64::MAX),
      vec![f64::MIN,f64::MAX],

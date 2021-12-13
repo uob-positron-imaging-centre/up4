@@ -10,7 +10,7 @@ use crate::{print_debug,print_warning};
 use crate::base::{ParticleSelector};
 use crate::base::particleselector::Selector;
 use std::time::{Duration, Instant};
-const BUFFERSIZE: usize=10000;
+const BUFFERSIZE: usize=20;
 
 #[pyclass]
 pub struct PData{
@@ -25,6 +25,7 @@ pub struct PData{
 
 
 impl PData{
+    ///new conste
     pub fn new(
         filename:&str,
 
@@ -178,7 +179,7 @@ impl PData{
     }
 
     pub fn reset_buffer(){
-
+        //TODO
     }
 
     pub fn update(&mut self,mut range: ( usize, usize) ){
@@ -385,13 +386,11 @@ impl DataManager for PData {
             // use mem::swap to swap it with a option(None)
             &self.buffer[timestep-self.range.0]
         }
-
-
     }
 
     fn global_stats(&self)-> GlobalStats {
         let dimensions = self.file
-            .dataset("dimensions")
+            .attr("dimensions")
             .expect(&format!(
                 "Can not find dataset \"dimensions\" in HDF5 file \"{:?}\"",
                 self.file.filename()
@@ -495,7 +494,7 @@ impl Manager for PData{}
 
 impl Drop for PData {
     fn drop(&mut self){
-        println!("Goodbye :-)");
+        print_debug!("Killing TData.\nGoodbye :-)");
         //self.file.close();
 
     }

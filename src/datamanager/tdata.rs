@@ -196,7 +196,7 @@ impl TData{
             range.1 = timesteps;
         }
         self.buffersize = range.1 - range.0;
-        
+
         let global_stats = self.global_stats();
         let timesteps = *global_stats.timesteps();
         print_debug!("TData: Looping over all particles:");
@@ -397,7 +397,7 @@ impl DataManager for TData {
 
     fn global_stats(&self)-> GlobalStats {
         let dimensions = self.file
-            .dataset("dimensions")
+            .attr("dimensions")
             .expect(&format!(
                 "Can not find dataset \"dimensions\" in HDF5 file \"{:?}\"",
                 self.file.filename()
@@ -500,7 +500,7 @@ impl Manager for TData{}
 
 impl Drop for TData {
     fn drop(&mut self){
-        println!("Goodbye :-)");
+        print_debug!("Killing TData.\nGoodbye :-)");
         //self.file.close();
 
     }

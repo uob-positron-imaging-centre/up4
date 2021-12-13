@@ -34,6 +34,7 @@ use base::{Grid,Selector,ParticleSelector};
 pub mod plotting;
 
 
+#[pyclass(name="Data")]
 struct PyData {
     data: Box<dyn Manager + Send>,
     selector: Box<dyn Selector + Send>,

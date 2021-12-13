@@ -10,8 +10,8 @@ crate-type = ["cdylib","rlib"]
 
 [dependencies]
 numpy = "0.14.0"
-#hdf5 = "0.7.0"
-hdf5 = {git="https://github.com/aldanor/hdf5-rust.git"}
+hdf5 = "0.8.0"
+#hdf5 = {git="https://github.com/aldanor/hdf5-rust.git"}
 ndarray = "0.15"
 ndarray-stats="0.5.0"
 derive-getters = "0.2.0"
@@ -22,6 +22,10 @@ dyn-clone = "1.0"
 #ndarray-linalg = "0.12"
 #em = { git = "https://github.com/calebwin/emu", branch = "master" }
 itertools = "0.10.1"
+regex = "1"
+vtkio ="0.6.0"
+indicatif = "0.17.0-beta.1"
+
 
 [dependencies.pyo3]
 version = ">0.11.1"

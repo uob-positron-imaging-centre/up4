@@ -30,9 +30,8 @@ pub mod datamanager;
 pub mod base;
 mod utilities;
 use datamanager::{GlobalStats,Manager,TData,PData};
-use base::{Grid,Selector,ParticleSelector};
+use base::{Grid,Selector,ParticleSelector, PyGrid};
 pub mod plotting;
-
 
 #[pyclass(name="Data")]
 struct PyData {
@@ -158,7 +157,6 @@ impl PyConverter{
         base::vtk(filenames,timestep,outname,filter);
     }
 }
-
 
 /// A Python module implemented in Rust. The name of this function must match
 /// the `lib.name` setting in the `Cargo.toml`, else Python will not be able to

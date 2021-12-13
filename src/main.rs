@@ -155,12 +155,6 @@ fn main() {
                                       .line(Line::new().color(NamedColor::Blue)); */
     plot.show();
 
-     /*TODO
-
-    3) Add option/enum structs for titles, axis labels and ranges
-    4) Investigate colourbar addition
-      */
-     const PTS: f64 = 20.; //number of points
      let now = Instant::now();
      let mut data = TData::new("test/drum.hdf5");
      let grid = Grid2D::new(array![30,30], Dim::TwoD((-0.04,0.04),(-0.04,0.04)));
@@ -194,7 +188,5 @@ fn main() {
      //let u: Array2<f64> = &x.mapv(f64::sin)*&y.mapv(f64::cos);
      //let v: Array2<f64> = -&y.mapv(f64::sin)*&x.mapv(f64::cos);
      //println!("{:?},{:?},{:?},{:?}",x,y,u,v);
-     let arrows = quiver_funcs::ArrowData::new(x,y,u,v);
-     quiver_funcs::plot_arrows(arrows, PTS);
      println!("End time: {}", now.elapsed().as_millis());
 }

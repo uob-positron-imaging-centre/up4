@@ -4,7 +4,8 @@ use ndarray::prelude::*;
 use ndarray_stats::QuantileExt;
 use crate::{print_debug};
 use std::any::Any;
-
+type position = (f64,f64,f64);
+type polarcoordinates = (f64,f64,f64);
 #[derive(Getters,Clone)]
 pub struct Grid2DPolar{
     cells: Array1<usize>,
@@ -67,6 +68,20 @@ impl  Grid2DPolar{
 
     pub fn data_array<T: Default+Clone>(&self)->Array2<T>{
         Array2::from_elem((self.cells[0] as usize,self.cells[1] as usize),T::default())
+    }
+
+    pub fn transfer_to_polar(self, position: Vec<f64>)-> polarcoordinates{
+        // step 1 : Translate
+        let px = position[0] - self.polarorigin.0;
+        let py = position[1] - self.polarorigin.1;
+        let newz = position[2] - self.polarorigin.2;
+        //step 2 Rotate#
+        let rotation_angle = (self.polarvector.0/self.polarvector.1).atan();
+        let newx = px*rotation_angle.cos()+py*rotation_angle.sin();
+        let newy = -px*rotation_angle.sin()+py*rotation_angle.cos();
+        let r = (newx*newx+newy*newy).sqrt();
+        let phi= newx.atan2(newy);
+        (r, phi, newz)
     }
 }
 

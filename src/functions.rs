@@ -275,6 +275,24 @@ pub fn meshgrid(
     return (xx, yy);
 }
 
+pub fn meshgrid3d(x: ndarray::Array1<f64>,
+    y: ndarray::Array1<f64>,
+    z: ndarray::Array1<f64>) -> (ndarray::Array3<f64>, ndarray::Array3<f64>, ndarray::Array3<f64>) {
+        let mut xx = ndarray::Array3::<f64>::zeros((x.len(),y.len(),z.len()));
+        let mut yy = ndarray::Array3::<f64>::zeros((x.len(),y.len(),z.len()));
+        let mut zz = ndarray::Array3::<f64>::zeros((x.len(),y.len(),z.len()));
+        for idx in 0..x.len() {
+            for idy in 0..y.len() {
+                for idz in 0..z.len() {
+                    xx[[idx, idy, idz]] = x[idx];
+                    yy[[idx, idy, idz]] = y[idy];
+                    zz[[idx, idy, idz]] = z[idz];
+                }
+            }
+        }
+        return (xx, yy, zz);
+    }
+
 /// calculates the cartesian norm of 3 velocity Vectors
 /// representative for the velocity in x,y and z direction
 fn norm_two(arr1: &Array2<f64>, arr2: &Array2<f64>) -> Array2<f64> {

@@ -51,7 +51,7 @@ pub enum BoundMode{
     Min(f64),
     Max(f64),
     Minmax((f64,f64)),
-    Node,
+    Node(f64),
     None,
 }
 
@@ -212,11 +212,10 @@ impl ArrowData {
 
     /// Constrain all arrows to lie within circle of radius dx/2 from each node.
     /// On a non-uniform grid, this *will* distort the plot.
-    pub fn node_bound(mut self, arrow_len: Array1<f64>) -> ArrowData {
-        let dx = (self.xdata[0] - self.xdata[1]).abs();
+    pub fn node_bound(mut self, dx: &f64, arrow_len: Array1<f64>) -> ArrowData {
         //println!("{},{},{}",self.xdata[1], self.xdata[2], dx);
-        self.udata *= 0.5*dx/arrow_len.max().unwrap();
-        self.vdata *= 0.5*dx/arrow_len.max().unwrap();
+        self.udata *= 0.5* *dx/arrow_len.max().unwrap();
+        self.vdata *= 0.5* *dx/arrow_len.max().unwrap();
         self.xdata_end = &self.xdata + &self.udata;
         self.ydata_end = &self.ydata + &self.vdata;
         return self
@@ -242,8 +241,8 @@ impl ArrowData {
             },
             
             //Note, this is  only valid for uniform grids
-            BoundMode::Node => {
-                let data_bounded: ArrowData = self.node_bound(arrow_len);
+            BoundMode::Node(dx) => {
+                let data_bounded: ArrowData = self.node_bound(&dx,arrow_len);
                 return data_bounded
             },
             //Do nothing as no bounds are requested

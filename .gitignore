@@ -8,3 +8,5 @@ src/functions_gpu.rs_old
 tests/fixtures/drum.hdf5
 tests/text.txt
 .idea
+up4.egg-info
+build

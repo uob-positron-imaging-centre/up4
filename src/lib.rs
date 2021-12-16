@@ -28,10 +28,11 @@ use plotly::{Plot, Scatter};
 mod functions;
 pub mod datamanager;
 pub mod base;
-mod utilities;
+pub mod utilities;
 use datamanager::{GlobalStats,Manager,TData,PData};
 use base::{Grid,Selector,ParticleSelector, PyGrid};
 pub mod plotting;
+
 
 #[pyclass(name="Data")]
 struct PyData {

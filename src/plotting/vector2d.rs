@@ -109,29 +109,21 @@ pub struct ArrowData {
 
 impl ArrowData {
     ///constructor for ArrowData struct
-    pub fn new(x:Array2<f64>, y:Array2<f64>, u:Array2<f64>, v:Array2<f64>, scale_mode: ScaleMode) -> ArrowData { //TODO: add Options struct that contains either bounds input tuple that enforces max and min size or just do nothing
+    pub fn new(x:Array2<f64>, y:Array2<f64>, u:Array2<f64>, v:Array2<f64>, scale_mode: ScaleMode) -> ArrowData { 
         //supercede the default error message for shape mismatch as it doesn't identify the offending array
         assert!(&x.dim() == &y.dim(),"Array dimension mismatch!\nx has dimensions {:?}\ny has dimensions {:?}", &x.dim(), &y.dim());
         assert!(&x.dim() == &u.dim(),"Array dimension mismatch!\nx has dimensions {:?}\nu has dimensions {:?}", &x.dim(), &u.dim());
         assert!(&x.dim() == &v.dim(),"Array dimension mismatch!\nx has dimensions {:?}\nv has dimensions {:?}", &x.dim(), &v.dim());
         return ArrowData {
-        xdata: ArrowData::flatten(&x),
-        ydata: ArrowData::flatten(&y),
-        udata: ArrowData::flatten(&ArrowData::scale(&scale_mode,&u)), 
-        vdata: ArrowData::flatten(&ArrowData::scale(&scale_mode,&v)),
-        xdata_end: ArrowData::flatten(&x) + ArrowData::flatten(&ArrowData::scale(&scale_mode,&u)), 
-        ydata_end: ArrowData::flatten(&y) + ArrowData::flatten(&ArrowData::scale(&scale_mode,&v))
+        xdata: flatten_2d(&x),
+        ydata: flatten_2d(&y),
+        udata: flatten_2d(&ArrowData::scale(&scale_mode,&u)), 
+        vdata: flatten_2d(&ArrowData::scale(&scale_mode,&v)),
+        xdata_end: flatten_2d(&x) + flatten_2d(&ArrowData::scale(&scale_mode,&u)), 
+        ydata_end: flatten_2d(&y) + flatten_2d(&ArrowData::scale(&scale_mode,&v))
             }
     }
     
-    /// Flattens a 2D array into a 1D array. This is called automatically by ``` ArrowData::new()```.
-    fn flatten(arr:&Array2<f64>) -> Array1<f64>{
-        return arr.slice(s![0..arr.shape()[0], 0..arr.shape()[1]]) //create slice of all elements
-                .iter() //create iterable
-                .copied() //iterate through
-                .collect::<Array1<f64>>() //collect into array
-    }
-
     /// Performs scaling as determined by ScaleMode enum value.
     fn scale(scale_mode: &ScaleMode, arr:&Array2<f64>) ->  Array2<f64> {
             //use match enum to decide whether to apply global, elementwise, default or no arrow scaling

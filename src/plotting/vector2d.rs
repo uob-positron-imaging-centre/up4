@@ -12,7 +12,7 @@ use plotly::common::{Fill, Line, Mode};
 use plotly::{NamedColor, Plot, Scatter};
 use core::panic;
 use ndarray_stats::QuantileExt;
-
+use crate::utilities::maths::flatten_2d;
 
 /// Set required scaling mode for arrow lengths.
 /// 

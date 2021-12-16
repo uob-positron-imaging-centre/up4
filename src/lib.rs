@@ -33,7 +33,7 @@ use datamanager::{GlobalStats,Manager,TData,PData};
 use base::{Grid,Selector,ParticleSelector, PyGrid};
 pub mod plotting;
 
-/*
+
 
 #[pyclass(name="Data")]
 struct PyData {
@@ -171,4 +171,3 @@ fn upppp_rust(_py: Python, m: &PyModule) -> PyResult<()> {
     Ok(())
 }
 
-*/

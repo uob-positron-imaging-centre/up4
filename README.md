@@ -24,4 +24,43 @@ you will need a rust compiler, see:
 
 https://www.rust-lang.org/tools/install
 
-Rust dependencys will be installed automatically before compilation
+Rust dependencies will be installed automatically before compilation
+
+
+### Project to-do list
+- [ ] HDF5 converter
+    - [x] VTK -> HDF5
+    - [ ] CSV -> HDF5
+    - [ ] TXT -> HDF5
+    - [ ] XLSX -> HDF5
+- [ ] Plotting utilities
+  - [ ] Vector plots
+    - [ ] 2D
+    - [ ] 3D
+  - [ ] Heatmaps
+  - [ ] Contour plots
+  - [ ] Slice plots
+  - [ ] Distributions
+  - [ ] Parity plots
+  - [ ] Recipes for above plots
+- [ ] Vectorfield functions
+  - [ ] Grid
+    - [ ] Euler grid
+    - [ ] Lagrange grid
+- [ ] Equipment specific functions (or recipes?)
+  - [ ] Rotating drum
+  - [ ] Mills
+  - [ ] Fluidised beds
+- [ ] Generic particle functions (see old upppp)
+  - [ ] Granular temperature distribution
+  - [ ] Velocity distribution
+- [ ] Documentation
+  - [ ] Agree standards
+  - [ ] Python
+    - [ ] Configure Sphinx
+    - [ ] Link rust docs (if possible)
+  - [ ] Rust
+- [ ] DEM contact list functions
+  - [ ] Energy dissipated
+  - [ ] Collision modes
+  - [ ] Mobilised contacts (where muFn < Ft)

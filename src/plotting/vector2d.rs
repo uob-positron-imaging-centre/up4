@@ -8,11 +8,13 @@ use itertools;
 use itertools::izip;
 use ndarray::prelude::*;
 use std::f64::consts::PI;
-use plotly::common::{Fill, Line, Mode};
-use plotly::{NamedColor, Plot, Scatter};
+use plotly::common::{ColorScalePalette, Fill, Line, Mode, Marker, ColorScale, ColorBar};
+use plotly::{Plot, Scatter};
+use plotly::layout::{Axis, Layout};
 use core::panic;
 use ndarray_stats::QuantileExt;
-use crate::utilities::maths::flatten_2d;
+use crate::utilities::maths::{flatten_2d, minmax};
+use colorous::Gradient;
 
 /// Set required scaling mode for arrow lengths.
 /// 
@@ -105,6 +107,8 @@ pub struct ArrowData {
     vdata: Array1<f64>,
     xdata_end: Array1<f64>,
     ydata_end: Array1<f64>,
+    normdata_scaled: Array1<f64>,
+    normdata_abs: Array1<f64>,
 }
 
 impl ArrowData {
@@ -114,13 +118,21 @@ impl ArrowData {
         assert!(&x.dim() == &y.dim(),"Array dimension mismatch!\nx has dimensions {:?}\ny has dimensions {:?}", &x.dim(), &y.dim());
         assert!(&x.dim() == &u.dim(),"Array dimension mismatch!\nx has dimensions {:?}\nu has dimensions {:?}", &x.dim(), &u.dim());
         assert!(&x.dim() == &v.dim(),"Array dimension mismatch!\nx has dimensions {:?}\nv has dimensions {:?}", &x.dim(), &v.dim());
+        let xdata = flatten_2d(&x);
+        let ydata = flatten_2d(&y);
+        let udata = flatten_2d(&ArrowData::scale(&scale_mode,&u));
+        let vdata = flatten_2d(&ArrowData::scale(&scale_mode,&v));
+        let xdata_end = &xdata + &udata;
+        let ydata_end = &ydata + &vdata;
         return ArrowData {
-        xdata: flatten_2d(&x),
-        ydata: flatten_2d(&y),
-        udata: flatten_2d(&ArrowData::scale(&scale_mode,&u)), 
-        vdata: flatten_2d(&ArrowData::scale(&scale_mode,&v)),
-        xdata_end: flatten_2d(&x) + flatten_2d(&ArrowData::scale(&scale_mode,&u)), 
-        ydata_end: flatten_2d(&y) + flatten_2d(&ArrowData::scale(&scale_mode,&v))
+            normdata_scaled: izip!(&udata,&vdata).map(|(u,v)| f64::hypot(*u,*v)).collect::<Array1<f64>>(),
+            normdata_abs: izip!(&u,&v).map(|(u,v)| f64::hypot(*u,*v)).collect::<Array1<f64>>(),
+            xdata: xdata,
+            ydata: ydata,
+            udata: udata,
+            vdata: vdata,
+            xdata_end: xdata_end, 
+            ydata_end: ydata_end,
             }
     }
     
@@ -128,27 +140,23 @@ impl ArrowData {
     fn scale(scale_mode: &ScaleMode, arr:&Array2<f64>) ->  Array2<f64> {
             //use match enum to decide whether to apply global, elementwise, default or no arrow scaling
             match scale_mode{
-                /// Apply single scaling factor to all elements.
                 ScaleMode::Global(scale_factor) => {
                     let scale_factor = *scale_factor;
                     return arr*scale_factor
                 },
                 
-                /// Apply an array of scale factors to elements.
                 ScaleMode::Elementwise(scale_array) => {
                     let scale_array = scale_array;
                     println!("original\n{:?})", arr);
                     println!("scaled\n{:?}", arr*scale_array) ;
                     return arr*scale_array
                 },
-            
-                /// Apply default scaling, equivalent to ``` ScaleMode::Global(0.3)```
+               
                 ScaleMode::Default => { 
                     let default_scale = 0.3;
                     return arr*default_scale
                 },
 
-                /// Apply no scaling.
                 ScaleMode::None => {
                     //perform no scaling
                     return arr*1.0
@@ -157,100 +165,108 @@ impl ArrowData {
         }
     
     /// Set minimum length for arrows.    
-    pub fn min_bound(mut self, min: &f64, mut arrow_len: Array1<f64>) -> ArrowData {
-        for i in 0..arrow_len.len_of(Axis(0)) {
-            if arrow_len[i] < *min {
-                arrow_len[i] = min/arrow_len[i];
+    pub fn min_bound(mut self, min: &f64) -> ArrowData {
+        for i in 0..self.normdata_scaled.len_of(Axis(0)) {
+            if self.normdata_scaled[i] < *min {
+                self.normdata_scaled[i] = min/self.normdata_scaled[i];
             }
             else {
-                arrow_len[i] = 1.;
+                self.normdata_scaled[i] = 1.;
             }
         }
-        self.udata *= &arrow_len;
-        self.vdata *= &arrow_len;
+        self.udata *= &self.normdata_scaled;
+        self.vdata *= &self.normdata_scaled;
         self.xdata_end = &self.xdata + &self.udata;
         self.ydata_end = &self.ydata + &self.vdata;
+        self.normdata_scaled = izip!(&self.udata,&self.vdata).map(|(u,v)| f64::hypot(*u,*v)).collect::<Array1<f64>>();
         return self
         }
 
     /// Set maximum length for arrows.
-    pub fn max_bound(mut self, max: &f64, mut arrow_len: Array1<f64>) -> ArrowData {
-        for i in 0..arrow_len.len_of(Axis(0)) {
-            if arrow_len[i] > *max {
-               arrow_len[i] = max/arrow_len[i];
+    pub fn max_bound(mut self, max: &f64) -> ArrowData {
+        for i in 0..self.normdata_scaled.len_of(Axis(0)) {
+            if self.normdata_scaled[i] > *max {
+                self.normdata_scaled[i] = max/self.normdata_scaled[i];
             }
             else {
-                arrow_len[i] = 1.;
+                self.normdata_scaled[i] = 1.;
             }
         }
-        self.udata *= &arrow_len;
-        self.vdata *= &arrow_len;
+        self.udata *= &self.normdata_scaled;
+        self.vdata *= &self.normdata_scaled;
         self.xdata_end = &self.xdata + &self.udata;
         self.ydata_end = &self.ydata + &self.vdata;
+        self.normdata_scaled = izip!(&self.udata,&self.vdata).map(|(u,v)| f64::hypot(*u,*v)).collect::<Array1<f64>>();
         return self
     }
 
     /// Set minimum and maximum lengths for arrows.
-    pub fn min_max_bound(mut self, min: &f64, max: &f64, mut arrow_len: Array1<f64>) -> ArrowData {
-        for i in 0..arrow_len.len_of(Axis(0)) {
-            if arrow_len[i] > *max {
-                arrow_len[i] = max/arrow_len[i];
+    pub fn min_max_bound(mut self, min: &f64, max: &f64) -> ArrowData {
+        for i in 0..self.normdata_scaled.len_of(Axis(0)) {
+            if self.normdata_scaled[i] > *max {
+                self.normdata_scaled[i] = max/self.normdata_scaled[i];
             }
-            else if arrow_len[i] < *min {
-                arrow_len[i] = min/arrow_len[i];
+            else if self.normdata_scaled[i] < *min {
+                self.normdata_scaled[i] = min/self.normdata_scaled[i];
             }
             else {
-                arrow_len[i] = 1.;
+                self.normdata_scaled[i] = 1.;
             }
         }
-        self.udata *= &arrow_len;
-        self.vdata *= &arrow_len;
+        self.udata *= &self.normdata_scaled;
+        self.vdata *= &self.normdata_scaled;
         self.xdata_end = &self.xdata + &self.udata;
         self.ydata_end = &self.ydata + &self.vdata;
+        self.normdata_scaled = izip!(&self.udata,&self.vdata).map(|(u,v)| f64::hypot(*u,*v)).collect::<Array1<f64>>();
         return self
     }
 
     /// Constrain all arrows to lie within circle of radius dx/2 from each node.
     /// On a non-uniform grid, this *will* distort the plot.
-    pub fn node_bound(mut self, dx: &f64, arrow_len: Array1<f64>) -> ArrowData {
-        //println!("{},{},{}",self.xdata[1], self.xdata[2], dx);
-        self.udata *= 0.5* *dx/arrow_len.max().unwrap();
-        self.vdata *= 0.5* *dx/arrow_len.max().unwrap();
+    pub fn node_bound(mut self, dx: &f64) -> ArrowData {
+        self.udata *= 0.5* *dx/self.normdata_scaled.max().unwrap();
+        self.vdata *= 0.5* *dx/self.normdata_scaled.max().unwrap();
         self.xdata_end = &self.xdata + &self.udata;
         self.ydata_end = &self.ydata + &self.vdata;
+        self.normdata_scaled = izip!(&self.udata,&self.vdata).map(|(u,v)| f64::hypot(*u,*v)).collect::<Array1<f64>>();
         return self
     }
 
     /// Apply bounds to arrows based on BoundMode enum value.
     pub fn bound(self, bound_mode: BoundMode) -> ArrowData {
-        let arrow_len: Array1<f64> = izip!(&self.udata,&self.vdata).map(|(u,v)| f64::hypot(*u,*v)).collect::<Array1<f64>>();
         match bound_mode{
             BoundMode::Min(min) => {
-                let data_bounded: ArrowData = self.min_bound(&min, arrow_len);
+                let mut data_bounded: ArrowData = self.min_bound(&min);
                 return data_bounded
             },
 
             BoundMode::Max(max) => {
-                let data_bounded: ArrowData = self.max_bound(&max, arrow_len);
+                let data_bounded: ArrowData = self.max_bound(&max);
                 return data_bounded
             },
 
             BoundMode::Minmax((min,max)) => {
-                let data_bounded: ArrowData = self.min_max_bound(&min, &max, arrow_len);
+                let data_bounded: ArrowData = self.min_max_bound(&min, &max);
                 return data_bounded
             },
             
             //Note, this is  only valid for uniform grids
             BoundMode::Node(dx) => {
-                let data_bounded: ArrowData = self.node_bound(&dx,arrow_len);
+                let data_bounded: ArrowData = self.node_bound(&dx);
                 return data_bounded
             },
             //Do nothing as no bounds are requested
             BoundMode::None => { 
-                let data_bounded: ArrowData = self; 
-                return data_bounded
+                return self
             },
         } 
+    }
+
+    /// Convert u and v into unit vectors
+    pub fn normalise(mut self) -> ArrowData{
+        self.udata /= &self.normdata_scaled;
+        self.vdata /= &self.normdata_scaled;
+        return self
     }
 }
     
@@ -303,14 +319,14 @@ pub fn quiver_barbs(data: &ArrowData) -> (Vec<(f64, f64)>, Vec<(f64, f64)>) {
 /// let arrow_scale = Some(0.3);
 /// let (arrow_x, arrow_y) = vector2d::gen_quiver_arrows(data, arrow_scale);
 /// ```
-pub fn gen_quiver_arrows(data: ArrowData, arrow_scale: Option<f64>) -> (Vec<(f64, f64, f64)>, Vec<(f64, f64, f64)>) {
+pub fn gen_quiver_arrows(data: &ArrowData, arrow_scale: Option<f64>) -> (Vec<(f64, f64, f64)>, Vec<(f64, f64, f64)>) {
 
     const ANGLE: f64 = PI/9.0; 
 
     // default scale is 0.5
     let arr_scale = arrow_scale.unwrap_or(0.5);
     
-    let arrow_len: Array1<f64> = arr_scale*izip!(&data.udata, &data.vdata).map(|(u, v)| f64::hypot(*u,*v)).collect::<Array1<f64>>();
+    let arrow_len: Array1<f64> = arr_scale*&data.normdata_scaled;
     // get barb angles
     let barb_ang: Array1<f64> = izip!(&data.vdata, &data.udata).map(|(v,u)| f64::atan2(*v,*u)).collect::<Array1<f64>>();
     
@@ -351,6 +367,25 @@ pub fn gen_quiver_arrows(data: ArrowData, arrow_scale: Option<f64>) -> (Vec<(f64
     return (arrow_x, arrow_y)
 }
 
+fn normalise_colour(data: &ArrowData, colour_bounds: &Option<(f64, f64)>) -> (Array1<f64>, f64, f64) {
+    match colour_bounds {
+        None => {
+            let min = data.normdata_abs.min().unwrap();
+            let max = data.normdata_abs.max().unwrap();
+            let colour_vector = (&data.normdata_abs - *min)/(*max - *min);
+            return (colour_vector, *min, *max)
+        },
+
+        Some((min, max)) => {
+            assert!(min < max, "Max needs to be greater than min!");
+            let min = *min;
+            let max = *max;
+            let colour_vector = (&data.normdata_abs - min)/(max - min);
+            return (colour_vector, min, max)
+        }
+    }
+}
+
 /// Returns ```Plotly::Scatter``` traces for plotting.
 /// 
 /// Inputs:
@@ -370,36 +405,53 @@ pub fn gen_quiver_arrows(data: ArrowData, arrow_scale: Option<f64>) -> (Vec<(f64
 /// let bound_mode = vector2d::BoundMode::None;
 /// let traces = vector2d::trace_arrows(data, arrow_scale, bound_mode);
 /// ```
-pub fn trace_arrows(data: ArrowData, arrow_scale: Option<f64>, bound_mode: BoundMode) -> Vec<Box<Scatter<f64,f64>>>  {
+pub fn trace_arrows_plotly(data: ArrowData, arrow_scale: Option<f64>, bound_mode: BoundMode, colour: Gradient, palette: ColorScalePalette, colour_bounds: Option<(f64, f64)>) -> Vec<Box<Scatter<f64,f64>>>  {
+    let (colour_vector, min, max) = normalise_colour(&data, &colour_bounds);
     let data_bounded = data.bound(bound_mode);
+    println!("{},{}", min, max);
     let (barb_x, barb_y) = quiver_barbs(&data_bounded);
-    let (arrow_x, arrow_y) = gen_quiver_arrows(data_bounded, arrow_scale);
+    let (arrow_x, arrow_y) = gen_quiver_arrows(&data_bounded, arrow_scale);
     let mut traces = Vec::new();
     //unpack the vectors of arrow barbs and heads into new vector containing each arrow as a tuple
-    for (x_line, y_line, x_head, y_head) in izip!(barb_x, barb_y, arrow_x, arrow_y) {
-       let xpl = vec![x_line.0, 
+    for (x_line, y_line, x_head, y_head, c) in izip!(barb_x, barb_y, arrow_x, arrow_y, colour_vector) {
+       let xpl: Vec<f64> = vec![x_line.0, 
                     x_line.1, 
                     x_head.0,
                     x_head.1,
-                    x_head.2];
+                    x_head.2
+                    ];
                        
-        let ypl = vec![y_line.0, 
+        let ypl: Vec<f64> = vec![y_line.0, 
                     y_line.1, 
                     y_head.0,
                     y_head.1,
-                    y_head.2];
-
-        let trace = Scatter::new(xpl, ypl)
-                        .mode(Mode::Lines)
-                        .show_legend(false)
-                        .fill(Fill::ToSelf)
-                        .fill_color(NamedColor::Blue)
-                        .line(Line::new().color(NamedColor::Blue));
-
-        traces.push(trace);
+                    y_head.2
+                    ];
+    //color for trace
+    let color = format!("#{:x}",colour.eval_continuous(c));
+    let trace = Scatter::new(xpl, ypl)
+        .mode(Mode::Lines)
+        .show_legend(false)
+        .fill(Fill::ToSelf)
+        .fill_color(&color)
+        .show_legend(false)
+        .line(Line::new().color(&color));
+    traces.push(trace);
         
     }    
 
+    //create an invisible marker to get the colorbar to appear - use the same map as above
+    let invisible_marker = Scatter::new(vec![data_bounded.xdata[0]],vec![data_bounded.ydata[0]])
+    .mode(Mode::Markers)
+    .marker(Marker::new()
+        .cmin(min) 
+        .cmax(max) 
+        .color_scale(ColorScale::Palette(palette))
+        .color_bar(ColorBar::new())
+        .size(1))
+        .show_legend(false);
+    
+    traces.push(invisible_marker);
     return traces
 }
 
@@ -416,26 +468,23 @@ pub fn trace_arrows(data: ArrowData, arrow_scale: Option<f64>, bound_mode: Bound
 /// 
 /// # Examples
 /// ```
-/// let layout = plotly::layout::Layout::new()
+/// let layout = Layout::new()
 ///                .title("Quiver plot".into());
 /// let mut plot = vector2d::plot(traces, layout, true); 
-pub fn plot(traces:Vec<Box<Scatter<f64,f64>>>, layout:plotly::layout::Layout, square: bool) -> Plot {
+pub fn plot(traces:Vec<Box<Scatter<f64,f64>>>, layout: Layout, square: bool) -> Plot {
     let mut plot = Plot::new();
     //use local render version
     plot.use_local_plotly();
     for trace in traces{
         plot.add_trace(trace);
     }
-
     // if this is true, then perform some additional plotly calls to create
     // a plot where the x and y axes are equal
     if square{
-        let y_axis = plotly::layout::Axis::new()
+        let y_axis = Axis::new()
                 .scale_anchor("x".to_string())
                 .scale_ratio(1.);
-
         let square_layout = layout.y_axis(y_axis);
-        
         plot.set_layout(square_layout);
     } else{
         //plot as-is

@@ -136,6 +136,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
+name = "colorous"
+version = "1.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3709fbbf6c748d84846a3ad0f7b97e6c7acc6126defcebc4b09fb77dce300750"
+
+[[package]]
 name = "console"
 version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -643,9 +649,10 @@ checksum = "58893f751c9b0412871a09abd62ecd2a00298c6c83befa223ef98c52aef40cbe"
 [[package]]
 name = "plotly"
 version = "0.6.0"
-source = "git+https://github.com/DanW97/plotly.git#dd3838cd34fb5a77178e0d422abce02cc278a8f7"
+source = "git+https://github.com/DanW97/plotly.git#e55e15e47319e5c61cafe1dcb47bad95d2d7fd67"
 dependencies = [
  "askama",
+ "ndarray",
  "rand",
  "rand_distr",
  "serde",
@@ -935,6 +942,7 @@ checksum = "f14ee04d9415b52b3aeab06258a3f07093182b88ba0f9b8d203f211a7a7d41c7"
 name = "upppp_rust"
 version = "0.1.0"
 dependencies = [
+ "colorous",
  "derive-getters",
  "dyn-clone",
  "hdf5",

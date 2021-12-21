@@ -1,5 +1,4 @@
 target*
-examples
 pyAnalyser.egg-info
 pyAnalyser/__pycache__
 rustAnalyser.cpython*

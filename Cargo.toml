@@ -16,7 +16,7 @@ ndarray = "0.15"
 ndarray-stats="0.5.0"
 derive-getters = "0.2.0"
 #plotly = "0.6.0"
-plotly = {git="https://github.com/DanW97/plotly.git"}
+plotly = {git="https://github.com/DanW97/plotly.git", features = ["plotly_ndarray"]}
 dyn-clone = "1.0"
 #num-traits = "0.2"
 #ndarray-linalg = "0.12"
@@ -25,7 +25,7 @@ itertools = "0.10.1"
 regex = "1"
 vtkio ="0.6.0"
 indicatif = "0.17.0-beta.1"
-
+colorous = "1.0.5"
 
 [dependencies.pyo3]
 version = "=0.14.5"

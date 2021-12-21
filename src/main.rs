@@ -48,12 +48,8 @@ fn main() {
 
 fn main() {
 
-    let arrow_scale: Option<f64> = None;
-    
-    let layout = plotly::layout::Layout::new();
-    const PI: f64 = consts::PI;
-    const PTS: f64 = 10.; //number of points
-    let valx: Array1<f64> = Array::range(0.,2.*PI+PI/PTS,2.*PI/PTS);
+  
+     /*let valx: Array1<f64> = Array::range(0.,2.*PI+PI/PTS,2.*PI/PTS);
     let valy: Array1<f64> = Array::range(0.,2.*PI+PI/PTS,2.*PI/PTS);
     let valz: Array1<f64> = Array::range(0.,2.*PI+PI/PTS,2.*PI/PTS);
     let (x, y, z) = meshgrid3d(valx,valy, valz);
@@ -69,8 +65,7 @@ fn main() {
     let arrows = vector3d::ConeData::new(x,y,z,u,v,w,vector3d::ScaleMode::Default);
     let mode: BoundMode = BoundMode::None;
     let cone_traces = vector3d::trace_arrows(arrows,arrow_scale, mode);
-    let mut plot = vector3d::plot(cone_traces, layout, true);
-    plot.show();
+    let mut plot = vector3d::plot(cone_traces, layout, true); */
     
     
 
@@ -89,24 +84,6 @@ fn main() {
          1
      );
 
-     //let valx: Array1<f64> = Array::range(0.,2.*PI+PI/PTS,2.*PI/PTS);
-     //let valy: Array1<f64> = Array::range(0.,2.*PI+PI/PTS,2.*PI/PTS);
-     //let (x, y) = meshgrid(valx,valy);
-     /*let x: Array2<f64> = array![[0., 1., 2., 3., 4.],
-                           [0., 1., 2., 3., 4.],
-                           [0., 1., 2., 3., 4.],
-                           [0., 1., 2., 3., 4.],
-                           [0., 1., 2., 3., 4.]];
-
-     let y: Array2<f64> = array![[0., 0., 0., 0., 0.],
-                           [1., 1., 1., 1., 1.],
-                           [2., 2., 2., 2., 2.],
-                           [3., 3., 3., 3., 3.],
-                           [4., 4., 4., 4., 4.]];*/
-
-     //let u: Array2<f64> = &x.mapv(f64::sin)*&y.mapv(f64::cos);
-     //let v: Array2<f64> = -&y.mapv(f64::sin)*&x.mapv(f64::cos);
-     //println!("{:?},{:?},{:?},{:?}",x,y,u,v);
      println!("End time: {}", now.elapsed().as_millis());
 
 }

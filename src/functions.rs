@@ -259,7 +259,7 @@ fn check_radius(id: f64, var: &Array1<f64>) -> bool {
     ret_val
 }
 
-pub fn meshgrid(
+fn meshgrid(
     x: ndarray::Array1<f64>,
     y: ndarray::Array1<f64>,
 ) -> (ndarray::Array2<f64>, ndarray::Array2<f64>) {
@@ -275,7 +275,7 @@ pub fn meshgrid(
     return (xx, yy);
 }
 
-pub fn meshgrid3d(x: ndarray::Array1<f64>,
+fn meshgrid3d(x: ndarray::Array1<f64>,
     y: ndarray::Array1<f64>,
     z: ndarray::Array1<f64>) -> (ndarray::Array3<f64>, ndarray::Array3<f64>, ndarray::Array3<f64>) {
         let mut xx = ndarray::Array3::<f64>::zeros((x.len(),y.len(),z.len()));

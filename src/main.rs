@@ -20,7 +20,7 @@ use plotly::common::{Mode, Fill, Line, Anchor, ColorBar, Marker};
 use plotly::{Plot,NamedColor, Scatter, Scatter3D};
 use ndarray::{Array, Ix1, Ix2};
 use plotly::ndarray::ArrayTraces;
-use functions::meshgrid3d;
+use utilities::maths::meshgrid3d;
 use plotly::Layout;
 
 use crate::plotting::vector3d::BoundMode;

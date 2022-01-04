@@ -1,8 +1,9 @@
 #ignore this, this is to prototype stuff in python so i can see what i need
 #from plotly.rs
-
+"""
 import plotly.graph_objects as go
 import numpy as np
+
 
 x = [1]
 y = [1]
@@ -21,24 +22,24 @@ fig = go.Figure(data=(go.Cone(x=x, y=y, z=z, u=u, v=v, w=w, sizemode='absolute',
 fig.update_layout(scene_camera_eye=dict(x=-0.76, y=1.8, z=0.92))
 
 fig.show()
-
-
 """
+
+
 import plotly.figure_factory as ff
 import plotly.graph_objects as go
 import numpy as np
-x, y = np.meshgrid(np.arange(0,2*np.pi,np.pi/10),np.arange(0,2*np.pi,np.pi/10))
+n = 10
+tmp = np.arange(0,2*np.pi+np.pi/n,np.pi/n)
+x, y = np.meshgrid(tmp,tmp)
 u = np.sin(x)*np.cos(y)
 v = -np.sin(y)*np.cos(x)
-
-fig = go.Figure(data=go.Cone(x=[1], y=[1], z=[1], u=[1], v=[1], w=[0]))
+fig = ff.create_quiver(x,y,u,v)
 
 #fig.update_layout(
 #    width = 1000,
 #    height = 1000,
 #)
 fig.update_xaxes(
-    #range=[-1,4],  # sets*the range of xaxis
     constrain="domain",  # meanwhile compresses*the xaxis by decreanp.sing its "domain"
 )
 fig.update_yaxes(
@@ -49,4 +50,4 @@ fig.update_yaxes(
 
 fig.show()
 json = fig.to_json()
-print(json) """
+print(json) 

@@ -1,5 +1,5 @@
 use plotly::common::{Mode, ColorBar, ColorScale, ColorScalePalette, Line, Marker, Fill, ColorScaleElement};
-use plotly::{Plot, Scatter};
+use plotly::{Plot, Scatter, Layout};
 use ndarray::prelude::*;
 use upppp_rust::{plotting::vector2d, utilities::maths::meshgrid};
 use vector2d::{BoundMode, ScaleMode};
@@ -78,8 +78,7 @@ fn vector_2d(){
     let palette = ColorScalePalette::Viridis;
     let colour_bounds = None; //Some((0.3, 0.5));
     let traces = vector2d::trace_arrows_plotly(arrows,arrow_scale, mode, colour, palette, colour_bounds);
-    
-    let layout = plotly::layout::Layout::new()
+    let layout = Layout::new()
                     .title("Quiver plot".into());
     let plot = vector2d::plot(traces, layout, true); 
     plot.show();

@@ -388,6 +388,7 @@ pub enum AxisRange {
     X(f64, f64),
     Y(f64, f64),
     XY(f64, f64, f64, f64),
+    Auto(f64),
     None
 }
 
@@ -410,7 +411,7 @@ pub enum AxisRange {
 /// let bound_mode = vector2d::BoundMode::None;
 /// let traces = vector2d::trace_arrows(data, arrow_scale, bound_mode);
 /// ```
-pub fn trace_arrows_plotly(data: ArrowData, arrow_scale: Option<f64>, bound_mode: BoundMode, colour: Gradient, palette: ColorScalePalette, colour_bounds: Option<(f64, f64)>) -> Vec<Box<Scatter<f64,f64>>>  {
+pub fn trace_arrows_plotly(data: ArrowData, arrow_scale: Option<f64>, bound_mode: BoundMode, colour: Gradient, palette: ColorScalePalette, colour_bounds: Option<(f64, f64)>) -> (Vec<Box<Scatter<f64,f64>>>, ArrowData)  {
     let (colour_vector, min, max) = normalise_colour(&data, &colour_bounds);
     let data_bounded = data.bound(bound_mode);
     let (barb_x, barb_y) = quiver_barbs(&data_bounded);
@@ -456,7 +457,7 @@ pub fn trace_arrows_plotly(data: ArrowData, arrow_scale: Option<f64>, bound_mode
         .show_legend(false);
     
     traces.push(invisible_marker);
-    return traces
+    return (traces, data_bounded)
 }
 
 /// Returns quiver plot based on user defined layout.
@@ -475,14 +476,14 @@ pub fn trace_arrows_plotly(data: ArrowData, arrow_scale: Option<f64>, bound_mode
 /// let layout = Layout::new()
 ///                .title("Quiver plot".into());
 /// let mut plot = vector2d::plot(traces, layout, true); 
-pub fn plot(traces:Vec<Box<Scatter<f64,f64>>>, layout: Layout, square: bool, range: AxisRange) -> Plot {
+pub fn plot(traces:Vec<Box<Scatter<f64,f64>>>, layout: Layout, square: bool, range: AxisRange, data: ArrowData) -> Plot {
     let mut plot = Plot::new();
     //use local render version
     plot.use_local_plotly();
     for trace in traces{
         plot.add_trace(trace);
     }
-    let (x_axis, y_axis) = axis_range((Axis::new(), Axis::new()), range);
+    let (x_axis, y_axis) = axis_range((Axis::new(), Axis::new()), range, data);
     
     // if this is true, then perform some additional plotly calls to create
     // a plot where the x and y axes are equal
@@ -498,7 +499,7 @@ pub fn plot(traces:Vec<Box<Scatter<f64,f64>>>, layout: Layout, square: bool, ran
     return plot
 }
 
-fn axis_range(axis: (Axis, Axis), range: AxisRange) -> (Axis, Axis) {
+fn axis_range(axis: (Axis, Axis), range: AxisRange, data: ArrowData) -> (Axis, Axis) {
     match range{
         AxisRange::X(xmin, xmax) => {
             return (axis.0.range(vec![xmin, xmax]), axis.1)
@@ -509,8 +510,16 @@ fn axis_range(axis: (Axis, Axis), range: AxisRange) -> (Axis, Axis) {
         AxisRange::XY(xmin, xmax, ymin, ymax) => {
             return (axis.0.range(vec![xmin, xmax]), axis.1.range(vec![ymin, ymax]))
         },
+        AxisRange::Auto(dtick) => {
+            let xmin = data.xdata.min().unwrap() - dtick;
+            let xmax = data.xdata.max().unwrap() + dtick;
+            let ymin = data.ydata.min().unwrap() - dtick;
+            let ymax = data.ydata.max().unwrap() + dtick;
+            return (axis.0.range(vec![xmin, xmax]), axis.1.range(vec![ymin, ymax]))
+        },
         AxisRange::None => {
             return (axis.0, axis.1)
         },
+        
     }
 }

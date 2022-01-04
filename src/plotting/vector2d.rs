@@ -10,7 +10,7 @@ use ndarray::prelude::*;
 use std::f64::consts::PI;
 use plotly::common::{ColorScalePalette, Fill, Line, Mode, Marker, ColorScale, ColorBar};
 use plotly::{Plot, Scatter};
-use plotly::layout::{Axis, Layout};
+use plotly::layout::{Axis, Layout, AxisConstrain};
 use core::panic;
 use ndarray_stats::QuantileExt;
 use crate::utilities::maths::{flatten_2d, minmax};
@@ -147,8 +147,6 @@ impl ArrowData {
                 
                 ScaleMode::Elementwise(scale_array) => {
                     let scale_array = scale_array;
-                    println!("original\n{:?})", arr);
-                    println!("scaled\n{:?}", arr*scale_array) ;
                     return arr*scale_array
                 },
                
@@ -386,6 +384,13 @@ fn normalise_colour(data: &ArrowData, colour_bounds: &Option<(f64, f64)>) -> (Ar
     }
 }
 
+pub enum AxisRange {
+    X(f64, f64),
+    Y(f64, f64),
+    XY(f64, f64, f64, f64),
+    None
+}
+
 /// Returns ```Plotly::Scatter``` traces for plotting.
 /// 
 /// Inputs:
@@ -408,7 +413,6 @@ fn normalise_colour(data: &ArrowData, colour_bounds: &Option<(f64, f64)>) -> (Ar
 pub fn trace_arrows_plotly(data: ArrowData, arrow_scale: Option<f64>, bound_mode: BoundMode, colour: Gradient, palette: ColorScalePalette, colour_bounds: Option<(f64, f64)>) -> Vec<Box<Scatter<f64,f64>>>  {
     let (colour_vector, min, max) = normalise_colour(&data, &colour_bounds);
     let data_bounded = data.bound(bound_mode);
-    println!("{},{}", min, max);
     let (barb_x, barb_y) = quiver_barbs(&data_bounded);
     let (arrow_x, arrow_y) = gen_quiver_arrows(&data_bounded, arrow_scale);
     let mut traces = Vec::new();
@@ -471,20 +475,21 @@ pub fn trace_arrows_plotly(data: ArrowData, arrow_scale: Option<f64>, bound_mode
 /// let layout = Layout::new()
 ///                .title("Quiver plot".into());
 /// let mut plot = vector2d::plot(traces, layout, true); 
-pub fn plot(traces:Vec<Box<Scatter<f64,f64>>>, layout: Layout, square: bool) -> Plot {
+pub fn plot(traces:Vec<Box<Scatter<f64,f64>>>, layout: Layout, square: bool, range: AxisRange) -> Plot {
     let mut plot = Plot::new();
     //use local render version
     plot.use_local_plotly();
     for trace in traces{
         plot.add_trace(trace);
     }
+    let (x_axis, y_axis) = axis_range((Axis::new(), Axis::new()), range);
+    
     // if this is true, then perform some additional plotly calls to create
     // a plot where the x and y axes are equal
-    if square{
-        let y_axis = Axis::new()
-                .scale_anchor("x".to_string())
-                .scale_ratio(1.);
-        let square_layout = layout.y_axis(y_axis);
+    if square{  
+        let square_layout = layout.y_axis(y_axis.scale_anchor("x".to_string())
+        .scale_ratio(1.))
+                                    .x_axis(x_axis.constrain(AxisConstrain::Domain));
         plot.set_layout(square_layout);
     } else{
         //plot as-is
@@ -493,3 +498,19 @@ pub fn plot(traces:Vec<Box<Scatter<f64,f64>>>, layout: Layout, square: bool) -> 
     return plot
 }
 
+fn axis_range(axis: (Axis, Axis), range: AxisRange) -> (Axis, Axis) {
+    match range{
+        AxisRange::X(xmin, xmax) => {
+            return (axis.0.range(vec![xmin, xmax]), axis.1)
+        },
+        AxisRange::Y(ymin, ymax) => {
+            return (axis.0, axis.1.range(vec![ymin, ymax]))
+        },
+        AxisRange::XY(xmin, xmax, ymin, ymax) => {
+            return (axis.0.range(vec![xmin, xmax]), axis.1.range(vec![ymin, ymax]))
+        },
+        AxisRange::None => {
+            return (axis.0, axis.1)
+        },
+    }
+}

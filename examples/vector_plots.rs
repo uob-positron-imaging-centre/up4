@@ -79,12 +79,11 @@ fn vector_2d(){
     let colour = colorous::VIRIDIS;
     let palette = ColorScalePalette::Viridis;
     let colour_bounds = None; //Some((0.3, 0.5));
-    let traces = vector2d::trace_arrows_plotly(arrows,arrow_scale, mode, colour, palette, colour_bounds);
+    let (traces, data) = vector2d::trace_arrows_plotly(arrows,arrow_scale, mode, colour, palette, colour_bounds);
     let layout = Layout::new()
-                    .title("Quiver plot".into())
-                    .margin(Margin::new().left(0).right(0).bottom(0).top(0).pad(0));
-    let range = AxisRange::XY(0.,2.*PI+PI/PTS,0.,2.*PI+PI/PTS);
-    let plot = vector2d::plot(traces, layout, true, range); 
+                    .title("Quiver plot".into());
+    let range = AxisRange::Auto(0.1);
+    let plot = vector2d::plot(traces, layout, true, range, data); 
     plot.show();
 }
 

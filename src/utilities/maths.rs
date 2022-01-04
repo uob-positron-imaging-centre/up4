@@ -1,4 +1,4 @@
-!// Module of common maths functions exposed to users
+//! Module of common maths functions exposed to users
 use ndarray::prelude::*;
 pub fn minmax(arr: &Array1<f64>) -> (f64, f64) {
     let mut min = f64::MAX;

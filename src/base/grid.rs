@@ -3,7 +3,6 @@
 //! finding a special cell
 
 //TODO Rewrite grids to make dimensionality a generic instead of 3 structs
-
 extern crate ndarray;
 use ndarray::prelude::*;
 use ndarray_stats::QuantileExt;
@@ -78,7 +77,7 @@ impl Grid1D{
     ///             0.0,                    // Initiate with zeros
     /// };
     /// ```
-    fn new(cells:Array1<usize>, limit: Dim)-> Self{
+    pub fn new(cells:Array1<usize>, limit: Dim)-> Self{
         print_debug!("Grid1D: Generating new grid");
         if cells.shape()[0] != 1 {
                 panic!("Grid1D got wrong Cell-shape.\\
@@ -106,7 +105,7 @@ impl Grid1D{
         }
     }
 
-    fn data_array<T: Default+Clone>(&self)->Array1<T>{
+    pub fn data_array<T: Default+Clone>(&self)->Array1<T>{
         Array1::from_elem(self.cells[0] as usize,T::default())
     }
 }
@@ -243,119 +242,7 @@ impl GridFunctions for Grid2D{
 
 }
 
-#[derive(Getters,Clone)]
-pub struct Grid3D{
-    cells: Array1<usize>,
-    xpositions: Array1<f64>,
-    ypositions:Array1<f64>,
-    zpositions:Array1<f64>,
-    xlim: (f64, f64),
-    ylim: (f64, f64),
-    zlim: (f64, f64),
-    // attrs: HashMap<String, >,
-}
-
-impl  Grid3D{
-    fn new(cells:Array1<usize>, limit: Dim)-> Self{
-        print_debug!("Grid3D: Generating new grid");
-        if cells.shape()[0] != 3 {
-                panic!("Grid1D got wrong Arrayshape.\\
-                    Array should only hold a single number.")
-        }
-
-        let (xlim, ylim, zlim) = match limit{
-            Dim::ThreeD(s,y,z)=> (s,y, z),
-            _ => panic!("Grid3D got limits for other then three dimensions.")
-
-        };
-        let xcellsize = (xlim.1-xlim.0)/cells[0] as f64;
-        let ycellsize = (ylim.1-ylim.0)/cells[1] as f64;
-        let zcellsize = (zlim.1-zlim.0)/cells[2] as f64;
-        let mut xpositions = Array::from_elem(cells[0], 0.);
-        let mut ypositions = Array::from_elem(cells[1], 0.);
-        let mut zpositions = Array::from_elem(cells[1], 0.);
-        for cellidx in 0..cells[0]{
-            xpositions[cellidx as usize ] = cellidx as f64 * xcellsize + xcellsize;
-        }
-        for cellidy in 0..cells[1]{
-            ypositions[cellidy as usize ] = cellidy as f64 * ycellsize + ycellsize;
-        }
-        for cellidz in 0..cells[2]{
-            zpositions[cellidz as usize ] = cellidz as f64 * zcellsize + zcellsize;
-        }
-        print_debug!(
-            "Grid3D:\n\tCells: {:?} \n\txpositions: {:?} \n\t\\
-            ypositions: {:?} \n\tzpositions: {:?} \n\txlim: {:?} \\
-            \n\tylim: {:?} \n\tzlim: {:?}",
-            cells,xpositions,ypositions,zpositions,xlim,ylim,zlim,
-        );
-
-        Grid3D{
-            cells,
-            xpositions,
-            ypositions,
-            zpositions,
-            xlim,
-            ylim,
-            zlim,
-        }
-    }
-
-    pub fn into_py(&self)->PyGrid{
-        PyGrid{
-            grid: Box::new(self.clone())
-        }
-    }
-
-
-}
-
-impl GridFunctions for Grid3D{
-    fn is_inside(&self, num: Vec<f64>)-> bool{
-        print_debug!("Grid3D: Checking if {:?} is in grid", num);
-        let posx = num[0];
-        let posy = num[1];
-        let posz = num[2];
-        posx > self.xlim.0 && posx < self.xlim.1 &&
-        posy > self.ylim.0 && posy < self.ylim.1 &&
-        posz > self.zlim.0 && posz < self.zlim.1
-    }
-
-    fn cell_id(&self, num: Vec<f64>)-> Array1<usize>{
-        print_debug!("Grid3D: Checking if {:?} is in grid", num);
-        let posx = num[0];
-        let cell_idx = (&self.xpositions-posx)
-                        .iter()
-                        .map(|x| x.abs())
-                        .collect::<Array1<f64>>()
-                        .argmin()
-                        .expect(&format!("Can not find min of {:?} in Gri3D",num));
-        let posy = num[1];
-        let cell_idy = (&self.ypositions-posy)
-                        .iter()
-                        .map(|x| x.abs())
-                        .collect::<Array1<f64>>()
-                        .argmin()
-                        .expect(&format!("Can not find min of {:?} in Gri3D",num));
-        let posz = num[2];
-        let cell_idz = (&self.zpositions-posz)
-                        .iter()
-                        .map(|z| z.abs())
-                        .collect::<Array1<f64>>()
-                        .argmin()
-                        .expect(&format!("Can not find min of {:?} in Gri3D",num));
-        array![cell_idx,cell_idy]
-    }
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-
-
-}
-
-
-
-
+// Left here due to import issues if in own file
 #[pyclass(name="Grid")]
 #[derive(Clone)]
 pub struct PyGrid  {
@@ -363,6 +250,12 @@ pub struct PyGrid  {
 }
 
 impl PyGrid{
+
+    pub fn new(grid: Box<dyn GridFunctions+Send>) -> PyGrid{
+        return PyGrid{
+            grid: grid,
+        }
+    }
     pub fn to_grid1d(&self)->Grid1D{
         let grid1d: Grid1D = match self.grid.as_any().downcast_ref::<Grid1D>(){
             Some(b) => b.clone(),
@@ -421,4 +314,110 @@ impl PyGrid{
         }
     }
 
+}
+
+#[derive(Getters,Clone)]
+pub struct Grid3D{
+    cells: Array1<usize>,
+    xpositions: Array1<f64>,
+    ypositions:Array1<f64>,
+    zpositions:Array1<f64>,
+    xlim: (f64, f64),
+    ylim: (f64, f64),
+    zlim: (f64, f64),
+    // attrs: HashMap<String, >,
+}
+
+impl  Grid3D{
+    pub fn new(cells:Array1<usize>, limit: Dim)-> Self{
+        print_debug!("Grid3D: Generating new grid");
+        if cells.shape()[0] != 3 {
+                panic!("Grid1D got wrong Arrayshape.\\
+                    Array should only hold a single number.")
+        }
+
+        let (xlim, ylim, zlim) = match limit{
+            Dim::ThreeD(s,y,z)=> (s,y, z),
+            _ => panic!("Grid3D got limits for other then three dimensions.")
+
+        };
+        let xcellsize = (xlim.1-xlim.0)/cells[0] as f64;
+        let ycellsize = (ylim.1-ylim.0)/cells[1] as f64;
+        let zcellsize = (zlim.1-zlim.0)/cells[2] as f64;
+        let mut xpositions = Array::from_elem(cells[0], 0.);
+        let mut ypositions = Array::from_elem(cells[1], 0.);
+        let mut zpositions = Array::from_elem(cells[1], 0.);
+        for cellidx in 0..cells[0]{
+            xpositions[cellidx as usize ] = cellidx as f64 * xcellsize + xcellsize;
+        }
+        for cellidy in 0..cells[1]{
+            ypositions[cellidy as usize ] = cellidy as f64 * ycellsize + ycellsize;
+        }
+        for cellidz in 0..cells[2]{
+            zpositions[cellidz as usize ] = cellidz as f64 * zcellsize + zcellsize;
+        }
+        print_debug!(
+            "Grid3D:\n\tCells: {:?} \n\txpositions: {:?} \n\t\\
+            ypositions: {:?} \n\tzpositions: {:?} \n\txlim: {:?} \\
+            \n\tylim: {:?} \n\tzlim: {:?}",
+            cells,xpositions,ypositions,zpositions,xlim,ylim,zlim,
+        );
+
+        Grid3D{
+            cells,
+            xpositions,
+            ypositions,
+            zpositions,
+            xlim,
+            ylim,
+            zlim,
+        }
+    }
+
+    pub fn into_py(&self)-> PyGrid{
+        PyGrid::new(Box::new(self.clone()))
+    }
+
+
+}
+
+impl GridFunctions for Grid3D{
+    fn is_inside(&self, num: Vec<f64>)-> bool{
+        print_debug!("Grid3D: Checking if {:?} is in grid", num);
+        let posx = num[0];
+        let posy = num[1];
+        let posz = num[2];
+        posx > self.xlim.0 && posx < self.xlim.1 &&
+        posy > self.ylim.0 && posy < self.ylim.1 &&
+        posz > self.zlim.0 && posz < self.zlim.1
+    }
+
+    fn cell_id(&self, num: Vec<f64>)-> Array1<usize>{
+        print_debug!("Grid3D: Checking if {:?} is in grid", num);
+        let posx = num[0];
+        let cell_idx = (&self.xpositions-posx)
+                        .iter()
+                        .map(|x| x.abs())
+                        .collect::<Array1<f64>>()
+                        .argmin()
+                        .expect(&format!("Can not find min of {:?} in Gri3D",num));
+        let posy = num[1];
+        let cell_idy = (&self.ypositions-posy)
+                        .iter()
+                        .map(|x| x.abs())
+                        .collect::<Array1<f64>>()
+                        .argmin()
+                        .expect(&format!("Can not find min of {:?} in Gri3D",num));
+        let posz = num[2];
+        let cell_idz = (&self.zpositions-posz)
+                        .iter()
+                        .map(|z| z.abs())
+                        .collect::<Array1<f64>>()
+                        .argmin()
+                        .expect(&format!("Can not find min of {:?} in Gri3D",num));
+        array![cell_idx,cell_idy]
+    }
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 }

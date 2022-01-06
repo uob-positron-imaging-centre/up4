@@ -12,7 +12,7 @@ Converter
 .. autosummary::
     :toctree: generated/
 
-    up4.Test
+    up4.Dummy
     up4.Converter
 
 Data 

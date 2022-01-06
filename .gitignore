@@ -1,11 +1,19 @@
+# Rust
 target*
-pyAnalyser.egg-info
-pyAnalyser/__pycache__
-rustAnalyser.cpython*
 src/functions_gpu.rs_old
-*.zip
+
+# Python
+up4/__pycache__
+rustAnalyser.cpython*
 tests/fixtures/drum.hdf5
 tests/text.txt
 .idea
 up4.egg-info
 build
+
+# General
+*.zip
+KonigCell
+.vscode
+docs/_build
+docs/_static

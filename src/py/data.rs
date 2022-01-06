@@ -1,13 +1,7 @@
 use numpy::{PyArrayDyn, IntoPyArray};
 use pyo3::prelude::*;
 use crate::{datamanager::{Manager, PData, TData}, base::{Selector, ParticleSelector, PyGrid}, print_debug};
-///Data class
-#[pyclass(name="Data")]
-#[pyo3(text_signature = "(filename)")]
-pub struct PyData {
-    data: Box<dyn Manager + Send>,
-    selector: Box<dyn Selector + Send>,
-}
+
 /// Class that holds the particle data for processing, if you have simulation data, you will *probably*
 /// want to use ``from_pdata`` to instantiate this class as this handles a large number of particles. 
 /// For experimental data, ``from_tdata`` is recommended. However, as the choice ultimately makes no 
@@ -37,12 +31,22 @@ pub struct PyData {
 /// 
 /// mean_velocity:
 ///     Calculates mean velocities
+#[pyclass(name="Data")]
+pub struct PyData {
+    data: Box<dyn Manager + Send>,
+    selector: Box<dyn Selector + Send>,
+}
+
 #[pymethods]
 impl PyData {
+
+    /// Create new instance of ``Data``. This function is called from either ``from_tdata``
+    /// or ``from_pdata`` based on requirements.
     #[new]
     fn constructor(filename: &str) -> Self {
         PyData::from_pdata(filename)
     }
+    
     /// Constructor for ``Data`` that is structured to handle large numbers
     /// of particles. 
     /// 
@@ -56,6 +60,7 @@ impl PyData {
         let selector=ParticleSelector::default();
         PyData { data: Box::new(pdata) ,selector:Box::new(selector) }
     }
+    
     /// Constructor for ``Data`` that is structured to handle small numbers
     /// of particles. 
     /// 
@@ -63,7 +68,7 @@ impl PyData {
     /// ----------
     /// filename: String
     ///     Path to the file to be analysed.
-    #[pyo3(name = "from_tdata", text_signature = "(filename, /)")]
+    #[pyo3(name = "from_tdata", text_signature = "(filename)")]
     #[staticmethod]
     fn from_tdata(filename: &str) -> Self {
         let tdata = TData::new(filename);
@@ -85,6 +90,7 @@ impl PyData {
     }
 
 
+    
     /// make a vector field
     /// 
     /// Parameters

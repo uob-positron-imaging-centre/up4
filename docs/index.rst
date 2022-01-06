@@ -15,6 +15,7 @@ Has this ever happened to you:
 
 Fear not, this is *precisely* the aim of UPPPP, the Universal Post Processor for Particulate Processes!
 
+Hi Dom, using `these docs <https://fastobo.readthedocs.io/en/latest/index.html#>`_ and `this repo <https://github.com/fastobo/fastobo-py>`_ as a template for how we do python docs. RST docs are located `here <https://sublime-and-sphinx-guide.readthedocs.io/en/latest/index.html>`_
 
 Indices and tables
 ==================
@@ -24,10 +25,18 @@ Indices and tables
 
    getting_started
    tutorials/index
-   manual/index
+   api/index
+
+Miscellaneous
+
+.. toctree::
+   :maxdepth: 2
+
+   about
 
 Pages
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+

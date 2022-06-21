@@ -1,3 +1,4 @@
+// This should appear in PR
 use plotly::common::{Mode, ColorBar, ColorScale, ColorScalePalette, Line, Marker, Fill, ColorScaleElement};
 use plotly::layout::Margin;
 use plotly::{Plot, Scatter, Layout};
@@ -23,10 +24,7 @@ fn simple_color_scatter() {
                         .line(Line::new()
                                     //.color_scale(ColorScale::Palette(ColorScalePalette::Viridis))
                                     .color(s)
-                                    .cauto(true)
-                                    
- 
-                                )
+                                    .cauto(true)) 
                                     .show_legend(false);
     plot.add_trace(trace);
     let x = vec![0.,-2.,-1.,-2.,-2.];
@@ -38,13 +36,10 @@ fn simple_color_scatter() {
                         .fill(Fill::ToSelf)
                         .fill_color(&s)
                         .line(Line::new()
-                                    //.color_scale(ColorScale::Palette(ColorScalePalette::Viridis))
-                                    .color(s)
-                                    .cauto(true)
-                                    
-
-                                )
-                                    .show_legend(false);
+                        //.color_scale(ColorScale::Palette(ColorScalePalette::Viridis))
+                        .color(s)
+                        .cauto(true))
+                        .show_legend(false);
     plot.add_trace(trace);
     let x = vec![0.,0.];
     let y = vec![0.5,1.];
@@ -57,8 +52,8 @@ fn simple_color_scatter() {
                                     .color_scale(ColorScale::Palette(ColorScalePalette::Viridis))
                                     //.color(Rgb::new(0,0,0))
                                     .color_bar(ColorBar::new())
-                                    .size(size))
-                                    .show_legend(false);
+                        .size(size))
+                        .show_legend(false);
     plot.add_trace(trace);
     plot.use_local_plotly();
     plot.show();
@@ -73,7 +68,7 @@ fn vector_2d(){
     let (x, y) = meshgrid(valx,valy);                       
     let u: Array2<f64> = &x.mapv(f64::sin)*&y.mapv(f64::cos);
     let v: Array2<f64> = -&y.mapv(f64::sin)*&x.mapv(f64::cos);
-    let arrows = vector2d::ArrowData::new(x,y,u,v,ScaleMode::Default);
+    let arrows = vector2d::ArrowData::new(x,y,u,v,ScaleMode::Global(0.1));
     let arrow_scale: Option<f64> = None;
     let mode: BoundMode = BoundMode::None;
     let colour = colorous::VIRIDIS;
@@ -81,7 +76,8 @@ fn vector_2d(){
     let colour_bounds = None; //Some((0.3, 0.5));
     let (traces, data) = vector2d::trace_arrows_plotly(arrows,arrow_scale, mode, colour, palette, colour_bounds);
     let layout = Layout::new()
-                    .title("Quiver plot".into());
+                        .width(1000)                
+                        .title("Quiver plot".into());
     let range = AxisRange::Auto(0.1);
     let plot = vector2d::plot(traces, layout, true, range, data); 
     plot.show();

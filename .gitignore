@@ -17,3 +17,5 @@ KonigCell
 .vscode
 docs/_build
 docs/_static
+json.txt 
+plotly_playground.py

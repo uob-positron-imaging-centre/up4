@@ -18,6 +18,6 @@ KonigCell
 .vscode
 docs/_build
 docs/_static
-json.txt 
+json.json
 plotly_playground.py
 3D_quiver.py

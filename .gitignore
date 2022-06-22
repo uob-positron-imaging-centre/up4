@@ -1,6 +1,7 @@
 # Rust
 target*
 src/functions_gpu.rs_old
+Cargo.lock
 
 # Python
 up4/__pycache__

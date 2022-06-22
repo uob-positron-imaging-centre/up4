@@ -2,7 +2,7 @@
 name = "upppp_rust"
 version = "0.1.0"
 edition = "2018"
-authors = ["Kit's little helpers"]
+authors = ["Dominik Werner, Daniel Weston"]
 
 [lib]
 name = "upppp_rust"
@@ -24,7 +24,7 @@ dyn-clone = "1.0"
 itertools = "0.10.1"
 regex = "1"
 vtkio ="0.6.0"
-indicatif = "0.17.0-beta.1"
+indicatif = "0.17.0-rc.11"
 colorous = "1.0.5"
 
 [dependencies.pyo3]

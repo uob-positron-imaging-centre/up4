@@ -32,13 +32,13 @@ pub fn vtk(
     timestep: f64,
     outname: &str,
     filter: &str, // example r"vtk_(\d+).vtk"
-){
+){ 
     let re = Regex::new(filter).unwrap();
     let hdf5file = File::create(outname).unwrap();
     let mut step = 0;
     let bar = ProgressBar::new(filenames.len() as u64 );
     bar.set_style(ProgressStyle::default_bar()
-        .template("{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {percent}% {per_sec} ({eta})")
+        .template("{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {percent}% {per_sec} ({eta})").unwrap()
         .with_key("eta", |state| format!("Time left: {:.1}s", state.eta().as_secs_f64()))
         .with_key("per_sec", |state| format!("{:.1} steps/s", state.per_sec()))
         .progress_chars("#>-"));
@@ -136,7 +136,7 @@ pub fn vtk(
         ).unwrap();
         print_debug!("Extracting statistical velocity information");
         for vel in particle_velocity.axis_iter(ndarray::Axis(0)){
-            for i in (0..3){
+            for i in 0..3 {
                 print_debug!("  i: {}",i);
                 if vel[i] < velocity[[i,0]]{
                     velocity[[i,0]] = vel[i];

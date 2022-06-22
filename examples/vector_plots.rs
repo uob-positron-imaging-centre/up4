@@ -1,13 +1,13 @@
+use colorous::Gradient;
 // This should appear in PR
 use plotly::common::{Mode, ColorBar, ColorScale, ColorScalePalette, Line, Marker, Fill, ColorScaleElement};
 use plotly::layout::Margin;
 use plotly::{Plot, Scatter, Layout};
 use ndarray::prelude::*;
-use upppp_rust::plotting::vector2d::AxisRange;
+use upppp_rust::plotting::VectorData;
+use upppp_rust::plotting::vector2d::VectorData2D;
 use upppp_rust::{plotting::vector2d, utilities::maths::meshgrid};
-use vector2d::{BoundMode, ScaleMode};
 use std::f64::consts;
-
 
 fn simple_color_scatter() {
 
@@ -60,26 +60,41 @@ fn simple_color_scatter() {
 }
 
 fn vector_2d(){
-    // generate 4 vortices and plot
+    /* 
+    This example creates 4 vortices from the equations
+        u(x, y) =  sin(x)*cos(y)
+        v(x, y) = -sin(y)*cos(x)
+    where u and v are components of a vector at positions x and y.
+
+    In this example we see how to create the VectorData2D struct and 
+    visualise it as a quiver plot
+    */
+     
     const PI: f64 = consts::PI;
-    const PTS: f64 = 60.; //number of points
-    let valx: Array1<f64> = Array::range(0.,2.*PI+PI/PTS,2.*PI/PTS);
-    let valy: Array1<f64> = Array::range(0.,2.*PI+PI/PTS,2.*PI/PTS);
-    let (x, y) = meshgrid(valx,valy);                       
+    const PTS: f64 = 20.; //number of points
+    
+    // create values for vortices
+    let x: Array1<f64> = Array::range(0.,2.*PI+PI/PTS,2.*PI/PTS);
+    let y: Array1<f64> = Array::range(0.,2.*PI+PI/PTS,2.*PI/PTS);
+    let (x, y) = meshgrid(x, y);                       
     let u: Array2<f64> = &x.mapv(f64::sin)*&y.mapv(f64::cos);
     let v: Array2<f64> = -&y.mapv(f64::sin)*&x.mapv(f64::cos);
-    let arrows = vector2d::ArrowData::new(x,y,u,v,ScaleMode::Global(0.1));
-    let arrow_scale: Option<f64> = None;
-    let mode: BoundMode = BoundMode::None;
-    let colour = colorous::VIRIDIS;
-    let palette = ColorScalePalette::Viridis;
-    let colour_bounds = None; //Some((0.3, 0.5));
-    let (traces, data) = vector2d::trace_arrows_plotly(arrows,arrow_scale, mode, colour, palette, colour_bounds);
-    let layout = Layout::new()
+
+    // create VectorData2D struct
+    let arrows: VectorData2D = vector2d::VectorData2D::new(x,y,u,v);
+
+    // define properties for plot
+    let arrow_scale: Option<f64> = None; // default scaling
+    let colour: Gradient = colorous::VIRIDIS; // set colourmap
+    let colour_bounds: Option<(f64, f64)> = None; //Some((0.3, 0.5));
+    let traces: Vec<Box<Scatter<f64, f64>>> = arrows.create_plotly_traces(arrow_scale, colour, colour_bounds);
+    let mut layout = Layout::new()
                         .width(1000)                
                         .title("Quiver plot".into());
-    let range = AxisRange::Auto(0.1);
-    let plot = vector2d::plot(traces, layout, true, range, data); 
+    let square: bool = true;
+    let mut axes = Vec::new();
+    axes.resize_with(2, || None);
+    let mut plot: Plot = arrows.vector_plot(traces, layout, square, axes);
     plot.show();
 }
 

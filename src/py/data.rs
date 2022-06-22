@@ -7,11 +7,6 @@ use crate::{datamanager::{Manager, PData, TData}, base::{Selector, ParticleSelec
 /// For experimental data, ``from_tdata`` is recommended. However, as the choice ultimately makes no 
 /// difference to how you use this library, that choice is down to you!
 /// 
-/// Attributes
-/// ----------
-/// placeholder: 
-///     idk lol
-/// 
 /// Methods
 /// -------
 /// from_pdata:

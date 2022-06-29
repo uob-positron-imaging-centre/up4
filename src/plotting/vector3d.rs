@@ -6,10 +6,13 @@ use itertools::izip;
 use ndarray::prelude::*;
 use plotly::cone::Anchor;
 use plotly::common::{Line, Mode};
-use plotly::{NamedColor, Plot, Cone, Scatter3D};
+use plotly::{Plot, Cone, Layout};
+use plotly::layout::Axis;
 use core::panic;
 use ndarray_stats::QuantileExt;
-use crate::utilities::maths::flatten_3d;
+
+use super::VectorData;
+use super::vector2d::{axis_range_x, axis_range_y};
 
 /// Set required scaling mode for arrow lengths.
 /// 
@@ -61,7 +64,7 @@ pub enum BoundMode{
 /// * vdata: vector y components.
 /// * wdata: vector z components.
 /// 
-/// The following 2 fields are defined through the use of associated function ```ConeData::scale```.
+/// The following 2 fields are defined through the use of associated function ```VectorData3D::scale```.
 /// * xdata_end: arrow ending x coordinates.
 /// * ydata_end: arrow ending y coordinates.
 /// * zdata_end: arrow ending z coordinates.
@@ -108,9 +111,9 @@ pub enum BoundMode{
 /// 
 /// let scale_mode = vector2d::ScaleMode::Default;
 /// 
-/// let arrows: ConeData = vector3d::ConeData::new(x,y,z,u,v,w,scale_mode);
+/// let arrows: VectorData3D = vector3d::VectorData3D::new(x,y,z,u,v,w,scale_mode);
 /// ```
-pub struct ConeData {
+pub struct VectorData3D {
     xdata: Array1<f64>,
     ydata: Array1<f64>,
     zdata: Array1<f64>,
@@ -120,211 +123,226 @@ pub struct ConeData {
     xdata_end: Array1<f64>,
     ydata_end: Array1<f64>,
     zdata_end: Array1<f64>,
+    normdata_scaled: Array1<f64>,
+    normdata_abs: Array1<f64>,
 }
 
-impl ConeData{
-    /// constructor for ConeData struct
-    pub fn new(x:Array3<f64>, y:Array3<f64>, z:Array3<f64>, u:Array3<f64>, v:Array3<f64>, w:Array3<f64>, scale_mode: ScaleMode) -> ConeData { 
+impl VectorData3D{
+    /// constructor for VectorData3D struct
+    pub fn new(x:Array3<f64>, y:Array3<f64>, z:Array3<f64>, u:Array3<f64>, v:Array3<f64>, w:Array3<f64>) -> VectorData3D { 
         //supercede the default error message for shape mismatch as it doesn't identify the offending array
         assert!(&x.dim() == &y.dim(),"Array dimension mismatch!\nx has dimensions {:?}\ny has dimensions {:?}", &x.dim(), &y.dim());
         assert!(&x.dim() == &z.dim(),"Array dimension mismatch!\nx has dimensions {:?}\nz has dimensions {:?}", &x.dim(), &z.dim());
         assert!(&x.dim() == &u.dim(),"Array dimension mismatch!\nx has dimensions {:?}\nu has dimensions {:?}", &x.dim(), &u.dim());
         assert!(&x.dim() == &v.dim(),"Array dimension mismatch!\nx has dimensions {:?}\nv has dimensions {:?}", &x.dim(), &v.dim());
         assert!(&x.dim() == &w.dim(),"Array dimension mismatch!\nx has dimensions {:?}\nw has dimensions {:?}", &x.dim(), &w.dim());
-        return ConeData {
-            xdata: flatten_3d(&x),
-            ydata: flatten_3d(&y),
-            zdata: flatten_3d(&z),
-            udata: flatten_3d(&ConeData::scale(&scale_mode,&u)), 
-            vdata: flatten_3d(&ConeData::scale(&scale_mode,&v)),
-            wdata: flatten_3d(&ConeData::scale(&scale_mode,&w)),
-            xdata_end: flatten_3d(&x) + flatten_3d(&ConeData::scale(&scale_mode,&u)), 
-            ydata_end: flatten_3d(&y) + flatten_3d(&ConeData::scale(&scale_mode,&v)),
-            zdata_end: flatten_3d(&z) + flatten_3d(&ConeData::scale(&scale_mode,&w)),
-        }
-    }
-    /// Performs scaling as determined by ScaleMode enum value.
-    fn scale(scale_mode: &ScaleMode, arr:&Array3<f64>) ->  Array3<f64> {
-        //use match enum to decide whether to apply global, elementwise, default or no arrow scaling
-        match scale_mode{
-            /// Apply single scaling factor to all elements.
-            ScaleMode::Global(scale_factor) => {
-                let scale_factor = *scale_factor;
-                return arr*scale_factor
-            },
-            
-            /// Apply an array of scale factors to elements.
-            ScaleMode::Elementwise(scale_array) => {
-                let scale_array = scale_array;
-                println!("original\n{:?})", arr);
-                println!("scaled\n{:?}", arr*scale_array) ;
-                return arr*scale_array
-            },
-        
-            /// Apply default scaling, equivalent to ``` ScaleMode::Global(0.3)```
-            ScaleMode::Default => { 
-                let default_scale = 0.3;
-                return arr*default_scale
-            },
+        let xdata: Array1<f64> = Array::from_iter(x);
+        let ydata: Array1<f64> = Array::from_iter(y);
+        let zdata: Array1<f64> = Array::from_iter(z);
+        let udata: Array1<f64> = Array::from_iter(u);
+        let vdata: Array1<f64> = Array::from_iter(v);
+        let wdata: Array1<f64> = Array::from_iter(w);
+        let xdata_end: Array1<f64> = &xdata + &udata;
+        let ydata_end: Array1<f64> = &ydata + &vdata;
+        let zdata_end: Array1<f64> = &zdata + &wdata;
+        let normdata_scaled: Array1<f64> = izip!(&udata, &vdata, &wdata).map(|x| (x.0.powi(2) + x.1.powi(2) + x.2.powi(2)).powf(0.5)).collect::<Array1<f64>>();
+        // initially unscaled
+        let normdata_abs: Array1<f64> = normdata_scaled.clone();
 
-            /// Apply no scaling.
-            ScaleMode::None => {
-                //perform no scaling
-                return arr*1.0
-            }
+        return VectorData3D {
+            xdata,
+            ydata,
+            zdata,
+            udata, 
+            vdata,
+            wdata,
+            xdata_end, 
+            ydata_end,
+            zdata_end,
+            normdata_abs,
+            normdata_scaled,
         }
     }
 
-    /// Set minimum length for arrows.    
-    pub fn min_bound(mut self, min: &f64, mut arrow_len: Array1<f64>) -> ConeData {
-        for i in 0..arrow_len.len_of(Axis(0)) {
-            if arrow_len[i] < *min {
-                arrow_len[i] = min/arrow_len[i];
-            }
-            else {
-                arrow_len[i] = 1.;
-            }
-        }
-        self.udata *= &arrow_len;
-        self.vdata *= &arrow_len;
-        self.wdata *= &arrow_len;
-        self.xdata_end = &self.xdata + &self.udata;
-        self.ydata_end = &self.ydata + &self.vdata;
-        self.zdata_end = &self.zdata + &self.wdata;
-        return self
-        }
+}
+impl VectorData<f64, Ix3, Cone<f64,f64,f64,f64,f64,f64>> for VectorData3D {
 
-    /// Set maximum length for arrows.
-    pub fn max_bound(mut self, max: &f64, mut arrow_len: Array1<f64>) -> ConeData {
-        for i in 0..arrow_len.len_of(Axis(0)) {
-            if arrow_len[i] > *max {
-            arrow_len[i] = max/arrow_len[i];
-            }
-            else {
-                arrow_len[i] = 1.;
-            }
-        }
-        self.udata *= &arrow_len;
-        self.vdata *= &arrow_len;
-        self.wdata *= &arrow_len;
+    /// Scales 3D vector data by a single scale factor
+    fn scale_global(&mut self, scale_factor: f64) {
+        self.udata *= scale_factor;
+        self.vdata *= scale_factor;
+        self.wdata *= scale_factor;
         self.xdata_end = &self.xdata + &self.udata;
         self.ydata_end = &self.ydata + &self.vdata;
         self.zdata_end = &self.zdata + &self.wdata;
-        return self
+        // update scaled norms
+        self.normdata_scaled *= scale_factor;
     }
 
-    /// Set minimum and maximum lengths for arrows.
-    pub fn min_max_bound(mut self, min: &f64, max: &f64, mut arrow_len: Array1<f64>) -> ConeData {
-        for i in 0..arrow_len.len_of(Axis(0)) {
-            if arrow_len[i] > *max {
-                arrow_len[i] = max/arrow_len[i];
-            }
-            else if arrow_len[i] < *min {
-                arrow_len[i] = min/arrow_len[i];
-            }
-            else {
-                arrow_len[i] = 1.;
-            }
-        }
-        self.udata *= &arrow_len;
-        self.vdata *= &arrow_len;
-        self.wdata *= &arrow_len;
+    fn scale_elementwise(&mut self, scale_array:Array<f64, Ix3>) {
+        let scale_factor: Array1<f64> = Array::from_iter(scale_array);
+        self.udata = &self.udata * &scale_factor;
+        self.vdata = &self.vdata * &scale_factor;
+        self.wdata = &self.udata * &scale_factor;
         self.xdata_end = &self.xdata + &self.udata;
         self.ydata_end = &self.ydata + &self.vdata;
         self.zdata_end = &self.zdata + &self.wdata;
-        return self
+        // update scaled norms
+        //self.normdata_scaled.assign(&(&self.normdata_scaled * scale_factor));
+        self.normdata_scaled *= &scale_factor;
+    }
+
+    fn bound_min(&mut self, min: f64) {
+        let mut scale_factor: Array1<f64> = Array1::ones(self.normdata_scaled.len_of(Axis(0)));
+        for i in 0..self.normdata_scaled.len_of(Axis(0)) {
+            if self.normdata_scaled[i] < min {
+                self.normdata_scaled[i] = min/self.normdata_scaled[i];
+                scale_factor[i] = self.normdata_scaled[i];
+            }
+            else {
+                scale_factor[i] = 1.;
+            }
+        }
+        self.udata *= &scale_factor;
+        self.vdata *= &scale_factor;
+        self.wdata *= &scale_factor;
+        self.xdata_end = &self.xdata + &self.udata;
+        self.ydata_end = &self.ydata + &self.vdata;
+        self.zdata_end = &self.zdata + &self.wdata;
+        self.normdata_scaled *= &scale_factor;
+    }
+
+    fn bound_max(&mut self, max: f64) {
+        let mut scale_factor: Array1<f64> = Array1::ones(self.normdata_scaled.len_of(Axis(0)));
+        for i in 0..self.normdata_scaled.len_of(Axis(0)) {
+            if self.normdata_scaled[i] > max {
+                self.normdata_scaled[i] = max/self.normdata_scaled[i];
+                scale_factor[i] = self.normdata_scaled[i];
+            }
+            else {
+                scale_factor[i] = 1.;
+            }
+        }
+        self.udata *= &scale_factor;
+        self.vdata *= &scale_factor;
+        self.wdata *= &scale_factor;
+        self.xdata_end = &self.xdata + &self.udata;
+        self.ydata_end = &self.ydata + &self.vdata;
+        self.zdata_end = &self.zdata + &self.wdata;
+        self.normdata_scaled *= &scale_factor;
+    }
+
+    fn bound_min_max(&mut self, min: f64, max: f64) {
+        let mut scale_factor: Array1<f64> = Array1::ones(self.normdata_scaled.len_of(Axis(0)));
+        for i in 0..self.normdata_scaled.len_of(Axis(0)) {
+            if self.normdata_scaled[i] > max {
+                self.normdata_scaled[i] = max/self.normdata_scaled[i];
+                scale_factor[i] = self.normdata_scaled[i];
+            }
+            else if self.normdata_scaled[i] < min {
+                self.normdata_scaled[i] = min/self.normdata_scaled[i];
+                scale_factor[i] = self.normdata_scaled[i];
+            }
+            else {
+                self.normdata_scaled[i] = 1.;
+            }
+        }
+        self.udata *= &scale_factor;
+        self.vdata *= &scale_factor;
+        self.wdata *= &scale_factor;
+        self.xdata_end = &self.xdata + &self.udata;
+        self.ydata_end = &self.ydata + &self.vdata;
+        self.zdata_end = &self.zdata + &self.wdata;
+        self.normdata_scaled *= &scale_factor;
     }
 
     /// Constrain all arrows to lie within circle of radius dx/2 from each node.
     /// On a non-uniform grid, this *will* distort the plot.
-    pub fn node_bound(mut self, arrow_len: Array1<f64>) -> ConeData {
-        let dx = (self.xdata[0] - self.xdata[1]).abs();
+    fn bound_node(&mut self, dx: f64) {
         //println!("{},{},{}",self.xdata[1], self.xdata[2], dx);
-        self.udata *= 0.5*dx/arrow_len.max().unwrap();
-        self.vdata *= 0.5*dx/arrow_len.max().unwrap();
-        self.wdata *= 0.5*dx/arrow_len.max().unwrap();
+        let scale_factor: f64 = 0.5*dx/self.normdata_scaled.max().unwrap();
+        self.udata *= scale_factor;
+        self.vdata *= scale_factor;
+        self.wdata *= scale_factor;
         self.xdata_end = &self.xdata + &self.udata;
         self.ydata_end = &self.ydata + &self.vdata;
         self.zdata_end = &self.zdata + &self.wdata;
-        return self
+        self.normdata_scaled *= scale_factor;
     }
 
-    /// Apply bounds to arrows based on BoundMode enum value.
-    pub fn bound(self, bound_mode: BoundMode) -> ConeData {
-        let arrow_len: Array1<f64> = izip!(&self.udata,&self.vdata).map(|(u,v)| f64::hypot(*u,*v)).collect::<Array1<f64>>();
-        match bound_mode{
-            BoundMode::Min(min) => {
-                let data_bounded: ConeData = self.min_bound(&min, arrow_len);
-                return data_bounded
-            },
-
-            BoundMode::Max(max) => {
-                let data_bounded: ConeData = self.max_bound(&max, arrow_len);
-                return data_bounded
-            },
-
-            BoundMode::Minmax((min,max)) => {
-                let data_bounded: ConeData = self.min_max_bound(&min, &max, arrow_len);
-                return data_bounded
-            },
-            
-            //Note, this is  only valid for uniform grids
-            BoundMode::Node => {
-                let data_bounded: ConeData = self.node_bound(arrow_len);
-                return data_bounded
-            },
-            //Do nothing as no bounds are requested
-            BoundMode::None => { 
-                let data_bounded: ConeData = self; 
-                return data_bounded
-            },
-        } 
+    /// Convert u, v and w into unit vectors
+    fn normalise_vectors(&mut self) {
+        self.udata /= &self.normdata_scaled;
+        self.vdata /= &self.normdata_scaled;
+        self.wdata /= &self.normdata_scaled;
     }
-}
 
-pub fn trace_arrows(data: ConeData, arrow_scale: Option<f64>, bound_mode: BoundMode) -> Vec<Box<Cone<f64,f64,f64,f64,f64,f64>>> {
-    let data_bounded = data.bound(bound_mode);
-    let mut cone_traces = Vec::new();
+    fn normalise_colour(&self, colour_bounds: Option<(f64, f64)>) -> (Array1<f64>, f64, f64) {
+        match colour_bounds {
+            None => {
+                let min: f64 = *self.normdata_scaled.min().unwrap();
+                let max: f64 = *self.normdata_scaled.max().unwrap();
+                let colour_vector: Array1<f64> = (&self.normdata_scaled - min)/(max - min);
+                return (colour_vector, min, max)
+            },
     
-    for idx in 0..data_bounded.xdata.len(){
-        let xpl = vec![data_bounded.xdata_end[idx]];
-        let ypl = vec![data_bounded.ydata_end[idx]];
-        let zpl = vec![data_bounded.zdata_end[idx]];
-        let upl = vec![data_bounded.udata[idx]];
-        let vpl = vec![data_bounded.vdata[idx]];
-        let wpl = vec![data_bounded.wdata[idx]];
-
-        let trace = Cone::new(xpl,ypl,zpl,upl,vpl,wpl)
-            .anchor(Anchor::Tip)
-            .show_legend(false)
-            .show_scale(false);
-        cone_traces.push(trace);
-    }   
-    return cone_traces
-}
-
-pub fn plot(cone_traces: Vec<Box<Cone<f64,f64,f64,f64,f64,f64>>>,  layout:plotly::layout::Layout, square: bool) -> Plot {
-    let mut plot = Plot::new();
-    //use local render version
-    plot.use_local_plotly();
-
-    for trace in cone_traces{
-        plot.add_trace(trace);
+            Some((min, max)) => {
+                assert!(min < max, "Max needs to be greater than min!");
+                let min = min;
+                let max = max;
+                let colour_vector = (&self.normdata_scaled - min)/(max - min);
+                return (colour_vector, min, max)
+            }
+        }
     }
 
-    // if this is true, then perform some additional plotly calls to create
-    // a plot where the x and y axes are equal
-    if square{
-        let y_axis = plotly::layout::Axis::new()
-                .scale_anchor("x".to_string())
-                .scale_ratio(1.);
+    fn create_plotly_traces(&self, arrow_scale: Option<f64>, colour: colorous::Gradient, colour_bounds: Option<(f64, f64)>) -> Vec<Box<Cone<f64,f64,f64,f64,f64,f64>>> {
+        let (colour_vector, min, max) = self.normalise_colour(colour_bounds);
+        let x: Array1<f64> = self.xdata_end.clone();
+        let y: Array1<f64> = self.ydata_end.clone();
+        let z: Array1<f64> = self.zdata_end.clone();
+        let u: Array1<f64> = self.udata.clone();
+        let v: Array1<f64> = self.vdata.clone();
+        let w: Array1<f64> = self.wdata.clone();
 
-        let square_layout = layout.y_axis(y_axis);
-        
-        plot.set_layout(square_layout);
-    } else{
-        //plot as-is
+        let trace = Cone::new(x, y, z, u, v, w)
+                .anchor(Anchor::Tip)
+                .show_legend(false)
+                
+                ;
+        let cone_trace = vec![trace];
+        return cone_trace
+        }   
+
+    fn vector_plot(&self, traces: Vec<Box<Cone<f64,f64,f64,f64,f64,f64>>>, layout: plotly::Layout, square: bool, axes: Vec<Option<plotly::layout::Axis>>) -> Plot {
+        let mut plot: Plot = Plot::new();
+        plot.use_local_plotly();
+        for trace in traces{
+            plot.add_trace(trace);
+        }
+        let mut axes_iter = axes.into_iter();
+        let x_axis: Axis = axes_iter.next().unwrap().unwrap_or(Axis::new());
+        let y_axis: Axis = axes_iter.next().unwrap().unwrap_or(Axis::new());
+        let z_axis: Axis = axes_iter.next().unwrap().unwrap_or(Axis::new());
         plot.set_layout(layout);
+        return plot
     }
-    return plot
+    
+    fn auto_axis_range(&self, layout: plotly::Layout, axes: Vec<plotly::layout::Axis>, dtick: f64) -> plotly::Layout {
+        let xmin: f64 = self.xdata.min().unwrap() - dtick;
+        let xmax: f64 = self.xdata.max().unwrap() + dtick;
+        let ymin: f64 = self.ydata.min().unwrap() - dtick;
+        let ymax: f64 = self.ydata.max().unwrap() + dtick;
+        let zmin: f64 = self.zdata.min().unwrap() - dtick;
+        let zmax: f64 = self.zdata.max().unwrap() + dtick;
+        let mut axes_iter = axes.into_iter();
+        let xaxis: Axis = axes_iter.next().unwrap();
+        let yaxis: Axis = axes_iter.next().unwrap();
+        let zaxis: Axis = axes_iter.next().unwrap();
+        // TODO mess with scene to achieve this
+        let x_auto: Layout = axis_range_x(layout, xaxis, xmin, xmax);
+        let xy_auto: Layout = axis_range_y(x_auto, yaxis, ymin, ymax);
+        return xy_auto
+    }
+
 }

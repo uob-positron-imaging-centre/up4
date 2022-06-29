@@ -203,78 +203,92 @@ impl VectorData<f64, Ix2, Scatter<f64, f64>> for VectorData2D {
         self.vdata *= scale_factor;
         self.xdata_end = &self.xdata + &self.udata;
         self.ydata_end = &self.ydata + &self.vdata;
+        // update scaled norms 
+        self.normdata_scaled = izip!(&self.udata, &self.vdata).map(|(u,v)| f64::hypot(*u,*v)).collect::<Array1<f64>>();
+
     } 
 
     fn scale_elementwise(&mut self, scale_array:Array2<f64>) {
         let scale_factor: Array1<f64> = Array::from_iter(scale_array);
-        self.udata = &self.udata * scale_factor.to_owned();
-        self.vdata = &self.vdata * scale_factor;
+        self.udata = &self.udata * &scale_factor;
+        self.vdata = &self.vdata * &scale_factor;
         self.xdata_end = &self.xdata + &self.udata;
         self.ydata_end = &self.ydata + &self.vdata;
+        // update scaled norms 
+        self.normdata_scaled = izip!(&self.udata, &self.vdata).map(|(u,v)| f64::hypot(*u,*v)).collect::<Array1<f64>>();
+
     }
 
     /// Set minimum length for arrows.    
-    fn bound_min(&mut self, min: &f64) {
+    fn bound_min(&mut self, min: f64) {
+        let mut scale_factor: Array1<f64> = Array1::ones(self.normdata_scaled.len_of(Axis(0)));
         for i in 0..self.normdata_scaled.len_of(Axis(0)) {
-            if self.normdata_scaled[i] < *min {
+            if self.normdata_scaled[i] < min {
                 self.normdata_scaled[i] = min/self.normdata_scaled[i];
+                scale_factor[i] = self.normdata_scaled[i];
             }
             else {
-                self.normdata_scaled[i] = 1.;
+                scale_factor[i] = 1.;
             }
         }
         self.udata *= &self.normdata_scaled;
         self.vdata *= &self.normdata_scaled;
         self.xdata_end = &self.xdata + &self.udata;
         self.ydata_end = &self.ydata + &self.vdata;
-        self.normdata_scaled = izip!(&self.udata,&self.vdata).map(|(u,v)| f64::hypot(*u,*v)).collect::<Array1<f64>>();
+        self.normdata_scaled *= &scale_factor;
     }
 
     /// Set maximum length for arrows.
-    fn bound_max(&mut self, max: &f64) {
+    fn bound_max(&mut self, max: f64) {
+        let mut scale_factor: Array1<f64> = Array1::ones(self.normdata_scaled.len_of(Axis(0)));
         for i in 0..self.normdata_scaled.len_of(Axis(0)) {
-            if self.normdata_scaled[i] > *max {
+            if self.normdata_scaled[i] > max {
                 self.normdata_scaled[i] = max/self.normdata_scaled[i];
+                scale_factor[i] = self.normdata_scaled[i];
             }
             else {
-                self.normdata_scaled[i] = 1.;
+                scale_factor[i] = 1.;
             }
         }
-        self.udata *= &self.normdata_scaled;
-        self.vdata *= &self.normdata_scaled;
+        self.udata *= &scale_factor;
+        self.vdata *= &scale_factor;
         self.xdata_end = &self.xdata + &self.udata;
         self.ydata_end = &self.ydata + &self.vdata;
-        self.normdata_scaled = izip!(&self.udata,&self.vdata).map(|(u,v)| f64::hypot(*u,*v)).collect::<Array1<f64>>();
+        self.normdata_scaled *= &scale_factor;
     }
 
     /// Set minimum and maximum lengths for arrows.
-    fn bound_min_max(&mut self, min: &f64, max: &f64) {
+    fn bound_min_max(&mut self, min: f64, max: f64) {
+        let mut scale_factor: Array1<f64> = Array1::ones(self.normdata_scaled.len_of(Axis(0)));
         for i in 0..self.normdata_scaled.len_of(Axis(0)) {
-            if self.normdata_scaled[i] > *max {
+            if self.normdata_scaled[i] > max {
                 self.normdata_scaled[i] = max/self.normdata_scaled[i];
+                scale_factor[i] = self.normdata_scaled[i];
             }
-            else if self.normdata_scaled[i] < *min {
+            else if self.normdata_scaled[i] < min {
                 self.normdata_scaled[i] = min/self.normdata_scaled[i];
+                scale_factor[i] = self.normdata_scaled[i];
             }
             else {
                 self.normdata_scaled[i] = 1.;
             }
         }
-        self.udata *= &self.normdata_scaled;
-        self.vdata *= &self.normdata_scaled;
+        self.udata *= &scale_factor;
+        self.vdata *= &scale_factor;
         self.xdata_end = &self.xdata + &self.udata;
         self.ydata_end = &self.ydata + &self.vdata;
-        self.normdata_scaled = izip!(&self.udata,&self.vdata).map(|(u,v)| f64::hypot(*u,*v)).collect::<Array1<f64>>();
+        self.normdata_scaled *= &scale_factor;
     }
 
     /// Constrain all arrows to lie within circle of radius dx/2 from each node.
     /// On a non-uniform grid, this *will* distort the plot.
-    fn bound_node(&mut self, dx: &f64) {
-        self.udata *= 0.5* *dx/self.normdata_scaled.max().unwrap();
-        self.vdata *= 0.5* *dx/self.normdata_scaled.max().unwrap();
+    fn bound_node(&mut self, dx: f64) {
+        let scale_factor: f64 = 0.5*dx/self.normdata_scaled.max().unwrap();
+        self.udata *= scale_factor;
+        self.vdata *= scale_factor;
         self.xdata_end = &self.xdata + &self.udata;
         self.ydata_end = &self.ydata + &self.vdata;
-        self.normdata_scaled = izip!(&self.udata,&self.vdata).map(|(u,v)| f64::hypot(*u,*v)).collect::<Array1<f64>>();
+        self.normdata_scaled *= scale_factor;
     }
 
     /// Convert u and v into unit vectors
@@ -283,20 +297,20 @@ impl VectorData<f64, Ix2, Scatter<f64, f64>> for VectorData2D {
         self.vdata /= &self.normdata_scaled;
     }
 
-    fn normalise_colour(&self, colour_bounds: &Option<(f64, f64)>) -> (Array1<f64>, f64, f64) {
+    fn normalise_colour(&self, colour_bounds: Option<(f64, f64)>) -> (Array1<f64>, f64, f64) {
         match colour_bounds {
             None => {
-                let min: &f64 = self.normdata_abs.min().unwrap();
-                let max: &f64 = self.normdata_abs.max().unwrap();
-                let colour_vector: Array1<f64> = (&self.normdata_abs - *min)/(*max - *min);
-                return (colour_vector, *min, *max)
+                let min: f64 = *self.normdata_scaled.min().unwrap();
+                let max: f64 = *self.normdata_scaled.max().unwrap();
+                let colour_vector: Array1<f64> = (&self.normdata_abs - min)/(max - min);
+                return (colour_vector, min, max)
             },
     
             Some((min, max)) => {
                 assert!(min < max, "Max needs to be greater than min!");
-                let min = *min;
-                let max = *max;
-                let colour_vector = (&self.normdata_abs - min)/(max - min);
+                let min = min;
+                let max = max;
+                let colour_vector = (&self.normdata_scaled - min)/(max - min);
                 return (colour_vector, min, max)
             }
         }
@@ -321,7 +335,7 @@ impl VectorData<f64, Ix2, Scatter<f64, f64>> for VectorData2D {
     /// let traces = vector2d::trace_arrows(data, arrow_scale, bound_mode);
     /// ```
     fn create_plotly_traces(&self, arrow_scale: Option<f64>, colourmap: Gradient, colour_bounds: Option<(f64, f64)>) -> Vec<Box<Scatter<f64,f64>>>  {
-        let (colour_vector, min, max) = self.normalise_colour(&colour_bounds);
+        let (colour_vector, min, max) = self.normalise_colour(colour_bounds);
         let (barb_x, barb_y) = self.quiver_barbs();
         let (arrow_x, arrow_y) = self.gen_quiver_arrows(arrow_scale);
         let mut traces = Vec::new();

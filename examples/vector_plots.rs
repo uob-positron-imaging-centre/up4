@@ -1,11 +1,13 @@
 use colorous::Gradient;
 // This should appear in PR
 use plotly::common::{Mode, ColorBar, ColorScale, ColorScalePalette, Line, Marker, Fill, ColorScaleElement};
-use plotly::layout::Margin;
+use plotly::layout::{Margin, LayoutColorScale};
 use plotly::{Plot, Scatter, Layout};
 use ndarray::prelude::*;
 use upppp_rust::plotting::VectorData;
 use upppp_rust::plotting::vector2d::VectorData2D;
+use upppp_rust::plotting::vector3d::VectorData3D;
+use upppp_rust::utilities::maths::meshgrid3d;
 use upppp_rust::{plotting::vector2d, utilities::maths::meshgrid};
 use std::f64::consts;
 
@@ -71,7 +73,7 @@ fn vector_2d(){
     */
      
     const PI: f64 = consts::PI;
-    const PTS: f64 = 20.; //number of points
+    const PTS: f64 = 60.; //number of points
     
     // create values for vortices
     let x: Array1<f64> = Array::range(0.,2.*PI+PI/PTS,2.*PI/PTS);
@@ -81,24 +83,76 @@ fn vector_2d(){
     let v: Array2<f64> = -&y.mapv(f64::sin)*&x.mapv(f64::cos);
 
     // create VectorData2D struct
-    let arrows: VectorData2D = vector2d::VectorData2D::new(x,y,u,v);
+    let mut arrows: VectorData2D = vector2d::VectorData2D::new(x,y,u,v);
+    arrows.scale_global(0.1);
 
     // define properties for plot
     let arrow_scale: Option<f64> = None; // default scaling
     let colour: Gradient = colorous::VIRIDIS; // set colourmap
     let colour_bounds: Option<(f64, f64)> = None; //Some((0.3, 0.5));
     let traces: Vec<Box<Scatter<f64, f64>>> = arrows.create_plotly_traces(arrow_scale, colour, colour_bounds);
-    let mut layout = Layout::new()
+    let layout = Layout::new()
                         .width(1000)                
                         .title("Quiver plot".into());
     let square: bool = true;
     let mut axes = Vec::new();
     axes.resize_with(2, || None);
-    let mut plot: Plot = arrows.vector_plot(traces, layout, square, axes);
+    let plot: Plot = arrows.vector_plot(traces, layout, square, axes);
+    plot.show();
+}
+
+fn vector_3d(){
+    /* 
+    This example creates 4 vortices from the equations
+        u(x, y, z) =  sin(x)*cos(y)
+        v(x, y, z) = -sin(y)*cos(x)
+        w(x, y, z) = z
+    at different levels
+    where u, v and w are components of a vector at positions x, y and z.
+
+    In this example we see how to create the VectorData3D struct and 
+    visualise it as a cone plot
+    */
+     
+    const PI: f64 = consts::PI;
+    const PTS: f64 = 20.; //number of points
+    // TODO make this a sphere instead
+    // create values for vortices
+    let xs: Array1<f64> = Array::range(0.,PI+PI/PTS,PI/PTS);
+    let ys: Array1<f64> = Array::range(0.,2.*PI+PI/PTS,2.*PI/PTS);
+    let zs: Array1<f64> = Array::range(0.,2., 2./PTS);
+    let (x, y, z) = meshgrid3d(xs, ys, zs);                    
+    let u: Array3<f64> = &x.mapv(f64::sin)*&y.mapv(f64::cos);
+    let v: Array3<f64> = &y.mapv(f64::sin)*&x.mapv(f64::sin);
+    let w: Array3<f64> = x.clone().mapv(f64::cos);
+
+    // create VectorData2D struct
+    let mut cones: VectorData3D = VectorData3D::new(x,y,z,u,v,w);
+    //cones.scale_global(0.5);
+
+    // define properties for plot
+    let arrow_scale: Option<f64> = None; // default scaling
+    let colour: Gradient = colorous::VIRIDIS; // set colourmap
+    let colour_bounds: Option<(f64, f64)> = None; //Some((0.3, 0.5));
+    let traces = cones.create_plotly_traces(arrow_scale, colour, colour_bounds);
+    let layout = Layout::new()
+                        .width(1000)      
+                        .title("Cone plot".into())
+                        .color_scale(LayoutColorScale::new().diverging(
+                            ColorScale::Palette(ColorScalePalette::Viridis)
+                        )
+                            
+                        )
+                        ;
+    let square: bool = true;
+    let mut axes = Vec::new();
+    axes.resize_with(3, || None);
+    let plot: Plot = cones.vector_plot(traces, layout, square, axes);
     plot.show();
 }
 
 fn main() {
    //simple_color_scatter();
-   vector_2d();
+   //vector_2d();
+   vector_3d();
 }

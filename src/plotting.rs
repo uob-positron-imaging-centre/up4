@@ -10,12 +10,12 @@ use plotly::{common::ColorScalePalette, Plot, Layout, layout::Axis};
 pub trait VectorData<T, D, P> {
     fn scale_global(&mut self, scale_factor: f64); 
     fn scale_elementwise(&mut self, scale_array:Array<T, D>);
-    fn bound_min(&mut self, min: &f64);
-    fn bound_max(&mut self, max: &f64);
-    fn bound_min_max(&mut self, min: &f64, max: &f64);
-    fn bound_node(&mut self, dx: &f64);
+    fn bound_min(&mut self, min: f64);
+    fn bound_max(&mut self, max: f64);
+    fn bound_min_max(&mut self, min: f64, max: f64);
+    fn bound_node(&mut self, dx: f64);
     fn normalise_vectors(&mut self);
-    fn normalise_colour(&self, colour_bounds: &Option<(f64, f64)>) -> (Array1<f64>, f64, f64);
+    fn normalise_colour(&self, colour_bounds: Option<(f64, f64)>) -> (Array1<f64>, f64, f64);
     fn create_plotly_traces(&self, arrow_scale: Option<f64>, colour: Gradient, colour_bounds: Option<(f64, f64)>) -> Vec<Box<P>>;
     fn vector_plot(&self, traces: Vec<Box<P>>, layout: Layout, square: bool, axes: Vec<Option<Axis>>) -> Plot;
     fn auto_axis_range(&self, layout: Layout, axes: Vec<Axis>, dtick: f64) -> Layout;

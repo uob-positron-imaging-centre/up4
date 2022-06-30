@@ -7,7 +7,7 @@ use std::any::Any;
 type position = (f64,f64,f64);
 type polarcoordinates = (f64,f64,f64);
 #[derive(Getters,Clone)]
-pub struct Grid2DPolar{
+pub struct Grid2DPolarRadial{
     cells: Array1<usize>,
     xpositions: Array1<f64>,
     ypositions:Array1<f64>,
@@ -19,7 +19,7 @@ pub struct Grid2DPolar{
 }
 
 
-impl  Grid2DPolar{
+impl  Grid2DPolarRadial{
     pub fn new(cells:Array1<usize>,polarvector: (f64,f64,f64), polarorigin: (f64,f64,f64), limit: Dim)-> Self{
         print_debug!("Grid2D: Generating new grid");
         if cells.shape()[0] != 2 {

@@ -8,13 +8,53 @@
  this skript tests given functions and returns its speed and
  if it failed or not
 """
-import up4 as p
-import time
+import up4
 import numpy as np
+import os
 from glob import glob
 import pytest
 from natsort import natsorted as sorted
 # add your function to this command list
+
+@pytest.fixture
+def exp_data():
+    """ Returns a instance of pdata with the experiment test data in fixtures/"""
+    return up4.Data.from_pdata("fixtures/HSM_Glass_2l_250.hdf5")
+
+@pytest.fixture
+def sim_data():
+    """ Returns a instance of tdata with the simulation test data in fixtures/"""
+    return up4.Data.from_tdata("fixtures/drum.hdf5")
+
+
+@pytest.mark.parametrize("data",[exp_data, sim_data])
+def test_data(data):
+    pass
+
+class TestVtk:
+
+
+    def test_successfull_write(self):
+        """Test if the hdf5 file is written"""
+        if os.path.exists("fixtures/vtk/drum.hdf5"):
+            os.remove("fixtures/vtk/drum.hdf5")
+        filenames = sorted([x for x in glob("fixtures/post/drum*.vtk") if not "bound" in x])
+        up4.Converter.vtk(filenames, 1e-5, "fixtures/drum.hdf5")
+        assert os.path.exists("fixtures/drum.hdf5") == True
+
+    def test_successfull_generated(self):
+        """Test if the hdf5 file is written and that it is readable"""
+        if os.path.exists("fixtures/vtk/drum.hdf5"):
+            os.remove("fixtures/vtk/drum.hdf5")
+        filenames = sorted([x for x in glob("fixtures/post/drum*.vtk") if not "bound" in x])
+        up4.Converter.vtk(filenames, 1e-5, "fixtures/drum.hdf5")
+        try:
+            up4.Data.from_tdata("fixtures/drum.hdf5")
+        except Exception as e:
+            pytest.fail(e)
+
+
+"""
 cmds=[]
 
 def test_vtkio():
@@ -97,3 +137,4 @@ if __name__=="__main__":
     print("\n\nTesting Experimental Data")
     data = p.Data.from_pdata("fixtures/HSM_Glass_2l_250.hdf5")
     test(data)
+"""

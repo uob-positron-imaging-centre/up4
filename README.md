@@ -25,3 +25,9 @@ you will need a rust compiler, see:
 https://www.rust-lang.org/tools/install
 
 Rust dependencys will be installed automatically before compilation
+
+
+## To Do
+### Tests
+- test failiures. make exceptations work
+- make paths work also when pytested from different folder

@@ -24,8 +24,10 @@ itertools = "0.10.1"
 regex = "1"
 vtkio ="0.6.0"
 indicatif = "0.17.0-beta.1"
-
-
+csv= "1.1.6"
+ndarray-csv = {version = "0.5.1"}
+polyfit-rs = "0.2.0"
+num-traits="0.2.14"
 [dependencies.pyo3]
 version = ">0.11.1"
 features = ["extension-module"]
@@ -36,3 +38,15 @@ features = ["extension-module"]
 uPPPP_debug = []
 uPPPP_warning = []
 python = []
+
+#[profile.dev]#
+#opt-level = 0              # Use slightly better optimizations.
+
+
+[profile.release]
+incremental = true
+debug = true
+lto = "fat"
+
+[rust]
+debuginfo-level = 1

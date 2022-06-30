@@ -10,7 +10,7 @@ macro_rules! print_debug{
         //#[cfg(feature= "uPPPP_debug",)]
         //print!("Debug: ");
         #[cfg(feature= "uPPPP_debug",)]
-        println!($($arg)*);
+        println!($($arg)*)
     }
 }
 
@@ -28,17 +28,16 @@ macro_rules! print_warning{
     }
 }
 
-
 /// Check kill- signals set by ctrl-c in the command line
 #[macro_export]
-macro_rules! check_signals{
-    () =>{
-        #[cfg(feature="python",)]
-        unsafe{
-            let  sig = pyo3::ffi::PyErr_CheckSignals();
-            if sig == -1{
+macro_rules! check_signals {
+    () => {
+        #[cfg(feature = "python")]
+        unsafe {
+            let sig = pyo3::ffi::PyErr_CheckSignals();
+            if sig == -1 {
                 panic!("KeyboardInterrupt: Rust caught a ctrl-c signal and exits!")
             }
         }
-    }
+    };
 }

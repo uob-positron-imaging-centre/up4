@@ -1,12 +1,10 @@
 //! Data Managment Module. Organizes file access.
 //use crate::functions::*;
 //use crate::functions::fields::*;
-use crate::utilities::*;
 use super::functions::Granular;
 
-use ndarray::DataMut;use ndarray::prelude::*;
 use derive_getters::Getters;
-
+use ndarray::prelude::*;
 
 pub mod pdata;
 pub use pdata::PData;
@@ -18,13 +16,13 @@ pub trait DataManager {
     fn get_timestep(&mut self, timestep: usize) -> &Timestep;
 
     /// Return `GlobalStats` for global system information
-    fn global_stats(&self)-> GlobalStats;
+    fn global_stats(&self) -> GlobalStats;
 
     /// Development function
     fn stats(&self);
 }
 
-pub trait Manager: DataManager +Granular{}
+pub trait Manager: DataManager + Granular {}
 
 /// Data-struct containing all necessery information for a timestep
 #[derive(Debug, Default, Getters, Clone)]
@@ -50,5 +48,4 @@ pub struct GlobalStats {
     sample_rate: f64,
     velocity: Array2<f64>,
     velocity_mag: Array1<f64>,
-
 }

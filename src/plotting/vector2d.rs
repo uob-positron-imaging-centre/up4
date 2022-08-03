@@ -7,13 +7,13 @@ use ndarray;
 use itertools;
 use itertools::izip;
 use ndarray::prelude::*;
+use plotly::common::ColorScale;
 use std::f64::consts::PI;
-use plotly::common::{Fill, Line, Mode, Marker, ColorScale, ColorBar, ColorScaleElement};
-use plotly::{Plot, Scatter};
+use plotly::common::{Fill, Line, Mode, Marker, ColorBar, ColorScaleElement};
+use plotly::{Plot, Scatter, NamedColor, HeatMap};
 use plotly::layout::{Axis, Layout, AxisConstrain};
 use core::panic;
 use ndarray_stats::QuantileExt;
-use crate::utilities::maths::{flatten_2d, minmax};
 use colorous::Gradient;
 use super::{VectorData};
 
@@ -60,7 +60,6 @@ use super::{VectorData};
 /// 
 /// let arrows: VectorData2D = vector2d::VectorData2D::new(x,y,u,v,scale_mode);
 /// ```
-
 pub struct VectorData2D {
     xdata: Array1<f64>,
     ydata: Array1<f64>,
@@ -192,6 +191,63 @@ impl VectorData2D {
         }
         return (arrow_x, arrow_y)
     }
+
+    // TODO figure out a zero(ish) vector handling strategy
+    pub fn create_unit_plotly_traces(&mut self, arrow_scale: Option<f64>, uniform: bool) -> Vec<Box<Scatter<f64, f64>>> {
+        self.normalise_vectors(); // normalise the vectors
+        if uniform{
+            let dx: f64 = self.ydata[1] - self.ydata[0];
+            self.bound_node(dx);
+        }
+        let (barb_x, barb_y) = self.quiver_barbs();
+        let (arrow_x, arrow_y) = self.gen_quiver_arrows(arrow_scale);
+        let mut traces = Vec::new();
+        for (x_line, y_line, x_head, y_head) in izip!(barb_x, barb_y, arrow_x, arrow_y) {
+            let xpl: Vec<f64> = vec![x_line.0, x_line.1, x_head.0, x_head.1, x_head.2 ];
+            let ypl: Vec<f64> = vec![y_line.0, y_line.1, y_head.0, y_head.1, y_head.2];
+            let trace = Scatter::new(xpl, ypl).mode(Mode::Lines).show_legend(false).fill(Fill::ToSelf).fill_color(NamedColor::Black).show_legend(false).line(Line::new().color(NamedColor::Black));
+            traces.push(trace);
+        }
+        return traces
+    }
+    // TODO add a heatmap background to the regular plot
+    pub fn unit_vector_plot(&mut self, traces: Vec<Box<Scatter<f64, f64>>>, layout: Layout, square: bool, palette: ColorScale, axes: Vec<Option<Axis>>, smoothing: Option<&str>) -> Plot {
+        let mut plot = Plot::new();
+        //use local render version
+        plot.use_local_plotly();
+        for trace in traces{
+            plot.add_trace(trace);
+        }
+        // TODO remove the need to use bound_node() so that actual unit vectors are plotted
+        // TODO ensure that the arrows fit in each cell
+        // Add a heatmap background to give the vectors some colour
+        let smooth_setting = smoothing.unwrap_or("best".into()); 
+        let heatmap: Box<HeatMap<f64, f64, f64>> = HeatMap::new(self.xdata.to_vec(), self.ydata.to_vec(), self.normdata_abs.to_vec()).zsmooth(smooth_setting).color_scale(palette);
+        plot.add_trace(heatmap);
+        // if this is true, then perform some additional plotly calls to create a plot where the x and y axes are equal
+        if square{  
+            let mut axes_iter = axes.into_iter();
+            let x_axis: Axis = axes_iter.next().unwrap().unwrap_or(Axis::new());
+            let y_axis: Axis = axes_iter.next().unwrap().unwrap_or(Axis::new());
+            let dx_start: f64 = self.xdata[1] - self.xdata[0];
+            let dx_end: f64 = self.xdata[self.xdata.len()-1] - self.xdata[self.xdata.len()-2];
+            let dy_start: f64 = self.ydata[1] - self.ydata[0];
+            let dy_end: f64 = self.ydata[self.ydata.len()-1] - self.ydata[self.ydata.len()-2]; 
+            // with a uniform grid we can easily rescale vectors to fit in grid
+            let square_layout: Layout = layout
+                .y_axis(y_axis.scale_anchor("x".to_string())
+                .range(vec![*self.ydata.min().unwrap() - dy_start*0.5, *self.ydata.max().unwrap() + dy_end*0.5]).scale_ratio(1.)
+                )
+                .x_axis(x_axis.constrain(AxisConstrain::Domain)
+                .range(vec![*self.xdata.min().unwrap() - dy_start*0.5, *self.xdata.max().unwrap() + dy_end*0.5])
+            );
+            plot.set_layout(square_layout);
+        } else{
+            //plot as-is
+            plot.set_layout(layout);
+        }
+        return plot
+    }
 }
     
 
@@ -214,9 +270,9 @@ impl VectorData<f64, Ix2, Scatter<f64, f64>> for VectorData2D {
     }
 
     /// Set minimum length for arrows.    
-    fn bound_min(&mut self, min: &f64) {
+    fn bound_min(&mut self, min: f64) {
         for i in 0..self.normdata_scaled.len_of(Axis(0)) {
-            if self.normdata_scaled[i] < *min {
+            if self.normdata_scaled[i] < min {
                 self.normdata_scaled[i] = min/self.normdata_scaled[i];
             }
             else {
@@ -231,9 +287,9 @@ impl VectorData<f64, Ix2, Scatter<f64, f64>> for VectorData2D {
     }
 
     /// Set maximum length for arrows.
-    fn bound_max(&mut self, max: &f64) {
+    fn bound_max(&mut self, max: f64) {
         for i in 0..self.normdata_scaled.len_of(Axis(0)) {
-            if self.normdata_scaled[i] > *max {
+            if self.normdata_scaled[i] > max {
                 self.normdata_scaled[i] = max/self.normdata_scaled[i];
             }
             else {
@@ -248,12 +304,12 @@ impl VectorData<f64, Ix2, Scatter<f64, f64>> for VectorData2D {
     }
 
     /// Set minimum and maximum lengths for arrows.
-    fn bound_min_max(&mut self, min: &f64, max: &f64) {
+    fn bound_min_max(&mut self, min: f64, max: f64) {
         for i in 0..self.normdata_scaled.len_of(Axis(0)) {
-            if self.normdata_scaled[i] > *max {
+            if self.normdata_scaled[i] > max {
                 self.normdata_scaled[i] = max/self.normdata_scaled[i];
             }
-            else if self.normdata_scaled[i] < *min {
+            else if self.normdata_scaled[i] < min {
                 self.normdata_scaled[i] = min/self.normdata_scaled[i];
             }
             else {
@@ -269,9 +325,9 @@ impl VectorData<f64, Ix2, Scatter<f64, f64>> for VectorData2D {
 
     /// Constrain all arrows to lie within circle of radius dx/2 from each node.
     /// On a non-uniform grid, this *will* distort the plot.
-    fn bound_node(&mut self, dx: &f64) {
-        self.udata *= 0.5* *dx/self.normdata_scaled.max().unwrap();
-        self.vdata *= 0.5* *dx/self.normdata_scaled.max().unwrap();
+    fn bound_node(&mut self, dx: f64) {
+        self.udata *= 0.5* dx/self.normdata_scaled.max().unwrap();
+        self.vdata *= 0.5* dx/self.normdata_scaled.max().unwrap();
         self.xdata_end = &self.xdata + &self.udata;
         self.ydata_end = &self.ydata + &self.vdata;
         self.normdata_scaled = izip!(&self.udata,&self.vdata).map(|(u,v)| f64::hypot(*u,*v)).collect::<Array1<f64>>();
@@ -281,6 +337,8 @@ impl VectorData<f64, Ix2, Scatter<f64, f64>> for VectorData2D {
     fn normalise_vectors(&mut self) {
         self.udata /= &self.normdata_scaled;
         self.vdata /= &self.normdata_scaled;
+        self.xdata_end = &self.xdata + &self.udata;
+        self.ydata_end = &self.ydata + &self.vdata;
     }
 
     fn normalise_colour(&self, colour_bounds: &Option<(f64, f64)>) -> (Array1<f64>, f64, f64) {
@@ -328,45 +386,20 @@ impl VectorData<f64, Ix2, Scatter<f64, f64>> for VectorData2D {
         let mut colour_elements: Vec<ColorScaleElement> = Vec::new();
         //unpack the vectors of arrow barbs and heads into new vector containing each arrow as a tuple
         for (x_line, y_line, x_head, y_head, c) in izip!(barb_x, barb_y, arrow_x, arrow_y, colour_vector) {
-        let xpl: Vec<f64> = vec![x_line.0, 
-                        x_line.1, 
-                        x_head.0,
-                        x_head.1,
-                        x_head.2
-                        ];
-                        
-            let ypl: Vec<f64> = vec![y_line.0, 
-                        y_line.1, 
-                        y_head.0,
-                        y_head.1,
-                        y_head.2
-                        ];
+            let xpl: Vec<f64> = vec![x_line.0, x_line.1, x_head.0, x_head.1, x_head.2 ];
+            let ypl: Vec<f64> = vec![y_line.0, y_line.1, y_head.0, y_head.1, y_head.2];
             //color for trace
             let color: String = format!("#{:x}", colourmap.eval_continuous(c));
             let s: String = color.clone();
             let element: ColorScaleElement = ColorScaleElement::new(c, s);
             colour_elements.push(element);
-            let trace = Scatter::new(xpl, ypl)
-                .mode(Mode::Lines)
-                .show_legend(false)
-                .fill(Fill::ToSelf)
-                .fill_color(&color)
-                .show_legend(false)
-                .line(Line::new().color(&color));
+            let trace = Scatter::new(xpl, ypl).mode(Mode::Lines).show_legend(false).fill(Fill::ToSelf).fill_color(&color).show_legend(false).line(Line::new().color(&color));
             traces.push(trace);
         }    
-
         //create an invisible marker to get the colorbar to appear - use the same map as above
         let invisible_marker = Scatter::new(vec![self.xdata[0]],vec![self.ydata[0]])
         .mode(Mode::Markers)
-        .marker(Marker::new()
-            .cmin(min) 
-            .cmax(max) 
-            .color_scale(ColorScale::Vector(colour_elements))
-            .color_bar(ColorBar::new())
-            .size(1))
-        .show_legend(false);
-        
+        .marker(Marker::new().cmin(min).cmax(max).color_scale(ColorScale::Vector(colour_elements)).color_bar(ColorBar::new()).size(1)).show_legend(false);
         traces.push(invisible_marker);
         return traces
     }
@@ -421,6 +454,7 @@ impl VectorData<f64, Ix2, Scatter<f64, f64>> for VectorData2D {
         let xy_auto: Layout = axis_range_y(x_auto, yaxis, ymin, ymax);
         return xy_auto
     }
+
 }
 
 // Convenience functions that act on a plotly plot

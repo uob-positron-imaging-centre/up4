@@ -151,8 +151,48 @@ fn vector_3d(){
     plot.show();
 }
 
+fn unit_vector_2d(){
+    /* 
+    This example creates 4 vortices from the equations
+        u(x, y) =  sin(x)*cos(y)
+        v(x, y) = -sin(y)*cos(x)
+    where u and v are components of a vector at positions x and y.
+
+    In this example we see how to create the VectorData2D struct and 
+    visualise it as a quiver plot, viewing the arrows as unit vectors
+    and using a heatmap to colour the background based on the vector norms.
+    */
+     
+    const PI: f64 = consts::PI;
+    const PTS: f64 = 30.; //number of points
+    let dx: f64 = 2.0*PI/PTS; // spacing
+    // create values for vortices
+    let x: Array1<f64> = Array::range(0.,2.*PI+dx,dx);
+    let y: Array1<f64> = Array::range(0.,2.*PI+dx,dx);
+    let (x, y) = meshgrid(x, y);                       
+    let u: Array2<f64> = &x.mapv(f64::sin)*&y.mapv(f64::cos);
+    let v: Array2<f64> = -&y.mapv(f64::sin)*&x.mapv(f64::cos);
+
+    // create VectorData2D struct
+    let mut arrows: VectorData2D = vector2d::VectorData2D::new(x,y,u,v);
+    //arrows.bound_node(dx);
+    //arrows.normalise_vectors();
+    // define properties for plot
+    let uniform: bool = true;
+    let arrow_scale: Option<f64> = None; // default scaling
+    let traces: Vec<Box<Scatter<f64, f64>>> = arrows.create_unit_plotly_traces(arrow_scale, uniform);
+    let layout: Layout = Layout::new()
+                        .width(1000)                
+                        .title("Quiver plot".into());
+    let square: bool = true;
+    let mut axes = Vec::new();
+    axes.resize_with(2, || None);
+    let plot: Plot = arrows.unit_vector_plot(traces, layout, square, ColorScale::Palette(ColorScalePalette::Viridis), axes, None);
+    plot.show();
+}
+
 fn main() {
    //simple_color_scatter();
    //vector_2d();
-   vector_3d();
+   unit_vector_2d();
 }

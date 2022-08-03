@@ -9,10 +9,11 @@ use ndarray_stats::QuantileExt;
 use crate::{GlobalStats,print_debug};
 use numpy::PyArray1;use pyo3::prelude::*;
 use numpy::{IntoPyArray, PyArrayDyn, PyReadonlyArray1,PyReadonlyArray2, ToPyArray};
-use std::fmt::Debug;
+use std::fmt::{Debug, Display};
 use std::any::Any;
 use derive_getters::Getters;
 use dyn_clone::{clone_trait_object, DynClone};
+use std::convert::TryFrom;
 /// Provides a generic way to send ranges to nD-Grid struct.
 ///
 /// Each Dimenion is defined by n - tuples of n*2 numbers to define the range in each dimension
@@ -28,9 +29,9 @@ pub enum Dim {
     TwoD((f64, f64), (f64, f64)),
     ThreeD((f64, f64), (f64, f64), (f64, f64)),
 }
-pub trait Grid: Debug{
-
-}
+//pub trait Grid: Debug{
+//
+//}
 pub trait GridFunctions: DynClone{
 
     // Clone instance with possibly new data type
@@ -420,4 +421,69 @@ impl GridFunctions for Grid3D{
     fn as_any(&self) -> &dyn Any {
         self
     }
+}
+
+
+pub trait GridTraits: DynClone{
+    fn from_1d(cells: Vec<usize>, limits: Vec<f64>) -> Self where Self: Sized;
+    fn from_2d(cells: Vec<usize>, limits: Vec<f64>) -> Self where Self: Sized;
+    fn from_3d(cells: Vec<usize>, limits: Vec<f64>) -> Self where Self: Sized;
+    fn is_inside(&self, num: Vec<f64>) -> bool;
+    fn cell_id(&self, num: Vec<f64>) -> Array1<usize>;
+    fn as_any(&self) -> &dyn Any;
+}
+
+clone_trait_object!(GridTraits);
+#[derive(Getters,Clone,Debug)]
+pub struct CartesianGrid{
+    cells: Vec<usize>,
+    positions: ArrayD<f64>,
+    limits: Vec<f64>
+}
+
+//impl Display for CartesianGrid {
+//    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//        write!()
+//    }
+//}
+
+impl GridTraits for CartesianGrid {
+    fn from_1d(cells: Vec<usize>, limits: Vec<f64>) -> Self {
+        print_debug!("Cartesian grid: Generating new grid");
+        if limits.len() != 2 {
+            panic!("1D Cartesian grid received the wrong number of limits.");
+        }
+        let cellsize: f64 = (limits[1] - limits[0])/cells[0] as f64;
+        let mut positions: ArrayD<f64> = ArrayD::zeros(cells.as_ref());
+        for cellid in 0..cells[0]{
+            positions[cellid] = cellid as f64 * cellsize + cellsize;
+        }
+        return CartesianGrid {cells, positions, limits}
+    }
+
+    fn from_2d(cells: Vec<usize>, limits: Vec<f64>) -> Self {
+        print_debug!("Cartesian grid: Generating new grid");
+        if limits.len() != 4 {
+            panic!("2D Cartesian grid received the wrong number of limits.");
+        }
+        let mut cellsize: Vec<f64> = Vec::new();
+        
+    }
+
+    fn from_3d(cells: Vec<usize>, limits: Vec<f64>) -> Self {
+        todo!()
+    }
+
+    fn is_inside(&self, num: Vec<f64>) -> bool {
+        todo!()
+    }
+
+    fn cell_id(&self, num: Vec<f64>) -> Array1<usize> {
+        todo!()
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        todo!()
+    }
+
 }

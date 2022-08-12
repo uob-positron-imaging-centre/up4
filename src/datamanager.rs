@@ -2,7 +2,7 @@
 //use crate::functions::*;
 //use crate::functions::fields::*;
 use super::functions::Granular;
-
+use crate::types::*;
 use derive_getters::Getters;
 use ndarray::prelude::*;
 
@@ -28,7 +28,7 @@ pub trait Manager: DataManager + Granular {}
 #[derive(Debug, Default, Getters, Clone)]
 pub struct Timestep {
     time: f64,
-    position: Array2<f64>,
+    position: Array1<Position>,
     velocity: Array2<f64>,
     radius: Array1<f64>,
     particleid: Array1<f64>,

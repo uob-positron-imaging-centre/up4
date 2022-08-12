@@ -5,8 +5,10 @@
 use super::{DataManager, GlobalStats, Manager, Timestep};
 use pyo3::prelude::*;
 extern crate ndarray;
-use crate::base::particleselector::Selector;
-use crate::base::ParticleSelector;
+use crate::particleselector::Selector;
+
+use crate::types::*;
+use crate::ParticleSelector;
 use crate::{print_debug, print_warning};
 use ndarray::prelude::*;
 use std::time::{Duration, Instant};
@@ -77,7 +79,10 @@ impl TData {
                 "Can not read dataset \"position\" in file {}",
                 self.file.filename()
             ))
-            .to_owned();
+            .to_owned()
+            .axis_iter(Axis(0))
+            .map(|x| [x[0], x[1], x[2]])
+            .collect::<Array1<Position>>();
 
         // for each particle find the velocuty at the
         let velocity = self
@@ -263,7 +268,10 @@ impl TData {
                     "Can not read dataset \"position\" in file {}",
                     self.file.filename()
                 ))
-                .to_owned();
+                .to_owned()
+                .axis_iter(Axis(0))
+                .map(|x| [x[0], x[1], x[2]])
+                .collect::<Array1<Position>>();
 
             // for each particle find the velocuty at the
             let velocity = self
@@ -437,7 +445,7 @@ impl TData {
         );
         for timestep in 0..*self.global_stats_.timesteps() {
             let timestep_data = self.get_timestep(timestep);
-            let positions: &Array2<f64> = timestep_data.position();
+            let positions: &Array1<Position> = timestep_data.position();
             let radius: &Array1<f64> = timestep_data.radius();
             let particleid: &Array1<f64> = timestep_data.particleid();
             let clouds: &Array1<f64> = timestep_data.clouds();
@@ -447,7 +455,7 @@ impl TData {
                 {
                     continue;
                 }
-                x = x + position[0];
+                x = x + positions[0][0];
             }
         }
         println!("Elapsed time: {}", now.elapsed().as_millis());

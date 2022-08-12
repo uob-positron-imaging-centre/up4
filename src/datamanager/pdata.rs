@@ -5,9 +5,9 @@
 use super::{DataManager, GlobalStats, Manager, Timestep};
 use pyo3::prelude::*;
 extern crate ndarray;
-use crate::base::particleselector::Selector;
-use crate::base::GridFunctions;
-use crate::base::ParticleSelector;
+use crate::particleselector::Selector;
+use crate::types::*;
+use crate::ParticleSelector;
 use crate::{print_debug, print_warning};
 use ndarray::prelude::*;
 use std::time::{Duration, Instant};
@@ -62,7 +62,7 @@ impl PData {
         print_debug!("PData: Reading a single timestep: {}", timestep);
 
         let particles = *self.global_stats_.nparticles();
-        let mut position: Array2<f64> = Array2::<f64>::zeros((particles, 3));
+        let mut position: Array1<Position> = Array1::from_elem((particles), [0.0, 0.0, 0.0]);
         let mut velocity: Array2<f64> = Array2::<f64>::zeros((particles, 3));
         let mut radius: Array1<f64> = Array1::<f64>::zeros(particles);
         let mut density: Array1<f64> = Array1::<f64>::zeros(particles);
@@ -91,7 +91,17 @@ impl PData {
                     self.file.filename()
                 ))
                 .slice(s![timestep, ..])
-                .to_owned();
+                .to_owned()
+                .into_shape((particles, 3))
+                .expect(&format!(
+                    "Can not shape dataset \"position\" in file {} into a ({}, 3) array",
+                    self.file.filename(),
+                    particles,
+                ))
+                .axis_iter(Axis(0))
+                .map(|x| [x[0], x[1], x[2]])
+                .collect::<Array1<Position>>();
+            // iter over elements in 2D array. make  it a 1D array of static arrays with 3 elements.
 
             print_debug!("\tParticle {}: Extracting velocity from HDF5.", particle_id);
             let part_vel = self
@@ -198,7 +208,7 @@ impl PData {
             let mut part_id: Array1<f64> = Array1::<f64>::zeros(1);
             part_id.fill(particle_id as f64);
 
-            position.slice_mut(s![particle_id, ..]).assign(&part_pos);
+            position.slice_mut(s![particle_id]).assign(&part_pos);
             velocity.slice_mut(s![particle_id, ..]).assign(&part_vel);
             radius.slice_mut(s![particle_id]).assign(&part_rad);
             density.slice_mut(s![particle_id]).assign(&part_density);
@@ -233,7 +243,8 @@ impl PData {
         }
         self.buffersize = range.1 - range.0;
         let particles = *self.global_stats_.nparticles();
-        let mut position: Array3<f64> = Array3::<f64>::zeros((self.buffersize, particles, 3));
+        let mut position: Array2<Position> =
+            Array2::<Position>::from_elem((self.buffersize, particles), [0.0, 0.0, 0.0]);
         let mut velocity: Array3<f64> = Array3::<f64>::zeros((self.buffersize, particles, 3));
         let mut radius: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
         let mut density: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
@@ -263,7 +274,17 @@ impl PData {
                     self.file.filename()
                 ))
                 .slice(s![range.0..range.1, ..])
-                .to_owned();
+                .to_owned()
+                .into_shape((range.1-range.0, 3))
+                .expect(&format!(
+                    "Can not shape dataset \"position\" in file {} into a ({}, 3) array, range: {:?}",
+                    self.file.filename(),
+                    range.1-range.0,
+                    range
+                ))
+                .axis_iter(Axis(0))
+                .map(|x| [x[0], x[1], x[2]])
+                .collect::<Array1<Position>>();
 
             // for each particle find the velocuty at the
             print_debug!("\tParticle {}: Extracting velocity from HDF5.", particle_id);
@@ -384,9 +405,7 @@ impl PData {
                 "\tParticle {}: Inserting all information in Arrays.",
                 particle_id
             );
-            position
-                .slice_mut(s![.., particle_id, ..])
-                .assign(&part_pos);
+            position.slice_mut(s![.., particle_id]).assign(&part_pos);
             velocity
                 .slice_mut(s![.., particle_id, ..])
                 .assign(&part_vel);
@@ -401,21 +420,16 @@ impl PData {
 
         print_debug!("PData: Generating Timestep structs.");
         for timestep in 0..range.1 - range.0 {
-            print_debug!("\tTimestep {}: Starting....", timestep);
             let dt = Timestep {
                 time: time[[timestep, 0]], //.slice(s![timestep,..]),
-                position: position.slice(s![timestep, .., ..]).to_owned(),
+                position: position.slice(s![timestep, ..]).to_owned(),
                 velocity: velocity.slice(s![timestep, .., ..]).to_owned(),
                 radius: radius.slice(s![timestep, ..]).to_owned(),
                 particleid: particleid.slice(s![timestep, ..]).to_owned(),
                 clouds: clouds.slice(s![timestep, ..]).to_owned(),
                 density: density.slice(s![timestep, ..]).to_owned(),
             };
-            print_debug!(
-                "\tTimestep {}: Saving struct in buffer with len: {}.",
-                timestep,
-                self.buffer.len()
-            );
+
             self.buffer[timestep] = dt;
         }
         self.range = range; //(range.0,range.1-1);
@@ -436,7 +450,7 @@ impl PData {
         );
         for timestep in 0..*self.global_stats_.timesteps() {
             let timestep_data = self.get_timestep(timestep);
-            let positions: &Array2<f64> = timestep_data.position();
+            let positions: &Array1<Position> = timestep_data.position();
             let velocity: &Array2<f64> = timestep_data.velocity();
             let radius: &Array1<f64> = timestep_data.radius();
             let particleid: &Array1<f64> = timestep_data.particleid();
@@ -620,7 +634,7 @@ impl Manager for PData {}
 
 impl Drop for PData {
     fn drop(&mut self) {
-        print_debug!("Killing TData.\nGoodbye :-)");
+        print_debug!("Killing PData.\nGoodbye :-)");
         //self.file.close();
     }
 }

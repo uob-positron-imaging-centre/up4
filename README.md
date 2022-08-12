@@ -31,3 +31,4 @@ Rust dependencys will be installed automatically before compilation
 ### Tests
 - test failiures. make exceptations work
 - make paths work also when pytested from different folder
+- new, better and smaller test datasets

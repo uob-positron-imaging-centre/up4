@@ -1,4 +1,4 @@
-mod maths;
+pub mod maths;
 
 /// Generate detailed output if compiled with `feature = uPPPP_debug`
 ///

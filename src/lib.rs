@@ -18,129 +18,21 @@
 use pyo3::prelude::*;
 extern crate ndarray;
 extern crate plotly;
-pub mod base;
+/// Module that implements nD grids and basic functionality on them.
+pub mod grid;
+pub use grid::*;
+
+/// Module that implements the `ParticleSelector`, a struct deciding if a particle is valid or not
+pub mod particleselector;
+pub use particleselector::*;
+
+pub mod converter;
+pub use converter::*;
+
 pub mod datamanager;
 mod functions;
+pub mod pylib;
+pub mod types;
 pub mod utilities;
-use base::{ParticleSelector, Selector};
-use datamanager::{Manager, PData, TData};
 
-#[pyclass(name = "Data")]
-struct PyData {
-    data: Box<dyn Manager + Send>,
-    selector: Box<dyn Selector + Send>,
-}
-
-#[pymethods]
-impl PyData {
-    #[new]
-    fn constructor(filename: &str) -> Self {
-        PyData::from_pdata(filename)
-    }
-
-    #[staticmethod]
-    fn from_pdata(filename: &str) -> Self {
-        let pdata = PData::new(filename);
-        let selector = ParticleSelector::default();
-        PyData {
-            data: Box::new(pdata),
-            selector: Box::new(selector),
-        }
-    }
-
-    #[staticmethod]
-    fn from_tdata(filename: &str) -> Self {
-        let tdata = TData::new(filename);
-        let selector = ParticleSelector::default();
-        PyData {
-            data: Box::new(tdata),
-            selector: Box::new(selector),
-        }
-    }
-
-    fn stats<'py>(&self, _py: Python<'py>) {
-        self.data.stats();
-    }
-    /*
-    #[args(norm_on = false, axis = 0)]
-    fn vectorfield<'py>(
-        &mut self,
-        _py: Python<'py>,
-        grid: PyGrid,
-        norm_on: bool, //normalise the size of the vectors
-        axis: usize,
-    ) -> (
-        &'py PyArrayDyn<f64>,
-        &'py PyArrayDyn<f64>,
-        &'py PyArrayDyn<f64>,
-        &'py PyArrayDyn<f64>,
-    ) {
-        print_debug!("Starting Vectorfield function");
-        let selector: &ParticleSelector =
-            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
-                Some(b) => b,
-                None => panic!("Can not convert PyGrid to Grid1D as "),
-            };
-        let (vx, vy, sx, sy) = self
-            .data
-            .vectorfield(grid.to_grid2d(), selector, norm_on, axis);
-        (
-            vx.into_pyarray(_py).to_dyn(),
-            vy.into_pyarray(_py).to_dyn(),
-            sx.into_pyarray(_py).to_dyn(),
-            sy.into_pyarray(_py).to_dyn(),
-        )
-    } //End vectorfield
-     */
-    fn mean_velocity_showcase<'py>(&mut self, _py: Python<'py>) -> f64 {
-        print_debug!("Starting mean velocity calculation on dataset ");
-        let selector: &ParticleSelector =
-            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
-                Some(b) => b,
-                None => panic!("Can not convert PyGrid to Grid1D as "),
-            };
-        let mean_velocity = self.data.mean_velocity_showcase(selector);
-        // return
-        mean_velocity
-    } //End mean_velocity
-
-    fn mean_velocity<'py>(&mut self, _py: Python<'py>) -> f64 {
-        print_debug!("Starting mean velocity calculation on dataset");
-        let selector: &ParticleSelector =
-            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
-                Some(b) => b,
-                None => panic!("Can not convert PyGrid to Grid1D as "),
-            };
-        let mean_velocity = self.data.mean_velocity(selector);
-        // return
-        mean_velocity
-    } //End mean_velocity
-} // ENd PyData
-
-#[pyclass(name = "Converter")]
-struct PyConverter {}
-
-#[pymethods]
-impl PyConverter {
-    #[args(filter = "r\"(\\d+).vtk\"")]
-    #[staticmethod]
-    fn vtk(
-        filenames: Vec<&str>,
-        timestep: f64,
-        outname: &str,
-        filter: &str, // example r"vtk_(\d+).vtk"
-    ) {
-        base::vtk(filenames, timestep, outname, filter);
-    }
-}
-
-/// A Python module implemented in Rust. The name of this function must match
-/// the `lib.name` setting in the `Cargo.toml`, else Python will not be able to
-/// import the module.
-#[pymodule]
-fn upppp_rust(_py: Python, m: &PyModule) -> PyResult<()> {
-    m.add_class::<PyData>()?;
-    //m.add_class::<PyGrid>()?;
-    m.add_class::<PyConverter>()?;
-    Ok(())
-}
+pub use pylib::*;

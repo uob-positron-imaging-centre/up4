@@ -1,7 +1,7 @@
 //! This file provides functionalities to convert data to HDF5 file format
 //!
 //!
-use crate::{check_signals, print_debug};
+use crate::{check_signals, print_debug, setup_bar};
 use csv;
 use hdf5::File;
 use indicatif::{ProgressBar, ProgressStyle};
@@ -280,6 +280,7 @@ pub fn csv_converter(
     outname: &str,
     mut columns: Vec<i64>,
     delimiter: &str,
+    header: bool,
     comment: &str,
     vel: bool,
     interpolate: bool,
@@ -302,7 +303,7 @@ pub fn csv_converter(
 
     // Read csv data
     let mut rdr = csv::ReaderBuilder::new()
-        .has_headers(false)
+        .has_headers(header)
         .delimiter(delimiter.as_bytes()[0])
         .double_quote(false)
         .escape(Some(b'\\'))
@@ -314,7 +315,7 @@ pub fn csv_converter(
     let data: ndarray::Array2<f64> = {
         let mut data: ndarray::ArrayBase<ndarray::OwnedRepr<f64>, ndarray::Dim<[usize; 2]>> = rdr
             .deserialize_array2_dynamic()
-            .expect("Unable to extract CSV data to ndarray!\n");
+            .expect("Unable to extract CSV data to ndarray! \nYour delimiter might be wrong.\n");
         if interpolate {
             data = convertertools::interpolate(data);
         }
@@ -336,12 +337,8 @@ pub fn csv_converter(
     };
     // progress bar
     let data_length = data.column(0).len();
-    let bar = ProgressBar::new(data_length as u64);
-    bar.set_style(ProgressStyle::default_bar()
-        .template("{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {percent}% {per_sec} ({eta})")
-        .with_key("eta", |state| format!("Time left: {:.1}s", state.eta().as_secs_f64()))
-        .with_key("per_sec", |state| format!("{:.1} steps/s", state.per_sec()))
-        .progress_chars("#>-"));
+
+    let bar = setup_bar!("Converting", data_length);
     // Attributes
     print_debug!("Constructing data arrays for attributes!");
     let mut dimensions: ndarray::Array2<f64> = ndarray::Array2::<f64>::zeros((2, 3)); // [min:[x,y,z],max:[x,y,z]]

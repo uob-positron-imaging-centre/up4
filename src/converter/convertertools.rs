@@ -1,15 +1,23 @@
-use crate::print_debug;
+use crate::{print_debug, setup_bar};
 
 use super::check_signals;
 use indicatif::{ProgressBar, ProgressStyle};
-use ndarray;
+use ndarray::{self, ArrayView1};
+use num_traits::real;
 use polyfit_rs;
 pub fn interpolate(data: ndarray::Array2<f64>) -> ndarray::Array2<f64> {
     // TODO implement different types of interpolation
-    let time = data.slice(ndarray::s![0 as usize, ..]);
-    let x = data.slice(ndarray::s![1 as usize, ..]);
-    let y = data.slice(ndarray::s![2 as usize, ..]);
-    let z = data.slice(ndarray::s![3 as usize, ..]);
+    //let bar = ProgressBar::new(data.column(0).len() as u64);
+    /*bar.set_style(ProgressStyle::default_bar()
+    .template("{spinner:.green} Interpolation [{elapsed_precise}] [{wide_bar:.cyan/blue}] {percent}% {per_sec} ({eta})")
+    .with_key("eta", |state| format!("Time left: {:.1}s", state.eta().as_secs_f64()))
+    .with_key("per_sec", |state| format!("{:.1} steps/s", state.per_sec()))
+    .progress_chars("#>-"));*/
+    let bar = setup_bar!("Interpolate", data.column(0).len());
+    let time: ArrayView1<f64> = data.slice(ndarray::s![.., 0 as usize]);
+    let x: ArrayView1<f64> = data.slice(ndarray::s![.., 1 as usize]);
+    let y: ArrayView1<f64> = data.slice(ndarray::s![.., 2 as usize]);
+    let z: ArrayView1<f64> = data.slice(ndarray::s![.., 3 as usize]);
     let maxtime = time[time.len() - 1];
     let timesteps = time.len();
     let dt = maxtime / timesteps as f64;
@@ -27,11 +35,38 @@ pub fn interpolate(data: ndarray::Array2<f64>) -> ndarray::Array2<f64> {
     interp_data[[timesteps - 1, 3]] = z[timesteps - 1];
 
     // loop over whole dataset and figure out the location at each timestep
+    let mut real_step = 1;
     for step in 1..timesteps - 1 {
-        let time_new = interp_data[[step - 1, 0]] + dt;
-        // find index in real data:
-        // TODO OPTIMISE: This function is highly optimizable
-        let real_step = argmin(time, time_new);
+        let time_new = step as f64 * dt;
+
+        // find the next indx in the real data which may be the old one
+        real_step = {
+            // if the temporal distance between new time and old time is smaller
+            // then distance between new time and next time return old timestep
+            if !(real_step >= time.len() - 1) {
+                let old_time = time[real_step];
+                let new_time = time[real_step + 1];
+
+                if (time_new - old_time).abs() < (time_new - new_time).abs() {
+                } else {
+                    real_step += 1;
+                    if !(real_step >= time.len() - 1) {
+                        let old_time = time[real_step];
+                        let new_time = time[real_step + 1];
+
+                        if (time_new - old_time).abs() < (time_new - new_time).abs() {
+                        } else {
+                            real_step += 1;
+                        }
+                    }
+                }
+            }
+            real_step
+        };
+
+        if real_step > data.shape()[0] - 1 {
+            panic!("Soemthing is Wrong in the interpolation. Timestep larger then time");
+        }
         let x_new = interpolate_step(
             data[[real_step - 1, 0]],
             data[[real_step + 1, 0]],
@@ -57,7 +92,10 @@ pub fn interpolate(data: ndarray::Array2<f64>) -> ndarray::Array2<f64> {
         interp_data[[step, 1]] = x_new;
         interp_data[[step, 2]] = y_new;
         interp_data[[step, 3]] = z_new;
+        check_signals!();
+        bar.inc(1);
     }
+    bar.finish();
     data
 }
 
@@ -74,12 +112,7 @@ pub fn velocity_polynom(
     }
     let mut new_data =
         ndarray::Array2::<f64>::zeros((data.column(0).len() - (sampling_steps - 1), 7));
-    let bar = ProgressBar::new(new_data.column(0).len() as u64);
-    bar.set_style(ProgressStyle::default_bar()
-        .template("{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {percent}% {per_sec} ({eta})")
-        .with_key("eta", |state| format!("Time left: {:.1}s", state.eta().as_secs_f64()))
-        .with_key("per_sec", |state| format!("{:.1} steps/s", state.per_sec()))
-        .progress_chars("#>-"));
+    let bar = setup_bar!("Velocity Calc", new_data.column(0).len());
     for id in (sampling_steps - 1) / 2..data.column(0).len() - (sampling_steps - 1) / 2 {
         let datasegment = data.slice(ndarray::s![
             id - (sampling_steps - 1) / 2..id + (sampling_steps - 1) / 2,
@@ -149,16 +182,4 @@ fn interpolate_step(
     let pos_current =
         pos_old + ((pos_new - pos_old) / (time_new - time_old)) * (time_current - time_old);
     pos_current
-}
-
-fn argmin(array: ndarray::ArrayView1<f64>, point: f64) -> usize {
-    let mut argmin = usize::MAX;
-    let mut min = f64::MAX;
-    for (step, x) in array.iter().enumerate() {
-        if (x - point).abs() < min {
-            min = (x - point).abs();
-            argmin = step;
-        }
-    }
-    argmin
 }

@@ -35,13 +35,13 @@ impl KartesianGrid3D {
         let mut ypositions = Array::from_elem(cells[1], 0.);
         let mut zpositions = Array::from_elem(cells[2], 0.);
         for cellidx in 0..cells[0] {
-            xpositions[cellidx as usize] = cellidx as f64 * xcellsize + xcellsize + lim[0][0];
+            xpositions[cellidx as usize] = cellidx as f64 * xcellsize + xcellsize / 2.0 + lim[0][0];
         }
         for cellidy in 0..cells[1] {
-            ypositions[cellidy as usize] = cellidy as f64 * ycellsize + ycellsize + lim[1][0];
+            ypositions[cellidy as usize] = cellidy as f64 * ycellsize + ycellsize / 2.0 + lim[1][0];
         }
         for cellidz in 0..cells[2] {
-            zpositions[cellidz as usize] = cellidz as f64 * zcellsize + zcellsize + lim[2][0];
+            zpositions[cellidz as usize] = cellidz as f64 * zcellsize + zcellsize / 2.0 + lim[2][0];
         }
         KartesianGrid3D {
             cells,
@@ -165,9 +165,9 @@ impl GridFunctions3D for KartesianGrid3D {
         Box::new(grid)
     }
 
-    fn collapse(&self) -> Array2<f64> {
+    fn collapse(&self, axis: usize) -> Array2<f64> {
         //check for Nans and     Infs and replace with 0
-        let axis = Axis(0);
+        let axis = Axis(axis);
         let mut result: Array2<f64> = Array::zeros(self.data.raw_dim().remove_axis(axis));
         let mut result_weight: Array2<f64> = Array::zeros(self.data.raw_dim().remove_axis(axis));
 

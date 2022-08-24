@@ -176,9 +176,9 @@ pub fn vtk(
                 velocity[[i, 1]] += vel[i];
             }
             let vel_mag = vel.map(|v| v * v).sum().sqrt();
-            if vel_mag > velocity_mag[0] {
+            if vel_mag < velocity_mag[0] {
                 velocity_mag[0] = vel_mag;
-            } else if vel_mag < velocity_mag[2] {
+            } else if vel_mag > velocity_mag[2] {
                 velocity_mag[2] = vel_mag;
             }
             velocity_mag[1] += vel_mag;
@@ -192,9 +192,18 @@ pub fn vtk(
                 filename
             ));
         let particle_positions = vtktools::get_positions::<f64>(filename);
+        for fh in 0..4 {
+            print_debug!(
+                "Old: {:?},{:?},{:?}",
+                particle_positions[fh * 3 + 0],
+                particle_positions[fh * 3 + 1],
+                particle_positions[fh * 3 + 2]
+            );
+        }
         let particle_positions =
             ndarray::Array::from_shape_vec((particle_positions.len() / 3, 3), particle_positions)
                 .unwrap();
+        print_debug!("New: {:?}", particle_positions);
         for pos in particle_positions.axis_iter(ndarray::Axis(0)) {
             for i in 0..3 {
                 if pos[i] < dimensions[[0, i]] {

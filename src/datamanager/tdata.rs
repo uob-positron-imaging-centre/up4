@@ -247,7 +247,7 @@ impl TData {
         self.buffersize = range.1 - range.0;
 
         print_debug!("TData: Looping over all particles:");
-        for timestep in 0..timesteps {
+        for timestep in range.0..range.1 {
             // for each particle find the Position at the
             print_debug!("Timestep {}: Extracting position from HDF5.", timestep);
             let position = self
@@ -426,7 +426,7 @@ impl TData {
                 timestep,
                 self.buffer.len()
             );
-            self.buffer[timestep] = dt;
+            self.buffer[timestep - range.0] = dt;
         }
         self.range = range; //(range.0,range.1-1);
         print_debug!("TData: Finished buffer update")

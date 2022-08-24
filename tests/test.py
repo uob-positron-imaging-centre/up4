@@ -20,7 +20,7 @@ from natsort import natsorted as sorted
 def data(request):
     """ Returns a instance of pdata with the experiment test data in fixtures/"""
     if request.param == "exp":
-        return up4.Data.from_pdata("fixtures/out.hdf5")
+        return up4.Data.from_pdata("fixtures/1000_0b_L_surf.hdf5")
     elif request.param == "sim":
         return up4.Data.from_tdata("fixtures/drum.hdf5")
 
@@ -29,8 +29,6 @@ def data(request):
 
 
 class TestVtk:
-
-
     def test_successfull_write(self):
         """Test if the hdf5 file is written"""
         if os.path.exists("fixtures/vtk/drum.hdf5"):
@@ -54,8 +52,7 @@ class TestVtk:
 class TestFields:
 
     def test_velocityfield(self,data):
-
         grid = up4.Grid.databound_cartesian3d(data, cells = [10,10,10])
         field = data.velocityfield(grid)
         assert field.shape() == [10,10,10]
-        pass
+

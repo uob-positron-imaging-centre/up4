@@ -32,3 +32,7 @@ Rust dependencys will be installed automatically before compilation
 - test failiures. make exceptations work
 - make paths work also when pytested from different folder
 - new, better and smaller test datasets
+- tets converter::convertertools:{interpolate, velocity}
+
+## Ideas
+-  save_constraints --> save the current particle selector constraints in the hdf5 file if file contains constraints, load them in Selector, however warn the user while loading, also make a reverse function to set selector to default state ( data.selector_default or similar)

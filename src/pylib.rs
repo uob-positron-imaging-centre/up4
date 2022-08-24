@@ -6,9 +6,11 @@ use crate::grid::*;
 use crate::particleselector::*;
 use crate::types::*;
 use crate::{print_debug, print_warning};
+pub mod libconv;
 pub mod libgrid;
 use crate::datamanager::{Manager, PData, TData};
 
+use libconv::*;
 use libgrid::*;
 #[pyclass(name = "Data")]
 struct PyData {
@@ -47,14 +49,18 @@ impl PyData {
         self.data.stats();
     }
 
-    #[args(norm_on = false, axis = 0)]
-    fn velocityfield<'py>(
-        &mut self,
-        _py: Python<'py>,
-        grid: &PyGrid,
-        norm_on: bool, //normalise the size of the vectors
-        axis: usize,
-    ) -> PyGrid {
+    fn set_time(&mut self, min_time: f64, max_time: f64) {
+        if self.data.global_stats().max_time() < &min_time {
+            panic!(
+                "selected time range is out of range. Consider changing time range.\n\
+            Max time of system: {}",
+                self.data.global_stats().max_time()
+            )
+        }
+        self.selector.set_time(min_time, max_time)
+    }
+
+    fn velocityfield<'py>(&mut self, _py: Python<'py>, grid: &PyGrid) -> PyGrid {
         print_debug!("Starting Vectorfield function");
         let selector: &ParticleSelector =
             match self.selector.as_any().downcast_ref::<ParticleSelector>() {
@@ -62,6 +68,18 @@ impl PyData {
                 None => panic!("Can not convert PyGrid to Grid1D as "),
             };
         let grid = self.data.velocityfield(grid.grid.clone(), selector);
+
+        PyGrid { grid: grid }
+    }
+
+    fn numberfield<'py>(&mut self, _py: Python<'py>, grid: &PyGrid) -> PyGrid {
+        print_debug!("Starting Vectorfield function");
+        let selector: &ParticleSelector =
+            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
+                Some(b) => b,
+                None => panic!("Can not convert PyGrid to Grid1D as "),
+            };
+        let grid = self.data.numberfield(grid.grid.clone(), selector);
 
         PyGrid { grid: grid }
     }
@@ -91,20 +109,65 @@ impl PyData {
     } //End mean_velocity
 } // ENd PyData
 
-#[pyclass(name = "Converter")]
-struct PyConverter {}
+#[pyproto]
+impl pyo3::PyObjectProtocol for PyData {
+    fn __str__(&self) -> PyResult<String> {
+        let global_stats = self.data.global_stats();
+        let time = global_stats.max_time();
+        let dim = global_stats.dimensions();
+        let part_num = global_stats.nparticles();
+        let vel_mag = global_stats.velocity_mag();
 
-#[pymethods]
-impl PyConverter {
-    #[args(filter = "r\"(\\d+).vtk\"")]
-    #[staticmethod]
-    fn vtk(
-        filenames: Vec<&str>,
-        timestep: f64,
-        outname: &str,
-        filter: &str, // example r"vtk_(\d+).vtk"
-    ) {
-        vtk(filenames, timestep, outname, filter);
+        Ok(format!(
+            "Dimensions of the system:\n\
+            \t x {:.2}-->{:.2}\n\
+            \t y {:.2}-->{:.2}\n\
+            \t z {:.2}-->{:.2}\n\
+            The max time of this set is : {:.2}\n\
+            Number of Particles: {:.2}\n\
+            Mean velocity of: {:.2} m/s\n\
+            Minimum velocity {:.2} m/s \nMaximum Velocity {:.2} m/s\n",
+            dim[[0, 0]],
+            dim[[1, 0]],
+            dim[[0, 1]],
+            dim[[1, 1]],
+            dim[[0, 2]],
+            dim[[1, 2]],
+            time,
+            part_num,
+            vel_mag[1usize],
+            vel_mag[0usize],
+            vel_mag[2usize]
+        ))
+    }
+
+    fn __repr__(&self) -> PyResult<String> {
+        let global_stats = self.data.global_stats();
+        let time = global_stats.max_time();
+        let dim = global_stats.dimensions();
+        let part_num = global_stats.nparticles();
+        let vel_mag = global_stats.velocity_mag();
+        Ok(format!(
+            "Dimensions of the system:\n\
+            \t x {:.2}-->{:.2}\n\
+            \t y {:.2}-->{:.2}\n\
+            \t z {:.2}-->{:.2}\n\
+            The max time of this set is : {:.2}\n\
+            Number of Particles: {:.2}\n\
+            Mean velocity of: {:.2} m/s\n\
+            Minimum velocity {:.2} m/s \nMaximum Velocity {:.2} m/s\n",
+            dim[[0, 0]],
+            dim[[1, 0]],
+            dim[[0, 1]],
+            dim[[1, 1]],
+            dim[[0, 2]],
+            dim[[1, 2]],
+            time,
+            part_num,
+            vel_mag[1usize],
+            vel_mag[0usize],
+            vel_mag[2usize]
+        ))
     }
 }
 

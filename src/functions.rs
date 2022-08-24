@@ -144,7 +144,6 @@ pub trait Granular: DataManager {
         let global_stats = self.global_stats();
         let timesteps: &usize = global_stats.timesteps();
         let mut velocity_grid = grid.new_zeros();
-        let mut number_grid = grid.new_zeros();
         print_debug!("velocityfield: Initiation over, entering time loop");
         for timestep in 0..timesteps - 1 {
             let timestep_data = self.get_timestep(timestep);
@@ -212,6 +211,71 @@ pub trait Granular: DataManager {
         }
         velocity_grid.divide_by_weight();
         velocity_grid
+    }
+
+    fn numberfield(
+        &mut self,
+        grid: Box<dyn GridFunctions3D>,
+        selector: &ParticleSelector,
+    ) -> (Box<dyn GridFunctions3D>) {
+        //read the number of timesteps inside this hdf5file
+        let global_stats = self.global_stats();
+        let timesteps: &usize = global_stats.timesteps();
+        let mut number_grid = grid.new_zeros();
+        print_debug!("velocityfield: Initiation over, entering time loop");
+        for timestep in 0..timesteps - 1 {
+            let timestep_data = self.get_timestep(timestep);
+            let current_time = *timestep_data.time();
+            // check if timestep is in the timeframe given
+            if !selector.timestep_valid(current_time) {
+                print_debug!("Timestep {} is not valid", timestep);
+                continue;
+            }
+            print_debug!("Timestep {} is valid", timestep);
+            let positions = timestep_data.position();
+            let velocities = timestep_data.velocity();
+            let particle_ids = timestep_data.particleid();
+            let rad_array = timestep_data.radius();
+            let clouds = timestep_data.clouds();
+            let density = timestep_data.density();
+            let particles = positions.len() / 3;
+            // loop over all particles in this timestep, calculate the velocity vector and add it to the
+            // vectorfield array
+            print_debug!(
+                "velocityfield: looping over particles form 0 to {}",
+                particles
+            );
+            for particle in 0..particles + 1 {
+                if !selector.is_valid(
+                    rad_array[particle],
+                    clouds[particle],
+                    density[particle],
+                    particle_ids[particle] as usize,
+                ) {
+                    print_debug!("Particle {} is not valid", particle);
+                    continue;
+                }
+                print_debug!("Particle {} is valid", particle);
+                let position = positions[particle];
+                if !grid.is_inside(position) {
+                    // the particle is out of the field of view
+                    print_debug!("Particle {} is out of FoV", particle);
+                    continue;
+                }
+                print_debug!("Particle {} is in the grid", particle);
+                print_debug!("Cell ids: {:?}", grid.cell_id(position));
+                print_debug!(
+                    "Grid Positions \n{:?},\n{:?},\n{:?}",
+                    grid.get_xpositions(),
+                    grid.get_ypositions(),
+                    grid.get_zpositions()
+                );
+                number_grid.add_value(position, 1.0);
+            }
+            // checking for kill signals after each timestep
+            check_signals!();
+        }
+        number_grid
     }
 
     /// Calculate the mean velocity of the valid particles within the system.

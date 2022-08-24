@@ -3,7 +3,7 @@ mod datamanager;
 /// Module that implements nD grids and basic functionality on them.
 pub mod grid;
 pub use grid::Dim;
-use grid::{GridFunctions3D, KartesianGrid3D};
+use grid::{CylindricalGrid3D, GridFunctions3D, KartesianGrid3D};
 
 /// Module that implements the `ParticleSelector`, a struct deciding if a particle is valid or not
 pub mod particleselector;
@@ -51,11 +51,11 @@ fn main() {
 
 fn main() {
     let now = Instant::now();
-    let mut pdata = PData::new("tests/fixtures/out.hdf5");
+    let mut pdata = TData::new("tests/fixtures/drum.hdf5");
     let stats = pdata.global_stats();
     let dim = stats.dimensions();
     let grid = Box::new(KartesianGrid3D::new(
-        [60, 60, 60],
+        [30, 60, 60],
         Dim::ThreeD([
             [dim[[0, 0]], dim[[1, 0]]],
             [dim[[0, 1]], dim[[1, 1]]],
@@ -65,12 +65,12 @@ fn main() {
 
     let x = pdata.velocityfield(grid, &ParticleSelector::default());
     let vec2d = x
-        .collapse()
+        .collapse(1)
         .outer_iter()
         .map(|arr| arr.to_vec())
         .collect::<Vec<_>>();
     let trace = HeatMap::new_z(vec2d);
-    println!("{:?}", x.collapse());
+    println!("{:?}", x.collapse(0));
     let mut plot = Plot::new();
     plot.add_trace(trace);
     plot.show();

@@ -2,6 +2,7 @@
 target*
 src/functions_gpu.rs_old
 Cargo.lock
+upppp_rust.cpython*
 
 # Python
 up4/__pycache__

@@ -11,9 +11,11 @@ use dyn_clone::{clone_trait_object, DynClone};
 use ndarray::prelude::*;
 use num_traits;
 use std::any::Any;
-pub mod grid3d;
-pub use grid3d::KartesianGrid3D;
+pub mod KartesianGrid;
 use std::ops::{Add, DivAssign, Sub};
+pub use KartesianGrid::KartesianGrid3D;
+pub mod CylindricalGrid;
+pub use CylindricalGrid::CylindricalGrid3D;
 
 type OneD = [[f64; 2]; 1];
 type TwoD = [[f64; 2]; 2];
@@ -67,7 +69,7 @@ pub trait GridFunctions3D: DynClone + std::fmt::Display + std::fmt::Debug + Send
     // return a new instance of grid with zeros
     fn new_zeros(&self) -> Box<dyn GridFunctions3D>;
 
-    fn collapse(&self) -> Array2<f64>;
+    fn collapse(&self, axis: usize) -> Array2<f64>;
     //slice
     //cellcenters
 

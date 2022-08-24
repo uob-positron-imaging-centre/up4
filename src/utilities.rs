@@ -41,3 +41,25 @@ macro_rules! check_signals {
         }
     };
 }
+
+#[macro_export]
+macro_rules! setup_bar {
+    ($name:expr,$len:expr) => {{
+        let bar = ProgressBar::new($len as u64);
+        bar.set_style(
+            ProgressStyle::default_bar()
+                .template(&format!(
+                    "{}{}{}",
+                    "{spinner:.green} ",
+                    $name,
+                    " [{elapsed_precise}] [{wide_bar:.cyan/blue}] {percent}% {per_sec} ({eta})"
+                ))
+                .with_key("eta", |state| {
+                    format!("Time left: {:.1}s", state.eta().as_secs_f64())
+                })
+                .with_key("per_sec", |state| format!("{:.1} steps/s", state.per_sec()))
+                .progress_chars("#>-"),
+        );
+        bar
+    }};
+}

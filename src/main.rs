@@ -55,7 +55,7 @@ fn main() {
     let stats = pdata.global_stats();
     let dim = stats.dimensions();
     let grid = Box::new(KartesianGrid3D::new(
-        [30, 60, 60],
+        [7, 1, 7],
         Dim::ThreeD([
             [dim[[0, 0]], dim[[1, 0]]],
             [dim[[0, 1]], dim[[1, 1]]],
@@ -63,14 +63,13 @@ fn main() {
         ]),
     ));
 
-    let x = pdata.velocityfield(grid, &ParticleSelector::default());
+    let x = pdata.numberfield(grid, &ParticleSelector::default());
     let vec2d = x
         .collapse(1)
         .outer_iter()
         .map(|arr| arr.to_vec())
         .collect::<Vec<_>>();
     let trace = HeatMap::new_z(vec2d);
-    println!("{:?}", x.collapse(0));
     let mut plot = Plot::new();
     plot.add_trace(trace);
     plot.show();

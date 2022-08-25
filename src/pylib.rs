@@ -6,6 +6,7 @@ use crate::grid::*;
 use crate::particleselector::*;
 use crate::types::*;
 use crate::{print_debug, print_warning};
+use numpy::{IntoPyArray, PyArray1, PyArray2, PyArrayDyn, PyReadonlyArrayDyn};
 pub mod libconv;
 pub mod libgrid;
 use crate::datamanager::{Manager, PData, TData};
@@ -70,6 +71,14 @@ impl PyData {
         let grid = self.data.velocityfield(grid.grid.clone(), selector);
 
         PyGrid { grid: grid }
+    }
+    fn extract<'py>(
+        &mut self,
+        _py: Python<'py>,
+        particle_id: usize,
+        timestep: (usize, usize),
+    ) -> &'py PyArray2<f64> {
+        self.data.extract(particle_id, timestep).into_pyarray(_py)
     }
 
     fn numberfield<'py>(&mut self, _py: Python<'py>, grid: &PyGrid) -> PyGrid {

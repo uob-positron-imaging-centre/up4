@@ -1,3 +1,4 @@
+pub mod extractions;
 pub mod fields;
 use crate::datamanager::DataManager;
 use crate::types::Position;
@@ -20,121 +21,92 @@ pub trait Granular: DataManager {
     /// # Examples
     ///
     ///
+    ///
     /*
-    fn vectorfield(
-        &mut self,
-        gridbox: Box<dyn GridFunctions3D>,
-        selector: &ParticleSelector,
-        norm: bool, //normalise the size of the vectors
-        axis: usize,
-    ) -> (ArrayD<Vec<f64>>) {
-        //read the number of timesteps inside this hdf5file
-        let global_stats = self.global_stats();
-        let timesteps: &usize = global_stats.timesteps();
-        let grid = gridbox;
-        let x = grid.cell_id(vec![10., 10., 10.]);
-        //initiate needed 2d arrays:
-        print_debug!("vectorfield: Initialising array");
-        let mut v_x_grid = grid.clone();
-        let mut v_z_grid = grid.data_array::<f64>();
-        print_debug!("Initialised vec_field with shape: {:?}", v_z_grid.shape());
-        //array to count how many particles found per cell
-        let mut n_x_grid = grid.data_array::<f64>();
-        let mut n_z_grid = grid.data_array::<f64>();
+        fn vectorfield(
+            &mut self,
+            gridbox: Box<dyn GridFunctions3D>,
+            selector: &ParticleSelector,
+            norm: bool, //normalise the size of the vectors
+            axis: usize,
+        ) -> (ArrayD<Vec<f64>>) {
+            //read the number of timesteps inside this hdf5file
+            let global_stats = self.global_stats();
+            let timesteps: &usize = global_stats.timesteps();
+            let grid = gridbox;
+            //initiate needed 2d arrays:
+            print_debug!("vectorfield: Initialising array");
+            print_debug!("Initialised vec_field with shape: {:?}", v_z_grid.shape());
+            //array to count how many particles found per cel
 
-        // find the two axis indizes which we want to "see"
-        let mut first_axis = 4;
-        let mut sec_axis = 4;
-        for x in 0..3 {
-            if x == axis {
-                continue;
-            };
-            if first_axis == 4 {
-                first_axis = x;
-            } else if sec_axis == 4 {
-                sec_axis = x;
-            } else {
-                panic!(
-                    "variable axis in vectorfield must be between 0 and 2 ! Currently it is {:?}",
-                    axis,
-                )
-            }
-        }
-        print_debug!("Axis choosen: {:?}, {:?}", first_axis, sec_axis);
-        for timestep in 0..timesteps - 1 {
-            let timestep_data = self.get_timestep(timestep);
-            let current_time = *timestep_data.time();
-            // check if timestep is in the timeframe given
-            if !selector.timestep_valid(current_time) {
-                continue;
-            }
-            let positions = timestep_data.position();
-            let velocities = timestep_data.velocity();
-            let particle_ids = timestep_data.particleid();
-            let rad_array = timestep_data.radius();
-            let clouds = timestep_data.clouds();
-            let density = timestep_data.density();
-            let particles = positions.len() / 3;
-            // loop over all particles in this timestep, calculate the velocity vector and add it to the
-            // vectorfield array
-            for particle in 0..particles {
-                if !selector.is_valid(
-                    rad_array[particle],
-                    clouds[particle],
-                    density[particle],
-                    particle_ids[particle] as usize,
-                ) {
-                    print_debug!("Particle {} is not valid", particle);
+            print_debug!("Axis choosen: {:?}, {:?}", first_axis, sec_axis);
+            for timestep in 0..timesteps - 1 {
+                let timestep_data = self.get_timestep(timestep);
+                let current_time = *timestep_data.time();
+                // check if timestep is in the timeframe given
+                if !selector.timestep_valid(current_time) {
                     continue;
                 }
-                let position = positions.slice(s![particle, ..]).to_owned();
-                let velocity = velocities.slice(s![particle, ..]).to_owned();
-                //reset the position. the lowest value should be at 0,0,0
+                let positions = timestep_data.position();
+                let velocities = timestep_data.velocity();
+                let particle_ids = timestep_data.particleid();
+                let rad_array = timestep_data.radius();
+                let clouds = timestep_data.clouds();
+                let density = timestep_data.density();
+                let particles = positions.len() / 3;
+                // loop over all particles in this timestep, calculate the velocity vector and add it to the
+                // vectorfield array
+                for particle in 0..particles {
+                    if !selector.is_valid(
+                        rad_array[particle],
+                        clouds[particle],
+                        density[particle],
+                        particle_ids[particle] as usize,
+                    ) {
+                        print_debug!("Particle {} is not valid", particle);
+                        continue;
+                    }
+                    let position = positions.slice(s![particle, ..]).to_owned();
+                    let velocity = velocities.slice(s![particle, ..]).to_owned();
+                    //reset the position. the lowest value should be at 0,0,0
 
-                let x_pos: f64 = position[first_axis];
-                let y_pos: f64 = position[sec_axis];
+                    let x_pos: f64 = position[first_axis];
+                    let y_pos: f64 = position[sec_axis];
 
-                //velocities
-                let vx: f64 = velocity[first_axis];
-                let vz: f64 = velocity[sec_axis];
+                    //velocities
+                    let vx: f64 = velocity[first_axis];
+                    let vz: f64 = velocity[sec_axis];
 
-                if !grid.is_inside(vec![x_pos, y_pos]) {
-                    // the particle is out of the field of view
-                    print_debug!("Particle {} is out of FoV", particle);
-                    continue;
+                    if !grid.is_inside(vec![x_pos, y_pos]) {
+                        // the particle is out of the field of view
+                        print_debug!("Particle {} is out of FoV", particle);
+                        continue;
+                    }
+                    // find the cell indice where particle is right now
+                    let cell_ids = grid.cell_id(vec![x_pos, y_pos]);
+
+                    let i = cell_ids[0];
+                    let k = cell_ids[1];
+                    print_debug!("Particle is in the grid, cells: {},{}", i, k);
+                    v_x_grid[[k, i]] = v_x_grid[[k, i]] + vx;
+                    v_z_grid[[k, i]] = v_z_grid[[k, i]] + vz;
+
+                    n_x_grid[[k, i]] = n_x_grid[[k, i]] + 1.0;
+                    n_z_grid[[k, i]] = n_z_grid[[k, i]] + 1.0;
                 }
-                // find the cell indice where particle is right now
-                let cell_ids = grid.cell_id(vec![x_pos, y_pos]);
-
-                let i = cell_ids[0];
-                let k = cell_ids[1];
-                print_debug!("Particle is in the grid, cells: {},{}", i, k);
-                v_x_grid[[k, i]] = v_x_grid[[k, i]] + vx;
-                v_z_grid[[k, i]] = v_z_grid[[k, i]] + vz;
-
-                n_x_grid[[k, i]] = n_x_grid[[k, i]] + 1.0;
-                n_z_grid[[k, i]] = n_z_grid[[k, i]] + 1.0;
+                // checking for kill signals after each timestep
+                check_signals!();
             }
-            // checking for kill signals after each timestep
-            check_signals!();
+
+            if norm {
+                let norm_arr = norm_two(&v_x_grid, &v_z_grid).to_owned();
+                v_x_grid = v_x_grid / &norm_arr;
+                v_z_grid = v_z_grid / &norm_arr;
+            }
+
+            (v_x_grid, v_z_grid, sx, sy)
         }
-
-        v_x_grid = v_x_grid / &n_x_grid;
-        v_z_grid = v_z_grid / &n_z_grid;
-        let (sx, sy) = meshgrid(
-            Array::linspace(grid.xlim().0, grid.xlim().1, grid.cells()[0usize] as usize),
-            Array::linspace(grid.ylim().0, grid.ylim().1, grid.cells()[1usize] as usize),
-        );
-        if norm {
-            let norm_arr = norm_two(&v_x_grid, &v_z_grid).to_owned();
-            v_x_grid = v_x_grid / &norm_arr;
-            v_z_grid = v_z_grid / &norm_arr;
-        }
-
-        (v_x_grid, v_z_grid, sx, sy)
-    } //end vectorfield
-    **/
-
+    */
     fn velocityfield(
         &mut self,
         grid: Box<dyn GridFunctions3D>,
@@ -160,14 +132,14 @@ pub trait Granular: DataManager {
             let rad_array = timestep_data.radius();
             let clouds = timestep_data.clouds();
             let density = timestep_data.density();
-            let particles = positions.len() / 3;
+            let particles = positions.len();
             // loop over all particles in this timestep, calculate the velocity vector and add it to the
             // vectorfield array
             print_debug!(
                 "velocityfield: looping over particles form 0 to {}",
                 particles
             );
-            for particle in 0..particles + 1 {
+            for particle in 0..particles {
                 if !selector.is_valid(
                     rad_array[particle],
                     clouds[particle],
@@ -233,19 +205,21 @@ pub trait Granular: DataManager {
             }
             print_debug!("Timestep {} is valid", timestep);
             let positions = timestep_data.position();
+
             let velocities = timestep_data.velocity();
             let particle_ids = timestep_data.particleid();
             let rad_array = timestep_data.radius();
             let clouds = timestep_data.clouds();
             let density = timestep_data.density();
-            let particles = positions.len() / 3;
+            let particles = positions.len();
             // loop over all particles in this timestep, calculate the velocity vector and add it to the
             // vectorfield array
             print_debug!(
                 "velocityfield: looping over particles form 0 to {}",
                 particles
             );
-            for particle in 0..particles + 1 {
+
+            for particle in 0..particles {
                 if !selector.is_valid(
                     rad_array[particle],
                     clouds[particle],
@@ -255,6 +229,7 @@ pub trait Granular: DataManager {
                     print_debug!("Particle {} is not valid", particle);
                     continue;
                 }
+
                 print_debug!("Particle {} is valid", particle);
                 let position = positions[particle];
                 if !grid.is_inside(position) {
@@ -270,6 +245,8 @@ pub trait Granular: DataManager {
                     grid.get_ypositions(),
                     grid.get_zpositions()
                 );
+                //here bug already
+
                 number_grid.add_value(position, 1.0);
             }
             // checking for kill signals after each timestep
@@ -336,7 +313,6 @@ pub trait Granular: DataManager {
                 continue;
             }
             let position = timestep_data.position();
-            println!("{:?}", grid.is_inside(position[0]));
 
             // checking for kill signals
             check_signals!()
@@ -361,6 +337,7 @@ pub trait Granular: DataManager {
 } //End Granular trait
 
 impl<T> Granular for T where T: DataManager {}
+impl<T> extractions::Extraction for T where T: DataManager {}
 
 fn derivative(x: Array1<f64>, y: Array1<f64>, avg: usize) -> (Array1<f64>, Array1<f64>) {
     if x.len() != y.len() {

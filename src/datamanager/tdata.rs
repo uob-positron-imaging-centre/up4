@@ -268,11 +268,11 @@ impl TData {
                     "Can not read dataset \"position\" in file {}",
                     self.file.filename()
                 ))
-                .to_owned()
+                .to_owned();
+            let position = position
                 .axis_iter(Axis(0))
                 .map(|x| [x[0], x[1], x[2]])
                 .collect::<Array1<Position>>();
-
             // for each particle find the velocuty at the
             let velocity = self
                 .file

@@ -240,6 +240,7 @@ pub fn vtk(
         velocity[[2, 1]]
     );
     print_debug!("Dimensions: {:?}", dimensions);
+
     hdf5file
         .new_attr_builder()
         .with_data(&dimensions)

@@ -9,7 +9,7 @@ extern crate ndarray;
 extern crate numpy;
 
 use crate::{
-    grid::{GridFunctions3D, KartesianGrid3D},
+    grid::{GridFunctions3D, KartesianGrid3D, Vectorgrid},
     ParticleSelector, Selector,
 };
 use core::panic;
@@ -22,6 +22,62 @@ pub trait Granular: DataManager {
     ///
     ///
     ///
+    ///
+    fn vectorfield(
+        &mut self,
+        gridbox: Box<dyn GridFunctions3D>,
+        selector: &ParticleSelector,
+    ) -> Vectorgrid {
+        let global_stats = self.global_stats();
+        let timesteps: &usize = global_stats.timesteps();
+        let mut vectorgrid = Vectorgrid::new(gridbox);
+        for timestep in 0..timesteps - 1 {
+            let timestep_data = self.get_timestep(timestep);
+            let current_time = *timestep_data.time();
+            // check if timestep is in the timeframe given
+            if !selector.timestep_valid(current_time) {
+                print_debug!("Timestep {} is not valid", timestep);
+                continue;
+            }
+            print_debug!("Timestep {} is valid", timestep);
+            let positions = timestep_data.position();
+            let velocities = timestep_data.velocity();
+            let particle_ids = timestep_data.particleid();
+            let rad_array = timestep_data.radius();
+            let clouds = timestep_data.clouds();
+            let density = timestep_data.density();
+            let particles = positions.len();
+            // loop over all particles in this timestep, calculate the velocity vector and add it to the
+            // vectorfield array
+            print_debug!(
+                "velocityfield: looping over particles form 0 to {}",
+                particles
+            );
+            for particle in 0..particles {
+                if !selector.is_valid(
+                    rad_array[particle],
+                    clouds[particle],
+                    density[particle],
+                    particle_ids[particle] as usize,
+                ) {
+                    print_debug!("Particle {} is not valid", particle);
+                    continue;
+                }
+                print_debug!("Particle {} is valid", particle);
+                let position = positions[particle];
+                let velocity = velocities.slice(s![particle, ..]).to_owned();
+                //reset the position. the lowest value should be at 0,0,0
+                let velocity = vectorgrid.velocity_calculation(position, velocity);
+                vectorgrid.data[0].add_value(position, velocity[0]);
+                vectorgrid.data[1].add_value(position, velocity[1]);
+                vectorgrid.data[2].add_value(position, velocity[2]);
+            }
+            check_signals!();
+        }
+        vectorgrid.divide_by_weight();
+        vectorgrid
+    }
+
     /*
         fn vectorfield(
             &mut self,

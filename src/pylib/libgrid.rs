@@ -1,7 +1,7 @@
 use super::PyData;
 use crate::grid::*;
 use crate::{grid, types::Position};
-use numpy::{IntoPyArray, PyArray3};
+use numpy::{IntoPyArray, PyArray1, PyArray3};
 use plotly::{Contour, HeatMap, Layout, Plot};
 use pyo3::prelude::*;
 #[pyclass(name = "Grid")]
@@ -126,6 +126,16 @@ impl PyGrid {
     fn is_inside(&self, position: Vec<f64>) -> bool {
         self.grid.is_inside([position[0], position[1], position[2]])
     }
+    fn cell_positions<'py>(
+        &self,
+        _py: Python<'py>,
+    ) -> (&'py PyArray1<f64>, &'py PyArray1<f64>, &'py PyArray1<f64>) {
+        (
+            self.grid.get_xpositions().to_owned().into_pyarray(_py),
+            self.grid.get_ypositions().to_owned().into_pyarray(_py),
+            self.grid.get_zpositions().to_owned().into_pyarray(_py),
+        )
+    }
 }
 
 #[pyproto]
@@ -159,5 +169,71 @@ impl pyo3::PyObjectProtocol for PyGrid {
             self.grid.get_cells()[2],
             self.grid.get_data()
         ))
+    }
+}
+
+#[pyclass(name = "VectorGrid")]
+pub struct PyVecGrid {
+    pub grid: VectorGrid::Vectorgrid,
+}
+
+#[pyproto]
+impl pyo3::PyObjectProtocol for PyVecGrid {
+    fn __str__(&self) -> PyResult<String> {
+        Ok(format!(
+            "3D Vector Mesh containing data with the shape: \n\
+            \tx: {}\n\
+            \ty: {}\n\
+            \tz: {}\
+",
+            self.grid.get_cells()[0],
+            self.grid.get_cells()[1],
+            self.grid.get_cells()[2]
+        ))
+    }
+    fn __repr__(&self) -> PyResult<String> {
+        Ok(format!(
+            "3D Vector Mesh containing data with the shape: \n\
+            \tx: {}\n\
+            \ty: {}\n\
+            \tz: {}\
+",
+            self.grid.get_cells()[0],
+            self.grid.get_cells()[1],
+            self.grid.get_cells()[2]
+        ))
+    }
+}
+
+#[pymethods]
+impl PyVecGrid {
+    fn to_numpy<'py>(
+        &self,
+        _py: Python<'py>,
+    ) -> (&'py PyArray3<f64>, &'py PyArray3<f64>, &'py PyArray3<f64>) {
+        (
+            self.grid.data[0].get_data().to_owned().into_pyarray(_py),
+            self.grid.data[1].get_data().to_owned().into_pyarray(_py),
+            self.grid.data[2].get_data().to_owned().into_pyarray(_py),
+        )
+    }
+    fn cell_positions<'py>(
+        &self,
+        _py: Python<'py>,
+    ) -> (&'py PyArray1<f64>, &'py PyArray1<f64>, &'py PyArray1<f64>) {
+        (
+            self.grid.data[0]
+                .get_xpositions()
+                .to_owned()
+                .into_pyarray(_py),
+            self.grid.data[0]
+                .get_ypositions()
+                .to_owned()
+                .into_pyarray(_py),
+            self.grid.data[0]
+                .get_zpositions()
+                .to_owned()
+                .into_pyarray(_py),
+        )
     }
 }

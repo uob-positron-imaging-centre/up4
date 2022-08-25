@@ -1,6 +1,7 @@
 //! Data Managment Module. Organizes file access.
 //use crate::functions::*;
 //use crate::functions::fields::*;
+use super::functions::extractions::Extraction;
 use super::functions::Granular;
 use crate::types::*;
 use derive_getters::Getters;
@@ -22,7 +23,7 @@ pub trait DataManager {
     fn stats(&self);
 }
 
-pub trait Manager: DataManager + Granular {}
+pub trait Manager: DataManager + Granular + Extraction {}
 
 /// Data-struct containing all necessery information for a timestep
 #[derive(Debug, Default, Getters, Clone)]

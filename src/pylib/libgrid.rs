@@ -1,6 +1,7 @@
 use super::PyData;
 use crate::grid::*;
 use crate::{grid, types::Position};
+use numpy::{IntoPyArray, PyArray3};
 use plotly::{Contour, HeatMap, Layout, Plot};
 use pyo3::prelude::*;
 #[pyclass(name = "Grid")]
@@ -86,8 +87,8 @@ impl PyGrid {
     }
 
     //return the data
-    fn data(&self) -> Vec<f64> {
-        self.grid.get_data().to_owned().into_raw_vec()
+    fn to_numpy<'py>(&self, _py: Python<'py>) -> &'py PyArray3<f64> {
+        self.grid.get_data().to_owned().into_pyarray(_py)
     }
 
     // plot using plotly

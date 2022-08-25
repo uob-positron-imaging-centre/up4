@@ -23,7 +23,31 @@ struct PyData {
 impl PyData {
     #[new]
     fn constructor(filename: &str) -> Self {
-        PyData::from_pdata(filename)
+        let file = hdf5::File::open(filename).expect(&format!(
+            "Unbale to open file {}. Check if file exists.",
+            filename
+        ));
+        let hdf5type: i32 = file
+            .attr("hdf5_up4_type")
+            .expect(&format!(
+                "Can not find attribute \"hdf5_up4_type\" in file {}",
+                filename
+            ))
+            .read_scalar()
+            .expect(&format!(
+                "Can not read scalar from attribute \"hdf5_up4_type\" in file {}",
+                filename
+            ));
+        file.close();
+        let mut data;
+        if hdf5type == 0x1_i32 {
+            data = PyData::from_tdata(filename)
+        } else if hdf5type == 0x2_i32 {
+            data = PyData::from_pdata(filename)
+        } else {
+            panic!("Unknown hdf5 type {}", hdf5type);
+        }
+        data
     }
 
     #[staticmethod]
@@ -59,6 +83,16 @@ impl PyData {
             )
         }
         self.selector.set_time(min_time, max_time)
+    }
+
+    fn vectorfield<'py>(&mut self, _py: Python<'py>, grid: &PyGrid) -> PyVecGrid {
+        let selector: &ParticleSelector =
+            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
+                Some(b) => b,
+                None => panic!("Can not convert PyGrid to Grid1D as "),
+            };
+        let grid = self.data.vectorfield(grid.grid.clone(), selector);
+        PyVecGrid { grid }
     }
 
     fn velocityfield<'py>(&mut self, _py: Python<'py>, grid: &PyGrid) -> PyGrid {

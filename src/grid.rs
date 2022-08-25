@@ -16,6 +16,8 @@ use std::ops::{Add, DivAssign, Sub};
 pub use KartesianGrid::KartesianGrid3D;
 pub mod CylindricalGrid;
 pub use CylindricalGrid::CylindricalGrid3D;
+pub mod VectorGrid;
+pub use VectorGrid::Vectorgrid;
 
 type OneD = [[f64; 2]; 1];
 type TwoD = [[f64; 2]; 2];
@@ -80,6 +82,7 @@ pub trait GridFunctions3D: DynClone + std::fmt::Display + std::fmt::Debug + Send
     fn get_limits(&self) -> &[[f64; 2]; 3];
     fn get_cells(&self) -> &CellId;
     fn get_data(&self) -> &Array3<f64>;
+    fn is_cylindrical(&self) -> bool;
 }
 clone_trait_object!(GridFunctions3D);
 

@@ -10,7 +10,7 @@ use std::f32::consts::PI;
 use std::ops::{Add, DivAssign, Sub};
 // TODO
 // - Currently the cylinder is always vertical, but this should be configurable.
-#[derive(Getters, Clone)]
+#[derive(Getters, Clone, Default)]
 pub struct CylindricalGrid3D {
     cells: CellId,
     rpositions: Array1<[f64; 2]>, // radius min and max for cell, needed because non equal distance
@@ -260,5 +260,9 @@ impl GridFunctions3D for CylindricalGrid3D {
     }
     fn get_data(&self) -> &Array3<f64> {
         &self.data
+    }
+
+    fn is_cylindrical(&self) -> bool {
+        true
     }
 }

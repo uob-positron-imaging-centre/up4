@@ -107,7 +107,7 @@ impl GridFunctions3D for KartesianGrid3D {
             .map(|(lim, pos)| pos > &lim[0] && pos < &lim[1])
             .all(|value| value)
     }
-    /*
+
     fn cell_id(&self, pos: Position) -> CellId {
         print_debug!("Grid3D: Checking if {:?} is in grid", pos);
         let posx = pos[0];
@@ -132,8 +132,8 @@ impl GridFunctions3D for KartesianGrid3D {
             .argmin()
             .expect(&format!("Can not find min of {:?} in Gri3D", pos));
         [cell_idx, cell_idy, cell_idz]
-    }*/
-
+    }
+    /*
     fn cell_id(&self, pos: Position) -> CellId {
         print_debug!("Grid3D: Checking if {:?} is in grid", pos);
 
@@ -145,7 +145,7 @@ impl GridFunctions3D for KartesianGrid3D {
             * self.cells[2] as f64) as usize;
 
         [cell_idx, cell_idy, cell_idz]
-    }
+    } */
     fn as_any(&self) -> &dyn Any {
         self
     }
@@ -211,5 +211,8 @@ impl GridFunctions3D for KartesianGrid3D {
     }
     fn get_data(&self) -> &Array3<f64> {
         &self.data
+    }
+    fn is_cylindrical(&self) -> bool {
+        false
     }
 }

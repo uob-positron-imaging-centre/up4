@@ -13,7 +13,7 @@ pub struct PyGrid {
 #[pymethods]
 impl PyGrid {
     #[staticmethod]
-    fn cartesian3d(filename: &str) -> Self {
+    fn cartesian3d_from_file(filename: &str) -> Self {
         let grid = Box::new(grid::CartesianGrid3D::new(
             [1, 60, 60],
             grid::Dim::ThreeD([[0., 1.], [0., 1.], [0., 1.]]),
@@ -25,7 +25,7 @@ impl PyGrid {
     }
 
     #[staticmethod]
-    fn databound_cartesian3d(pydata: &PyData, cells: Vec<usize>) -> Self {
+    fn cartesian3d_from_data(pydata: &PyData, cells: Vec<usize>) -> Self {
         let stats = pydata.data.global_stats();
         let dim = stats.dimensions();
         let grid = CartesianGrid3D::new(
@@ -65,7 +65,7 @@ impl PyGrid {
     }
     #[args(mode = "\"volume\"")]
     #[staticmethod]
-    fn databound_cylindrical3d(pydata: &PyData, cells: Vec<usize>, mode: &str) -> Self {
+    fn cylindrical3d_from_data(pydata: &PyData, cells: Vec<usize>, mode: &str) -> Self {
         let stats = pydata.data.global_stats();
         let dim = stats.dimensions();
         let grid = CylindricalGrid3D::new(

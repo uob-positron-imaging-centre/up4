@@ -116,7 +116,7 @@ impl Selector for ParticleSelector {
     }
 
     fn timestep_valid(&self, time: f64) -> bool {
-        (time >= self.time.0 && time <= self.time.1)
+        time >= self.time.0 && time <= self.time.1
     }
 
     fn set_time(&mut self, min_time: f64, max_time: f64) {

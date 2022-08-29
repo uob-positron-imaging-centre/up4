@@ -3,7 +3,6 @@ use crate::{print_debug, setup_bar};
 use super::check_signals;
 use indicatif::{ProgressBar, ProgressStyle};
 use ndarray::{self, ArrayView1};
-use num_traits::real;
 use polyfit_rs;
 pub fn interpolate(data: ndarray::Array2<f64>) -> ndarray::Array2<f64> {
     // TODO implement different types of interpolation

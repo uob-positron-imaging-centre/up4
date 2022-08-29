@@ -5,9 +5,6 @@ use derive_getters::Getters;
 use ndarray::{prelude::*, RemoveAxis};
 use ndarray_stats::QuantileExt;
 use std::any::Any;
-use std::cell::Cell;
-use std::f32::consts::PI;
-use std::ops::{Add, DivAssign, Sub};
 // TODO
 // - Currently the cylinder is always vertical, but this should be configurable.
 #[derive(Getters, Clone, Default)]
@@ -176,7 +173,10 @@ impl GridFunctions3D for CylindricalGrid3D {
                 cell_idr = Some(idx)
             }
         }
-        let cell_idr = cell_idr.expect("Unable to find radial cell id");
+        let cell_idr = cell_idr.expect(&format!(
+            "Unable to find radial cell id \n pos r:{}\nlen {:?}",
+            posr, self.rpositions
+        ));
         let poso = pos[1];
         let cell_ido = (&self.opositions - poso)
             .iter()

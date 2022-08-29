@@ -1,15 +1,13 @@
 extern crate ndarray;
 use super::{CellId, Dim, GridFunctions3D, Position, ThreeD};
-use crate::{print_debug, print_warning};
+use crate::print_debug;
 use derive_getters::Getters;
 use ndarray::{prelude::*, RemoveAxis};
 use ndarray_stats::QuantileExt;
 use std::any::Any;
-use std::cell::Cell;
-use std::ops::{Add, DivAssign, Sub};
 
 #[derive(Getters, Clone)]
-pub struct KartesianGrid3D {
+pub struct CartesianGrid3D {
     cells: CellId,
     xpositions: Array1<f64>,
     ypositions: Array1<f64>,
@@ -20,7 +18,7 @@ pub struct KartesianGrid3D {
     // attrs: HashMap<String, >,
 }
 
-impl KartesianGrid3D {
+impl CartesianGrid3D {
     pub fn new(cells: [usize; 3], limit: Dim) -> Self {
         print_debug!("Grid3D: Generating new grid");
 
@@ -43,7 +41,7 @@ impl KartesianGrid3D {
         for cellidz in 0..cells[2] {
             zpositions[cellidz as usize] = cellidz as f64 * zcellsize + zcellsize / 2.0 + lim[2][0];
         }
-        KartesianGrid3D {
+        CartesianGrid3D {
             cells,
             xpositions,
             ypositions,
@@ -61,7 +59,7 @@ impl KartesianGrid3D {
     }*/
 }
 
-impl std::fmt::Debug for KartesianGrid3D {
+impl std::fmt::Debug for CartesianGrid3D {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             f,
@@ -80,7 +78,7 @@ impl std::fmt::Debug for KartesianGrid3D {
     }
 }
 
-impl std::fmt::Display for KartesianGrid3D {
+impl std::fmt::Display for CartesianGrid3D {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             f,
@@ -98,7 +96,7 @@ impl std::fmt::Display for KartesianGrid3D {
         )
     }
 }
-impl GridFunctions3D for KartesianGrid3D {
+impl GridFunctions3D for CartesianGrid3D {
     fn is_inside(&self, pos: Position) -> bool {
         print_debug!("Grid3D: Checking if {:?} is in grid", pos);
         self.limits
@@ -110,32 +108,6 @@ impl GridFunctions3D for KartesianGrid3D {
 
     fn cell_id(&self, pos: Position) -> CellId {
         print_debug!("Grid3D: Checking if {:?} is in grid", pos);
-        let posx = pos[0];
-        let cell_idx = (&self.xpositions - posx)
-            .iter()
-            .map(|x| x.abs())
-            .collect::<Array1<f64>>()
-            .argmin()
-            .expect(&format!("Can not find min of {:?} in Gri3D", pos));
-        let posy = pos[1];
-        let cell_idy = (&self.ypositions - posy)
-            .iter()
-            .map(|x| x.abs())
-            .collect::<Array1<f64>>()
-            .argmin()
-            .expect(&format!("Can not find min of {:?} in Gri3D", pos));
-        let posz = pos[2];
-        let cell_idz = (&self.zpositions - posz)
-            .iter()
-            .map(|z| z.abs())
-            .collect::<Array1<f64>>()
-            .argmin()
-            .expect(&format!("Can not find min of {:?} in Gri3D", pos));
-        [cell_idx, cell_idy, cell_idz]
-    }
-    /*
-    fn cell_id(&self, pos: Position) -> CellId {
-        print_debug!("Grid3D: Checking if {:?} is in grid", pos);
 
         let cell_idx = ((pos[0] - self.limits[0][0]) / (self.limits[0][1] - self.limits[0][0])
             * self.cells[0] as f64) as usize;
@@ -145,7 +117,7 @@ impl GridFunctions3D for KartesianGrid3D {
             * self.cells[2] as f64) as usize;
 
         [cell_idx, cell_idy, cell_idz]
-    } */
+    }
     fn as_any(&self) -> &dyn Any {
         self
     }

@@ -18,9 +18,7 @@ pub use CylindricalGrid::CylindricalGrid3D;
 pub mod VectorGrid;
 pub use VectorGrid::Vectorgrid;
 
-type OneD = [[f64; 2]; 1];
-type TwoD = [[f64; 2]; 2];
-type ThreeD = [[f64; 2]; 3];
+
 //mod grid2dpolar;
 //pub use grid2dpolar::Grid2DPolar;
 /// Provides a generic way to send ranges to nD-Grid struct.

@@ -1,11 +1,15 @@
 target*
 examples
+Cargo.lock
 up4.egg-info
-up4/__pycache__
+*/__pycache__
 rustAnalyser.cpython*
 src/functions_gpu.rs_old
+src/old
 *.zip
 tests/fixtures/drum.hdf5
 tests/text.txt
 .idea
+.private
 build
+.vscode

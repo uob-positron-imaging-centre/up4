@@ -1,9 +1,10 @@
+#![allow(dead_code)]
 mod datamanager;
 //use std::time::{Duration, Instant};
 /// Module that implements nD grids and basic functionality on them.
 pub mod grid;
 pub use grid::Dim;
-use grid::{CylindricalGrid3D, GridFunctions3D, KartesianGrid3D};
+use grid::{CartesianGrid3D, CylindricalGrid3D, GridFunctions3D};
 
 /// Module that implements the `ParticleSelector`, a struct deciding if a particle is valid or not
 pub mod particleselector;
@@ -54,15 +55,16 @@ fn main() {
     let mut pdata = TData::new("tests/fixtures/drum.hdf5");
     let stats = pdata.global_stats();
     let dim = stats.dimensions();
-    let grid = Box::new(KartesianGrid3D::new(
-        [7, 1, 7],
+    let grid = Box::new(CartesianGrid3D::new(
+        //[800, 800, 800],
+        [10, 10, 10],
         Dim::ThreeD([
             [dim[[0, 0]], dim[[1, 0]]],
             [dim[[0, 1]], dim[[1, 1]]],
             [dim[[0, 2]], dim[[1, 2]]],
         ]),
     ));
-
+    let y = 0;
     let x = pdata.numberfield(grid, &ParticleSelector::default());
     let vec2d = x
         .collapse(1)
@@ -72,6 +74,6 @@ fn main() {
     let trace = HeatMap::new_z(vec2d);
     let mut plot = Plot::new();
     plot.add_trace(trace);
-    plot.show();
+    //plot.show();
     println!("End time: {}", now.elapsed().as_millis());
 }

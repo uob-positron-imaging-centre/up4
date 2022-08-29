@@ -8,7 +8,7 @@ use indicatif::{ProgressBar, ProgressStyle};
 use ndarray;
 use ndarray_csv::Array2Reader;
 use regex::Regex;
-use std::{path::Path, thread::current};
+use std::path::Path;
 
 mod convertertools;
 mod vtktools;
@@ -166,7 +166,7 @@ pub fn vtk(
                 .unwrap();
         print_debug!("Extracting statistical velocity information");
         for vel in particle_velocity.axis_iter(ndarray::Axis(0)) {
-            for i in (0..3) {
+            for i in 0..3 {
                 print_debug!("  i: {}", i);
                 if vel[i] < velocity[[i, 0]] {
                     velocity[[i, 0]] = vel[i];

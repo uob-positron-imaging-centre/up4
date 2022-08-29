@@ -1,12 +1,9 @@
 extern crate ndarray;
-use super::{CellId, Dim, GridFunctions3D, Position, ThreeD};
-use crate::{grid, print_debug, print_warning, CylindricalGrid3D};
+use super::{CellId, GridFunctions3D, Position};
+use crate::{grid, CylindricalGrid3D};
 use derive_getters::Getters;
-use ndarray::{prelude::*, RemoveAxis};
-use ndarray_stats::QuantileExt;
+use ndarray::prelude::*;
 use std::any::Any;
-use std::cell::Cell;
-use std::ops::{Add, DivAssign, Sub};
 #[derive(Getters, Clone)]
 pub struct Vectorgrid {
     pub data: [Box<dyn grid::GridFunctions3D>; 3],

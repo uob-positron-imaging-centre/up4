@@ -1,8 +1,9 @@
 use super::PyData;
+use crate::grid;
 use crate::grid::*;
-use crate::{grid, types::Position};
+use ndarray_stats::QuantileExt;
 use numpy::{IntoPyArray, PyArray1, PyArray3};
-use plotly::{Contour, HeatMap, Layout, Plot};
+use plotly::{HeatMap, Plot};
 use pyo3::prelude::*;
 #[pyclass(name = "Grid")]
 pub struct PyGrid {
@@ -13,7 +14,7 @@ pub struct PyGrid {
 impl PyGrid {
     #[staticmethod]
     fn cartesian3d(filename: &str) -> Self {
-        let grid = Box::new(grid::KartesianGrid3D::new(
+        let grid = Box::new(grid::CartesianGrid3D::new(
             [1, 60, 60],
             grid::Dim::ThreeD([[0., 1.], [0., 1.], [0., 1.]]),
         ));
@@ -27,7 +28,7 @@ impl PyGrid {
     fn databound_cartesian3d(pydata: &PyData, cells: Vec<usize>) -> Self {
         let stats = pydata.data.global_stats();
         let dim = stats.dimensions();
-        let grid = KartesianGrid3D::new(
+        let grid = CartesianGrid3D::new(
             [cells[0], cells[1], cells[2]],
             grid::Dim::ThreeD([
                 [dim[[0, 0]], dim[[1, 0]]],
@@ -142,17 +143,20 @@ impl PyGrid {
 impl pyo3::PyObjectProtocol for PyGrid {
     fn __str__(&self) -> PyResult<String> {
         Ok(format!(
-            "3D Mesh containing data with the shape: \n\
-            \tx: {}\n\
-            \ty: {}\n\
-            \tz: {}\n\
-            Data: \n\
-            ---------------------------------------------------------
-            {:?}",
-            self.grid.get_cells()[0],
-            self.grid.get_cells()[1],
-            self.grid.get_cells()[2],
-            self.grid.get_data()
+            "Grid3D: \n\tCells: {:?} \n\txlim: {:?} \
+            \n\tylim: {:?} \n\tzlim: {:?}\n\tData information:\n\t\tMean: {:?}\
+            \n\t\tStd: {:?}\n\t\tMin: {:?}\n\t\tMax: {:?}",
+            self.grid.get_cells(),
+            self.grid.get_limits()[0],
+            self.grid.get_limits()[1],
+            self.grid.get_limits()[2],
+            self.grid
+                .get_data()
+                .mean()
+                .expect("Unable to calculate mean of data"),
+            self.grid.get_data().std(1.),
+            self.grid.get_data().min_skipnan(),
+            self.grid.get_data().max_skipnan()
         ))
     }
     fn __repr__(&self) -> PyResult<String> {
@@ -235,5 +239,8 @@ impl PyVecGrid {
                 .to_owned()
                 .into_pyarray(_py),
         )
+    }
+    fn shape(&self) -> Vec<usize> {
+        self.grid.data[0].get_cells().to_vec()
     }
 }

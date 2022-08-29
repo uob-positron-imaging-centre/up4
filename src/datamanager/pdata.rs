@@ -3,14 +3,13 @@
 //! Implementation of reading + buffering functions.
 
 use super::{DataManager, GlobalStats, Manager, Timestep};
-use pyo3::prelude::*;
 extern crate ndarray;
 use crate::particleselector::Selector;
 use crate::types::*;
 use crate::ParticleSelector;
 use crate::{print_debug, print_warning};
 use ndarray::prelude::*;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 const BUFFERSIZE: usize = 2000000;
 
 //#[pyclass]
@@ -62,7 +61,7 @@ impl PData {
         print_debug!("PData: Reading a single timestep: {}", timestep);
 
         let particles = *self.global_stats_.nparticles();
-        let mut position: Array1<Position> = Array1::from_elem((particles), [0.0, 0.0, 0.0]);
+        let mut position: Array1<Position> = Array1::from_elem(particles, [0.0, 0.0, 0.0]);
         let mut velocity: Array2<f64> = Array2::<f64>::zeros((particles, 3));
         let mut radius: Array1<f64> = Array1::<f64>::zeros(particles);
         let mut density: Array1<f64> = Array1::<f64>::zeros(particles);

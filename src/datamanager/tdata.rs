@@ -11,7 +11,7 @@ use crate::types::*;
 use crate::ParticleSelector;
 use crate::{print_debug, print_warning};
 use ndarray::prelude::*;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 const BUFFERSIZE: usize = 100;
 #[pyclass]
 pub struct TData {

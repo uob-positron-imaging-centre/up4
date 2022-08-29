@@ -1,12 +1,9 @@
 use pyo3::prelude::*;
 extern crate ndarray;
 extern crate plotly;
-use crate::converter::*;
-use crate::grid::*;
 use crate::particleselector::*;
-use crate::types::*;
-use crate::{print_debug, print_warning};
-use numpy::{IntoPyArray, PyArray1, PyArray2, PyArrayDyn, PyReadonlyArrayDyn};
+use crate::print_debug;
+use numpy::{IntoPyArray, PyArray2};
 pub mod libconv;
 pub mod libgrid;
 use crate::datamanager::{Manager, PData, TData};

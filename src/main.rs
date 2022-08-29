@@ -1,29 +1,32 @@
+#![allow(dead_code)]
 mod datamanager;
-use std::time::{Duration, Instant};
-mod base;
+//use std::time::{Duration, Instant};
+/// Module that implements nD grids and basic functionality on them.
+pub mod grid;
+pub use grid::Dim;
+use grid::{CartesianGrid3D, CylindricalGrid3D, GridFunctions3D};
 
-pub mod utilities;
+/// Module that implements the `ParticleSelector`, a struct deciding if a particle is valid or not
+pub mod particleselector;
+pub use particleselector::*;
+
+pub mod converter;
+pub use converter::*;
+
 pub mod functions;
-use functions::Granular;
-use datamanager::{GlobalStats,DataManager, Manager,Timestep};
+pub mod utilities;
 use datamanager::pdata::PData;
 use datamanager::tdata::TData;
-mod plotting;
-use itertools::izip;
-use plotting::vector2d;
-use base::{ParticleSelector,Grid2D,Dim};
+use datamanager::{DataManager, Manager};
+use functions::Granular;
+pub mod types;
 use ndarray::prelude::*;
-use core::panic;
-use std::f64::consts;
-use ndarray::stack;
-use plotly::common::{Mode, Fill, Line, Anchor, ColorBar, Marker};
-use plotly::{Plot,NamedColor, Scatter, Scatter3D};
-use ndarray::{Array, Ix1, Ix2};
-use plotly::ndarray::ArrayTraces;
-use functions::meshgrid;
-use plotly::Layout;
+use std::time::{Duration, Instant};
 
-use crate::plotting::vector2d::BoundMode;
+use plotly::common::{ColorScale, ColorScalePalette, Title};
+use plotly::contour::Contours;
+use plotly::{Contour, HeatMap, Layout, Plot};
+
 /*
 fn main() {
 
@@ -47,146 +50,29 @@ fn main() {
 } */
 
 fn main() {
-     println!("Welcome to Dan's attempts at a quiver plot, oh wow!");
-     // test data
-     const PI: f64 = consts::PI;
-     const PTS: f64 = 60.; //number of points
-     let valx: Array1<f64> = Array::range(0.,2.*PI+PI/PTS,2.*PI/PTS);
-     let valy: Array1<f64> = Array::range(0.,2.*PI+PI/PTS,2.*PI/PTS);
-     let (x, y) = meshgrid(valx,valy);
-     let sf: Array2<f64> = array![[1., 1., 2., 3., 4.],
-                           [1., 1., 2., 3., 4.],
-                           [1., 1., 2., 3., 4.],
-                           [1., 1., 2., 3., 4.],
-                           [1., 1., 2., 3., 4.]];                          
-    let u: Array2<f64> = &x.mapv(f64::sin)*&y.mapv(f64::cos);
-    let v: Array2<f64> = -&y.mapv(f64::sin)*&x.mapv(f64::cos);
-    //let arrows = quiver2d::ArrowData::new(x,y,u,v,quiver2d::ScaleMode::Global(0.5));
-    //let arrows = quiver2d::ArrowData::new(x,y,u,v,quiver2d::ScaleMode::Elementwise(sf));
-    let arrows = vector2d::ArrowData::new(x,y,u,v,vector2d::ScaleMode::Default);
-    //let arrows = quiver2d::ArrowData::new(x,y,u,v,quiver2d::ScaleMode::None); 
-    let arrow_scale: Option<f64> = None;
-    let mode: BoundMode = BoundMode::Max(0.001);
-    let traces = vector2d::trace_arrows(arrows,arrow_scale, mode);
-    //let cbar = plotly::common::ColorBar::default();
-    //let caxis = plotly::layout::ColorAxis::new()
-                              //.color_bar(cbar)
-                              //.auto_color_scale(true)
-                              //.show_scale(true)
-                                ;
-    let layout = plotly::layout::Layout::new()
-                       .title("oh wow it works!!!".into())  
-                       //.color_axis(caxis)   
-                       ;
-    let mut plot = vector2d::plot(traces, layout, true); 
-    
-    //uncomment to see how the grid looks, each point is half the width of the grid the arrows are plotted on
-    /*let valx: Array1<f64> = Array::range(0.,2.*PI+PI/(2.*PTS),PI/PTS);
-    let valy: Array1<f64> = Array::range(0.,2.*PI+PI/(2.*PTS),PI/PTS);
-    let (x, y) = meshgrid(valx,valy);
-                     
-    let mut grid_traces = Vec::new();
-    for (x_it, y_it) in izip!(x, y){
-      let xpl = vec![x_it];
-      let ypl = vec![y_it];
-      let trace = Scatter::new(xpl,ypl)
-                  .mode(Mode::Markers)
-                  .show_legend(false)
-                  .marker(Marker::new().color(NamedColor::Black));
-      grid_traces.push(trace);
-    }
-
-    
-    for trace in grid_traces{
-      plot.add_trace(trace);
-  }*/
-    /*let x: Array3<f64> = array![[[0.]]];
-    let y: Array3<f64> = array![[[0.]]];
-    let z: Array3<f64> = array![[[0.]]];
-
-    let u: Array3<f64> = array![[[1.]]];
-    let v: Array3<f64> = array![[[1.]]];
-    let w: Array3<f64> = array![[[1.]]];
-       
-    //let arrows = quiver2d::ArrowData::new(x,y,u,v,quiver2d::ScaleMode::Default);
-    
-    
-    //consider 3 point and 4 point arrows (triangle and square based pyramids)
-    const arrow_ang: f64 = PI/4.0;
-    const barb_ang: f64 = PI/6.0;
-    let x: Vec<f64> = vec![0.,1.,
-                           1.-0.3*f64::cos(arrow_ang+barb_ang),1., //west
-                           1.-0.3*f64::cos(arrow_ang+barb_ang),1., //south
-                           1.-0.3*f64::cos(arrow_ang-barb_ang),1., //north
-                           1.-0.3*f64::cos(arrow_ang-barb_ang), //east
-                           1.-0.3*f64::cos(arrow_ang+barb_ang), //south
-                           1.-0.3*f64::cos(arrow_ang+barb_ang), //west
-                           1.-0.3*f64::cos(arrow_ang-barb_ang), //north
-                           1.-0.3*f64::cos(arrow_ang-barb_ang), //east
-                           ];
-
-    let y: Vec<f64> = vec![0.,1.,
-                           1.-0.3*f64::sin(arrow_ang+barb_ang),1., //west
-                           1.-0.3*f64::sin(arrow_ang-barb_ang),1., //south
-                           1.-0.3*f64::sin(arrow_ang+barb_ang),1., //north
-                           1.-0.3*f64::sin(arrow_ang-barb_ang), //east
-                           1.-0.3*f64::sin(arrow_ang-barb_ang), //south
-                           1.-0.3*f64::sin(arrow_ang+barb_ang), //west
-                           1.-0.3*f64::sin(arrow_ang+barb_ang), //north
-                           1.-0.3*f64::sin(arrow_ang-barb_ang), //east
-                           ];
-
-    let z: Vec<f64> = vec![0.,1.,
-                          1.-0.3*f64::sin(arrow_ang),1., //west
-                          1.-0.3*f64::sin(arrow_ang+barb_ang),1., //south
-                          1.-0.3*f64::sin(arrow_ang-barb_ang),1., //north
-                          1.-0.3*f64::sin(arrow_ang), //east
-                          1.-0.3*f64::sin(arrow_ang+barb_ang), //south
-                          1.-0.3*f64::sin(arrow_ang), //west
-                          1.-0.3*f64::sin(arrow_ang-barb_ang), //north
-                          1.-0.3*f64::sin(arrow_ang), //east
-                                                     ];
-
-    let trace = Scatter3D::new(x,y,z)
-                                      .mode(Mode::Lines)
-                                      .show_legend(false)
-                                      .fill(Fill::ToSelf)
-                                      .fill_color(NamedColor::Blue)
-                                      .line(Line::new().color(NamedColor::Blue)); */
-    plot.show();
-
-     let now = Instant::now();
-     let mut data = TData::new("test/drum.hdf5");
-     let grid = Grid2D::new(array![30,30], Dim::TwoD((-0.04,0.04),(-0.04,0.04)));
-     let selector = ParticleSelector::new((f64::MIN,f64::MAX),
-     vec![f64::MIN,f64::MAX],
-     vec![f64::MIN,f64::MAX],
-     vec![f64::MIN,f64::MAX],
-     vec![usize::MIN,usize::MAX]);
-     let (u, v, x, y) = data.vectorfield(
-         grid,
-         &selector,
-         false,
-         1
-     );
-
-     //let valx: Array1<f64> = Array::range(0.,2.*PI+PI/PTS,2.*PI/PTS);
-     //let valy: Array1<f64> = Array::range(0.,2.*PI+PI/PTS,2.*PI/PTS);
-     //let (x, y) = meshgrid(valx,valy);
-     /*let x: Array2<f64> = array![[0., 1., 2., 3., 4.],
-                           [0., 1., 2., 3., 4.],
-                           [0., 1., 2., 3., 4.],
-                           [0., 1., 2., 3., 4.],
-                           [0., 1., 2., 3., 4.]];
-
-     let y: Array2<f64> = array![[0., 0., 0., 0., 0.],
-                           [1., 1., 1., 1., 1.],
-                           [2., 2., 2., 2., 2.],
-                           [3., 3., 3., 3., 3.],
-                           [4., 4., 4., 4., 4.]];*/
-
-     //let u: Array2<f64> = &x.mapv(f64::sin)*&y.mapv(f64::cos);
-     //let v: Array2<f64> = -&y.mapv(f64::sin)*&x.mapv(f64::cos);
-     //println!("{:?},{:?},{:?},{:?}",x,y,u,v);
-     println!("End time: {}", now.elapsed().as_millis());
+    let now = Instant::now();
+    let mut pdata = TData::new("tests/fixtures/drum.hdf5");
+    let stats = pdata.global_stats();
+    let dim = stats.dimensions();
+    let grid = Box::new(CartesianGrid3D::new(
+        //[800, 800, 800],
+        [10, 10, 10],
+        Dim::ThreeD([
+            [dim[[0, 0]], dim[[1, 0]]],
+            [dim[[0, 1]], dim[[1, 1]]],
+            [dim[[0, 2]], dim[[1, 2]]],
+        ]),
+    ));
+    let y = 0;
+    let x = pdata.numberfield(grid, &ParticleSelector::default());
+    let vec2d = x
+        .collapse(1)
+        .outer_iter()
+        .map(|arr| arr.to_vec())
+        .collect::<Vec<_>>();
+    let trace = HeatMap::new_z(vec2d);
+    let mut plot = Plot::new();
+    plot.add_trace(trace);
+    //plot.show();
+    println!("End time: {}", now.elapsed().as_millis());
 }

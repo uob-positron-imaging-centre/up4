@@ -57,7 +57,7 @@ jobs:
           python3 -m pip install -r requirements.txt
       - name: Find where libhdf5.so is
         run: |
-          ls -laR $CONDA_PREFIX | rg 'hdf5'
+          find $CONDA_PREFIX -type f | rg 'hdf5'
       #- name: Install up4 on python
       #  run: |
       #    export HDF5_DIR="$CONDA_PREFIX"

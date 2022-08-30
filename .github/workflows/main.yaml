@@ -64,5 +64,5 @@ jobs:
           export HDF5_DIR="$CONDA_PREFIX"
           echo "$CONDA_PREFIX/bin" >> $GITHUB_PATH
           echo "$CONDA_PREFIX/lib" >> $GITHUB_PATH
-          python3 -m pip install pytest
+          python3 -m pip install pytest h5py
           python3 -m pytest tests/test_all.py

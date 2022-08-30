@@ -45,7 +45,7 @@ jobs:
           export PYO3_PYTHON=python3
           [ "${{runner.os}}" != "Windows" ] && export RUSTFLAGS="-C link-args=-Wl,-rpath,$CONDA_PREFIX/lib"
           cargo clean
-#cargo check
+          cargo check
       - name: Install Python requirements
         run: |
           pwd
@@ -58,7 +58,7 @@ jobs:
         run: |
           export HDF5_DIR="$CONDA_PREFIX"
           export PYO3_PYTHON=python3
-#python3 -m pip install .
+          python3 -m pip install .
       - name: Run tests
         run: |
           export LD_LIBRARY_PATH="$CONDA_PREFIX"

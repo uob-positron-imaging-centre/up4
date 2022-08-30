@@ -49,6 +49,9 @@ jobs:
       - name: Install Python requirements
         run: |
           pwd
+          export HDF5_DIR="$CONDA_PREFIX"
+          export PYO3_PYTHON=python3
+          [ "${{runner.os}}" != "Windows" ] && export RUSTFLAGS="-C link-args=-Wl,-rpath,$CONDA_PREFIX/lib"
           python3 -m pip install --upgrade pip
           python3 -m pip install -r requirements.txt
       - name: Install up4 on python

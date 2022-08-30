@@ -30,9 +30,9 @@ def data(request):
 def grid(request):
     """ Returns a instance of pdata with the experiment test data in fixtures/"""
     if request.param == "cylidrical":
-        return up4.Grid.databound_cylindrical3d
+        return up4.Grid.cylindrical3d_from_data
     elif request.param == "cartesian":
-        return up4.Grid.databound_cartesian3d
+        return up4.Grid.cartesian3d_from_data
 
 
 

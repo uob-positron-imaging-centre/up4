@@ -2,13 +2,11 @@ extern crate ndarray;
 //extern crate ndarray_linalg;
 extern crate numpy;
 
-
-use core::panic;use ndarray::prelude::*;
-use super::super::utilities::*;
 use super::*;
+use core::panic;
+use ndarray::prelude::*;
 
-
-pub trait Fields{
+pub trait Fields {
     fn occupancyfield(
         filename: &str,          //filename of hdf5 file
         cells: Array1<f64>,      //number of cells to store vec-data
@@ -18,14 +16,10 @@ pub trait Fields{
         radius: Array1<f64>,     // include a radius
         particle_id: Array1<i64>,
         axis: usize,
-    ) ->
-        (Array1<f64>,Array1<f64>,Array2<f64>)
-     {
+    ) -> (Array1<f64>, Array1<f64>, Array2<f64>) {
         // Opening hdf5 file
-        let file = hdf5::File::open(&filename).expect(&format!(
-            "Can not open HDF5 file {:?}",
-            &filename
-        ));
+        let file =
+            hdf5::File::open(&filename).expect(&format!("Can not open HDF5 file {:?}", &filename));
         //read the number of timesteps inside this hdf5file
         let timesteps: u64 = timesteps(&file);
         //Extracting the min and max dimensions of the simulation
@@ -43,28 +37,28 @@ pub trait Fields{
                 &filename
             ));
         let mut min_array = array.slice(s![0, ..]).to_owned();
-        let mut  max_array = array.slice(s![1, ..]).to_owned();
+        let mut max_array = array.slice(s![1, ..]).to_owned();
         //let cells_int =
         //before going through timestep, implement:
         // dimension check?
 
-        if dimensions.slice(s![0, ..]).to_owned()[0usize] > min_array[0usize]  {
+        if dimensions.slice(s![0, ..]).to_owned()[0usize] > min_array[0usize] {
             min_array[0usize] = dimensions.slice(s![0, ..]).to_owned()[0usize]
         }
-        if dimensions.slice(s![0, ..]).to_owned()[1usize] > min_array[1usize]  {
+        if dimensions.slice(s![0, ..]).to_owned()[1usize] > min_array[1usize] {
             min_array[1usize] = dimensions.slice(s![0, ..]).to_owned()[1usize]
         }
-        if dimensions.slice(s![0, ..]).to_owned()[2usize] > min_array[2usize]  {
+        if dimensions.slice(s![0, ..]).to_owned()[2usize] > min_array[2usize] {
             min_array[2usize] = dimensions.slice(s![0, ..]).to_owned()[2usize]
         }
 
-        if dimensions.slice(s![1, ..]).to_owned()[0usize] < max_array[0usize]  {
+        if dimensions.slice(s![1, ..]).to_owned()[0usize] < max_array[0usize] {
             max_array[0usize] = dimensions.slice(s![1, ..]).to_owned()[0usize]
         }
-        if dimensions.slice(s![1, ..]).to_owned()[1usize] < max_array[1usize]  {
+        if dimensions.slice(s![1, ..]).to_owned()[1usize] < max_array[1usize] {
             max_array[1usize] = dimensions.slice(s![1, ..]).to_owned()[1usize]
         }
-        if dimensions.slice(s![1, ..]).to_owned()[2usize] < max_array[2usize]  {
+        if dimensions.slice(s![1, ..]).to_owned()[2usize] < max_array[2usize] {
             max_array[2usize] = dimensions.slice(s![1, ..]).to_owned()[2usize]
         }
 
@@ -88,12 +82,15 @@ pub trait Fields{
         // find the two axis indizes which we want to "see"
         let mut first_axis = 4;
         let mut sec_axis = 4;
-        for x in 0..3{
-            if x == axis{continue};
-            if first_axis == 4{ first_axis = x;
-            }else if sec_axis ==4{
-                sec_axis =x ;
-            }else{
+        for x in 0..3 {
+            if x == axis {
+                continue;
+            };
+            if first_axis == 4 {
+                first_axis = x;
+            } else if sec_axis == 4 {
+                sec_axis = x;
+            } else {
                 panic!(&format!(
                     "variable axis in vectorfield must be between 0 and 2 ! Currently it is {:?}",
                     axis,
@@ -104,10 +101,9 @@ pub trait Fields{
         for timestep in 0..timesteps - 1 {
             let name: String = "timestep ".to_string() + &timestep.to_string();
             let group = file.group(&name).expect(&format!(
-                    "Could not find group {:?} in file {:?}",
-                    &name,
-                    &filename
-                ));
+                "Could not find group {:?} in file {:?}",
+                &name, &filename
+            ));
             let current_time = group
                 .dataset("time")
                 .expect(&format!(
@@ -186,7 +182,6 @@ pub trait Fields{
             // loop over all particles in this timestep, calculate the velocity vector and add it to the
             // vectorfield array
             for particle in 0..particles {
-
                 //check if this particle is fitting the criteria
                 if !check_id(particle_ids[particle] as usize, &particle_id) {
                     println!("skipping because of ID");
@@ -204,10 +199,9 @@ pub trait Fields{
                 let x_abs: f64 = position[first_axis];
                 let z_abs: f64 = position[sec_axis];
 
-
                 let pos_abs = position;
 
-                if     pos_abs[0] < dimensions[[0usize, 0]]
+                if pos_abs[0] < dimensions[[0usize, 0]]
                     || pos_abs[0] > dimensions[[1usize, 0]]
                     || pos_abs[1] < dimensions[[0usize, 1]]
                     || pos_abs[1] > dimensions[[1usize, 1]]
@@ -222,26 +216,24 @@ pub trait Fields{
 
                 let i: usize = (x / cell_size[first_axis]).floor() as usize;
                 let k: usize = (z / cell_size[sec_axis]).floor() as usize;
-                let vel: f64 = (velocity[first_axis]*velocity[first_axis]+velocity[sec_axis]*velocity[sec_axis]).sqrt();
+                let vel: f64 = (velocity[first_axis] * velocity[first_axis]
+                    + velocity[sec_axis] * velocity[sec_axis])
+                    .sqrt();
                 //calculate the time this particle spent in the cell
                 let time_spent;
-                if vel <= cell_size[first_axis]/dt {
+                if vel <= cell_size[first_axis] / dt {
                     time_spent = dt;
-                }
-                else{
-                 time_spent = cell_size[first_axis] / vel;
+                } else {
+                    time_spent = cell_size[first_axis] / vel;
                 }
 
                 // check if indexes are higher then maximum
-                if i >= cells[first_axis] as usize
-                    || k >= cells[sec_axis] as usize
-                {
+                if i >= cells[first_axis] as usize || k >= cells[sec_axis] as usize {
                     continue;
                 }
                 t_grid[[k, i]] = t_grid[[k, i]] + time_spent;
                 complete_time += time_spent;
             }
-
         }
         file.close();
 
@@ -255,9 +247,8 @@ pub trait Fields{
             max_array[sec_axis],
             cells[sec_axis] as usize,
         );
-        (sx,sy,&t_grid/complete_time)
+        (sx, sy, &t_grid / complete_time)
     }
-
 
     fn velocityfield(
         filename: &str,          //filename of hdf5 file
@@ -268,14 +259,10 @@ pub trait Fields{
         radius: Array1<f64>,     // include a radius
         particle_id: Array1<i64>,
         axis: usize,
-    ) ->
-        (Array1<f64>,Array1<f64>,Array2<f64>)
-     {
+    ) -> (Array1<f64>, Array1<f64>, Array2<f64>) {
         // Opening hdf5 file
-        let file = hdf5::File::open(&filename).expect(&format!(
-            "Can not open HDF5 file {:?}",
-            &filename
-        ));
+        let file =
+            hdf5::File::open(&filename).expect(&format!("Can not open HDF5 file {:?}", &filename));
         //read the number of timesteps inside this hdf5file
         let timesteps: u64 = timesteps(&file);
         //Extracting the min and max dimensions of the simulation
@@ -299,23 +286,29 @@ pub trait Fields{
         //before going through timestep, implement:
         // dimension check?
 
-        if true { //dimensions.slice(s![0, ..]).to_owned()[0usize] > min_array[0usize]  {
+        if true {
+            //dimensions.slice(s![0, ..]).to_owned()[0usize] > min_array[0usize]  {
             min_array[0usize] = dimensions.slice(s![0, ..]).to_owned()[0usize]
         }
-        if true { //dimensions.slice(s![0, ..]).to_owned()[1usize] > min_array[1usize]  {
+        if true {
+            //dimensions.slice(s![0, ..]).to_owned()[1usize] > min_array[1usize]  {
             min_array[1usize] = dimensions.slice(s![0, ..]).to_owned()[1usize]
         }
-        if true { //dimensions.slice(s![0, ..]).to_owned()[2usize] > min_array[2usize]  {
+        if true {
+            //dimensions.slice(s![0, ..]).to_owned()[2usize] > min_array[2usize]  {
             min_array[2usize] = dimensions.slice(s![0, ..]).to_owned()[2usize]
         }
 
-        if true { //dimensions.slice(s![1, ..]).to_owned()[0usize] < max_array[0usize]  {
+        if true {
+            //dimensions.slice(s![1, ..]).to_owned()[0usize] < max_array[0usize]  {
             max_array[0usize] = dimensions.slice(s![1, ..]).to_owned()[0usize]
         }
-        if true { //dimensions.slice(s![1, ..]).to_owned()[1usize] < max_array[1usize]  {
+        if true {
+            //dimensions.slice(s![1, ..]).to_owned()[1usize] < max_array[1usize]  {
             max_array[1usize] = dimensions.slice(s![1, ..]).to_owned()[1usize]
         }
-        if true { // dimensions.slice(s![1, ..]).to_owned()[2usize] < max_array[2usize]  {
+        if true {
+            // dimensions.slice(s![1, ..]).to_owned()[2usize] < max_array[2usize]  {
             max_array[2usize] = dimensions.slice(s![1, ..]).to_owned()[2usize]
         }
 
@@ -335,16 +328,18 @@ pub trait Fields{
             cells[0usize].floor() as usize,
         ));
 
-
         // find the two axis indizes which we want to "see"
         let mut first_axis = 4;
         let mut sec_axis = 4;
-        for x in 0..3{
-            if x == axis{continue};
-            if first_axis == 4{ first_axis = x;
-            }else if sec_axis ==4{
-                sec_axis =x ;
-            }else{
+        for x in 0..3 {
+            if x == axis {
+                continue;
+            };
+            if first_axis == 4 {
+                first_axis = x;
+            } else if sec_axis == 4 {
+                sec_axis = x;
+            } else {
                 panic!(&format!(
                     "variable axis in vectorfield must be between 0 and 2 ! Currently it is {:?}",
                     axis,
@@ -355,10 +350,9 @@ pub trait Fields{
         for timestep in 0..timesteps - 1 {
             let name: String = "timestep ".to_string() + &timestep.to_string();
             let group = file.group(&name).expect(&format!(
-                    "Could not find group {:?} in file {:?}",
-                    &name,
-                    &filename
-                ));
+                "Could not find group {:?} in file {:?}",
+                &name, &filename
+            ));
             let current_time = group
                 .dataset("time")
                 .expect(&format!(
@@ -436,7 +430,6 @@ pub trait Fields{
             // loop over all particles in this timestep, calculate the velocity vector and add it to the
             // vectorfield array
             for particle in 0..particles {
-
                 //check if this particle is fitting the criteria
                 if !check_id(particle_ids[particle] as usize, &particle_id) {
                     println!("skipping because of ID");
@@ -456,7 +449,7 @@ pub trait Fields{
 
                 let pos_abs = position;
 
-                if     pos_abs[0] < dimensions[[0usize, 0]]
+                if pos_abs[0] < dimensions[[0usize, 0]]
                     || pos_abs[0] > dimensions[[1usize, 0]]
                     || pos_abs[1] < dimensions[[0usize, 1]]
                     || pos_abs[1] > dimensions[[1usize, 1]]
@@ -472,16 +465,12 @@ pub trait Fields{
                 let i: usize = (x / cell_size[first_axis]).floor() as usize;
                 let k: usize = (z / cell_size[sec_axis]).floor() as usize;
                 // check if indexes are higher then maximum
-                if i >= cells[first_axis] as usize
-                    || k >= cells[sec_axis] as usize
-                {
+                if i >= cells[first_axis] as usize || k >= cells[sec_axis] as usize {
                     continue;
                 }
                 n_grid[[k, i]] = n_grid[[k, i]] + 1.0;
-                v_grid[[k, i]] = v_grid[[k, i]] + norm_l2(&velocity)
-                                                .abs();
+                v_grid[[k, i]] = v_grid[[k, i]] + norm_l2(&velocity).abs();
             }
-
         }
         file.close();
         // make arrays for position of each cell in each diemnsion
@@ -497,7 +486,7 @@ pub trait Fields{
             cells[sec_axis] as usize,
         );
 
-        (sx,sy,v_grid/n_grid)
+        (sx, sy, v_grid / n_grid)
     }
 
     fn numberfield(
@@ -509,14 +498,10 @@ pub trait Fields{
         radius: Array1<f64>,     // include a radius
         particle_id: Array1<i64>,
         axis: usize,
-    ) ->
-        (Array1<f64>,Array1<f64>,Array2<f64>)
-     {
+    ) -> (Array1<f64>, Array1<f64>, Array2<f64>) {
         // Opening hdf5 file
-        let file = hdf5::File::open(&filename).expect(&format!(
-            "Can not open HDF5 file {:?}",
-            &filename
-        ));
+        let file =
+            hdf5::File::open(&filename).expect(&format!("Can not open HDF5 file {:?}", &filename));
         //read the number of timesteps inside this hdf5file
         let timesteps: u64 = timesteps(&file);
         //Extracting the min and max dimensions of the simulation
@@ -534,29 +519,29 @@ pub trait Fields{
                 &filename
             ));
         let mut min_array = array.slice(s![0, ..]).to_owned();
-        let mut  max_array = array.slice(s![1, ..]).to_owned();
+        let mut max_array = array.slice(s![1, ..]).to_owned();
 
         //let cells_int =
         //before going through timestep, implement:
         // dimension check?
 
-        if dimensions.slice(s![0, ..]).to_owned()[0usize] > min_array[0usize]  {
+        if dimensions.slice(s![0, ..]).to_owned()[0usize] > min_array[0usize] {
             min_array[0usize] = dimensions.slice(s![0, ..]).to_owned()[0usize]
         }
-        if dimensions.slice(s![0, ..]).to_owned()[1usize] > min_array[1usize]  {
+        if dimensions.slice(s![0, ..]).to_owned()[1usize] > min_array[1usize] {
             min_array[1usize] = dimensions.slice(s![0, ..]).to_owned()[1usize]
         }
-        if dimensions.slice(s![0, ..]).to_owned()[2usize] > min_array[2usize]  {
+        if dimensions.slice(s![0, ..]).to_owned()[2usize] > min_array[2usize] {
             min_array[2usize] = dimensions.slice(s![0, ..]).to_owned()[2usize]
         }
 
-        if dimensions.slice(s![1, ..]).to_owned()[0usize] < max_array[0usize]  {
+        if dimensions.slice(s![1, ..]).to_owned()[0usize] < max_array[0usize] {
             max_array[0usize] = dimensions.slice(s![1, ..]).to_owned()[0usize]
         }
-        if dimensions.slice(s![1, ..]).to_owned()[1usize] < max_array[1usize]  {
+        if dimensions.slice(s![1, ..]).to_owned()[1usize] < max_array[1usize] {
             max_array[1usize] = dimensions.slice(s![1, ..]).to_owned()[1usize]
         }
-        if dimensions.slice(s![1, ..]).to_owned()[2usize] < max_array[2usize]  {
+        if dimensions.slice(s![1, ..]).to_owned()[2usize] < max_array[2usize] {
             max_array[2usize] = dimensions.slice(s![1, ..]).to_owned()[2usize]
         }
 
@@ -572,16 +557,18 @@ pub trait Fields{
             cells[0usize].floor() as usize,
         ));
 
-
         // find the two axis indizes which we want to "see"
         let mut first_axis = 4;
         let mut sec_axis = 4;
-        for x in 0..3{
-            if x == axis{continue};
-            if first_axis == 4{ first_axis = x;
-            }else if sec_axis ==4{
-                sec_axis =x ;
-            }else{
+        for x in 0..3 {
+            if x == axis {
+                continue;
+            };
+            if first_axis == 4 {
+                first_axis = x;
+            } else if sec_axis == 4 {
+                sec_axis = x;
+            } else {
                 panic!(&format!(
                     "variable axis in vectorfield must be between 0 and 2 ! Currently it is {:?}",
                     axis,
@@ -592,10 +579,9 @@ pub trait Fields{
         for timestep in 0..timesteps - 1 {
             let name: String = "timestep ".to_string() + &timestep.to_string();
             let group = file.group(&name).expect(&format!(
-                    "Could not find group {:?} in file {:?}",
-                    &name,
-                    &filename
-                ));
+                "Could not find group {:?} in file {:?}",
+                &name, &filename
+            ));
             let current_time = group
                 .dataset("time")
                 .expect(&format!(
@@ -673,7 +659,6 @@ pub trait Fields{
             // loop over all particles in this timestep, calculate the velocity vector and add it to the
             // vectorfield array
             for particle in 0..particles {
-
                 //check if this particle is fitting the criteria
                 if !check_id(particle_ids[particle] as usize, &particle_id) {
                     println!("skipping because of ID");
@@ -697,7 +682,7 @@ pub trait Fields{
 
                 let pos_abs = position;
 
-                if     pos_abs[0] < dimensions[[0usize, 0]]
+                if pos_abs[0] < dimensions[[0usize, 0]]
                     || pos_abs[0] > dimensions[[1usize, 0]]
                     || pos_abs[1] < dimensions[[0usize, 1]]
                     || pos_abs[1] > dimensions[[1usize, 1]]
@@ -713,14 +698,11 @@ pub trait Fields{
                 let i: usize = (x / cell_size[first_axis]).floor() as usize;
                 let k: usize = (z / cell_size[sec_axis]).floor() as usize;
                 // check if indexes are higher then maximum
-                if i >= cells[first_axis] as usize
-                    || k >= cells[sec_axis] as usize
-                {
+                if i >= cells[first_axis] as usize || k >= cells[sec_axis] as usize {
                     continue;
                 }
                 n_grid[[k, i]] = n_grid[[k, i]] + 1.0;
             }
-
         }
         file.close();
         let sx = Array::linspace(
@@ -734,9 +716,8 @@ pub trait Fields{
             cells[sec_axis] as usize,
         );
 
-        (sx,sy,n_grid)
+        (sx, sy, n_grid)
     }
-
 }
 
 impl<T> Fields for T where T: DataManager {}

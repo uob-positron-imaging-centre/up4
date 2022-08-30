@@ -2,7 +2,7 @@
 target*
 src/functions_gpu.rs_old
 Cargo.lock
-upppp_rust.cpython*
+*.cpython*
 
 # Python
 up4/__pycache__
@@ -22,3 +22,5 @@ docs/_static
 json.json
 plotly_playground.py
 3D_quiver.py
+.private
+.idea

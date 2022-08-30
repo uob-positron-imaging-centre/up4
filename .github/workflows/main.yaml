@@ -58,8 +58,8 @@ jobs:
         run: |
           export HDF5_DIR="$CONDA_PREFIX"
           export PYO3_PYTHON=python3
-          export RUST_BACKTRACE=1
           python3 -m pip install .
       - name: Run tests
         run:
-          pytest tests/test_all.py
+          python3 -m pip install pytest
+          python3 -m pytest tests/test_all.py

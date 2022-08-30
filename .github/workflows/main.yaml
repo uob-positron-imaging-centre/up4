@@ -58,9 +58,12 @@ jobs:
         run: |
           export HDF5_DIR="$CONDA_PREFIX"
           export PYO3_PYTHON=python3
-          python3 -m pip install .
+#python3 -m pip install .
       - name: Run tests
         run: |
           export LD_LIBRARY_PATH="$CONDA_PREFIX"
+          ls $CONDA_PREFIX
+          ls $CONDA_PREFIX/bin
+          ls $CONDA_PREFIx/lib
           python3 -m pip install pytest
           python3 -m pytest tests/test_all.py

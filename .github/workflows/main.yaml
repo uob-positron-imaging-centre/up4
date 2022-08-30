@@ -46,6 +46,7 @@ jobs:
           [ "${{runner.os}}" != "Windows" ] && export RUSTFLAGS="-C link-args=-Wl,-rpath,$CONDA_PREFIX/lib"
           cargo clean
           cargo check
+          cargo install ripgrep
       - name: Install Python requirements
         run: |
           pwd
@@ -54,16 +55,19 @@ jobs:
           [ "${{runner.os}}" != "Windows" ] && export RUSTFLAGS="-C link-args=-Wl,-rpath,$CONDA_PREFIX/lib"
           python3 -m pip install --upgrade pip
           python3 -m pip install -r requirements.txt
-      - name: Install up4 on python
+      - name: Find where libhdf5.so is
         run: |
-          export HDF5_DIR="$CONDA_PREFIX"
-          export PYO3_PYTHON=python3
-          python3 -m pip install .
-      - name: Run tests
-        run: |
-          export LD_LIBRARY_PATH="$CONDA_PREFIX"
-          ls $CONDA_PREFIX
-          ls $CONDA_PREFIX/bin
-          ls $CONDA_PREFIx/lib
-          python3 -m pip install pytest
-          python3 -m pytest tests/test_all.py
+          ls -laR $CONDA_PREFIX | rg 'hdf5'
+      #- name: Install up4 on python
+      #  run: |
+      #    export HDF5_DIR="$CONDA_PREFIX"
+      #    export PYO3_PYTHON=python3
+      #    #python3 -m pip install .
+      #- name: Run tests
+      #  run: |
+      #    export LD_LIBRARY_PATH="$CONDA_PREFIX"
+      #    ls $CONDA_PREFIX
+      #    ls $CONDA_PREFIX/bin
+      #    ls $CONDA_PREFIx/lib
+      #    python3 -m pip install pytest
+      #    python3 -m pytest tests/test_all.py

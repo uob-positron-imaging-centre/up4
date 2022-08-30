@@ -63,8 +63,8 @@ pub fn vtk(
     // Attributes
     print_debug!("Constructing data arrays for attributes!");
     let mut dimensions: ndarray::Array2<f64> = ndarray::Array2::<f64>::zeros((2, 3)); // [min:[x,y,z],max:[x,y,z]]
-    dimensions.slice_mut(ndarray::s![0, ..]).fill(f64::MAX);
-    dimensions.slice_mut(ndarray::s![1, ..]).fill(f64::MIN);
+    dimensions.slice_mut(ndarray::s![0usize, ..]).fill(f64::MAX);
+    dimensions.slice_mut(ndarray::s![1usize, ..]).fill(f64::MIN);
     let mut nparticles: u64 = 0;
     let timesteps: usize = filenames.len();
     let mut time: ndarray::Array1<f64> = ndarray::Array1::<f64>::zeros(2);
@@ -72,8 +72,8 @@ pub fn vtk(
     let mut old_time = 0.0;
     //velocity: [x:[min, mean, max],y:[min,mean,max],z:[min,mean,max]]
     let mut velocity: ndarray::Array2<f64> = ndarray::Array2::<f64>::zeros((3, 3));
-    velocity.slice_mut(ndarray::s![.., 0]).fill(f64::MAX);
-    velocity.slice_mut(ndarray::s![.., 2]).fill(f64::MIN);
+    velocity.slice_mut(ndarray::s![.., 0usize]).fill(f64::MAX);
+    velocity.slice_mut(ndarray::s![.., 2usize]).fill(f64::MIN);
     // vel mag = [min,mean,max]
     let mut velocity_mag: ndarray::Array1<f64> = ndarray::Array1::<f64>::zeros(3);
     velocity_mag[0] = f64::MAX;
@@ -550,7 +550,7 @@ pub fn csv_converter(
         .new_attr::<u64>()
         .create("particle number")
         .unwrap()
-        .write_scalar(&1)
+        .write_scalar(&1_usize)
         .unwrap();
     hdf5file
         .new_attr::<u64>()

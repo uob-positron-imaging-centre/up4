@@ -55,12 +55,6 @@ jobs:
           [ "${{runner.os}}" != "Windows" ] && export RUSTFLAGS="-C link-args=-Wl,-rpath,$CONDA_PREFIX/lib"
           python3 -m pip install --upgrade pip
           python3 -m pip install -r requirements.txt
-      - name: Find where libhdf5.so is
-        run: |
-          pwd
-          echo $CONDA_PREFIX
-          ls -la $CONDA_PREFIX
-          find $CONDA_PREFIX -type f | rg 'hdf5'
       - name: Install up4 on python
         run: |
           export HDF5_DIR="$CONDA_PREFIX"
@@ -69,8 +63,12 @@ jobs:
       - name: Run tests
         run: |
           export LD_LIBRARY_PATH="$CONDA_PREFIX"
-          ls $CONDA_PREFIX
-          ls $CONDA_PREFIX/bin
-          ls $CONDA_PREFIX/lib
+          echo $LD_LIBRARY_PATH
+          echo "HDF5 in: $CONDA_PREFIX" 
+          ls $CONDA_PREFIX | rg 'hdf5'
+          echo "HDF5 in: $CONDA_PREFIX/bin" 
+          ls $CONDA_PREFIX/bin | rg 'hdf5'
+          echo "HDF5 in: $CONDA_PREFIX/lib" 
+          ls $CONDA_PREFIX/lib | rg 'hdf5'
           python3 -m pip install pytest
           python3 -m pytest tests/test_all.py

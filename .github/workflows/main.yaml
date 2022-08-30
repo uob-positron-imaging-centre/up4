@@ -61,8 +61,8 @@ jobs:
           export PYO3_PYTHON=python3
           python3 -m pip install .
       - name: Run tests
+        continue-on-error: true
         run: |
-          continue-on-error: true.
           export LD_LIBRARY_PATH="$CONDA_PREFIX"
           echo $LD_LIBRARY_PATH
           echo "HDF5 in: $CONDA_PREFIX" 

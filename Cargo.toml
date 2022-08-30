@@ -11,22 +11,21 @@ crate-type = ["cdylib","rlib"]
 [dependencies]
 numpy = "0.14.0"
 hdf5 = "0.8.0"
-#hdf5 = {git="https://github.com/aldanor/hdf5-rust.git"}
 ndarray = "0.15"
 ndarray-stats="0.5.0"
 derive-getters = "0.2.0"
 #plotly = "0.6.0"
 plotly = {git="https://github.com/DanW97/plotly.git", features = ["plotly_ndarray"]}
 dyn-clone = "1.0"
-#num-traits = "0.2"
-#ndarray-linalg = "0.12"
-#em = { git = "https://github.com/calebwin/emu", branch = "master" }
 itertools = "0.10.1"
 regex = "1"
 vtkio ="0.6.0"
-indicatif = "0.17.0-rc.11"
 colorous = "1.0.5"
-
+indicatif = "=0.17.0-beta.1"
+csv= "1.1.6"
+ndarray-csv = {version = "0.5.1"}
+polyfit-rs = "0.2.0"
+num-traits="0.2.14"
 [dependencies.pyo3]
 version = "=0.14.5"
 features = ["extension-module"]
@@ -37,3 +36,15 @@ features = ["extension-module"]
 uPPPP_debug = []
 uPPPP_warning = []
 python = []
+
+#[profile.dev]#
+#opt-level = 0              # Use slightly better optimizations.
+
+
+[profile.release]
+incremental = true
+debug = true
+lto = "fat"
+
+[rust]
+debuginfo-level = 1

@@ -42,6 +42,7 @@ jobs:
       - name: Build and test all crates
         run: |
           export HDF5_DIR="$CONDA_PREFIX"
+          export PYO3_PYTHON=python3
           [ "${{matrix.mpi}}" != "" ] && FEATURES=mpio
           [ "${{runner.os}}" != "Windows" ] && export RUSTFLAGS="-C link-args=-Wl,-rpath,$CONDA_PREFIX/lib"
           [ "${{matrix.mpi}}" == "mpich" ] && [ "${{runner.os}}" == "Linux" ] && export MPICH_CC=$(which gcc)

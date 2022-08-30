@@ -35,7 +35,7 @@ impl PyData {
                 "Can not read scalar from attribute \"hdf5_up4_type\" in file {}",
                 filename
             ));
-        file.close();
+        file.close().expect("Unable to close file");
         let mut data;
         if hdf5type == 0x1_i32 {
             data = PyData::from_tdata(filename)

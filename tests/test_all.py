@@ -40,20 +40,23 @@ def grid(request):
 
 
 class TestVtk:
-    def test_successfull_write(self):
-        """Test if the hdf5 file is written"""
-        if os.path.exists("tests/fixtures/vtk/drum.hdf5"):
-            os.remove("tests/fixtures/vtk/drum.hdf5")
-        filenames = sorted([x for x in glob("tests/fixtures/post/drum*.vtk") if not "bound" in x])
-        up4.Converter.vtk(filenames, 1e-5, "tests/fixtures/drum.hdf5")
-        assert os.path.exists("tests/fixtures/drum.hdf5") == True
-
-    def test_successfull_generated(self):
+    def test_generated(self):
         """Test if the hdf5 file is written and that it is readable"""
         if os.path.exists("tests/fixtures/vtk/drum.hdf5"):
             os.remove("tests/fixtures/vtk/drum.hdf5")
         filenames = sorted([x for x in glob("tests/fixtures/post/drum*.vtk") if not "bound" in x])
         up4.Converter.vtk(filenames, 1e-5, "tests/fixtures/drum.hdf5")
+        try:
+            up4.Data.from_tdata("tests/fixtures/drum.hdf5")
+        except Exception as e:
+            pytest.fail(e)
+
+    def test_generated_folder(self):
+        """Test if the hdf5 file is written and that it is readable"""
+        if os.path.exists("tests/fixtures/vtk/drum.hdf5"):
+            os.remove("tests/fixtures/vtk/drum.hdf5")
+        filenames = sorted([x for x in glob("tests/fixtures/post/drum*.vtk") if not "bound" in x])
+        up4.Converter.vtk_from_folder("tests/fixtures/post/", 1e-5, "tests/fixtures/drum.hdf5")
         try:
             up4.Data.from_tdata("tests/fixtures/drum.hdf5")
         except Exception as e:

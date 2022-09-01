@@ -284,6 +284,71 @@ pub fn vtk(
     print_debug!("Finished with conversion from vtk to HDF5 ");
 } // end vtk function
 
+/// Convert a folder with vtk files into a HDF5 file
+///
+///
+/// # Examples
+///
+/// Convert data from a sorted list of vtk files into Hdf5 (TData-format)
+/// Filename in format: vtk_(Number).vtk, important for filtering the time for each file
+/// whereas 'number' is the timestep of the simulation
+///
+/// see [regex](https://docs.rs/regex/1.5.4/regex/) for mor information about filtering
+///'''
+///vtk(
+///     filenames: "post/",
+///     timestep: 1e-5,             //simulation timestep
+///     outname: "output.hdf5",
+///     filter: r"vtk_(\d+).vtk"    // regex filter to extract the timestep
+///)
+///'''
+pub fn vtk_from_folder(
+    mut folder: &str,
+    timestep: f64,
+    outname: &str,
+    filter: &str, // example r"vtk_(\d+).vtk"
+) {
+    print_debug!("Starting conversion from vtk to HDF5 ");
+    let system_foldername;
+    let string;
+    if !folder.ends_with(std::path::MAIN_SEPARATOR) {
+        // add separator if not present
+        string = format!("{}{}", folder, std::path::MAIN_SEPARATOR);
+        system_foldername = string.as_str();
+    } else {
+        system_foldername = folder;
+    }
+
+    let filenames = std::fs::read_dir(system_foldername)
+        .expect(&format!("Unable to read directory {}", system_foldername))
+        .map(|res| res.map(|e| e.path()))
+        .collect::<Result<Vec<_>, std::io::Error>>()
+        .expect(&format!(
+            "Unable to convert files in directory {}",
+            system_foldername
+        ));
+    let mut out_vec: Vec<&str> = Vec::new();
+    for filename_ in filenames.iter() {
+        let filename = filename_.to_str().unwrap();
+        if filename.ends_with(".vtk") && !filename.contains("boundingBox") {
+            print_debug!("\t Found file: {}", filename);
+        } else {
+            print_debug!("\t Ignoring file: {}", filename);
+            continue;
+        }
+        // append out vec
+        out_vec.push(filename);
+    }
+    // sort the filenames
+    out_vec.sort_unstable_by(|a, b| natord::compare(a, b));
+
+    if out_vec.len() == 0 {
+        panic!("No files to convert");
+    }
+
+    vtk(out_vec, timestep, outname, filter);
+}
+
 /// Convert a single trajectory csv file to Hdf5
 pub fn csv_converter(
     filename: &str,

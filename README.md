@@ -1,4 +1,5 @@
 # up4: Universal Post-Processor for Particulate Processes
+![example workflow](https://github.com/uob-positron-imaging-centre/up4/actions/workflows/main.yaml/badge.svg)
 
 A fast flexible analysis toolset for particle data of all kinds.
 
@@ -51,12 +52,14 @@ after the requirements are installed, you can install the package with:
 
 this could take some time as it compiles the rust code on your machine.
 
-You can run the tests with:
+To ensure that the installation was successful, you can run tests with [pytest](https://docs.pytest.org/en/7.1.x/getting-started.html):
 
 ```bash
-    python3 -m pytest tests/tets-all.py
+    python3 -m pytest tests/test_all.py
 ```
 
+
+# To DO / Dev notes
 ### Tests
 
 - test failiures. make exceptations work

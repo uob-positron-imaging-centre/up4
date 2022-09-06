@@ -27,7 +27,7 @@ pub fn meshgrid(
             yy[[idx, idy]] = y[idy];
         }
     }
-    return (xx, yy);
+    return (xx, yy)
 }
 
 pub fn meshgrid3d(x: ndarray::Array1<f64>,
@@ -45,7 +45,7 @@ pub fn meshgrid3d(x: ndarray::Array1<f64>,
                 }
             }
         }
-        return (xx, yy, zz);
+        return (xx, yy, zz)
     }
 
 /// Flattens a 2D array into a 1D array. 

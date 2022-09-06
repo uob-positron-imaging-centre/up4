@@ -20,7 +20,6 @@ KonigCell
 docs/_build
 docs/_static
 json.json
-plotly_playground.py
-3D_quiver.py
 .private
 .idea
+*.py

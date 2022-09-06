@@ -178,7 +178,7 @@ impl pyo3::PyObjectProtocol for PyGrid {
 
 #[pyclass(name = "VectorGrid")]
 pub struct PyVecGrid {
-    pub grid: VectorGrid::Vectorgrid,
+    pub grid: vector_grid::VectorGrid,
 }
 
 #[pyproto]

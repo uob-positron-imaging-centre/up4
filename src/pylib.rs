@@ -2,14 +2,17 @@ use pyo3::prelude::*;
 extern crate ndarray;
 extern crate plotly;
 use crate::particleselector::*;
+
 use crate::print_debug;
 use numpy::{IntoPyArray, PyArray2};
 pub mod libconv;
 pub mod libgrid;
+pub mod libplot;
 use crate::datamanager::{Manager, PData, TData};
-
+use libplot::*;
 use libconv::*;
 use libgrid::*;
+
 #[pyclass(name = "Data")]
 struct PyData {
     data: Box<dyn Manager + Send>,
@@ -21,7 +24,7 @@ impl PyData {
     #[new]
     fn constructor(filename: &str) -> Self {
         let file = hdf5::File::open(filename).expect(&format!(
-            "Unbale to open file {}. Check if file exists.",
+            "Unable to open file {}. Check if file exists.",
             filename
         ));
         let hdf5type: i32 = file
@@ -218,6 +221,9 @@ impl pyo3::PyObjectProtocol for PyData {
 fn upppp_rust(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<PyData>()?;
     m.add_class::<PyGrid>()?;
-    m.add_class::<PyConverter>()?;
+    m.add_class::<PyConverter>()?;  
+    m.add_class::<PyVectorPlotter>()?;
+    m.add_class::<PyScalarPlotter>()?;
+    m.add_class::<PyComparisonPlotter>()?;
     Ok(())
 }

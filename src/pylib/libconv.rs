@@ -19,6 +19,16 @@ impl PyConverter {
     ) {
         vtk(filenames, timestep, outname, filter);
     }
+    #[args(filter = "r\"(\\d+).vtk\"")]
+    #[staticmethod]
+    fn vtk_from_folder(
+        folder: &str,
+        timestep: f64,
+        outname: &str,
+        filter: &str, // example r"vtk_(\d+).vtk"
+    ) {
+        vtk_from_folder(folder, timestep, outname, filter);
+    }
     #[args(
         columns = "vec![0,1,2,3]",
         delimiter = "\",\"",

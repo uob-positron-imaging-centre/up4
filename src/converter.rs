@@ -13,7 +13,7 @@ use std::path::Path;
 mod convertertools;
 mod vtktools;
 // Maximum amount of failiures in a row available for a process
-const MAX_FAILS: i64 = 5000;
+const MAX_FAILS: i64 = 500;
 
 /// Convert a vtk file into a HDF5 file
 ///
@@ -192,14 +192,7 @@ pub fn vtk(
                 filename
             ));
         let particle_positions = vtktools::get_positions::<f64>(filename);
-        for fh in 0..4 {
-            print_debug!(
-                "Old: {:?},{:?},{:?}",
-                particle_positions[fh * 3 + 0],
-                particle_positions[fh * 3 + 1],
-                particle_positions[fh * 3 + 2]
-            );
-        }
+
         let particle_positions =
             ndarray::Array::from_shape_vec((particle_positions.len() / 3, 3), particle_positions)
                 .unwrap();
@@ -284,6 +277,71 @@ pub fn vtk(
     print_debug!("Finished with conversion from vtk to HDF5 ");
 } // end vtk function
 
+/// Convert a folder with vtk files into a HDF5 file
+///
+///
+/// # Examples
+///
+/// Convert data from a sorted list of vtk files into Hdf5 (TData-format)
+/// Filename in format: vtk_(Number).vtk, important for filtering the time for each file
+/// whereas 'number' is the timestep of the simulation
+///
+/// see [regex](https://docs.rs/regex/1.5.4/regex/) for mor information about filtering
+///'''
+///vtk(
+///     filenames: "post/",
+///     timestep: 1e-5,             //simulation timestep
+///     outname: "output.hdf5",
+///     filter: r"vtk_(\d+).vtk"    // regex filter to extract the timestep
+///)
+///'''
+pub fn vtk_from_folder(
+    mut folder: &str,
+    timestep: f64,
+    outname: &str,
+    filter: &str, // example r"vtk_(\d+).vtk"
+) {
+    print_debug!("Starting conversion from vtk to HDF5 ");
+    let system_foldername;
+    let string;
+    if !folder.ends_with(std::path::MAIN_SEPARATOR) {
+        // add separator if not present
+        string = format!("{}{}", folder, std::path::MAIN_SEPARATOR);
+        system_foldername = string.as_str();
+    } else {
+        system_foldername = folder;
+    }
+
+    let filenames = std::fs::read_dir(system_foldername)
+        .expect(&format!("Unable to read directory {}", system_foldername))
+        .map(|res| res.map(|e| e.path()))
+        .collect::<Result<Vec<_>, std::io::Error>>()
+        .expect(&format!(
+            "Unable to convert files in directory {}",
+            system_foldername
+        ));
+    let mut out_vec: Vec<&str> = Vec::new();
+    for filename_ in filenames.iter() {
+        let filename = filename_.to_str().unwrap();
+        if filename.ends_with(".vtk") && !filename.contains("boundingBox") {
+            print_debug!("\t Found file: {}", filename);
+        } else {
+            print_debug!("\t Ignoring file: {}", filename);
+            continue;
+        }
+        // append out vec
+        out_vec.push(filename);
+    }
+    // sort the filenames
+    out_vec.sort_unstable_by(|a, b| natord::compare(a, b));
+
+    if out_vec.len() == 0 {
+        panic!("No files to convert");
+    }
+
+    vtk(out_vec, timestep, outname, filter);
+}
+
 /// Convert a single trajectory csv file to Hdf5
 pub fn csv_converter(
     filename: &str,
@@ -326,11 +384,22 @@ pub fn csv_converter(
         let mut data: ndarray::ArrayBase<ndarray::OwnedRepr<f64>, ndarray::Dim<[usize; 2]>> = rdr
             .deserialize_array2_dynamic()
             .expect("Unable to extract CSV data to ndarray! \nYour delimiter might be wrong.\n");
+        // slice the read array to only get the colums requested
+        if columns.len() > 0 {
+            let mut temp_data = ndarray::Array2::<f64>::from_elem((data.shape()[0], 7), f64::NAN);
+            for (i, column) in columns.iter().enumerate() {
+                temp_data
+                    .slice_mut(ndarray::s![.., i])
+                    .assign(&data.slice(ndarray::s![.., *column as usize]));
+            }
+            data = temp_data;
+        } else {
+            panic!("No columns selected to extract!");
+        }
         if interpolate {
             data = convertertools::interpolate(data);
         }
         if vel {
-            data = convertertools::velocity_polynom(data, 9, 2);
             if columns.len() >= 5 {
                 panic!(
                     "Your columns are specified with more then 4 values and velocity \
@@ -339,9 +408,7 @@ pub fn csv_converter(
                 time, x, y, z -position "
                 )
             }
-            columns.append(&mut vec![columns[1] + 3]);
-            columns.append(&mut vec![columns[2] + 3]);
-            columns.append(&mut vec![columns[3] + 3]);
+            data = convertertools::velocity_polynom(data, 9, 2);
         }
         data
     };
@@ -391,10 +458,15 @@ pub fn csv_converter(
     let group = hdf5file
         .create_group(&format!("particle {}", step))
         .expect(&format!("Can not create group particle {}", step));
-    // Go through every line of the csv file
 
+    if data[[0, 6]].is_nan() {
+        panic!("Velocity information required")
+    }
+    // Go through every line of the csv file
+    println!("{:?}", data.shape());
     for (line_id, line) in data.outer_iter().enumerate() {
-        let current_time = line[columns[0] as usize];
+        println!("{:?}", line);
+        let current_time = line[0];
         if current_time <= old_time {
             // The particle went back in time
             // This is not possible and must be ignored.
@@ -413,14 +485,13 @@ pub fn csv_converter(
         // resetfailcount. we only dont allow them do be in a row!
         failcount = 0;
         old_time = current_time;
-        let pos_x = line[columns[1] as usize];
-        let pos_y = line[columns[2] as usize];
-        let pos_z = line[columns[3] as usize];
+        let pos_x = line[1];
+        let pos_y = line[2];
+        let pos_z = line[3];
         let pos = ndarray::array![pos_x, pos_y, pos_z];
         pos_array[[line_id, 0]] = pos_x;
         pos_array[[line_id, 1]] = pos_y;
         pos_array[[line_id, 2]] = pos_z;
-
         let v_x = line[4];
         let v_y = line[5];
         let v_z = line[6];

@@ -1,6 +1,6 @@
-.. 
-   File   : index.rst 
-   License: 
+..
+   File   : index.rst
+   License:
    Author : Dominik Werner <d.wer2@gmx.de>, Daniel Weston <danw2697@btinternet.com>
    Date   : 05.01.2021
 
@@ -15,7 +15,12 @@ Has this ever happened to you:
 
 Fear not, this is *precisely* the aim of UPPPP, the Universal Post Processor for Particulate Processes!
 
-Hi Dom, using `these docs <https://fastobo.readthedocs.io/en/latest/index.html#>`_ and `this repo <https://github.com/fastobo/fastobo-py>`_ as a template for how we do python docs. RST docs are located `here <https://sublime-and-sphinx-guide.readthedocs.io/en/latest/index.html>`_
+|CI|
+..
+   .. |CI| image::  https://img.shields.io/github/workflow/status/uob-positron-imaging-centre/up4/main?logo=github&style=flat-square&maxAge=600
+   :target: https://github.com/uob-positron-imaging-centre/up4
+   make badge on https://shields.io/category/build
+
 
 Indices and tables
 ==================

@@ -34,4 +34,7 @@ pub mod pylib;
 pub mod types;
 pub mod utilities;
 
+pub mod plotting;
+pub use plotting::*;
+
 pub use pylib::*;

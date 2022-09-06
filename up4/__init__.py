@@ -9,6 +9,6 @@
 #Desc    :   None
 from .dummy import Dummy
 from upppp_rust import Data, Grid, Converter
-
+from . import plotting 
 
 #TODO: see how to print string representations of rust python classes

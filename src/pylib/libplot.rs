@@ -4,7 +4,6 @@ use itertools::izip;
 use plotly::{Layout, Plot, layout::Axis, Trace};
 // TODO export plotting class
 use pyo3::prelude::*;
-use pyo3::types::PyLong;
 use crate::{vector_plot::VectorPlotter, libgrid::{PyVecGrid, PyGrid}, scalar_plot::ScalarPlotter, comparison_plot::ComparisonPlotter};
 use plotly::heat_map::Smoothing;
 #[pyclass(name="VectorPlotter")]

@@ -260,16 +260,19 @@ impl VectorPlotter {
     fn create_quiver_arrows(&self, arrow_scale: Option<f64>, axis: usize, index: usize) -> (Vec<(f64, f64, f64)>, Vec<(f64, f64, f64)>) {
         // select the required data 
         let (x, y, u, v) = self.component_axis_selector(axis);
-        let u: Array2<f64> = component_data_selector(u, axis, index);
-        let v: Array2<f64> = component_data_selector(v, axis, index);
-        let norm: Array2<f64> = component_data_selector(self.true_norm.to_owned(), axis, index);
+        let (x, y) = meshgrid(x, y);
+        let x: Array1<f64> = Array1::from_iter(x);
+        let y: Array1<f64> = Array1::from_iter(y);
+        let u: Array1<f64> = Array1::from_iter(component_data_selector(u, axis, index));
+        let v: Array1<f64> = Array1::from_iter(component_data_selector(v, axis, index));
+        let norm: Array1<f64> = izip!(&u, &v).map(|(v,u)| f64::hypot(*u,*v)).collect::<Array1<f64>>();
 
         // angle between arrows
         const ANGLE: f64 = PI/9.0; 
         // default scale is 0.5
         let scale_factor: f64 = arrow_scale.unwrap_or(0.5);
         
-        let arrow_len: Array1<f64> = (scale_factor * norm).into_iter().collect::<Array1<f64>>();
+        let arrow_len: Array1<f64> = scale_factor * norm;
         // get barb angles
         let barb_ang: Array1<f64> = izip!(&v, &u).map(|(v, u)| f64::atan2(*v,*u)).collect::<Array1<f64>>();
         
@@ -290,10 +293,10 @@ impl VectorPlotter {
         let seg_2_y: Array1<f64> = &arrow_len * &sin_ang_2;
         
         //set coordinates of the arrow
-        let point_1_x: Array1<f64> = (&x + &u).into_iter().collect::<Array1<f64>>() - &seg_1_x;
-        let point_1_y: Array1<f64> = (&y + &v).into_iter().collect::<Array1<f64>>() - &seg_1_y;
-        let point_2_x: Array1<f64> = (&x + &u).into_iter().collect::<Array1<f64>>() - &seg_2_x;
-        let point_2_y: Array1<f64> = (&y + &v).into_iter().collect::<Array1<f64>>() - &seg_2_y;
+        let point_1_x: Array1<f64> = (&x + &u).into_iter().collect::<Array1<f64>>() - seg_1_x;
+        let point_1_y: Array1<f64> = (&y + &v).into_iter().collect::<Array1<f64>>() - seg_1_y;
+        let point_2_x: Array1<f64> = (&x + &u).into_iter().collect::<Array1<f64>>() - seg_2_x;
+        let point_2_y: Array1<f64> = (&y + &v).into_iter().collect::<Array1<f64>>() - seg_2_y;
         
         //finally, combine this data into something usable
         let mut arrow_x = Vec::new();

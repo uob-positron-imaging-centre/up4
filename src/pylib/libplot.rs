@@ -2,7 +2,6 @@
 
 use itertools::izip;
 use plotly::{Layout, Plot, layout::Axis, Trace};
-// TODO export plotting class
 use pyo3::prelude::*;
 use crate::{vector_plot::VectorPlotter, libgrid::{PyVecGrid, PyGrid}, scalar_plot::ScalarPlotter, comparison_plot::ComparisonPlotter};
 use plotly::heat_map::Smoothing;
@@ -30,10 +29,9 @@ impl PyVectorPlotter {
     // TODO offer a slice variant
     fn unit_vector_plot(&mut self, axis: usize, index: usize)  {
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
-        self.plotting_data.scale_global(0.0001);
         let arrows = self.plotting_data.create_unit_vector_traces(None, true, axis, index);
         let layout: Layout = Layout::new();
-        let square: bool = true;
+        let square: bool = false;
         let smoothing = Some(Smoothing::False);
         let xaxis: Option<Axis> = Some(Axis::new().title("x position".into()));
         let yaxis: Option<Axis> = Some(Axis::new().title("y position".into()));
@@ -55,7 +53,7 @@ impl PyVectorPlotter {
         let backgrounds = self.plotting_data.unit_vector_slice_background(range, axis);
         for (arrow, background) in izip!(arrows, backgrounds) {
             traces.push(arrow);
-            //traces.push(background);
+            traces.push(background);
         }
         let layout: Layout = Layout::new();
         let show: bool = false;

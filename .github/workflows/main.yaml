@@ -64,5 +64,5 @@ jobs:
         run: |
           export LD_LIBRARY_PATH="$CONDA_PREFIX/lib"
           python3 -m pytest tests/test_all.py
-  call-docs-workflow:
-    uses: ./.github/workflows/pages.yaml
+      - name: Update docs
+        uses: ./.github/workflows/pages.yaml

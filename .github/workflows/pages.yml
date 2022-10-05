@@ -1,6 +1,7 @@
-name: Publish doc to GitHub Pages
+name: Docs
 
-on: push
+on: 
+  workflow_call:
 
 env:
   SPHINX_VERSION: 4.3.1

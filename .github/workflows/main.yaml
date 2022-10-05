@@ -64,5 +64,6 @@ jobs:
         run: |
           export LD_LIBRARY_PATH="$CONDA_PREFIX/lib"
           python3 -m pytest tests/test_all.py
-      - name: Update docs
-        uses: ./.github/workflows/pages.yaml
+  docs:
+    uses: .github/workflows/pages.yaml@uPPPP
+    needs: conda

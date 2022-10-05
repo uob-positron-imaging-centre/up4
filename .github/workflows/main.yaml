@@ -67,6 +67,9 @@ jobs:
       - name: Setup Sphinx
         run: |
           conda install -y -c ${{matrix.channel}} --file docs/requirements.txt
+      - name: Generate Rust docs
+        run: |
+          cargo doc --no-deps --target-dir docs/_static/
       - name: Build HTML
         run: |
           cd docs

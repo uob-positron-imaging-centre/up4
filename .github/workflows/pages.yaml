@@ -16,9 +16,6 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Checkout code
-        uses: actions/checkout@v2
-
       - name: Setup Sphinx
         run: |
           pip install sphinx==${{ env.SPHINX_VERSION }}

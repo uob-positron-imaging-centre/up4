@@ -138,6 +138,7 @@ impl VectorPlotter {
     }
 
     // FIXME documentation
+    // FIXME select the smallest circle for each cell so that we can handle cuboid cells
     /// Constrain all arrows to lie within circle of radius dx/2 from each node.
     /// On a non-uniform grid, this *will* distort the plot.
     pub fn bound_node(&mut self, dx: f64) {
@@ -328,7 +329,7 @@ impl VectorPlotter {
             let xpl: Vec<f64> = vec![x_line.0, x_line.1, x_head.0, x_head.1, x_head.2 ];
             let ypl: Vec<f64> = vec![y_line.0, y_line.1, y_head.0, y_head.1, y_head.2];
             let trace = Scatter::new(xpl, ypl).mode(Mode::Lines).show_legend(false)
-            //.fill(Fill::ToSelf).fill_color(NamedColor::Black)
+            .fill(Fill::ToSelf).fill_color(NamedColor::Black)
             .show_legend(false).line(Line::new().color(NamedColor::Black));
             traces.push(trace);
         }
@@ -345,6 +346,8 @@ impl VectorPlotter {
         let smooth_setting = smoothing.unwrap_or(Smoothing::False); 
         let heatmap: Box<HeatMap<f64, f64, f64>> = HeatMap::new(xaxis.into_raw_vec(), yaxis.into_raw_vec(), plot_data.into_raw_vec()).zsmooth(smooth_setting);
         // if this is true, then perform some additional plotly calls to create a plot where the x and y axes are equal
+        // FIXME dx and dy parameters need to be independent of the plane selected
+        // TODO implement scale_ratio in plotly fork
         if square{  
             let mut axes_iter = axes.into_iter();
             let x_axis: plotly::layout::Axis = axes_iter.next().unwrap().unwrap_or(plotly::layout::Axis::new());

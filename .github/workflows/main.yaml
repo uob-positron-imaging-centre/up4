@@ -66,7 +66,7 @@ jobs:
 
       - name: Setup Sphinx
         run: |
-          conda install --file docs/requirements.txt
+          conda install -y -c ${{matrix.channel}} --file docs/requirements.txt
       - name: Build HTML
         run: |
           cd docs

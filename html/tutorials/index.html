@@ -1,0 +1,555 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+    <title>Tutorials &#8212; up4 v0.1.0 Manual</title>
+  <script>
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=9b1a4fa89bdd0e95b23b" rel="stylesheet">
+
+  
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/6.1.2/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx_highlight.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/index';</script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Manual" href="../api/index.html" />
+    <link rel="prev" title="Getting Started" href="../getting_started.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="docsearch:language" content="en">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
+  <label class="overlay overlay-primary" for="__primary"></label>
+
+  
+  <input type="checkbox" class="sidebar-toggle" name="__secondary" id="__secondary">
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+      
+<form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+    </div>
+  </div>
+
+  
+  <nav class="bd-header navbar navbar-expand-lg bd-navbar" id="navbar-main"><div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+      <span class="fas fa-bars"></span>
+  </label>
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+    <p class="title logo__title">up4 v0.1.0 Manual</p>
+  
+</a>
+    
+  </div>
+
+  
+  <div class="col-lg-9 navbar-header-items">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../getting_started.html">
+                        Getting Started
+                    </a>
+                </li>
+                
+
+                <li class="nav-item current active">
+                    <a class="nav-link" href="#">
+                        Tutorials
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../api/index.html">
+                        Manual
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../about.html">
+                        About
+                    </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      <div class="navbar-end-item navbar-end__search-button-container">
+        
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+      </div>
+      
+      <div class="navbar-end-item">
+        
+<form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/uob-positron-imaging-centre/up4" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+
+
+  
+  <div class="search-button-container--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search">
+  <i class="fas fa-search"></i>
+</button>
+  </div>
+
+  
+  <label class="sidebar-toggle secondary-toggle" for="__secondary">
+      <span class="fas fa-outdent"></span>
+  </label>
+  
+
+</div>
+  </nav>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+      
+      <div class="navbar-center-item">
+        <nav class="navbar-nav">
+    <p class="sidebar-header-items__title" role="heading" aria-level="1" aria-label="Site Navigation">
+        Site Navigation
+    </p>
+    <ul id="navbar-main-elements" class="navbar-nav">
+        
+                <li class="nav-item">
+                    <a class="nav-link" href="../getting_started.html">
+                        Getting Started
+                    </a>
+                </li>
+                
+
+                <li class="nav-item current active">
+                    <a class="nav-link" href="#">
+                        Tutorials
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../api/index.html">
+                        Manual
+                    </a>
+                </li>
+                
+
+                <li class="nav-item">
+                    <a class="nav-link" href="../about.html">
+                        About
+                    </a>
+                </li>
+                
+    </ul>
+</nav>
+      </div>
+      
+      </div>
+    
+
+    
+    
+    <div class="sidebar-header-items__end">
+      
+      <div class="navbar-end-item">
+        
+<form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/uob-positron-imaging-centre/up4" title="GitHub" class="nav-link" rel="noopener" target="_blank"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+    
+  </div>
+
+  
+
+  
+  <div class="sidebar-end-items sidebar-primary__section">
+    <div class="sidebar-end-items__item">
+    </div>
+  </div>
+
+      </div>
+      <main class="bd-main">
+        
+        
+        <div class="bd-content">
+          <div class="bd-article-container">
+            
+            <div class="bd-header-article">
+                
+            </div>
+            
+            
+            <article class="bd-article" role="main">
+              
+  <section id="tutorials">
+<h1>Tutorials<a class="headerlink" href="#tutorials" title="Permalink to this heading">#</a></h1>
+<p>The usual workflow in up4 consists of 4 steps: Converting, Generating grids, Analysis, and Plotting or short CGAP.
+This tutorial will go through each element in CGAP and explain what it does and how to use it.</p>
+<section id="converting-data">
+<h2>Converting data<a class="headerlink" href="#converting-data" title="Permalink to this heading">#</a></h2>
+<p>up4 is build on the HDF5 data format. To use up4 we must first convert data to HDF5.
+Up to this point there are two supported conversion functions: csv and vtk.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">up4</span>
+<span class="n">up4</span><span class="o">.</span><span class="n">Converter</span><span class="o">.</span><span class="n">csv</span><span class="p">(</span>
+    <span class="s1">&#39;path/to/data.csv&#39;</span><span class="p">,</span>     <span class="c1"># Path to the csv file</span>
+    <span class="s1">&#39;output.hdf5&#39;</span><span class="p">,</span>          <span class="c1"># filename to write</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span>    <span class="c1"># Select the columns for to read, pointing to the time, x-, y-, z-positions</span>
+    <span class="n">delimiter</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="p">,</span>        <span class="c1"># Delimiter used in the csv file</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>          <span class="c1"># Does the csv file have a header?</span>
+    <span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;#&#39;</span><span class="p">,</span>          <span class="c1"># Comment character</span>
+    <span class="n">vel</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>             <span class="c1"># Do you want to calculate the velocity</span>
+    <span class="n">interpolate</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>     <span class="c1"># Do you want to interpolate the data</span>
+    <span class="n">radius</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>           <span class="c1"># Radius of the particle</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>It is strongly recommended to interpolate the data. Up4 sometimes relies on the spacing between the data points to be constant.
+If the csv contains velocity information you can read it in by simply extending the columns vector from 4 to 7 elements, pointing to t, x, y, z, vx, vy, vz.</p>
+<p>The vtk reader is developed to read .vtk files generated by <a class="reference external" href="https://www.cfdem.com/liggghts-open-source-discrete-element-method-particle-simulation-code">LIGGGHTS</a> simulation software.
+There are two ways to convert vtk files, either with <code class="code docutils literal notranslate"><span class="pre">up4.Converter.vtk</span></code>, which requires a list of filenames as input, or with <code class="code docutils literal notranslate"><span class="pre">up4.Converter.vtk_from_folder</span></code>
+which will read all vtk files in a folder and convert them to hdf5.</p>
+<p>The list of filenames in <code class="code docutils literal notranslate"><span class="pre">up4.Converter.vtk</span></code> must be sorted and without any sub-files generated by LIGGGHTS and can be generated with the following code:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
+<span class="kn">from</span> <span class="nn">natsort</span> <span class="kn">import</span> <span class="n">natsorted</span>
+<span class="n">files</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="s1">&#39;path/to/folder/*.vtk&#39;</span><span class="p">)</span>
+<span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="ow">not</span> <span class="s2">&quot;boundingBox&quot;</span> <span class="ow">in</span> <span class="n">f</span><span class="p">]</span>
+<span class="n">files</span> <span class="o">=</span> <span class="n">natsorted</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>conversion can then be done with:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">up4</span>
+<span class="n">up4</span><span class="o">.</span><span class="n">Converter</span><span class="o">.</span><span class="n">vtk</span><span class="p">(</span>
+    <span class="n">files</span><span class="p">,</span>                 <span class="c1"># Sorted list of filenames</span>
+    <span class="mf">1e-5</span><span class="p">,</span>                  <span class="c1"># timestep of the simulation</span>
+    <span class="s1">&#39;output.hdf5&#39;</span><span class="p">,</span>         <span class="c1"># filename to write</span>
+    <span class="sa">r</span><span class="s2">&quot;(</span><span class="se">\\</span><span class="s2">d+).vtk&quot;</span><span class="p">,</span>         <span class="c1"># regex to extract the timestep from the filename</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The regex filter used in <code class="code docutils literal notranslate"><span class="pre">up4.Converter.vtk</span></code> is used to extract the timestep from the filename. The regex must contain a group of numbers.
+Read more about regex <a class="reference external" href="https://docs.python.org/3/howto/regex.html">here</a>. The default regex filter should work in most cases.</p>
+<p>The function <code class="code docutils literal notranslate"><span class="pre">up4.Converter.vtk_from_folder</span></code> is a wrapper around <code class="code docutils literal notranslate"><span class="pre">up4.Converter.vtk</span></code> and can be used as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">up4</span>
+<span class="n">up4</span><span class="o">.</span><span class="n">Converter</span><span class="o">.</span><span class="n">vtk_from_folder</span><span class="p">(</span>
+    <span class="s1">&#39;path/to/folder&#39;</span><span class="p">,</span>       <span class="c1"># Path to the folder containing the vtk files</span>
+    <span class="mf">1e-5</span><span class="p">,</span>                   <span class="c1"># timestep of the simulation</span>
+    <span class="s1">&#39;output.hdf5&#39;</span><span class="p">,</span>          <span class="c1"># filename to write</span>
+    <span class="sa">r</span><span class="s2">&quot;(</span><span class="se">\\</span><span class="s2">d+).vtk&quot;</span><span class="p">,</span>          <span class="c1"># regex to extract the timestep from the filename</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>Short notice on stats: Once you generated your hdf5 file you can read it in using the <code class="code docutils literal notranslate"><span class="pre">up4.Data</span></code> class.
+If you include the class in a normal print function the output may look as following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">up4</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="s1">&#39;output.hdf5&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Dimensions of the system:</span>
+<span class="sd">     x -0.07--&gt;0.06</span>
+<span class="sd">     y 0.00--&gt;0.13</span>
+<span class="sd">     z -0.09--&gt;0.01</span>
+<span class="sd">The max time of this set is : 2.00</span>
+<span class="sd">Number of Particles: 1</span>
+<span class="sd">Mean velocity of: 0.44 m/s</span>
+<span class="sd">Minimum velocity 0.03 m/s</span>
+<span class="sd">Maximum Velocity 0.74 m/s</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="generating-grids">
+<h2>Generating grids<a class="headerlink" href="#generating-grids" title="Permalink to this heading">#</a></h2>
+<p>Grids are one of the main parts in up4. They determine where (spatially) and in which way we want to have a look at the data.
+The grid is generated by the <code class="code docutils literal notranslate"><span class="pre">up4.Grid</span></code> class.</p>
+<p>Two different grid species are supported:</p>
+<ol class="arabic simple">
+<li><p>Cartesian</p></li>
+<li><p>Cylindrical</p></li>
+</ol>
+<p>the simplest way to generate a grid is to use <code class="code docutils literal notranslate"><span class="pre">up4.Grid.cartesian_from_data</span></code> or <code class="code docutils literal notranslate"><span class="pre">up4.Grid.cylindrical_from_data</span></code>.
+Those functions automatically apply the system boundaries of the data given as their own boundaries.</p>
+<p>To use those functions we need to read in the data using the <code class="code docutils literal notranslate"><span class="pre">up4.Data</span></code> class.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">up4</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="s2">&quot;path/to/data.hdf5&quot;</span><span class="p">)</span>
+<span class="n">grid_car</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Grid</span><span class="o">.</span><span class="n">cartesian_from_data</span><span class="p">(</span>    <span class="n">data</span><span class="p">,</span> <span class="n">cells</span> <span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">])</span>
+<span class="n">grid_cyl</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Grid</span><span class="o">.</span><span class="n">cylindrical_from_data</span><span class="p">(</span>  <span class="n">data</span><span class="p">,</span> <span class="n">cells</span> <span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">])</span>
+</pre></div>
+</div>
+</section>
+<section id="data-analysis">
+<h2>Data analysis<a class="headerlink" href="#data-analysis" title="Permalink to this heading">#</a></h2>
+<p>Data analysis is done by methods of the <code class="code docutils literal notranslate"><span class="pre">up4.Data</span></code> class. The most important methods are:</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">up4.Data.vectorfield</span></code>: Calculates the velocity vector field of the data</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">up4.Data.velocityfield</span></code>: Calculates the magnitude velocity field of the data</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">up4.Data.numbersfield</span></code>: Calculates the number field of the data</p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">up4</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="s2">&quot;path/to/data.hdf5&quot;</span><span class="p">)</span>
+<span class="n">grid_car</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Grid</span><span class="o">.</span><span class="n">cartesian_from_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cells</span> <span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">])</span>
+<span class="n">velocity_field</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">velocityfield</span><span class="p">(</span><span class="n">grid_car</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>all functions can be called with any type of grid.
+The velocity field in this example can also be calculated in cylindrical coordinates:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">up4</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="s2">&quot;path/to/data.hdf5&quot;</span><span class="p">)</span>
+<span class="n">grid_cyl</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Grid</span><span class="o">.</span><span class="n">cylindrical_from_data</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cells</span> <span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">20</span><span class="p">])</span>
+<span class="n">velocity_field</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">velocityfield</span><span class="p">(</span><span class="n">grid_cyl</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="plotting">
+<h2>Plotting<a class="headerlink" href="#plotting" title="Permalink to this heading">#</a></h2>
+<p>for mr Weston</p>
+</section>
+</section>
+
+
+            </article>
+            
+            
+            
+            <footer class="bd-footer-article">
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="../getting_started.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">Getting Started</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="../api/index.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Manual</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+            </footer>
+            
+          </div>
+          
+          
+          
+            <div class="bd-sidebar-secondary bd-toc">
+              
+<div class="toc-item">
+  
+<div class="tocsection onthispage">
+    <i class="fas fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#converting-data">
+   Converting data
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#generating-grids">
+   Generating grids
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#data-analysis">
+   Data analysis
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#plotting">
+   Plotting
+  </a>
+ </li>
+</ul>
+
+</nav>
+</div>
+
+<div class="toc-item">
+  
+
+<div class="tocsection editthispage">
+    <a href="https://github.com/uob-positron-imaging-centre/up4/edit/DanW-dev/tutorials/index.rst">
+        <i class="fas fa-pencil-alt"></i> Edit this page
+    </a>
+</div>
+
+</div>
+
+<div class="toc-item">
+  
+<div class="tocsection sourcelink">
+    <a href="../_sources/tutorials/index.rst.txt">
+        <i class="fas fa-file-alt"></i> Show Source
+    </a>
+</div>
+
+</div>
+
+            </div>
+          
+          
+        </div>
+        <footer class="bd-footer-content">
+          <div class="bd-footer-content__inner">
+            
+          </div>
+        </footer>
+        
+      </main>
+    </div>
+  </div>
+
+  
+    
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=9b1a4fa89bdd0e95b23b"></script>
+
+  <footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    
+<p class="copyright">
+
+    &copy; Copyright 2022, Dominik Werner and Daniel Weston.<br>
+
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+<p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br>
+</p>
+
+  </div>
+  
+</div>
+  </footer>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-# Sample workflow for building and deploying a Jekyll site to GitHub Pages
+# Sample workflow for building and deploying docs to GitHub Pages
 name: Docs
 
 on:
@@ -28,11 +28,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - name: Setup Python
-        uses: conda-incubator/setup-miniconda@v2
-        with: {auto-update-conda: false, activate-environment: testenv}
+        uses: actions/setup-python@v2
       - name: Install dependencies
         run: |
-          conda install sphinx pydata-sphinx-theme --channel conda-forge
+          pip install sphinx pydata-sphinx-theme
       - name: Sphinx build
         run: |
           sphinx-build doc build

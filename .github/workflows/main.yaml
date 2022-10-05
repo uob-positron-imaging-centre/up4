@@ -46,7 +46,6 @@ jobs:
           [ "${{runner.os}}" != "Windows" ] && export RUSTFLAGS="-C link-args=-Wl,-rpath,$CONDA_PREFIX/lib"
           cargo clean
           cargo check
-          cargo install ripgrep
       - name: Install Python requirements
         run: |
           pwd

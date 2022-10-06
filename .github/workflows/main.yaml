@@ -63,6 +63,26 @@ jobs:
         run: |
           export LD_LIBRARY_PATH="$CONDA_PREFIX/lib"
           python3 -m pytest tests/test_all.py
-  docs:
-    uses: ./.github/workflows/pages.yaml
-    needs: conda
+
+      - name: Setup Sphinx
+        run: |
+          conda install -y -c ${{matrix.channel}} --file docs/requirements.txt
+      - name: Generate Rust docs
+        run: |
+          cargo doc --no-deps --target-dir docs/_static/
+      - name: Build HTML
+        run: |
+          cd docs
+          make html
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: html-doc
+          path: docs/build/html
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@4.1.7
+        with:
+          branch: gh-pages
+          folder: docs/build/html
+        

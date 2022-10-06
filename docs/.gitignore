@@ -1,0 +1,5 @@
+_static/debug
+doc
+.rust*
+CACHEDIR.TAG
+build

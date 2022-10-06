@@ -1,16 +1,16 @@
 //! Submodule for handling 2D scalar data.
 
-use ndarray::{Array1, Array3};
-use plotly::{HeatMap, Trace, Plot, Layout};
-use crate::{GridFunctions3D, component_data_selector};
 use crate::utilities::maths::meshgrid;
+use crate::{component_data_selector, GridFunctions3D};
+use ndarray::{Array1, Array3};
+use plotly::{HeatMap, Layout, Plot, Trace};
 
 /// Scalar data handling struct.
 pub struct ScalarPlotter {
     xdata: Array1<f64>,
     ydata: Array1<f64>,
     zdata: Array1<f64>,
-    scalar_data: Array3<f64>
+    scalar_data: Array3<f64>,
 }
 
 impl ScalarPlotter {
@@ -21,22 +21,22 @@ impl ScalarPlotter {
             0 => {
                 let xcomponent = self.ydata.to_owned();
                 let ycomponent = self.zdata.to_owned();
-                return (xcomponent, ycomponent)
+                return (xcomponent, ycomponent);
             }
             // xz view
             1 => {
                 let xcomponent = self.xdata.to_owned();
                 let ycomponent = self.zdata.to_owned();
-                return (xcomponent, ycomponent)
+                return (xcomponent, ycomponent);
             }
             // xy view
             2 => {
                 let xcomponent = self.xdata.to_owned();
                 let ycomponent = self.ydata.to_owned();
-                return (xcomponent, ycomponent)
+                return (xcomponent, ycomponent);
             }
             // panic
-            _ => panic!("axis value must be either 0, 1 or 2!")
+            _ => panic!("axis value must be either 0, 1 or 2!"),
         };
     }
 
@@ -46,16 +46,16 @@ impl ScalarPlotter {
         let ydata: Array1<f64> = grid.get_ypositions().to_owned();
         let zdata: Array1<f64> = grid.get_zpositions().to_owned();
         let scalar_data: Array3<f64> = grid.get_data().to_owned();
-        return ScalarPlotter { 
-            xdata: xdata, 
-            ydata: ydata, 
-            zdata: zdata, 
-            scalar_data: scalar_data, 
-        }
+        return ScalarPlotter {
+            xdata: xdata,
+            ydata: ydata,
+            zdata: zdata,
+            scalar_data: scalar_data,
+        };
     }
     // TODO contour wrapping
     //pub fn scalar_contour_plot(&self, axis: usize, index: usize)  {
-        
+
     //}
 
     /// Take created traces and plot them.
@@ -63,14 +63,14 @@ impl ScalarPlotter {
         let mut plot: Plot = Plot::new();
         //use local render version
         plot.use_local_plotly();
-        for trace in traces{
+        for trace in traces {
             plot.add_trace(trace);
         }
         plot.set_layout(layout);
-        if show{
+        if show {
             plot.show();
         }
-        return plot
+        return plot;
     }
 
     /// Return heatmap trace of scalar data, perpendicular to provided axis, at the index specified.
@@ -78,9 +78,13 @@ impl ScalarPlotter {
         let (xaxis, yaxis) = self.axis_selector(axis);
         let (xaxis, yaxis) = meshgrid(xaxis, yaxis);
         let plot_data = component_data_selector(self.scalar_data.to_owned(), axis, index);
-        let heatmap = HeatMap::new(xaxis.into_raw_vec(), yaxis.into_raw_vec(), plot_data.into_raw_vec());
+        let heatmap = HeatMap::new(
+            xaxis.into_raw_vec(),
+            yaxis.into_raw_vec(),
+            plot_data.into_raw_vec(),
+        );
         let trace = vec![heatmap];
-        return trace
+        return trace;
     }
 }
 

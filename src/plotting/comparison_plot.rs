@@ -1,9 +1,13 @@
 //! Submodule handling plots comparing 2 datasets (reference ("the ground truth") and comparison data) for equality this submodule assumes that the grids containing both datasets are identically laid out.
-use ndarray_stats::QuantileExt;
-use plotly::{Scatter, Layout, HeatMap, common::{Line, Mode, Marker, MarkerSymbol}, Plot, Trace, color::NamedColor};
-use crate::{GridFunctions3D, axis_selector, data_selector};
+use crate::utilities::maths::{flatten_2d, meshgrid};
+use crate::{axis_selector, data_selector, GridFunctions3D};
 use ndarray::prelude::*;
-use crate::utilities::maths::{meshgrid, flatten_2d};
+use ndarray_stats::QuantileExt;
+use plotly::{
+    color::NamedColor,
+    common::{Line, Marker, MarkerSymbol, Mode},
+    HeatMap, Layout, Plot, Scatter, Trace,
+};
 
 /// Comparison data handling struct.
 pub struct ComparisonPlotter {
@@ -13,14 +17,17 @@ pub struct ComparisonPlotter {
 
 impl ComparisonPlotter {
     /// Constructor
-    pub fn new(reference_data: Box<dyn GridFunctions3D>, comparison_data: Box<dyn GridFunctions3D>) -> ComparisonPlotter {
+    pub fn new(
+        reference_data: Box<dyn GridFunctions3D>,
+        comparison_data: Box<dyn GridFunctions3D>,
+    ) -> ComparisonPlotter {
         if reference_data.get_data().len() != comparison_data.get_data().len() {
             panic!("Provided reference and comparison grids are unequal shapes!")
         }
-        return ComparisonPlotter { 
-            reference_data: reference_data, 
-            comparison_data: comparison_data 
-        }
+        return ComparisonPlotter {
+            reference_data: reference_data,
+            comparison_data: comparison_data,
+        };
     }
 
     /// Return traces corresponding to the parity line, and the data itself.
@@ -36,52 +43,85 @@ impl ComparisonPlotter {
         let ymax_reference = *self.reference_data.get_data().max_skipnan();
         let ymin_comparison = *self.comparison_data.get_data().min_skipnan();
         let ymax_comparison = *self.comparison_data.get_data().max_skipnan();
-        let xmin = if xmin_reference < xmin_comparison {xmin_reference} else {xmin_comparison};
-        let xmax = if xmax_reference < xmax_comparison {xmax_reference} else {xmax_comparison};
-        let ymin = if ymin_reference < ymin_comparison {ymin_reference} else {ymin_comparison};
-        let ymax = if ymax_reference < ymax_comparison {ymax_reference} else {ymax_comparison};
+        let xmin = if xmin_reference < xmin_comparison {
+            xmin_reference
+        } else {
+            xmin_comparison
+        };
+        let xmax = if xmax_reference < xmax_comparison {
+            xmax_reference
+        } else {
+            xmax_comparison
+        };
+        let ymin = if ymin_reference < ymin_comparison {
+            ymin_reference
+        } else {
+            ymin_comparison
+        };
+        let ymax = if ymax_reference < ymax_comparison {
+            ymax_reference
+        } else {
+            ymax_comparison
+        };
         // parity line trace
-        let parity_line = Scatter::new(vec![xmin, xmax], vec![ymin, ymax]).mode(Mode::Lines).show_legend(false).line(Line::new().color(NamedColor::Black));
+        let parity_line = Scatter::new(vec![xmin, xmax], vec![ymin, ymax])
+            .mode(Mode::Lines)
+            .show_legend(false)
+            .line(Line::new().color(NamedColor::Black));
         // parity scatter trace
-        let parity_scatter = Scatter::new(self.reference_data.get_data().to_owned().into_raw_vec(), self.comparison_data.get_data().to_owned().into_raw_vec()).mode(Mode::Markers).marker(Marker::new().symbol(MarkerSymbol::Cross)).show_legend(false);
+        let parity_scatter = Scatter::new(
+            self.reference_data.get_data().to_owned().into_raw_vec(),
+            self.comparison_data.get_data().to_owned().into_raw_vec(),
+        )
+        .mode(Mode::Markers)
+        .marker(Marker::new().symbol(MarkerSymbol::Cross))
+        .show_legend(false);
         let traces = vec![parity_line, parity_scatter];
-        return traces
+        return traces;
     }
 
     /// Return heatmap trace coloured by the signed difference between reference and comparison data. This data
     /// is selected perpendicular to the provided axis and located at the given index.
-    pub fn create_comparison_heatmap_traces(&self, axis: usize, index: usize) -> Vec<Box<HeatMap<f64, f64, f64>>> {
+    pub fn create_comparison_heatmap_traces(
+        &self,
+        axis: usize,
+        index: usize,
+    ) -> Vec<Box<HeatMap<f64, f64, f64>>> {
         // select what 'x' and 'y' on the heatmap are according to the axis value
-        
+
         let (xaxis, yaxis) = axis_selector(self.reference_data.to_owned(), axis);
         let (xaxis, yaxis) = meshgrid(xaxis, yaxis);
         // select the data along given axis at index location
-        let reference_data = data_selector(self.reference_data.to_owned(), axis, index);    
-        let comparison_data = data_selector(self.comparison_data.to_owned(), axis, index); 
+        let reference_data = data_selector(self.reference_data.to_owned(), axis, index);
+        let comparison_data = data_selector(self.comparison_data.to_owned(), axis, index);
         let delta: Array2<f64> = reference_data.into_owned() - comparison_data.into_owned();
-        let heatmap = HeatMap::new(flatten_2d(&xaxis).to_vec(),flatten_2d(&yaxis).to_vec(),flatten_2d(&delta).to_vec());
+        let heatmap = HeatMap::new(
+            flatten_2d(&xaxis).to_vec(),
+            flatten_2d(&yaxis).to_vec(),
+            flatten_2d(&delta).to_vec(),
+        );
         let traces = vec![heatmap];
-        return traces
+        return traces;
     }
 
     // TODO create
     // FIXME doc
-    // pub fn create_comparison_heatmap_slice_traces(&self, axis: usize, start: usize, stop: usize, step: usize) 
-    // -> Vec<Box<Surface<f64, f64, f64> 
-    // { 
+    // pub fn create_comparison_heatmap_slice_traces(&self, axis: usize, start: usize, stop: usize, step: usize)
+    // -> Vec<Box<Surface<f64, f64, f64>
+    // {
     //
     // }
     // // TODO comparison contour plot
     // // FIXME doc
     // pub fn create_comparison_contour_traces(&self)
-    //  //-> Vec<Box<Contour<f64, f64>>> 
+    //  //-> Vec<Box<Contour<f64, f64>>>
     //  {
     //
     // }
     // // TODO comparison contour plot
     // // FIXME doc
-    // pub fn create_comparison_surface_traces(&self) 
-    // //-> Vec<Box<SurfaceContours<f64, f64, f64>>> 
+    // pub fn create_comparison_surface_traces(&self)
+    // //-> Vec<Box<SurfaceContours<f64, f64, f64>>>
     // {
     //
     // }
@@ -95,14 +135,13 @@ impl ComparisonPlotter {
         let mut plot: Plot = Plot::new();
         //use local render version
         plot.use_local_plotly();
-        for trace in traces{
+        for trace in traces {
             plot.add_trace(trace);
         }
         plot.set_layout(layout);
-        if show{
+        if show {
             plot.show();
         }
-        return plot
+        return plot;
     }
-
 }

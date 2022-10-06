@@ -1,7 +1,7 @@
 ..
    File   : index.rst
    License:
-   Author : Dominik Werner <d.wer2@gmx.de>, Daniel Weston <danw2697@btinternet.com>
+   Author : Dominik Werner <d.wer2@gmx.de>, Daniel Weston <dtw545@bham.ac.uk>
    Date   : 05.01.2021
 
 =======================================================================

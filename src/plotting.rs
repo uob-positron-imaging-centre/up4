@@ -1,4 +1,4 @@
-//! Parent Module for plotting functions
+//! Module that handles plotting of particle data.
 
 use colorous::Gradient;
 use dyn_clone::{DynClone, clone_trait_object};
@@ -7,14 +7,12 @@ use crate::GridFunctions3D;
 
 use self::vector_plot::VectorPlotter;
 
-//FIXME doc
+
 pub mod vector_plot;
-/// Module for handling 2D scalar data
 pub mod scalar_plot;
-/// Module handling plots comparing 2 datasets
 pub mod comparison_plot;
 
-// FIXME doc
+/// Return plane positions perpendicular to the provided axis.
 pub fn axis_selector(grid: Box<dyn GridFunctions3D>, axis: usize) -> (Array1<f64>, Array1<f64>) {
     match axis {
         // yz view
@@ -40,17 +38,18 @@ pub fn axis_selector(grid: Box<dyn GridFunctions3D>, axis: usize) -> (Array1<f64
     };
 }
 
-// FIXME doc
+/// Return data in plane perpendicular to provided axis, at the provided index.
 pub fn data_selector(grid: Box<dyn GridFunctions3D>, axis: usize, index: usize) -> Array2<f64> {
     let selected_data: Array2<f64> = grid.get_data().index_axis(ndarray::Axis(axis), index).into_owned();
     return selected_data
 }
 
-//FIXME doc
+/// Return data in plane perpendicular to provided axis, at the provided index.
 pub fn component_data_selector(data: Array3<f64>, axis: usize, index: usize) -> Array2<f64> {
     let selected_data: Array2<f64> = data.index_axis(ndarray::Axis(axis), index).into_owned();
     return selected_data
 }
+
 /*
 // Unit tests
 #[cfg(test)]

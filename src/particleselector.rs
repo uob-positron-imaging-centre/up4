@@ -1,3 +1,5 @@
+//! Module that implements the `ParticleSelector`, a struct deciding if a particle is valid or not
+
 extern crate ndarray;
 
 use crate::print_debug;

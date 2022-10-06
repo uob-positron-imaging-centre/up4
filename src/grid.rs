@@ -18,7 +18,6 @@ pub use cylindrical_grid::CylindricalGrid3D;
 pub mod vector_grid;
 pub use vector_grid::VectorGrid;
 
-
 //mod grid2dpolar;
 //pub use grid2dpolar::Grid2DPolar;
 /// Provides a generic way to send ranges to nD-Grid struct.

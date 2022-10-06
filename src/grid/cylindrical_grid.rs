@@ -110,7 +110,7 @@ impl CylindricalGrid3D {
         let r = (pos[0] * pos[0] + pos[1] * pos[1]).sqrt();
         let theta = pos[1].atan2(pos[0]);
         let z = pos[2];
-        
+
         print_debug!("Cart to cyl: {:?}-->{:?}", pos, new_pos);
         [r, theta, z]
     }
@@ -173,8 +173,12 @@ impl GridFunctions3D for CylindricalGrid3D {
                 cell_idr = Some(idx)
             }
         }
-        let cell_idr = cell_idr.unwrap_or_else(|| panic!("Unable to find radial cell id \n pos r:{}\nlen {:?}",
-            posr, self.rpositions));
+        let cell_idr = cell_idr.unwrap_or_else(|| {
+            panic!(
+                "Unable to find radial cell id \n pos r:{}\nlen {:?}",
+                posr, self.rpositions
+            )
+        });
         let poso = pos[1];
         let cell_ido = (&self.opositions - poso)
             .iter()

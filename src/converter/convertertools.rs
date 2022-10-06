@@ -178,6 +178,5 @@ fn interpolate_step(
     pos_old: f64,
     pos_new: f64,
 ) -> f64 {
-    
     pos_old + ((pos_new - pos_old) / (time_new - time_old)) * (time_current - time_old)
 }

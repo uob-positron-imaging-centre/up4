@@ -110,9 +110,9 @@ impl CylindricalGrid3D {
         let r = (pos[0] * pos[0] + pos[1] * pos[1]).sqrt();
         let theta = pos[1].atan2(pos[0]);
         let z = pos[2];
-        let new_pos = [r, theta, z];
+        
         print_debug!("Cart to cyl: {:?}-->{:?}", pos, new_pos);
-        new_pos
+        [r, theta, z]
     }
 }
 
@@ -173,24 +173,22 @@ impl GridFunctions3D for CylindricalGrid3D {
                 cell_idr = Some(idx)
             }
         }
-        let cell_idr = cell_idr.expect(&format!(
-            "Unable to find radial cell id \n pos r:{}\nlen {:?}",
-            posr, self.rpositions
-        ));
+        let cell_idr = cell_idr.unwrap_or_else(|| panic!("Unable to find radial cell id \n pos r:{}\nlen {:?}",
+            posr, self.rpositions));
         let poso = pos[1];
         let cell_ido = (&self.opositions - poso)
             .iter()
             .map(|x| x.abs())
             .collect::<Array1<f64>>()
             .argmin()
-            .expect(&format!("Can not find min of {:?} in Gri3D", pos));
+            .unwrap_or_else(|_| panic!("Can not find min of {:?} in Gri3D", pos));
         let posz = pos[2];
         let cell_idz = (&self.zpositions - posz)
             .iter()
             .map(|z| z.abs())
             .collect::<Array1<f64>>()
             .argmin()
-            .expect(&format!("Can not find min of {:?} in Gri3D", pos));
+            .unwrap_or_else(|_| panic!("Can not find min of {:?} in Gri3D", pos));
         [cell_idr, cell_ido, cell_idz]
     }
     fn as_any(&self) -> &dyn Any {
@@ -236,9 +234,9 @@ impl GridFunctions3D for CylindricalGrid3D {
             let data_arr = data_arr.mapv(|x| if x.is_nan() { 0. } else { x });
             let weight = weight.mapv(|x| if x.is_nan() { 0. } else { x });
             result = result + &data_arr * &weight;
-            result_weight = result_weight + &weight;
+            result_weight += &weight;
         }
-        result = result / &result_weight;
+        result /= &result_weight;
         result
     }
 

@@ -4,7 +4,7 @@ pub fn get_field<T>(filename: &str,field: &str) -> Vec<T>
         T: vtkio::model::Scalar
     {
     let  vtk_file =  Vtk::import(&filename)
-        .expect(&format!("Failed to load file: {:?}", filename));
+        .unwrap_or_else(|_| panic!("Failed to load file: {:?}", filename));
     let pieces = if let DataSet::PolyData { pieces, .. } = vtk_file.data {
         pieces
     } else {
@@ -20,7 +20,7 @@ pub fn get_field<T>(filename: &str,field: &str) -> Vec<T>
          data_array
             .iter()
             .find(|&DataArrayBase { name, .. }| name == field)
-            .expect(&format!("Failed to find {} field",field))
+            .unwrap_or_else(|| panic!("Failed to find {} field",field))
             .data
             .clone()
             .cast_into::<T>()
@@ -35,7 +35,7 @@ pub fn get_positions<T>(filename: &str) -> Vec<T>
         T: vtkio::model::Scalar
     {
         let  vtk_file =  Vtk::import(&filename)
-        .expect(&format!("Failed to load file: {:?}", filename));
+        .unwrap_or_else(|_| panic!("Failed to load file: {:?}", filename));
         let pieces = if let DataSet::PolyData { pieces, .. } = &vtk_file.data {
             pieces
         } else {

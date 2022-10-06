@@ -1,0 +1,2 @@
+pydata-sphinx-theme>=0.8.0
+numpydoc>=1.4.0

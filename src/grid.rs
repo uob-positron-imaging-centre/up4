@@ -91,7 +91,7 @@ pub struct Grid<F> {
     data: Array3<F>,
 }
 impl<F> Grid<F> {
-    fn new<Sh>(shape: Sh) -> Self
+    fn new<Sh>(_shape: Sh) -> Self
     where
         Sh: ShapeBuilder + Clone,
         F: Clone + num_traits::identities::Zero,

@@ -277,11 +277,11 @@ pub trait Granular: DataManager {
     ///’’’
     ///mean_velocity = data.mean_velocity_showcase(particleselector)
     ///'''
-    fn grid_test(&mut self, selector: &ParticleSelector, grid: Box<dyn GridFunctions3D>) -> f64 {
+    fn grid_test(&mut self, selector: &ParticleSelector, _grid: Box<dyn GridFunctions3D>) -> f64 {
         let global_stats = self.global_stats();
         let timesteps = global_stats.timesteps();
         let mut mean_velocity = 0.0;
-        let mut num_counts = 0.0;
+        let num_counts = 0.0;
         for timestep in 0..timesteps - 1 {
             let timestep_data = self.get_timestep(timestep);
             let current_time = *timestep_data.time();
@@ -306,7 +306,7 @@ pub trait Granular: DataManager {
     ///’’’
     ///mean_velocity = data.mean_velocity(particleselector)
     ///'''
-    fn mean_velocity(&mut self, selector: &ParticleSelector) -> f64 {
+    fn mean_velocity(&mut self, _selector: &ParticleSelector) -> f64 {
         let global_stats = self.global_stats();
         global_stats.velocity_mag()[1]
     } //end mean velocity

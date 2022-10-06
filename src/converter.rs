@@ -1,6 +1,4 @@
 //! This file provides functionalities to convert data to HDF5 file format
-//!
-//!
 use crate::{check_signals, print_debug, setup_bar};
 use csv;
 use hdf5::File;
@@ -346,7 +344,7 @@ pub fn vtk_from_folder(
 pub fn csv_converter(
     filename: &str,
     outname: &str,
-    mut columns: Vec<i64>,
+    columns: Vec<i64>,
     delimiter: &str,
     header: bool,
     comment: &str,

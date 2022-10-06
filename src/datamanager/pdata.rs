@@ -169,7 +169,7 @@ impl PData {
                     ))
                     .slice(s![timestep])
                     .to_owned(),
-                Err(s) => {
+                Err(_s) => {
                     print_warning!(
                         "\tParticle {}: Could not find density in HDF5 file {}. \
                         Using one instead.",
@@ -233,6 +233,46 @@ impl PData {
     pub fn reset_buffer() {
         //TODO
     }
+    pub fn test(&mut self) {
+        let now = Instant::now();
+        let _time = self.global_stats_.max_time();
+        let mut v = 0.;
+        let mut n = 0;
+        let selector = ParticleSelector::new(
+            (f64::MIN, f64::MAX),
+            vec![f64::MIN, f64::MAX],
+            vec![f64::MIN, f64::MAX],
+            vec![f64::MIN, f64::MAX],
+            vec![usize::MIN, usize::MAX],
+        );
+        for timestep in 0..*self.global_stats_.timesteps() {
+            let timestep_data = self.get_timestep(timestep);
+            let _positions: &Array1<Position> = timestep_data.position();
+            let velocity: &Array2<f64> = timestep_data.velocity();
+            let radius: &Array1<f64> = timestep_data.radius();
+            let particleid: &Array1<f64> = timestep_data.particleid();
+            let clouds: &Array1<f64> = timestep_data.clouds();
+            let density: Array1<f64> = Array1::from_elem(clouds.len(), 1000.0);
+            for (id, vel) in velocity.outer_iter().enumerate() {
+                if !selector.is_valid(radius[id], clouds[id], density[id], particleid[id] as usize)
+                {
+                    continue;
+                }
+                if vel[0 as usize].is_nan() {
+                    continue;
+                }
+                v = v + vel[0 as usize].abs();
+                n += 1;
+            }
+        }
+        println!("Elapsed time: {}", now.elapsed().as_millis());
+        println!("vel: {}", v / n as f64);
+        println!(
+            "Vel from global STats: {}",
+            self.global_stats_.velocity()[[0, 1]]
+        )
+    }
+
     #[inline(never)]
     pub fn update(&mut self, mut range: (usize, usize)) {
         print_debug!("PData: Updating buffer");
@@ -330,7 +370,7 @@ impl PData {
                     ))
                     .slice(s![range.0..range.1])
                     .to_owned(),
-                Err(s) => {
+                Err(_s) => {
                     print_warning!(
                         "\tParticle {}: Could not find radius in HDF5 file {}. \
                         Using zeros instead.",
@@ -361,7 +401,7 @@ impl PData {
                     ))
                     .slice(s![range.0..range.1])
                     .to_owned(),
-                Err(s) => {
+                Err(_s) => {
                     print_warning!(
                         "\tParticle {}: Could not find density in HDF5 file {}. \
                         Using one instead.",
@@ -433,46 +473,6 @@ impl PData {
         }
         self.range = range; //(range.0,range.1-1);
         print_debug!("PData: Finished buffer update")
-    }
-
-    pub fn test(&mut self) {
-        let now = Instant::now();
-        let time = self.global_stats_.max_time();
-        let mut v = 0.;
-        let mut n = 0;
-        let selector = ParticleSelector::new(
-            (f64::MIN, f64::MAX),
-            vec![f64::MIN, f64::MAX],
-            vec![f64::MIN, f64::MAX],
-            vec![f64::MIN, f64::MAX],
-            vec![usize::MIN, usize::MAX],
-        );
-        for timestep in 0..*self.global_stats_.timesteps() {
-            let timestep_data = self.get_timestep(timestep);
-            let positions: &Array1<Position> = timestep_data.position();
-            let velocity: &Array2<f64> = timestep_data.velocity();
-            let radius: &Array1<f64> = timestep_data.radius();
-            let particleid: &Array1<f64> = timestep_data.particleid();
-            let clouds: &Array1<f64> = timestep_data.clouds();
-            let density: Array1<f64> = Array1::from_elem(clouds.len(), 1000.0);
-            for (id, vel) in velocity.outer_iter().enumerate() {
-                if !selector.is_valid(radius[id], clouds[id], density[id], particleid[id] as usize)
-                {
-                    continue;
-                }
-                if vel[0 as usize].is_nan() {
-                    continue;
-                }
-                v = v + vel[0 as usize].abs();
-                n += 1;
-            }
-        }
-        println!("Elapsed time: {}", now.elapsed().as_millis());
-        println!("vel: {}", v / n as f64);
-        println!(
-            "Vel from global STats: {}",
-            self.global_stats_.velocity()[[0, 1]]
-        )
     }
 } //end impl
 

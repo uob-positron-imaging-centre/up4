@@ -1,18 +1,18 @@
+//! Submodule handling plots comparing 2 datasets (reference ("the ground truth") and comparison data) for equality this submodule assumes that the grids containing both datasets are identically laid out.
 use ndarray_stats::QuantileExt;
 use plotly::{Scatter, Layout, HeatMap, common::{Line, Mode, Marker, MarkerSymbol}, Surface, surface::SurfaceContours, Plot, Trace, color::NamedColor};
 use crate::{GridFunctions3D, axis_selector, data_selector};
 use ndarray::prelude::*;
 use crate::utilities::maths::{meshgrid, flatten_2d};
 
-// FIXME doc
-// mention that we assume that the grid is identically positioned
+/// Comparison data handling struct.
 pub struct ComparisonPlotter {
     reference_data: Box<dyn GridFunctions3D>,
     comparison_data: Box<dyn GridFunctions3D>,
 }
 
 impl ComparisonPlotter {
-    // FIXME doc
+    /// Constructor
     pub fn new(reference_data: Box<dyn GridFunctions3D>, comparison_data: Box<dyn GridFunctions3D>) -> ComparisonPlotter {
         if reference_data.get_data().len() != comparison_data.get_data().len() {
             panic!("Provided reference and comparison grids are unequal shapes!")
@@ -23,8 +23,7 @@ impl ComparisonPlotter {
         }
     }
 
-    // FIXME doc
-    // return Scatter traces for the parity line
+    /// Return traces corresponding to the parity line, and the data itself.
     pub fn create_parity_traces(&self) -> Vec<Box<Scatter<f64, f64>>> {
         // determine the extent of the parity line
         // assign all possible values for (xmin, ymin), (xmax, ymax)
@@ -49,7 +48,8 @@ impl ComparisonPlotter {
         return traces
     }
 
-    // FIXME doc
+    /// Return heatmap trace coloured by the signed difference between reference and comparison data. This data
+    /// is selected perpendicular to the provided axis and located at the given index.
     pub fn create_comparison_heatmap_traces(&self, axis: usize, index: usize) -> Vec<Box<HeatMap<f64, f64, f64>>> {
         // select what 'x' and 'y' on the heatmap are according to the axis value
         
@@ -90,7 +90,7 @@ impl ComparisonPlotter {
         // TODO
     }
 
-    // FIXME documentation
+    /// Take created traces and plot them.
     pub fn plot(&self, traces: Vec<Box<dyn Trace>>, layout: Layout, show: bool) -> Plot {
         let mut plot: Plot = Plot::new();
         //use local render version

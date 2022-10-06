@@ -1,9 +1,11 @@
-
+//! Submodule for handling 2D scalar data.
 
 use ndarray::{Array1, Array2, Array3};
 use plotly::{HeatMap, Trace, Plot, Layout};
 use crate::{GridFunctions3D, component_data_selector};
 use crate::utilities::maths::meshgrid;
+
+/// Scalar data handling struct.
 pub struct ScalarPlotter {
     xdata: Array1<f64>,
     ydata: Array1<f64>,
@@ -12,6 +14,7 @@ pub struct ScalarPlotter {
 }
 
 impl ScalarPlotter {
+    /// Constructor
     pub fn new(grid: Box<dyn GridFunctions3D>) -> ScalarPlotter {
         let xdata: Array1<f64> = grid.get_xpositions().to_owned();
         let ydata: Array1<f64> = grid.get_ypositions().to_owned();
@@ -25,7 +28,7 @@ impl ScalarPlotter {
         }
     }
 
-    // TODO heatmap wrapping
+    /// Return heatmap trace of scalar data, perpendicular to provided axis, at the index specified.
     pub fn scalar_map_plot(&self, axis: usize, index: usize) -> Vec<Box<HeatMap<f64, f64, f64>>> {
         let (xaxis, yaxis) = self.axis_selector(axis);
         let (xaxis, yaxis) = meshgrid(xaxis, yaxis);
@@ -39,7 +42,7 @@ impl ScalarPlotter {
         
     }
 
-    //FIXME doc
+    /// Return positions of plane perpendicular to provided axis.
     fn axis_selector(&self, axis: usize) -> (Array1<f64>, Array1<f64>) {
         match axis {
             // yz view
@@ -65,7 +68,7 @@ impl ScalarPlotter {
         };
     }
 
-    // FIXME documentation
+    /// Take created traces and plot them.
     pub fn plot(&self, traces: Vec<Box<dyn Trace>>, layout: Layout, show: bool) -> Plot {
         let mut plot: Plot = Plot::new();
         //use local render version

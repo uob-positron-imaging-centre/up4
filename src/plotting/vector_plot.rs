@@ -1,11 +1,6 @@
-// FIXME doc
-//! Plots 2D quivers given a grid of arrow starting positions and corresponding vector components.
-//! 
-//! This code adapts the quiver plot code from plotly.py, improving both the speed of execution and arrow
-//! visual appearance. Like with quiver plots in Python and MATLAB, a 2D grid of x and y coordinates, and 
-//! corresponding vector components (u and v) are expected with this module. Throughout this module, the f64 type is expected.
+//! Submodule for handling 3D vector data.
+
 use derive_getters::Getters;
-use ndarray;
 use itertools::izip;
 use ndarray::prelude::*;
 use plotly::{Cone, Scatter3D, Surface};
@@ -23,9 +18,7 @@ use crate::{GridFunctions3D,  component_data_selector};
 use crate::vector_grid::VectorGrid;
 use crate::utilities::maths::{meshgrid, meshgrid3d};
 
-// FIXME documentation
-// FIXME collapse all 2D and 3D methods into this struct,
-// and the methods
+/// Vector data handling struct. The `true_norm` field contains the original vector norms, and is used for shading. Norms used for drawing arrows are not necessarily the same as they may be scaled for display reasons.
 #[derive(Getters, Clone)]
 pub struct VectorPlotter {
     xdata: Array1<f64>,
@@ -37,12 +30,9 @@ pub struct VectorPlotter {
     true_norm: Array3<f64>,
 }
 
-// FIXME documentation
-// Struct specific impls
+
 impl VectorPlotter {
-    // FIXME documentation
-    // FIXME this needs 3 grids for now
-    // assume the grid is Nx Ny 1 in size
+    /// Constructor
     pub fn new(grid: VectorGrid) -> VectorPlotter {
         let xdata: Array1<f64> = grid.get_xpositions().to_owned();
         let ydata: Array1<f64> = grid.get_ypositions().to_owned();
@@ -63,19 +53,19 @@ impl VectorPlotter {
         }
     }
 
-    // FIXME documentation
+    /// Scale all vector elements by a singular scale factor.
     pub fn scale_global(&mut self, scale_factor: f64) {
         self.udata *= scale_factor;
         self.vdata *= scale_factor;
         self.wdata *= scale_factor;
     } 
-    // FIXME documentation
+    /// Scale vector elements elementwise. Each component with the same indices will be scaled identically.
     pub fn scale_elementwise(&mut self, scale_factor:Array3<f64>) {
         self.udata = &self.udata * &scale_factor;
         self.vdata = &self.vdata * &scale_factor;
         self.wdata = &self.wdata * &scale_factor;
     }
-    // FIXME documentation
+
     /// Set minimum length for arrows.    
     pub fn bound_min(&mut self, min: f64) {
         let mut scale_factor: Array3<f64> = Array3::ones(self.udata.raw_dim());
@@ -95,7 +85,7 @@ impl VectorPlotter {
         self.vdata *= &scale_factor;
         self.wdata *= &scale_factor;
     }
-    // FIXME documentation
+
     /// Set maximum length for arrows.
     pub fn bound_max(&mut self, max: f64) {
         let mut scale_factor: Array3<f64> = Array3::ones(self.udata.raw_dim());
@@ -113,7 +103,6 @@ impl VectorPlotter {
         }
     }
 
-    // FIXME documentation
     /// Set minimum and maximum lengths for arrows.
     pub fn bound_min_max(&mut self, min: f64, max: f64) {
         let mut scale_factor: Array3<f64> = Array3::ones(self.udata.raw_dim());
@@ -137,7 +126,6 @@ impl VectorPlotter {
         self.wdata *= &scale_factor;
     }
 
-    // FIXME documentation
     // FIXME select the smallest circle for each cell so that we can handle cuboid cells
     /// Constrain all arrows to lie within circle of radius dx/2 from each node.
     /// On a non-uniform grid, this *will* distort the plot.
@@ -146,14 +134,14 @@ impl VectorPlotter {
         self.scale_global(scale_factor);
     }
 
-    // FIXME documentation
+    /// Convert vectors into unit vectors.
     pub fn normalise_vectors(&mut self) {
         self.udata/=&self.true_norm;
         self.vdata/=&self.true_norm;
         self.wdata/=&self.true_norm;
     }
 
-    // FIXME documentation
+    /// Map vector norm values to the interval [0, 1]
     pub fn normalise_colour(&self, colour_bounds: Option<(f64, f64)>) -> (Array3<f64>, f64, f64) {
         match colour_bounds {
             None => {
@@ -172,8 +160,8 @@ impl VectorPlotter {
             }
         }
     }
-    // FIXME documentation
-    // FIXME add selector and axes to use
+    
+    /// Create arrow traces for vectors.
     pub fn create_quiver_traces(&self, arrow_scale: Option<f64>, colourmap: Gradient, colour_bounds: Option<(f64, f64)>, axis: usize, index: usize) -> Vec<Box<Scatter<f64,f64>>>  {
         let (colour_vector, min, max) = self.normalise_colour(colour_bounds);
         let (barb_x, barb_y) = self.create_quiver_barbs(axis, index);
@@ -200,32 +188,8 @@ impl VectorPlotter {
         return traces
     }
 
-    // FIXME documentation
-    // FIXME rename to square plotter
-    pub fn quiver_plot(&self, traces: Vec<Box<Scatter<f64, f64>>>, layout: Layout, square: bool, axes: Vec<Option<plotly::layout::Axis>>) -> Plot {
-        let mut plot = Plot::new();
-        //use local render version
-        plot.use_local_plotly();
-        for trace in traces{
-            plot.add_trace(trace);
-        }
-        // if this is true, then perform some additional plotly calls to create a plot where the x and y axes are equal
-        if square{  
-            let mut axes_iter = axes.into_iter();
-            let x_axis: plotly::layout::Axis = axes_iter.next().unwrap().unwrap_or(plotly::layout::Axis::new());
-            let y_axis: plotly::layout::Axis = axes_iter.next().unwrap().unwrap_or(plotly::layout::Axis::new());
-            let square_layout: Layout = layout.y_axis(y_axis.anchor("x")
-            ).x_axis(x_axis.constrain(AxisConstrain::Domain));
-            plot.set_layout(square_layout);
-        } else{
-            //plot as-is
-            plot.set_layout(layout);
-        }
-        return plot
-    }
-
-    // FIXME documentation
-    // FIXME choose dims to select min and max from
+    // TODO choose dims to select min and max from
+    /// Automatically set axis limits for 2D plots.
     pub fn auto_axis_range(&self, layout: Layout, axes: Vec<plotly::layout::Axis>, dtick: f64) -> Layout {
         let xmin: f64 = self.xdata.min_skipnan() - dtick;
         let xmax: f64 = self.xdata.max_skipnan() + dtick;
@@ -239,7 +203,7 @@ impl VectorPlotter {
         return xy_auto
     }
 
-    // FIXME documentation
+    /// Create the arrow shafts.
     fn create_quiver_barbs(&self, axis: usize, index: usize) -> (Vec<(f64, f64)>, Vec<(f64, f64)>) {
         let mut barb_x = Vec::new();
         let mut barb_y = Vec::new();
@@ -255,9 +219,7 @@ impl VectorPlotter {
         }
         return (barb_x, barb_y)
     }
-    // FIXME documentation
-    // FIXME select which dims to use
-    // FIXME update
+    /// Create the arrowheads.
     fn create_quiver_arrows(&self, arrow_scale: Option<f64>, axis: usize, index: usize) -> (Vec<(f64, f64, f64)>, Vec<(f64, f64, f64)>) {
         // select the required data 
         let (x, y, u, v) = self.component_axis_selector(axis);
@@ -314,10 +276,10 @@ impl VectorPlotter {
         return (arrow_x, arrow_y)
     }
 
-    // FIXME documentation
     // TODO figure out a zero(ish) vector handling strategy
+    /// Create arrow traces, but for the data converted into unit vectors.
     pub fn create_unit_vector_traces(&mut self, arrow_scale: Option<f64>, uniform: bool, axis: usize, index: usize) -> Vec<Box<Scatter<f64, f64>>> {
-        self.normalise_vectors(); // normalise the vectors
+        self.normalise_vectors();
         if uniform{
             let dx: f64 = self.xdata[1] - self.xdata[0];
             self.bound_node(dx);
@@ -335,7 +297,8 @@ impl VectorPlotter {
         }
         return traces
     }
-    // FIXME limits
+
+    /// Create the background for the unit vector plot, coloured by norm values.
     pub fn create_unit_vector_background(&self, layout: Layout, square: bool, axes: Vec<Option<plotly::layout::Axis>>, smoothing: Option<Smoothing>, axis: usize, index: usize) -> (Box<HeatMap<f64, f64, f64>>, Layout) {
         // TODO remove the need to use bound_node() so that actual unit vectors are plotted
         // TODO ensure that the arrows fit in each cell
@@ -367,8 +330,8 @@ impl VectorPlotter {
         }
         return (heatmap, layout)
     }
-    // FIXME documentation
-    // TODO add a heatmap background to the regular plot
+
+    /// Take traces and plot them
     pub fn plot(&self, traces: Vec<Box<dyn Trace>>, layout: Layout, show: bool) -> Plot {
         let mut plot: Plot = Plot::new();
         //use local render version
@@ -521,15 +484,12 @@ impl VectorPlotter {
     }
 }
 
-// Convenience functions that act on a plotly plot
-// FIXME documentation
 /// Manually set x axis range
 pub fn axis_range_x(layout: Layout, xaxis: plotly::layout::Axis, xmin: f64, xmax:f64) -> Layout {
     let new_layout: Layout = layout.x_axis(xaxis.range(vec![xmin, xmax]));
     return new_layout
 }
 
-// FIXME documentation
 /// Manually set y axis range
 pub fn axis_range_y(layout: Layout, yaxis: plotly::layout::Axis, ymin: f64, ymax:f64) -> Layout {
     let new_layout: Layout = layout.y_axis(yaxis.range(vec![ymin, ymax]));

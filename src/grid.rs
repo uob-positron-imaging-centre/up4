@@ -1,4 +1,4 @@
-//!
+//! Module that implements nD grids and basic functionality on them.
 //! Grids implement ndarrays which hold data. This grid wrapper allows easy grid operations such as
 //! finding a special cell
 

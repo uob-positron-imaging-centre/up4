@@ -1,3 +1,4 @@
+//! Provide utilities for the rest of the crate, such as mathematical functions and enhanced functionality.
 pub mod maths;
 
 /// Generate detailed output if compiled with `feature = uPPPP_debug`

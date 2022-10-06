@@ -1,10 +1,19 @@
-
+//! Submodule for export of plotting code to Python.
 
 use itertools::izip;
 use plotly::{Layout, Plot, layout::Axis, Trace};
 use pyo3::prelude::*;
 use crate::{vector_plot::VectorPlotter, libgrid::{PyVecGrid, PyGrid}, scalar_plot::ScalarPlotter, comparison_plot::ComparisonPlotter};
 use plotly::heat_map::Smoothing;
+
+/// Class that handles plotting of vector data. This class produces 2D and 3D plots of vector data.
+/// To enable transfer of plotting from Rust to Python, the Rust backend serialises plots into JSON strings
+/// that are then parsed by up4.VectorPlotter.plot to return a plotly.graph_objects.Figure object.
+/// 
+/// Methods
+/// -------
+/// unit_vector_plot
+///     Create unit vector plot JSON string.
 #[pyclass(name="VectorPlotter")]
 pub struct PyVectorPlotter {
     plotting_string: String,
@@ -14,11 +23,16 @@ pub struct PyVectorPlotter {
 #[pymethods]
 impl PyVectorPlotter {
 
-    // TODO remove debug test string when done
+    /// Create new instance of up4.plotting.VectorPlotter class.
+    /// 
+    /// Returns
+    /// -------
+    /// up4.plotting.VectorPlotter
+    ///     Vector plotting class.
     #[new]
     fn constructor(vector_grid: &PyVecGrid) -> PyVectorPlotter {
         let plotter: VectorPlotter = VectorPlotter::new(vector_grid.grid.to_owned());
-        return PyVectorPlotter { plotting_string: String::from("this is a test string"), plotting_data: plotter }
+        return PyVectorPlotter { plotting_string: String::new(), plotting_data: plotter }
     }
 
     #[getter]
@@ -26,7 +40,14 @@ impl PyVectorPlotter {
         Ok(self.plotting_string.to_owned())
     }
 
-    // TODO offer a slice variant
+    /// Create unit vector plot JSON string. The unit vector plot is perpendicular to the provided axis and located at the index value.
+    /// 
+    /// Parameters
+    /// ----------
+    /// axis : int
+    ///     Axis that the plane is perpendicular to.
+    /// index : int
+    ///     Index along supplied `axis` to select data from.
     fn unit_vector_plot(&mut self, axis: usize, index: usize)  {
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
         let arrows = self.plotting_data.create_unit_vector_traces(None, true, axis, index);
@@ -72,12 +93,16 @@ impl PyVectorPlotter {
         
     }
 
-    fn volume_plot(&self)  {
-       
-    }
-
 }
 
+/// Class that handles plotting of scalar data. This class produces 2D and 3D plots of scalar data.
+/// To enable transfer of plotting from Rust to Python, the Rust backend serialises plots into JSON strings
+/// that are then parsed by up4.ScalarPlotter.plot to return a plotly.graph_objects.Figure object.
+/// 
+/// Methods
+/// -------
+/// scalar_map_plot
+///     Create heatmap plot JSON string.
 #[pyclass(name="ScalarPlotter")]
 pub struct PyScalarPlotter {
     plotting_string: String,
@@ -86,11 +111,17 @@ pub struct PyScalarPlotter {
 
 #[pymethods]
 impl PyScalarPlotter {
+    /// Create new instance of up4.plotting.ScalarPlotter class.
+    /// 
+    /// Returns
+    /// -------
+    /// up4.plotting.ScalarPlotter
+    ///     Scalar plotting class.
     #[new]
     fn constructor(scalar_grid: &PyGrid) -> PyScalarPlotter {
         let plotter: ScalarPlotter = ScalarPlotter::new(scalar_grid.grid.to_owned());
         return PyScalarPlotter { 
-            plotting_string: String::from("this is a test string"), 
+            plotting_string: String::new(), 
             plotting_data: plotter 
         }
     }
@@ -100,7 +131,14 @@ impl PyScalarPlotter {
         Ok(self.plotting_string.to_owned())
     }
 
-    // TODO offer slices
+    /// Create heatmap plot JSON string. The heatmap plot is perpendicular to the provided axis and located at the index value.
+    /// 
+    /// Parameters
+    /// ----------
+    /// axis : int
+    ///     Axis that the plane is perpendicular to.
+    /// index : int
+    ///     Index along supplied `axis` to select data from.
     fn scalar_map_plot(&mut self, axis: usize, index: usize) {
         let mut trace = self.plotting_data.scalar_map_plot(axis, index);
         let traces: Vec<Box<dyn Trace>> = vec![trace.pop().unwrap()];
@@ -116,8 +154,20 @@ impl PyScalarPlotter {
         
     }
 
+    fn volume_plot(&self)  {
+       
+    }
+
 }
 
+/// Class that handles plotting of comparison data. This class produces 2D plots of reference ("the ground truth") data compared against another dataset ("comparison data").
+/// To enable transfer of plotting from Rust to Python, the Rust backend serialises plots into JSON strings
+/// that are then parsed by up4.ComparisonPlotter.plot to return a plotly.graph_objects.Figure object.
+/// 
+/// Methods
+/// -------
+/// parity_plot
+///     Create parity plot JSON string.
 #[pyclass(name="ComparisonPlotter")]
 pub struct PyComparisonPlotter {
     plotting_string: String,
@@ -126,11 +176,16 @@ pub struct PyComparisonPlotter {
 
 #[pymethods]
 impl PyComparisonPlotter {
-
+    /// Create new instance of up4.plotting.ComparisonPlotter class.
+    /// 
+    /// Returns
+    /// -------
+    /// up4.plotting.ComparisonPlotter
+    ///     Comparison plotting class.
     #[new]
     fn constructor(reference_grid: &PyGrid, comparison_grid: &PyGrid) -> PyComparisonPlotter {
         let plotter: ComparisonPlotter = ComparisonPlotter::new(reference_grid.grid.to_owned(), comparison_grid.grid.to_owned());
-        return PyComparisonPlotter { plotting_string: String::from("this is a test string"), plotting_data: plotter }
+        return PyComparisonPlotter { plotting_string: String::new(), plotting_data: plotter }
     }
 
     #[getter]
@@ -138,7 +193,7 @@ impl PyComparisonPlotter {
         Ok(self.plotting_string.to_owned())
     }
 
-    // TODO offer slices
+    /// Create parity plot JSON string. This plots the comparison dataset on the x axis and reference data on the y axis. 
     fn parity_plot(&mut self) {
         let trace = self.plotting_data.create_parity_traces();
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();

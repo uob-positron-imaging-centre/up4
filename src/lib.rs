@@ -1,6 +1,6 @@
-//! The `uppp` crate provides an tool for post processing particle based data.
+//! The `upppp` crate provides an tool for post processing particle based data.
 //!
-//! in `uppp` we provide different structs allowing the accessing, processing and visualisation
+//! in `upppp` we provide different structs allowing the accessing, processing and visualisation
 //! of quantities such as the velocity vectorfield, mean-squared-displacement or
 //! dispersion.
 //!
@@ -14,14 +14,14 @@
 //!    but few particles such as [PEPT](https://www.birmingham.ac.uk/research/activity/physics/particle-nuclear/positron-imaging-centre/positron-emission-particle-tracking-pept/pept-overview.aspx)
 //! - **`TData`**: A timestep based saving of data, for simulational data from different engines such
 //!    as [LIGGGHTS](https://www.cfdem.com/liggghtsr-open-source-discrete-element-method-particle-simulation-code)
+//! 
+//! This crate also has a [Python API](../../../../index.html).
 #![allow(dead_code)]
 extern crate ndarray;
 extern crate plotly;
-/// Module that implements nD grids and basic functionality on them.
 pub mod grid;
 pub use grid::*;
 
-/// Module that implements the `ParticleSelector`, a struct deciding if a particle is valid or not
 pub mod particleselector;
 pub use particleselector::*;
 

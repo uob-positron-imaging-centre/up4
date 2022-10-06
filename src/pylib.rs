@@ -84,7 +84,7 @@ impl PyData {
                 filename
             ));
         file.close().expect("Unable to close file");
-        let mut data;
+        let data;
         if hdf5type == 0x1_i32 {
             data = PyData::from_tdata(filename)
         } else if hdf5type == 0x2_i32 {

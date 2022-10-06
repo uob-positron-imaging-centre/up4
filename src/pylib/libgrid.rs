@@ -13,18 +13,6 @@ pub struct PyGrid {
 #[pymethods]
 impl PyGrid {
     #[staticmethod]
-    fn cartesian3d_from_file(filename: &str) -> Self {
-        let grid = Box::new(grid::CartesianGrid3D::new(
-            [1, 60, 60],
-            grid::Dim::ThreeD([[0., 1.], [0., 1.], [0., 1.]]),
-        ));
-        let grid = PyGrid {
-            grid: grid, //Box::new(grid),
-        };
-        grid
-    }
-
-    #[staticmethod]
     fn cartesian3d_from_data(pydata: &PyData, cells: Vec<usize>) -> Self {
         let stats = pydata.data.global_stats();
         let dim = stats.dimensions();
@@ -41,6 +29,28 @@ impl PyGrid {
         }
     }
 
+    #[staticmethod]
+    fn cartesian3d_from_file(_filename: &str) -> Self {
+        let grid = Box::new(grid::CartesianGrid3D::new(
+            [1, 60, 60],
+            grid::Dim::ThreeD([[0., 1.], [0., 1.], [0., 1.]]),
+        ));
+        let grid = PyGrid {
+            grid: grid, //Box::new(grid),
+        };
+        grid
+    }
+
+    fn cell_positions<'py>(
+        &self,
+        _py: Python<'py>,
+    ) -> (&'py PyArray1<f64>, &'py PyArray1<f64>, &'py PyArray1<f64>) {
+        (
+            self.grid.get_xpositions().to_owned().into_pyarray(_py),
+            self.grid.get_ypositions().to_owned().into_pyarray(_py),
+            self.grid.get_zpositions().to_owned().into_pyarray(_py),
+        )
+    }
     #[staticmethod]
     fn cylindrical3d(cells: Vec<usize>, limit: Vec<f64>, mode: &str) -> Self {
         if cells.len() != 3 {
@@ -63,6 +73,7 @@ impl PyGrid {
         };
         grid
     }
+
     #[args(mode = "\"volume\"")]
     #[staticmethod]
     fn cylindrical3d_from_data(pydata: &PyData, cells: Vec<usize>, mode: &str) -> Self {
@@ -82,14 +93,8 @@ impl PyGrid {
         }
     }
 
-    // return shape of the data grid
-    fn shape(&self) -> Vec<usize> {
-        self.grid.get_cells().to_vec()
-    }
-
-    //return the data
-    fn to_numpy<'py>(&self, _py: Python<'py>) -> &'py PyArray3<f64> {
-        self.grid.get_data().to_owned().into_pyarray(_py)
+    fn is_inside(&self, position: Vec<f64>) -> bool {
+        self.grid.is_inside([position[0], position[1], position[2]])
     }
 
     // plot using plotly
@@ -124,18 +129,13 @@ impl PyGrid {
         plot.add_trace(trace);
         plot.show()
     }
-    fn is_inside(&self, position: Vec<f64>) -> bool {
-        self.grid.is_inside([position[0], position[1], position[2]])
+    // return shape of the data grid
+    fn shape(&self) -> Vec<usize> {
+        self.grid.get_cells().to_vec()
     }
-    fn cell_positions<'py>(
-        &self,
-        _py: Python<'py>,
-    ) -> (&'py PyArray1<f64>, &'py PyArray1<f64>, &'py PyArray1<f64>) {
-        (
-            self.grid.get_xpositions().to_owned().into_pyarray(_py),
-            self.grid.get_ypositions().to_owned().into_pyarray(_py),
-            self.grid.get_zpositions().to_owned().into_pyarray(_py),
-        )
+    //return the data
+    fn to_numpy<'py>(&self, _py: Python<'py>) -> &'py PyArray3<f64> {
+        self.grid.get_data().to_owned().into_pyarray(_py)
     }
 }
 

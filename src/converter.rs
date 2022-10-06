@@ -109,12 +109,6 @@ pub fn vtk(
             panic!("Vtk files are not sorted into the correct order!");
         }
         time[1] = current_time;
-        let builder = group
-            .new_dataset::<f64>()
-            .create("time")
-            .unwrap()
-            .write_scalar(&current_time)
-            .unwrap();
         // VTK data reading
         print_debug!("Recieving data from VTKio and creating datasets");
         let particle_id = vtktools::get_field::<u64>(filename, "id");
@@ -294,7 +288,7 @@ pub fn vtk(
 ///)
 ///'''
 pub fn vtk_from_folder(
-    mut folder: &str,
+    folder: &str,
     timestep: f64,
     outname: &str,
     filter: &str, // example r"vtk_(\d+).vtk"

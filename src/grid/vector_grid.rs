@@ -24,7 +24,7 @@ impl VectorGrid {
         }
         VectorGrid {
             data: [grid.clone(), grid.clone(), grid.clone()],
-            cyl_grid: cyl_grid,
+            cyl_grid,
         }
     }
 
@@ -101,7 +101,7 @@ impl std::fmt::Display for VectorGrid {
 }
 
 impl GridFunctions3D for VectorGrid {
-    fn get_value(&self, pos: Position) -> f64 {
+    fn get_value(&self, _pos: Position) -> f64 {
         unimplemented!()
     }
 
@@ -153,7 +153,7 @@ impl GridFunctions3D for VectorGrid {
         Box::new(VectorGrid::new(self.data[0].new_zeros()))
     }
 
-    fn collapse(&self, axis: usize) -> Array2<f64> {
+    fn collapse(&self, _axis: usize) -> Array2<f64> {
         unimplemented!()
     }
     //slice

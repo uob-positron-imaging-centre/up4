@@ -13,10 +13,10 @@ pub fn interpolate(data: ndarray::Array2<f64>) -> ndarray::Array2<f64> {
     .with_key("per_sec", |state| format!("{:.1} steps/s", state.per_sec()))
     .progress_chars("#>-"));*/
     let bar = setup_bar!("Interpolate", data.column(0).len());
-    let time: ArrayView1<f64> = data.slice(ndarray::s![.., 0 as usize]);
-    let x: ArrayView1<f64> = data.slice(ndarray::s![.., 1 as usize]);
-    let y: ArrayView1<f64> = data.slice(ndarray::s![.., 2 as usize]);
-    let z: ArrayView1<f64> = data.slice(ndarray::s![.., 3 as usize]);
+    let time: ArrayView1<f64> = data.slice(ndarray::s![.., 0_usize]);
+    let x: ArrayView1<f64> = data.slice(ndarray::s![.., 1_usize]);
+    let y: ArrayView1<f64> = data.slice(ndarray::s![.., 2_usize]);
+    let z: ArrayView1<f64> = data.slice(ndarray::s![.., 3_usize]);
     let maxtime = time[time.len() - 1];
     let timesteps = time.len();
     let dt = maxtime / timesteps as f64;
@@ -42,14 +42,14 @@ pub fn interpolate(data: ndarray::Array2<f64>) -> ndarray::Array2<f64> {
         real_step = {
             // if the temporal distance between new time and old time is smaller
             // then distance between new time and next time return old timestep
-            if !(real_step >= time.len() - 1) {
+            if real_step < time.len() - 1 {
                 let old_time = time[real_step];
                 let new_time = time[real_step + 1];
 
                 if (time_new - old_time).abs() < (time_new - new_time).abs() {
                 } else {
                     real_step += 1;
-                    if !(real_step >= time.len() - 1) {
+                    if real_step < time.len() - 1 {
                         let old_time = time[real_step];
                         let new_time = time[real_step + 1];
 
@@ -178,7 +178,6 @@ fn interpolate_step(
     pos_old: f64,
     pos_new: f64,
 ) -> f64 {
-    let pos_current =
-        pos_old + ((pos_new - pos_old) / (time_new - time_old)) * (time_current - time_old);
-    pos_current
+    
+    pos_old + ((pos_new - pos_old) / (time_new - time_old)) * (time_current - time_old)
 }

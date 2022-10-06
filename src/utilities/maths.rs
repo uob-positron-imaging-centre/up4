@@ -5,10 +5,10 @@ pub fn minmax(arr: &Array1<f64>) -> (f64, f64) {
     let mut max = f64::MIN;
     for value in arr.iter() {
         if value > &max {
-            max = value.clone();
+            max = *value;
         }
         if value < &min {
-            min = value.clone();
+            min = *value;
         }
     }
     (min, max)
@@ -27,7 +27,7 @@ pub fn meshgrid(
             yy[[idx, idy]] = y[idy];
         }
     }
-    return (xx, yy)
+    (xx, yy)
 }
 
 pub fn meshgrid3d(x: ndarray::Array1<f64>,
@@ -45,7 +45,7 @@ pub fn meshgrid3d(x: ndarray::Array1<f64>,
                 }
             }
         }
-        return (xx, yy, zz)
+        (xx, yy, zz)
     }
 
 /// Flattens a 2D array into a 1D array. 

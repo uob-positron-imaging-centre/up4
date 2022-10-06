@@ -1,6 +1,6 @@
-*****
+*********
 Tutorials
-*****
+*********
 The usual workflow in up4 consists of 4 steps: Converting, Generating grids, Analysis, and Plotting or short CGAP.
 This tutorial will go through each element in CGAP and explain what it does and how to use it.
 
@@ -126,7 +126,7 @@ Data analysis is done by methods of the :code:`up4.Data` class. The most importa
 
 - :code:`up4.Data.vectorfield`: Calculates the velocity vector field of the data
 - :code:`up4.Data.velocityfield`: Calculates the magnitude velocity field of the data
-- :code:`up4.Data.numbersfield`: Calculates the number field of the data
+- :code:`up4.Data.numberfield`: Calculates the number field of the data
 
 
 .. code-block:: python
@@ -150,6 +150,30 @@ The velocity field in this example can also be calculated in cylindrical coordin
 Plotting
 --------
 
-for mr Weston
+Plotting is done by one of the classes in :code:`up4.plotting`. These are:
+
+- :code:`up4.plotting.VectorPlotter`: Calculates the velocity vector field of the data
+- :code:`up4.plotting.ScalarPlotter`: Calculates the magnitude velocity field of the data
+- :code:`up4.plotting.ComparisonPlotter`: Calculates the number field of the data
+
+If we reuse the example from above, plotting can be done by adding the following lines:
+
+.. code-block:: python
+
+    from up4.plotting import VectorPlotter, ScalarPlotter
+    dpi = 600 # nice quality image saving
+    axis = 1 # look along y-axis
+    index = 4
+    vector_field = data.vector_field(grid) # for vector plotting
+    
+    # plot vector field
+    vec_field_plotter = VectorPlotter(vector_field)
+    vec_field_plotter.unit_vector_plot(vector_field)
+    vec_fig = vec_field_plotter.plot()
+
+Which, if used on the `tests/fixtures/drum.hdf5` file, looks a little like this:
+
+.. image:: ../_static/unitv.png
+
 
 

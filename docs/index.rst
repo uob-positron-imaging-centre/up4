@@ -16,11 +16,9 @@ Has this ever happened to you:
 Fear not, this is *precisely* the aim of UPPPP, the Universal Post Processor for Particulate Processes!
 
 |CI|
-..
-   .. |CI| image::  https://img.shields.io/github/workflow/status/uob-positron-imaging-centre/up4/main?logo=github&style=flat-square&maxAge=600
-   :target: https://github.com/uob-positron-imaging-centre/up4
-   make badge on https://shields.io/category/build
 
+.. |CI| image::  https://github.com/uob-positron-imaging-centre/up4/actions/workflows/main.yaml/badge.svg
+   :target: https://github.com/uob-positron-imaging-centre/up4/actions/workflows/main.yaml
 
 Indices and tables
 ==================

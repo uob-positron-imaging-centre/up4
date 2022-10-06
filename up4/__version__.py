@@ -4,7 +4,7 @@
 #Time    :   2022/01/05 22:51:50
 #Author  :   Dominik Werner, Daniel Weston
 #Version :   0.1.0
-#Contact :   d.wer2@gmx.de, danw2697@btinternet.com
+#Contact :   d.wer2@gmx.de, dtw545@bham.ac.uk
 #Licence :   GNU v3.0
 #Desc    :   None
 

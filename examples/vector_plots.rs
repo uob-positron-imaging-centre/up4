@@ -80,7 +80,7 @@ fn unit_vector_2d(){
     }
     traces.push(heatmap.color_scale(color_scale).zmax(1.).zmin(0.).color_bar(color_bar));
     let show: bool = true;
-    let plot: Plot = arrows.plot(traces, layout, show);
+    let _plot: Plot = arrows.plot(traces, layout, show);
     
 }
 

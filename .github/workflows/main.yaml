@@ -46,7 +46,6 @@ jobs:
           [ "${{runner.os}}" != "Windows" ] && export RUSTFLAGS="-C link-args=-Wl,-rpath,$CONDA_PREFIX/lib"
           cargo clean
           cargo check
-          cargo install ripgrep
       - name: Install Python requirements
         run: |
           pwd
@@ -64,3 +63,6 @@ jobs:
         run: |
           export LD_LIBRARY_PATH="$CONDA_PREFIX/lib"
           python3 -m pytest tests/test_all.py
+  docs:
+    uses: ./.github/workflows/pages.yaml
+    needs: conda

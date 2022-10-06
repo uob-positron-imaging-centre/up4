@@ -7,10 +7,7 @@ extern crate ndarray;
 //extern crate ndarray_linalg;
 extern crate numpy;
 
-use crate::{
-    grid::{GridFunctions3D},
-    ParticleSelector, Selector,
-};
+use crate::{grid::GridFunctions3D, ParticleSelector, Selector};
 use ndarray::prelude::*;
 pub trait Granular: DataManager {
     /// Calculate a 2D velocity vectorfield across `grid`, optionally normalising values to 1.

@@ -14,7 +14,7 @@
 //!    but few particles such as [PEPT](https://www.birmingham.ac.uk/research/activity/physics/particle-nuclear/positron-imaging-centre/positron-emission-particle-tracking-pept/pept-overview.aspx)
 //! - **`TData`**: A timestep based saving of data, for simulational data from different engines such
 //!    as [LIGGGHTS](https://www.cfdem.com/liggghtsr-open-source-discrete-element-method-particle-simulation-code)
-//! 
+//!
 //! This crate also has a [Python API](../../../../index.html).
 #![allow(dead_code)]
 extern crate ndarray;

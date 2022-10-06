@@ -17,13 +17,11 @@ pub mod functions;
 pub mod utilities;
 
 use datamanager::tdata::TData;
-use datamanager::{DataManager};
+use datamanager::DataManager;
 use functions::Granular;
 pub mod types;
 
-use std::time::{Instant};
-
-
+use std::time::Instant;
 
 use plotly::{HeatMap, Plot};
 

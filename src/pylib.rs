@@ -10,41 +10,41 @@ pub mod libconv;
 pub mod libgrid;
 pub mod libplot;
 use crate::datamanager::{Manager, PData, TData};
-use libplot::*;
 use libconv::*;
 use libgrid::*;
+use libplot::*;
 
 /// Class that holds the particle data for processing, if you have simulation data, you will *probably*
-/// want to use ``Data.from_pdata()`` to instantiate this class as this handles a large number of particles. 
-/// For experimental data, ``Data.from_tdata()`` is recommended. However, as the choice ultimately makes no 
+/// want to use ``Data.from_pdata()`` to instantiate this class as this handles a large number of particles.
+/// For experimental data, ``Data.from_tdata()`` is recommended. However, as the choice ultimately makes no
 /// difference to how you use this library, that choice is down to you!
-/// 
+///
 /// Methods
 /// -------
 /// from_pdata:
-///     Constructor for up4.Data using data that has large numbers of particles, typically from simulation. 
-/// 
+///     Constructor for up4.Data using data that has large numbers of particles, typically from simulation.
+///
 /// from_tdata:
 ///     Constructor for up4.Data using data that has low numbers of particles, typically from experiment.
-/// 
+///
 /// stats:
 ///     Calculate statistics of the dataset such as dimensions, mean velocity and number of particles.
-/// 
+///
 /// set_time:
 ///     Select the dataset between two times.
-/// 
-/// vectorfield: 
+///
+/// vectorfield:
 ///     Return vector data as a vector field.
-/// 
+///
 /// velocityfield:
 ///     Return the velocity data as a velocity field.
-/// 
+///
 /// extract:
 ///     Return particle information over specified duration.
-/// 
+///
 /// numberfield:
 ///     Return the number density field.
-/// 
+///
 /// mean_velocity:
 ///     Return the mean velocity of all valid particles in the system.
 #[pyclass(name = "Data")]
@@ -56,12 +56,12 @@ struct PyData {
 #[pymethods]
 impl PyData {
     /// Create new instance of up4.Data class. Time or particle oriented formats are parsed automatically.
-    /// 
+    ///
     /// Parameters
     /// ----------
     /// filename : str
     ///     Filename of hdf5 dataset.
-    /// 
+    ///
     /// Returns
     /// -------
     /// up4.Data
@@ -96,16 +96,16 @@ impl PyData {
     }
 
     /// Create new instance of the up4.Data class. This method assumes a particle oriented hdf5 file.
-    /// 
+    ///
     /// Parameters
     /// ----------
     /// filename : str
     ///     Filename of hdf5 dataset.
-    /// 
+    ///
     /// Returns
     /// -------
     /// up4.Data
-    ///     Data class 
+    ///     Data class
     #[staticmethod]
     fn from_pdata(filename: &str) -> Self {
         let pdata = PData::new(filename);
@@ -117,16 +117,16 @@ impl PyData {
     }
 
     /// Create new instance of the Data class. This method assumes a time oriented hdf5 file.
-    /// 
+    ///
     /// Parameters
     /// ----------
     /// filename : str
     ///     Filename of hdf5 dataset.
-    /// 
+    ///
     /// Returns
     /// -------
     /// up4.Data
-    ///     Data class 
+    ///     Data class
     #[staticmethod]
     fn from_tdata(filename: &str) -> Self {
         let tdata = TData::new(filename);
@@ -142,13 +142,13 @@ impl PyData {
     /// * Maximum time.
     /// * Number of particles.
     /// * Mean velocity.
-    /// * Minimum and maximum velocity. 
+    /// * Minimum and maximum velocity.
     fn stats<'py>(&self, _py: Python<'py>) {
         self.data.stats();
     }
 
     /// Select the dataset between two different times.
-    /// 
+    ///
     /// Parameters
     /// ----------
     /// min_time : float
@@ -167,12 +167,12 @@ impl PyData {
     }
 
     /// Return vector data as a vector field.
-    /// 
+    ///
     /// Parameters
     /// ----------
     /// grid : up4.Grid
     ///     Grid class containing the grid layout.
-    /// 
+    ///
     /// Returns
     /// -------
     /// up4.VectorGrid
@@ -188,12 +188,12 @@ impl PyData {
     }
 
     /// Return the velocity data as a velocity field of their norms.
-    /// 
+    ///
     /// Parameters
     /// ----------
     /// grid : up4.Grid
     ///      Grid class containing the grid layout.
-    /// 
+    ///
     /// Returns
     /// -------
     /// up4.Grid
@@ -211,14 +211,14 @@ impl PyData {
     }
 
     /// Return particle information over specified duration.
-    /// 
+    ///
     /// Parameters
     /// ----------
     /// particle_id : int
     ///     Particle ID.
     /// timestep : tuple[int, int]
     ///     Start and end timesteps for particle selection.
-    /// 
+    ///
     /// Returns
     /// -------
     /// numpy.ndarray
@@ -233,12 +233,12 @@ impl PyData {
     }
 
     /// Return the number density field.
-    /// 
+    ///
     /// Parameters
     /// ----------
     /// grid : up4.Grid
     ///     Grid class containing the grid layout.
-    /// 
+    ///
     /// Returns
     /// -------
     /// up4.Grid
@@ -256,7 +256,7 @@ impl PyData {
     }
 
     /// Return the mean velocity of all valid particles in the system.
-    /// 
+    ///
     /// Returns
     /// -------
     /// float
@@ -343,7 +343,7 @@ impl pyo3::PyObjectProtocol for PyData {
 fn upppp_rust(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<PyData>()?;
     m.add_class::<PyGrid>()?;
-    m.add_class::<PyConverter>()?;  
+    m.add_class::<PyConverter>()?;
     m.add_class::<PyVectorPlotter>()?;
     m.add_class::<PyScalarPlotter>()?;
     m.add_class::<PyComparisonPlotter>()?;

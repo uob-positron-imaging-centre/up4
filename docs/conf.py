@@ -72,7 +72,10 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
+    'sphinx_copybutton'
 ]
+# copy python snippets with no hassle
+copybutton_prompt_text = ">>> "
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -184,7 +187,7 @@ html_theme_options = {
 html_context = {
     "github_user": "uob-positron-imaging-centre",
     "github_repo": "up4",
-    "github_version": "DanW-dev",
+    "github_version": "uPPPP",
 }
 
 html_sidebars = {
@@ -203,7 +206,7 @@ html_static_path = ['_static']
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
 # directly to the root of the documentation.
-# html_extra_path = []
+#html_extra_path =
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -308,5 +311,6 @@ latex_documents = [
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3/', None),
     'numpy': ('https://numpy.org/devdocs/', None),
-    'sklearn': ('https://scikit-learn.org/stable/', None),
+    'plotly': ('https://plotly.com/python-api-reference/', None),
+
 }

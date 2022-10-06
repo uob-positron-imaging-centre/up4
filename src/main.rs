@@ -4,7 +4,7 @@ mod datamanager;
 /// Module that implements nD grids and basic functionality on them.
 pub mod grid;
 pub use grid::Dim;
-use grid::{CartesianGrid3D, CylindricalGrid3D, GridFunctions3D};
+use grid::{CartesianGrid3D, CylindricalGrid3D};
 
 /// Module that implements the `ParticleSelector`, a struct deciding if a particle is valid or not
 pub mod particleselector;

@@ -1,6 +1,6 @@
 //! Submodule handling plots comparing 2 datasets (reference ("the ground truth") and comparison data) for equality this submodule assumes that the grids containing both datasets are identically laid out.
 use ndarray_stats::QuantileExt;
-use plotly::{Scatter, Layout, HeatMap, common::{Line, Mode, Marker, MarkerSymbol}, Surface, surface::SurfaceContours, Plot, Trace, color::NamedColor};
+use plotly::{Scatter, Layout, HeatMap, common::{Line, Mode, Marker, MarkerSymbol}, Plot, Trace, color::NamedColor};
 use crate::{GridFunctions3D, axis_selector, data_selector};
 use ndarray::prelude::*;
 use crate::utilities::maths::{meshgrid, flatten_2d};
@@ -66,30 +66,30 @@ impl ComparisonPlotter {
 
     // TODO create
     // FIXME doc
-    pub fn create_comparison_heatmap_slice_traces(&self, axis: usize, start: usize, stop: usize, step: usize) 
-    //-> Vec<Box<Surface<f64, f64, f64> 
-    { 
-
-    }
-    // TODO comparison contour plot
-    // FIXME doc
-    pub fn create_comparison_contour_traces(&self)
-     //-> Vec<Box<Contour<f64, f64>>> 
-     {
-        
-    }
-    // TODO comparison contour plot
-    // FIXME doc
-    pub fn create_comparison_surface_traces(&self) 
-    //-> Vec<Box<SurfaceContours<f64, f64, f64>>> 
-    {
-
-    }
-    // FIXME doc
-    pub fn auto_axis_range(&self) {
-        // TODO
-    }
-
+    // pub fn create_comparison_heatmap_slice_traces(&self, axis: usize, start: usize, stop: usize, step: usize) 
+    // -> Vec<Box<Surface<f64, f64, f64> 
+    // { 
+    //
+    // }
+    // // TODO comparison contour plot
+    // // FIXME doc
+    // pub fn create_comparison_contour_traces(&self)
+    //  //-> Vec<Box<Contour<f64, f64>>> 
+    //  {
+    //
+    // }
+    // // TODO comparison contour plot
+    // // FIXME doc
+    // pub fn create_comparison_surface_traces(&self) 
+    // //-> Vec<Box<SurfaceContours<f64, f64, f64>>> 
+    // {
+    //
+    // }
+    // // FIXME doc
+    // pub fn auto_axis_range(&self) {
+    // // TODO
+    // }
+    //
     /// Take created traces and plot them.
     pub fn plot(&self, traces: Vec<Box<dyn Trace>>, layout: Layout, show: bool) -> Plot {
         let mut plot: Plot = Plot::new();

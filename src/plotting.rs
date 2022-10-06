@@ -1,12 +1,8 @@
 //! Module that handles plotting of particle data.
 
-use colorous::Gradient;
-use dyn_clone::{DynClone, clone_trait_object};
+
 use ndarray::{Array1, Array2, Array3};
 use crate::GridFunctions3D;
-
-use self::vector_plot::VectorPlotter;
-
 
 pub mod vector_plot;
 pub mod scalar_plot;

@@ -167,7 +167,7 @@ impl VectorPlotter {
         let (barb_x, barb_y) = self.create_quiver_barbs(axis, index);
         let (arrow_x, arrow_y) = self.create_quiver_arrows(arrow_scale, axis, index);
         let mut traces = Vec::new();
-        let mut colour_elements: Vec<ColorScaleElement> = Vec::new();
+        let colour_elements: Vec<ColorScaleElement> = Vec::new();
         //unpack the vectors of arrow barbs and heads into new vector containing each arrow as a tuple
         for (x_line, y_line, x_head, y_head, c) in izip!(barb_x, barb_y, arrow_x, arrow_y, colour_vector) {
             let xpl: Vec<f64> = vec![x_line.0, x_line.1, x_head.0, x_head.1, x_head.2 ];
@@ -347,14 +347,14 @@ impl VectorPlotter {
     }
 
     // TODO create
-    fn quiver_slices(&self, nevery: usize,  traces: Vec<Box<Scatter<f64, f64>>>, layout: Layout, square: bool, axes: Vec<Option<Axis>>) {
+    //fn quiver_slices(&self, nevery: usize,  traces: Vec<Box<Scatter<f64, f64>>>, layout: Layout, square: bool, axes: Vec<Option<Axis>>) {
         
-    }
+    //}
 
     // TODO create
-    fn save(&self, plot: Plot, filename: &str, dpi: usize) {
+    //fn save(&self, plot: Plot, filename: &str, dpi: usize) {
         
-    }
+    //}
 
     // FIXME doc
     // range is [start, stop, step]
@@ -391,7 +391,7 @@ impl VectorPlotter {
         let mut traces = Vec::new();
         for index in (range[0]..range[1]).step_by(range[2]) {
             // select data
-            let (x, y, _ ,_) = self.component_axis_selector(axis);
+            let (x, _y, _ ,_) = self.component_axis_selector(axis);
             let norm: Array2<f64> = component_data_selector(self.true_norm.to_owned(), axis, index);
             let xpl: Vec<f64> = x.to_owned().into_raw_vec();
             let mut ypl: Array1<f64> = Array1::ones(x.len());
@@ -409,8 +409,8 @@ impl VectorPlotter {
         return traces
     }
 
-    fn create_cone_traces(&self, arrow_scale: Option<f64>, colour: Gradient, colour_bounds: Option<(f64, f64)>) -> Vec<Box<Cone<f64,f64,f64,f64,f64,f64>>> {
-        let (colour_vector, min, max) = self.normalise_colour(colour_bounds);
+    fn create_cone_traces(&self, colour_bounds: Option<(f64, f64)>) -> Vec<Box<Cone<f64,f64,f64,f64,f64,f64>>> {
+        let (_colour_vector, _min, _max) = self.normalise_colour(colour_bounds);
         let (x, y, z) = meshgrid3d(self.xdata.to_owned(), self.ydata.to_owned(), self.zdata.to_owned());
         let x: Vec<f64> = x.into_raw_vec();
         let y: Vec<f64> = y.into_raw_vec();

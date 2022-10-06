@@ -1,6 +1,6 @@
 //! Submodule for handling 2D scalar data.
 
-use ndarray::{Array1, Array2, Array3};
+use ndarray::{Array1, Array3};
 use plotly::{HeatMap, Trace, Plot, Layout};
 use crate::{GridFunctions3D, component_data_selector};
 use crate::utilities::maths::meshgrid;
@@ -14,34 +14,6 @@ pub struct ScalarPlotter {
 }
 
 impl ScalarPlotter {
-    /// Constructor
-    pub fn new(grid: Box<dyn GridFunctions3D>) -> ScalarPlotter {
-        let xdata: Array1<f64> = grid.get_xpositions().to_owned();
-        let ydata: Array1<f64> = grid.get_ypositions().to_owned();
-        let zdata: Array1<f64> = grid.get_zpositions().to_owned();
-        let scalar_data: Array3<f64> = grid.get_data().to_owned();
-        return ScalarPlotter { 
-            xdata: xdata, 
-            ydata: ydata, 
-            zdata: zdata, 
-            scalar_data: scalar_data, 
-        }
-    }
-
-    /// Return heatmap trace of scalar data, perpendicular to provided axis, at the index specified.
-    pub fn scalar_map_plot(&self, axis: usize, index: usize) -> Vec<Box<HeatMap<f64, f64, f64>>> {
-        let (xaxis, yaxis) = self.axis_selector(axis);
-        let (xaxis, yaxis) = meshgrid(xaxis, yaxis);
-        let plot_data = component_data_selector(self.scalar_data.to_owned(), axis, index);
-        let heatmap = HeatMap::new(xaxis.into_raw_vec(), yaxis.into_raw_vec(), plot_data.into_raw_vec());
-        let trace = vec![heatmap];
-        return trace
-    }
-    // TODO contour wrapping
-    pub fn scalar_contour_plot(&self, axis: usize, index: usize)  {
-        
-    }
-
     /// Return positions of plane perpendicular to provided axis.
     fn axis_selector(&self, axis: usize) -> (Array1<f64>, Array1<f64>) {
         match axis {
@@ -68,6 +40,24 @@ impl ScalarPlotter {
         };
     }
 
+    /// Constructor
+    pub fn new(grid: Box<dyn GridFunctions3D>) -> ScalarPlotter {
+        let xdata: Array1<f64> = grid.get_xpositions().to_owned();
+        let ydata: Array1<f64> = grid.get_ypositions().to_owned();
+        let zdata: Array1<f64> = grid.get_zpositions().to_owned();
+        let scalar_data: Array3<f64> = grid.get_data().to_owned();
+        return ScalarPlotter { 
+            xdata: xdata, 
+            ydata: ydata, 
+            zdata: zdata, 
+            scalar_data: scalar_data, 
+        }
+    }
+    // TODO contour wrapping
+    //pub fn scalar_contour_plot(&self, axis: usize, index: usize)  {
+        
+    //}
+
     /// Take created traces and plot them.
     pub fn plot(&self, traces: Vec<Box<dyn Trace>>, layout: Layout, show: bool) -> Plot {
         let mut plot: Plot = Plot::new();
@@ -81,6 +71,16 @@ impl ScalarPlotter {
             plot.show();
         }
         return plot
+    }
+
+    /// Return heatmap trace of scalar data, perpendicular to provided axis, at the index specified.
+    pub fn scalar_map_plot(&self, axis: usize, index: usize) -> Vec<Box<HeatMap<f64, f64, f64>>> {
+        let (xaxis, yaxis) = self.axis_selector(axis);
+        let (xaxis, yaxis) = meshgrid(xaxis, yaxis);
+        let plot_data = component_data_selector(self.scalar_data.to_owned(), axis, index);
+        let heatmap = HeatMap::new(xaxis.into_raw_vec(), yaxis.into_raw_vec(), plot_data.into_raw_vec());
+        let trace = vec![heatmap];
+        return trace
     }
 }
 

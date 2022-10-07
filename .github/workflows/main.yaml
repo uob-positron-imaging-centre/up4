@@ -21,7 +21,7 @@ jobs:
         include:
           #- {os: macos, version: 1.12.0, channel: conda-forge, rust: stable}
           #- {os: windows, version: 1.12.0, channel: conda-forge, rust: stable}
-          - {os: ubuntu, version: 1.12.0, channel: conda-forge, rust: stable}
+          - {os: ubuntu, version: 1.12.0, channel: conda-forge, rust: stable, python-version: 3.9}
     defaults:
       run:
         shell: bash -l {0}
@@ -32,9 +32,17 @@ jobs:
       - name: Install Rust (${{matrix.rust}})
         uses: actions-rs/toolchain@v1
         with: {toolchain: '${{matrix.rust}}', profile: minimal, override: true}
+      - uses: "actions/checkout@v2"
+      - name: "Install miniconda"
+        run: |
+          if [[ ! -z $INSTALL_MINICONDA ]]; then source .github/workflows/install_miniconda.sh; fi
       - name: Install conda
         uses: conda-incubator/setup-miniconda@v2
-        with: {auto-update-conda: false, activate-environment: testenv}
+        with:
+          auto-update-conda: true
+          python-version: "${{ matrix.python-version }}"
+          channels: "conda-forge,anaconda"
+          activate-environment: testenv
       - name: Install HDF5 (${{matrix.version}}${{matrix.mpi && '-' || ''}}${{matrix.mpi}})
         run: |
           [ "${{matrix.mpi}}" != "" ] && MPICC_PKG=${{matrix.mpi}}-mpicc
@@ -45,34 +53,46 @@ jobs:
           export PYO3_PYTHON=python3
           [ "${{runner.os}}" != "Windows" ] && export RUSTFLAGS="-C link-args=-Wl,-rpath,$CONDA_PREFIX/lib"
           cargo clean
-          cargo check
-      - name: Install Python requirements
+        #cargo check
+      - name: "Install dependencies"
         run: |
           pwd
           export HDF5_DIR="$CONDA_PREFIX"
           export PYO3_PYTHON=python3
+          which python
+          python -VV
+          python -m site
+          python -m pip install --upgrade pip setuptools
           [ "${{runner.os}}" != "Windows" ] && export RUSTFLAGS="-C link-args=-Wl,-rpath,$CONDA_PREFIX/lib"
-          python3 -m pip install --upgrade pip
           python3 -m pip install -r requirements_test.txt
       - name: Install up4 on python
         run: |
           export HDF5_DIR="$CONDA_PREFIX"
           export PYO3_PYTHON=python3
           python3 -m pip install .
+          python3 -c "import up4"
+          python3 -c "import upppp_rust; print(upppp_rust.__file__)"
       - name: Run tests
         run: |
           export LD_LIBRARY_PATH="$CONDA_PREFIX/lib"
-          python3 -m pytest tests/test_all.py
+          python3 -c "import up4; print(up4.__file__)"
+      #    python3 -m pytest tests/test_all.py
 
       - name: Setup Sphinx
         run: |
           conda install -y -c ${{matrix.channel}} --file docs/requirements.txt
-      - name: Generate Rust docs
-        run: |
-          cargo doc --no-deps --target-dir docs/_static/
+      #- name: Generate Rust docs
+      #  run: |
+      #    export HDF5_DIR="$CONDA_PREFIX"
+      #    cargo doc --no-deps --target-dir docs/_static/
       - name: Build HTML
         run: |
+          pwd
+          export HDF5_DIR="$CONDA_PREFIX"
+          export PYO3_PYTHON=python3
+          export LD_LIBRARY_PATH="$CONDA_PREFIX/lib"
           cd docs
+          python3 -c "import up4; print(up4.__file__)"
           make html
       - name: Upload artifacts
         uses: actions/upload-artifact@v2
@@ -85,4 +105,4 @@ jobs:
         with:
           branch: gh-pages
           folder: docs/build/html
-        
+

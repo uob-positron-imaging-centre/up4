@@ -34,6 +34,16 @@
 
 import os
 import sys
+_HERE = os.path.dirname(__file__)
+_ROOT_DIR = os.path.abspath(os.path.join(_HERE, '..'))
+_PACKAGE_DIR = os.path.abspath(os.path.join(_HERE, '../up4'))
+_SUBPACKAGE_DIR = os.path.abspath(os.path.join(_HERE, '../up4/plotting'))
+
+sys.path.insert(0, _ROOT_DIR)
+sys.path.insert(0, _PACKAGE_DIR)
+sys.path.insert(0, _SUBPACKAGE_DIR)
+
+import up4
 
 sys.path.insert(0, os.path.abspath("../up4"))
 os.environ["MPLBACKEND"] = "Agg"  # avoid tkinter import errors on rtfd.io

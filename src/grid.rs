@@ -1,4 +1,4 @@
-//!
+//! Module that implements nD grids and basic functionality on them.
 //! Grids implement ndarrays which hold data. This grid wrapper allows easy grid operations such as
 //! finding a special cell
 
@@ -11,13 +11,12 @@ use dyn_clone::{clone_trait_object, DynClone};
 use ndarray::prelude::*;
 use num_traits;
 use std::any::Any;
-pub mod KartesianGrid;
-pub use KartesianGrid::CartesianGrid3D;
-pub mod CylindricalGrid;
-pub use CylindricalGrid::CylindricalGrid3D;
-pub mod VectorGrid;
-pub use VectorGrid::Vectorgrid;
-
+pub mod cartesian_grid;
+pub use cartesian_grid::CartesianGrid3D;
+pub mod cylindrical_grid;
+pub use cylindrical_grid::CylindricalGrid3D;
+pub mod vector_grid;
+pub use vector_grid::VectorGrid;
 
 //mod grid2dpolar;
 //pub use grid2dpolar::Grid2DPolar;
@@ -91,7 +90,7 @@ pub struct Grid<F> {
     data: Array3<F>,
 }
 impl<F> Grid<F> {
-    fn new<Sh>(shape: Sh) -> Self
+    fn new<Sh>(_shape: Sh) -> Self
     where
         Sh: ShapeBuilder + Clone,
         F: Clone + num_traits::identities::Zero,

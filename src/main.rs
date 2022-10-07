@@ -4,7 +4,7 @@ mod datamanager;
 /// Module that implements nD grids and basic functionality on them.
 pub mod grid;
 pub use grid::Dim;
-use grid::{CartesianGrid3D, CylindricalGrid3D, GridFunctions3D};
+use grid::{CartesianGrid3D, CylindricalGrid3D};
 
 /// Module that implements the `ParticleSelector`, a struct deciding if a particle is valid or not
 pub mod particleselector;
@@ -15,17 +15,15 @@ pub use converter::*;
 
 pub mod functions;
 pub mod utilities;
-use datamanager::pdata::PData;
+
 use datamanager::tdata::TData;
-use datamanager::{DataManager, Manager};
+use datamanager::DataManager;
 use functions::Granular;
 pub mod types;
-use ndarray::prelude::*;
-use std::time::{Duration, Instant};
 
-use plotly::common::{ColorScale, ColorScalePalette, Title};
-use plotly::contour::Contours;
-use plotly::{Contour, HeatMap, Layout, Plot};
+use std::time::Instant;
+
+use plotly::{HeatMap, Plot};
 
 /*
 fn main() {
@@ -63,7 +61,7 @@ fn main() {
             [dim[[0, 2]], dim[[1, 2]]],
         ]),
     ));
-    let y = 0;
+    let _y = 0;
     let x = pdata.numberfield(grid, &ParticleSelector::default());
     let vec2d = x
         .collapse(1)

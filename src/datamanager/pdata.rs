@@ -33,12 +33,12 @@ impl PData {
             &filename,
             BUFFERSIZE
         );
-        let file =
-            hdf5::File::open(filename).expect(&format!("Can not read HDF5 file {}. ", &filename));
+        let file = hdf5::File::open(filename)
+            .unwrap_or_else(|_| panic!("Can not read HDF5 file {}. ", &filename));
         let buffer = vec![Timestep::default(); BUFFERSIZE];
         let mut data = PData {
-            file: file,
-            buffer: buffer,
+            file,
+            buffer,
             range: (0, 0),
             buffersize: BUFFERSIZE,
             single_data: Timestep::default(),
@@ -74,29 +74,37 @@ impl PData {
             let part_pos = self
                 .file
                 .group(&format!("particle {}", particle_id))
-                .expect(&format!(
-                    "Can not find group \"particle {}\" in file {}",
-                    particle_id,
-                    self.file.filename()
-                ))
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not find group \"particle {}\" in file {}",
+                        particle_id,
+                        self.file.filename()
+                    )
+                })
                 .dataset("position")
-                .expect(&format!(
-                    "Can not find dataset \"position\" in file {}",
-                    self.file.filename()
-                ))
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not find dataset \"position\" in file {}",
+                        self.file.filename()
+                    )
+                })
                 .read_2d::<f64>()
-                .expect(&format!(
-                    "Can not read dataset \"position\" in file {}",
-                    self.file.filename()
-                ))
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not read dataset \"position\" in file {}",
+                        self.file.filename()
+                    )
+                })
                 .slice(s![timestep, ..])
                 .to_owned()
                 .into_shape((particles, 3))
-                .expect(&format!(
-                    "Can not shape dataset \"position\" in file {} into a ({}, 3) array",
-                    self.file.filename(),
-                    particles,
-                ))
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not shape dataset \"position\" in file {} into a ({}, 3) array",
+                        self.file.filename(),
+                        particles
+                    )
+                })
                 .axis_iter(Axis(0))
                 .map(|x| [x[0], x[1], x[2]])
                 .collect::<Array1<Position>>();
@@ -106,21 +114,27 @@ impl PData {
             let part_vel = self
                 .file
                 .group(&format!("particle {}", particle_id))
-                .expect(&format!(
-                    "Can not find group \"particle {}\" in file {}",
-                    particle_id,
-                    self.file.filename()
-                ))
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not find group \"particle {}\" in file {}",
+                        particle_id,
+                        self.file.filename()
+                    )
+                })
                 .dataset("velocity")
-                .expect(&format!(
-                    "Can not find dataset \"velocity\" in file {}",
-                    self.file.filename()
-                ))
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not find dataset \"velocity\" in file {}",
+                        self.file.filename()
+                    )
+                })
                 .read_2d::<f64>()
-                .expect(&format!(
-                    "Can not read dataset \"velocity\" in file {}",
-                    self.file.filename()
-                ))
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not read dataset \"velocity\" in file {}",
+                        self.file.filename()
+                    )
+                })
                 .slice(s![timestep, ..])
                 .to_owned();
 
@@ -129,47 +143,57 @@ impl PData {
             let part_rad = self
                 .file
                 .group(&format!("particle {}", particle_id))
-                .expect(&format!(
-                    "Can not fine particle {} in file {}",
-                    particle_id,
-                    self.file.filename()
-                ))
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not fine particle {} in file {}",
+                        particle_id,
+                        self.file.filename()
+                    )
+                })
                 .dataset("radius")
-                .expect(&format!(
-                    "Can not find dataset \"radius\" in HDF5 file \"{:?}\"",
-                    self.file.filename()
-                ))
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not find dataset \"radius\" in HDF5 file \"{:?}\"",
+                        self.file.filename()
+                    )
+                })
                 .read_1d::<f64>()
-                .expect(&format!(
-                    "Can not read data from \"radius\" dataset. \
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not read data from \"radius\" dataset. \
                     Data type or data format might be wrong. \
                     Check creation of HDF5 file  \"{:?}\"",
-                    self.file.filename()
-                ))
+                        self.file.filename()
+                    )
+                })
                 .slice(s![timestep])
                 .to_owned();
             print_debug!("\tParticle {}: Extracting density from HDF5.", particle_id);
             let part_density = match self
                 .file
                 .group(&format!("particle {}", particle_id))
-                .expect(&format!(
-                    "Can not find particle {} in file {}",
-                    particle_id,
-                    self.file.filename()
-                ))
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not find particle {} in file {}",
+                        particle_id,
+                        self.file.filename()
+                    )
+                })
                 .dataset("density")
             {
                 Ok(s) => s
                     .read_1d::<f64>()
-                    .expect(&format!(
-                        "Can not read data from \"density\" dataset. \
+                    .unwrap_or_else(|_| {
+                        panic!(
+                            "Can not read data from \"density\" dataset. \
                         Data type or data format might be wrong. \
                         Check creation of HDF5 file  \"{:?}\"",
-                        self.file.filename()
-                    ))
+                            self.file.filename()
+                        )
+                    })
                     .slice(s![timestep])
                     .to_owned(),
-                Err(s) => {
+                Err(_s) => {
                     print_warning!(
                         "\tParticle {}: Could not find density in HDF5 file {}. \
                         Using one instead.",
@@ -185,23 +209,29 @@ impl PData {
             let part_time = self
                 .file
                 .group(&format!("particle {}", 0))
-                .expect(&format!(
-                    "Can not fine particle {} in file {}",
-                    0,
-                    self.file.filename()
-                ))
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not fine particle {} in file {}",
+                        0,
+                        self.file.filename()
+                    )
+                })
                 .dataset("time")
-                .expect(&format!(
-                    "Can not find dataset \"time\" in HDF5 file \"{:?}\"",
-                    self.file.filename()
-                ))
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not find dataset \"time\" in HDF5 file \"{:?}\"",
+                        self.file.filename()
+                    )
+                })
                 .read_1d::<f64>()
-                .expect(&format!(
-                    "Can not read data from \"time\" dataset. \
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not read data from \"time\" dataset. \
                     Data type or data format might be wrong. \
                     Check creation of HDF5 file  \"{:?}\"",
-                    self.file.filename()
-                ))
+                        self.file.filename()
+                    )
+                })
                 .slice(s![timestep])
                 .to_owned();
             let mut part_id: Array1<f64> = Array1::<f64>::zeros(1);
@@ -217,12 +247,12 @@ impl PData {
 
         let dt = Timestep {
             time: time[0],
-            position: position,
-            velocity: velocity,
-            radius: radius,
-            particleid: particleid,
-            clouds: clouds,
-            density: density,
+            position,
+            velocity,
+            radius,
+            particleid,
+            clouds,
+            density,
         };
         print_debug!("PData: Data read. Saving new timestap and return reference.");
         //let dt = Timestep::default();
@@ -233,6 +263,46 @@ impl PData {
     pub fn reset_buffer() {
         //TODO
     }
+    pub fn test(&mut self) {
+        let now = Instant::now();
+        let _time = self.global_stats_.max_time();
+        let mut v = 0.;
+        let mut n = 0;
+        let selector = ParticleSelector::new(
+            (f64::MIN, f64::MAX),
+            vec![f64::MIN, f64::MAX],
+            vec![f64::MIN, f64::MAX],
+            vec![f64::MIN, f64::MAX],
+            vec![usize::MIN, usize::MAX],
+        );
+        for timestep in 0..*self.global_stats_.timesteps() {
+            let timestep_data = self.get_timestep(timestep);
+            let _positions: &Array1<Position> = timestep_data.position();
+            let velocity: &Array2<f64> = timestep_data.velocity();
+            let radius: &Array1<f64> = timestep_data.radius();
+            let particleid: &Array1<f64> = timestep_data.particleid();
+            let clouds: &Array1<f64> = timestep_data.clouds();
+            let density: Array1<f64> = Array1::from_elem(clouds.len(), 1000.0);
+            for (id, vel) in velocity.outer_iter().enumerate() {
+                if !selector.is_valid(radius[id], clouds[id], density[id], particleid[id] as usize)
+                {
+                    continue;
+                }
+                if vel[0_usize].is_nan() {
+                    continue;
+                }
+                v += vel[0_usize].abs();
+                n += 1;
+            }
+        }
+        println!("Elapsed time: {}", now.elapsed().as_millis());
+        println!("vel: {}", v / n as f64);
+        println!(
+            "Vel from global STats: {}",
+            self.global_stats_.velocity()[[0, 1]]
+        )
+    }
+
     #[inline(never)]
     pub fn update(&mut self, mut range: (usize, usize)) {
         print_debug!("PData: Updating buffer");
@@ -257,30 +327,22 @@ impl PData {
             let part_pos = self
                 .file
                 .group(&format!("particle {}", particle_id))
-                .expect(&format!(
-                    "Can not find group \"particle {}\" in file {}",
+                .unwrap_or_else(|_| panic!("Can not find group \"particle {}\" in file {}",
                     particle_id,
-                    self.file.filename()
-                ))
+                    self.file.filename()))
                 .dataset("position")
-                .expect(&format!(
-                    "Can not find dataset \"position\" in file {}",
-                    self.file.filename()
-                ))
+                .unwrap_or_else(|_| panic!("Can not find dataset \"position\" in file {}",
+                    self.file.filename()))
                 .read_2d::<f64>()
-                .expect(&format!(
-                    "Can not read dataset \"position\" in file {}",
-                    self.file.filename()
-                ))
+                .unwrap_or_else(|_| panic!("Can not read dataset \"position\" in file {}",
+                    self.file.filename()))
                 .slice(s![range.0..range.1, ..])
                 .to_owned()
                 .into_shape((range.1-range.0, 3))
-                .expect(&format!(
-                    "Can not shape dataset \"position\" in file {} into a ({}, 3) array, range: {:?}",
+                .unwrap_or_else(|_| panic!("Can not shape dataset \"position\" in file {} into a ({}, 3) array, range: {:?}",
                     self.file.filename(),
                     range.1-range.0,
-                    range
-                ))
+                    range))
                 .axis_iter(Axis(0))
                 .map(|x| [x[0], x[1], x[2]])
                 .collect::<Array1<Position>>();
@@ -290,21 +352,27 @@ impl PData {
             let part_vel = self
                 .file
                 .group(&format!("particle {}", particle_id))
-                .expect(&format!(
-                    "Can not find group \"particle {}\" in file {}",
-                    particle_id,
-                    self.file.filename()
-                ))
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not find group \"particle {}\" in file {}",
+                        particle_id,
+                        self.file.filename()
+                    )
+                })
                 .dataset("velocity")
-                .expect(&format!(
-                    "Can not find dataset \"velocity\" in file {}",
-                    self.file.filename()
-                ))
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not find dataset \"velocity\" in file {}",
+                        self.file.filename()
+                    )
+                })
                 .read_2d::<f64>()
-                .expect(&format!(
-                    "Can not read dataset \"velocity\" in file {}",
-                    self.file.filename()
-                ))
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not read dataset \"velocity\" in file {}",
+                        self.file.filename()
+                    )
+                })
                 .slice(s![range.0..range.1, ..])
                 .to_owned();
 
@@ -313,24 +381,28 @@ impl PData {
             let part_rad = match self
                 .file
                 .group(&format!("particle {}", particle_id))
-                .expect(&format!(
-                    "Can not find particle {} in file {}",
-                    particle_id,
-                    self.file.filename()
-                ))
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not find particle {} in file {}",
+                        particle_id,
+                        self.file.filename()
+                    )
+                })
                 .dataset("radius")
             {
                 Ok(s) => s
                     .read_1d::<f64>()
-                    .expect(&format!(
-                        "Can not read data from \"radius\" dataset. \
+                    .unwrap_or_else(|_| {
+                        panic!(
+                            "Can not read data from \"radius\" dataset. \
                         Data type or data format might be wrong. \
                         Check creation of HDF5 file  \"{:?}\"",
-                        self.file.filename()
-                    ))
+                            self.file.filename()
+                        )
+                    })
                     .slice(s![range.0..range.1])
                     .to_owned(),
-                Err(s) => {
+                Err(_s) => {
                     print_warning!(
                         "\tParticle {}: Could not find radius in HDF5 file {}. \
                         Using zeros instead.",
@@ -344,24 +416,28 @@ impl PData {
             let part_density = match self
                 .file
                 .group(&format!("particle {}", particle_id))
-                .expect(&format!(
-                    "Can not find particle {} in file {}",
-                    particle_id,
-                    self.file.filename()
-                ))
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not find particle {} in file {}",
+                        particle_id,
+                        self.file.filename()
+                    )
+                })
                 .dataset("density")
             {
                 Ok(s) => s
                     .read_1d::<f64>()
-                    .expect(&format!(
-                        "Can not read data from \"density\" dataset. \
+                    .unwrap_or_else(|_| {
+                        panic!(
+                            "Can not read data from \"density\" dataset. \
                         Data type or data format might be wrong. \
                         Check creation of HDF5 file  \"{:?}\"",
-                        self.file.filename()
-                    ))
+                            self.file.filename()
+                        )
+                    })
                     .slice(s![range.0..range.1])
                     .to_owned(),
-                Err(s) => {
+                Err(_s) => {
                     print_warning!(
                         "\tParticle {}: Could not find density in HDF5 file {}. \
                         Using one instead.",
@@ -376,23 +452,29 @@ impl PData {
             let part_time = self
                 .file
                 .group(&format!("particle {}", 0))
-                .expect(&format!(
-                    "Can not fine particle {} in file {}",
-                    0,
-                    self.file.filename()
-                ))
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not fine particle {} in file {}",
+                        0,
+                        self.file.filename()
+                    )
+                })
                 .dataset("time")
-                .expect(&format!(
-                    "Can not find dataset \"time\" in HDF5 file \"{:?}\"",
-                    self.file.filename()
-                ))
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not find dataset \"time\" in HDF5 file \"{:?}\"",
+                        self.file.filename()
+                    )
+                })
                 .read_1d::<f64>()
-                .expect(&format!(
-                    "Can not read data from \"time\" dataset. \
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "Can not read data from \"time\" dataset. \
                     Data type or data format might be wrong. \
                     Check creation of HDF5 file  \"{:?}\"",
-                    self.file.filename()
-                ))
+                        self.file.filename()
+                    )
+                })
                 .slice(s![range.0..range.1])
                 .to_owned();
 
@@ -434,46 +516,6 @@ impl PData {
         self.range = range; //(range.0,range.1-1);
         print_debug!("PData: Finished buffer update")
     }
-
-    pub fn test(&mut self) {
-        let now = Instant::now();
-        let time = self.global_stats_.max_time();
-        let mut v = 0.;
-        let mut n = 0;
-        let selector = ParticleSelector::new(
-            (f64::MIN, f64::MAX),
-            vec![f64::MIN, f64::MAX],
-            vec![f64::MIN, f64::MAX],
-            vec![f64::MIN, f64::MAX],
-            vec![usize::MIN, usize::MAX],
-        );
-        for timestep in 0..*self.global_stats_.timesteps() {
-            let timestep_data = self.get_timestep(timestep);
-            let positions: &Array1<Position> = timestep_data.position();
-            let velocity: &Array2<f64> = timestep_data.velocity();
-            let radius: &Array1<f64> = timestep_data.radius();
-            let particleid: &Array1<f64> = timestep_data.particleid();
-            let clouds: &Array1<f64> = timestep_data.clouds();
-            let density: Array1<f64> = Array1::from_elem(clouds.len(), 1000.0);
-            for (id, vel) in velocity.outer_iter().enumerate() {
-                if !selector.is_valid(radius[id], clouds[id], density[id], particleid[id] as usize)
-                {
-                    continue;
-                }
-                if vel[0 as usize].is_nan() {
-                    continue;
-                }
-                v = v + vel[0 as usize].abs();
-                n += 1;
-            }
-        }
-        println!("Elapsed time: {}", now.elapsed().as_millis());
-        println!("vel: {}", v / n as f64);
-        println!(
-            "Vel from global STats: {}",
-            self.global_stats_.velocity()[[0, 1]]
-        )
-    }
 } //end impl
 
 impl DataManager for PData {
@@ -505,98 +547,126 @@ impl DataManager for PData {
         let dimensions = self
             .file
             .attr("dimensions")
-            .expect(&format!(
-                "Can not find dataset \"dimensions\" in HDF5 file \"{:?}\"",
-                self.file.filename()
-            ))
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Can not find dataset \"dimensions\" in HDF5 file \"{:?}\"",
+                    self.file.filename()
+                )
+            })
             .read_2d::<f64>()
-            .expect(&format!(
-                "Can not read data from \"dimensions\" dataset. \
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Can not read data from \"dimensions\" dataset. \
                 Data type or data format might be wrong. \
                 Check creation of HDF5 file  \"{:?}\"",
-                self.file.filename()
-            ));
+                    self.file.filename()
+                )
+            });
         let nparticles = self
             .file
             .attr("particle number")
-            .expect(&format!(
-                "Can not find attribute \"particle number\" in file {}",
-                self.file.filename()
-            ))
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Can not find attribute \"particle number\" in file {}",
+                    self.file.filename()
+                )
+            })
             .read_scalar()
-            .expect(&format!(
-                "Can not read scalar from attribute \"particle number\" in file {}",
-                self.file.filename()
-            ));
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Can not read scalar from attribute \"particle number\" in file {}",
+                    self.file.filename()
+                )
+            });
         let timesteps = self
             .file
             .attr("timesteps")
-            .expect(&format!(
-                "Can not find attribute \"timesteps\" in file {}",
-                self.file.filename()
-            ))
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Can not find attribute \"timesteps\" in file {}",
+                    self.file.filename()
+                )
+            })
             .read_scalar()
-            .expect(&format!(
-                "Can not read scalar from attribute \"timesteps\" in file {}",
-                self.file.filename()
-            ));
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Can not read scalar from attribute \"timesteps\" in file {}",
+                    self.file.filename()
+                )
+            });
         let time = self
             .file
             .attr("time")
-            .expect(&format!(
-                "Can not find attribute \"time\" in file {}",
-                self.file.filename()
-            ))
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Can not find attribute \"time\" in file {}",
+                    self.file.filename()
+                )
+            })
             .read_raw()
-            .expect(&format!(
-                "Can not read vector from attribute \"time\" in file {}",
-                self.file.filename()
-            ));
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Can not read vector from attribute \"time\" in file {}",
+                    self.file.filename()
+                )
+            });
         let sample_rate = self
             .file
             .attr("sample rate")
-            .expect(&format!(
-                "Can not find attribute \"sample rate\" in file {}",
-                self.file.filename()
-            ))
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Can not find attribute \"sample rate\" in file {}",
+                    self.file.filename()
+                )
+            })
             .read_scalar()
-            .expect(&format!(
-                "Can not read scalar from attribute \"sample rate\" in file {}",
-                self.file.filename()
-            ));
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Can not read scalar from attribute \"sample rate\" in file {}",
+                    self.file.filename()
+                )
+            });
         let velocity = self
             .file
             .attr("velocity")
-            .expect(&format!(
-                "Can not find attribute \"velocity\" in file {}",
-                self.file.filename()
-            ))
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Can not find attribute \"velocity\" in file {}",
+                    self.file.filename()
+                )
+            })
             .read_2d()
-            .expect(&format!(
-                "Can not read scalar from attribute \"velocity\" in file {}",
-                self.file.filename()
-            ));
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Can not read scalar from attribute \"velocity\" in file {}",
+                    self.file.filename()
+                )
+            });
         let velocity_mag = self
             .file
             .attr("velocity magnitude")
-            .expect(&format!(
-                "Can not find attribute \"velocity magnitude\" in file {}",
-                self.file.filename()
-            ))
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Can not find attribute \"velocity magnitude\" in file {}",
+                    self.file.filename()
+                )
+            })
             .read_1d()
-            .expect(&format!(
-                "Can not read scalar from attribute \"velocity magnitude\" in file {}",
-                self.file.filename()
-            ));
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Can not read scalar from attribute \"velocity magnitude\" in file {}",
+                    self.file.filename()
+                )
+            });
         GlobalStats {
-            dimensions: dimensions,
-            nparticles: nparticles,
+            dimensions,
+            nparticles,
             ntimesteps: timesteps,
             min_time: time[0],
             max_time: time[1],
-            sample_rate: sample_rate,
-            velocity: velocity,
-            velocity_mag: velocity_mag,
+            sample_rate,
+            velocity,
+            velocity_mag,
         }
     }
     fn stats(&self) {

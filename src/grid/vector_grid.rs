@@ -5,12 +5,12 @@ use derive_getters::Getters;
 use ndarray::prelude::*;
 use std::any::Any;
 #[derive(Getters, Clone)]
-pub struct Vectorgrid {
+pub struct VectorGrid {
     pub data: [Box<dyn grid::GridFunctions3D>; 3],
     cyl_grid: CylindricalGrid3D,
 }
 
-impl Vectorgrid {
+impl VectorGrid {
     pub fn new(grid: Box<dyn GridFunctions3D>) -> Self {
         let cyl_grid;
         if grid.is_cylindrical() {
@@ -22,9 +22,9 @@ impl Vectorgrid {
         } else {
             cyl_grid = CylindricalGrid3D::default();
         }
-        Vectorgrid {
+        VectorGrid {
             data: [grid.clone(), grid.clone(), grid.clone()],
-            cyl_grid: cyl_grid,
+            cyl_grid,
         }
     }
 
@@ -46,7 +46,7 @@ impl Vectorgrid {
     }
 }
 
-impl std::fmt::Debug for Vectorgrid {
+impl std::fmt::Debug for VectorGrid {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             f,
@@ -73,7 +73,7 @@ impl std::fmt::Debug for Vectorgrid {
     }
 }
 
-impl std::fmt::Display for Vectorgrid {
+impl std::fmt::Display for VectorGrid {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(
             f,
@@ -100,8 +100,8 @@ impl std::fmt::Display for Vectorgrid {
     }
 }
 
-impl GridFunctions3D for Vectorgrid {
-    fn get_value(&self, pos: Position) -> f64 {
+impl GridFunctions3D for VectorGrid {
+    fn get_value(&self, _pos: Position) -> f64 {
         unimplemented!()
     }
 
@@ -150,10 +150,10 @@ impl GridFunctions3D for Vectorgrid {
 
     // return a new instance of grid with zeros
     fn new_zeros(&self) -> Box<dyn GridFunctions3D> {
-        Box::new(Vectorgrid::new(self.data[0].new_zeros()))
+        Box::new(VectorGrid::new(self.data[0].new_zeros()))
     }
 
-    fn collapse(&self, axis: usize) -> Array2<f64> {
+    fn collapse(&self, _axis: usize) -> Array2<f64> {
         unimplemented!()
     }
     //slice

@@ -1,3 +1,5 @@
+//! Module that implements the `ParticleSelector`, a struct deciding if a particle is valid or not
+
 extern crate ndarray;
 
 use crate::print_debug;
@@ -51,11 +53,11 @@ impl ParticleSelector {
             return true;
         }
         if self.radius.len() == 1 {
-            return radius == self.radius[0];
+            radius == self.radius[0]
         } else if self.radius.len() == 2 {
-            return radius >= self.radius[0] && radius <= self.radius[1];
+            radius >= self.radius[0] && radius <= self.radius[1]
         } else {
-            return self.radius.contains(&radius);
+            self.radius.contains(&radius)
         }
     }
     fn is_cloud_valid(&self, cloud: f64) -> bool {
@@ -64,11 +66,11 @@ impl ParticleSelector {
             return true;
         }
         if self.clouds.len() == 1 {
-            return cloud == self.clouds[0];
+            cloud == self.clouds[0]
         } else if self.radius.len() == 2 {
-            return cloud >= self.clouds[0] && cloud <= self.clouds[1];
+            cloud >= self.clouds[0] && cloud <= self.clouds[1]
         } else {
-            return self.clouds.contains(&cloud);
+            self.clouds.contains(&cloud)
         }
     }
     fn is_density_valid(&self, density: f64) -> bool {
@@ -77,11 +79,11 @@ impl ParticleSelector {
             return true;
         }
         if self.density.len() == 1 {
-            return density == self.density[0];
+            density == self.density[0]
         } else if self.radius.len() == 2 {
-            return density >= self.density[0] && density <= self.radius[1];
+            density >= self.density[0] && density <= self.radius[1]
         } else {
-            return self.density.contains(&density);
+            self.density.contains(&density)
         }
     }
     fn is_particleid_valid(&self, particleid: usize) -> bool {
@@ -91,11 +93,11 @@ impl ParticleSelector {
             return true;
         }
         if self.particleid.len() == 1 {
-            return particleid == self.particleid[0];
+            particleid == self.particleid[0]
         } else if self.particleid.len() == 2 {
-            return particleid >= self.particleid[0] && particleid <= self.particleid[1];
+            particleid >= self.particleid[0] && particleid <= self.particleid[1]
         } else {
-            return self.particleid.contains(&particleid);
+            self.particleid.contains(&particleid)
         }
     }
 }
@@ -112,7 +114,7 @@ impl Selector for ParticleSelector {
         } else if !self.is_particleid_valid(particleid) {
             return false;
         };
-        return true;
+        true
     }
 
     fn timestep_valid(&self, time: f64) -> bool {

@@ -160,9 +160,9 @@ impl GridFunctions3D for CartesianGrid3D {
             // check for nans
             let data_arr = data_arr.mapv(|x| if x.is_nan() { 0. } else { x });
             result = result + &data_arr * &weight;
-            result_weight = result_weight + &weight;
+            result_weight += &weight;
         }
-        result = result / &result_weight;
+        result /= &result_weight;
         result
     }
 

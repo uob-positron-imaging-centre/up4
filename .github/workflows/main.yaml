@@ -92,7 +92,7 @@ jobs:
           export PYO3_PYTHON=python3
           export LD_LIBRARY_PATH="$CONDA_PREFIX/lib"
           cd docs
-          python3 -c "import up4; print(’Success’)"
+          python3 -c "import up4; print(up4.__file__)"
           make html
       - name: Upload artifacts
         uses: actions/upload-artifact@v2

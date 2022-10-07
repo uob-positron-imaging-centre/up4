@@ -1,15 +1,52 @@
+//! Create Python bindings for crate.
 use pyo3::prelude::*;
 extern crate ndarray;
 extern crate plotly;
 use crate::particleselector::*;
+
 use crate::print_debug;
 use numpy::{IntoPyArray, PyArray2};
 pub mod libconv;
 pub mod libgrid;
+pub mod libplot;
 use crate::datamanager::{Manager, PData, TData};
-
 use libconv::*;
 use libgrid::*;
+use libplot::*;
+
+/// Class that holds the particle data for processing, if you have simulation data, you will *probably*
+/// want to use ``Data.from_pdata()`` to instantiate this class as this handles a large number of particles.
+/// For experimental data, ``Data.from_tdata()`` is recommended. However, as the choice ultimately makes no
+/// difference to how you use this library, that choice is down to you!
+///
+/// Methods
+/// -------
+/// from_pdata:
+///     Constructor for up4.Data using data that has large numbers of particles, typically from simulation.
+///
+/// from_tdata:
+///     Constructor for up4.Data using data that has low numbers of particles, typically from experiment.
+///
+/// stats:
+///     Calculate statistics of the dataset such as dimensions, mean velocity and number of particles.
+///
+/// set_time:
+///     Select the dataset between two times.
+///
+/// vectorfield:
+///     Return vector data as a vector field.
+///
+/// velocityfield:
+///     Return the velocity data as a velocity field.
+///
+/// extract:
+///     Return particle information over specified duration.
+///
+/// numberfield:
+///     Return the number density field.
+///
+/// mean_velocity:
+///     Return the mean velocity of all valid particles in the system.
 #[pyclass(name = "Data")]
 struct PyData {
     data: Box<dyn Manager + Send>,
@@ -18,10 +55,21 @@ struct PyData {
 
 #[pymethods]
 impl PyData {
+    /// Create new instance of up4.Data class. Time or particle oriented formats are parsed automatically.
+    ///
+    /// Parameters
+    /// ----------
+    /// filename : str
+    ///     Filename of hdf5 dataset.
+    ///
+    /// Returns
+    /// -------
+    /// up4.Data
+    ///     Data class.
     #[new]
     fn constructor(filename: &str) -> Self {
         let file = hdf5::File::open(filename).expect(&format!(
-            "Unbale to open file {}. Check if file exists.",
+            "Unable to open file {}. Check if file exists.",
             filename
         ));
         let hdf5type: i32 = file
@@ -36,7 +84,7 @@ impl PyData {
                 filename
             ));
         file.close().expect("Unable to close file");
-        let mut data;
+        let data;
         if hdf5type == 0x1_i32 {
             data = PyData::from_tdata(filename)
         } else if hdf5type == 0x2_i32 {
@@ -47,6 +95,17 @@ impl PyData {
         data
     }
 
+    /// Create new instance of the up4.Data class. This method assumes a particle oriented hdf5 file.
+    ///
+    /// Parameters
+    /// ----------
+    /// filename : str
+    ///     Filename of hdf5 dataset.
+    ///
+    /// Returns
+    /// -------
+    /// up4.Data
+    ///     Data class
     #[staticmethod]
     fn from_pdata(filename: &str) -> Self {
         let pdata = PData::new(filename);
@@ -57,6 +116,17 @@ impl PyData {
         }
     }
 
+    /// Create new instance of the Data class. This method assumes a time oriented hdf5 file.
+    ///
+    /// Parameters
+    /// ----------
+    /// filename : str
+    ///     Filename of hdf5 dataset.
+    ///
+    /// Returns
+    /// -------
+    /// up4.Data
+    ///     Data class
     #[staticmethod]
     fn from_tdata(filename: &str) -> Self {
         let tdata = TData::new(filename);
@@ -67,10 +137,24 @@ impl PyData {
         }
     }
 
+    /// Calculate statistics of the dataset and print to terminal. Currently these are:
+    /// * System dimensions.
+    /// * Maximum time.
+    /// * Number of particles.
+    /// * Mean velocity.
+    /// * Minimum and maximum velocity.
     fn stats<'py>(&self, _py: Python<'py>) {
         self.data.stats();
     }
 
+    /// Select the dataset between two different times.
+    ///
+    /// Parameters
+    /// ----------
+    /// min_time : float
+    ///     Starting time for selection.
+    /// max_time : float
+    ///     End time for selection.
     fn set_time(&mut self, min_time: f64, max_time: f64) {
         if self.data.global_stats().max_time() < &min_time {
             panic!(
@@ -82,6 +166,17 @@ impl PyData {
         self.selector.set_time(min_time, max_time)
     }
 
+    /// Return vector data as a vector field.
+    ///
+    /// Parameters
+    /// ----------
+    /// grid : up4.Grid
+    ///     Grid class containing the grid layout.
+    ///
+    /// Returns
+    /// -------
+    /// up4.VectorGrid
+    ///     VectorGrid class containing each vector component for each grid cell.
     fn vectorfield<'py>(&mut self, _py: Python<'py>, grid: &PyGrid) -> PyVecGrid {
         let selector: &ParticleSelector =
             match self.selector.as_any().downcast_ref::<ParticleSelector>() {
@@ -92,6 +187,17 @@ impl PyData {
         PyVecGrid { grid }
     }
 
+    /// Return the velocity data as a velocity field of their norms.
+    ///
+    /// Parameters
+    /// ----------
+    /// grid : up4.Grid
+    ///      Grid class containing the grid layout.
+    ///
+    /// Returns
+    /// -------
+    /// up4.Grid
+    ///     Grid class containing the velocity field.
     fn velocityfield<'py>(&mut self, _py: Python<'py>, grid: &PyGrid) -> PyGrid {
         print_debug!("Starting Vectorfield function");
         let selector: &ParticleSelector =
@@ -103,6 +209,20 @@ impl PyData {
 
         PyGrid { grid: grid }
     }
+
+    /// Return particle information over specified duration.
+    ///
+    /// Parameters
+    /// ----------
+    /// particle_id : int
+    ///     Particle ID.
+    /// timestep : tuple[int, int]
+    ///     Start and end timesteps for particle selection.
+    ///
+    /// Returns
+    /// -------
+    /// numpy.ndarray
+    ///     2D numpy array with shape (timestep[1] - timestep[0]) X 7. Where in each row is the current time, particle position and its velocity components.
     fn extract<'py>(
         &mut self,
         _py: Python<'py>,
@@ -112,6 +232,17 @@ impl PyData {
         self.data.extract(particle_id, timestep).into_pyarray(_py)
     }
 
+    /// Return the number density field.
+    ///
+    /// Parameters
+    /// ----------
+    /// grid : up4.Grid
+    ///     Grid class containing the grid layout.
+    ///
+    /// Returns
+    /// -------
+    /// up4.Grid
+    ///     Grid class containing the number field
     fn numberfield<'py>(&mut self, _py: Python<'py>, grid: &PyGrid) -> PyGrid {
         print_debug!("Starting Vectorfield function");
         let selector: &ParticleSelector =
@@ -124,18 +255,12 @@ impl PyData {
         PyGrid { grid: grid }
     }
 
-    fn mean_velocity_showcase<'py>(&mut self, _py: Python<'py>) -> f64 {
-        print_debug!("Starting mean velocity calculation on dataset ");
-        let selector: &ParticleSelector =
-            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
-                Some(b) => b,
-                None => panic!("Can not convert PyGrid to Grid1D as "),
-            };
-        let mean_velocity = self.data.mean_velocity_showcase(selector);
-        // return
-        mean_velocity
-    } //End mean_velocity
-
+    /// Return the mean velocity of all valid particles in the system.
+    ///
+    /// Returns
+    /// -------
+    /// float
+    ///     Mean particle velocity
     fn mean_velocity<'py>(&mut self, _py: Python<'py>) -> f64 {
         print_debug!("Starting mean velocity calculation on dataset");
         let selector: &ParticleSelector =
@@ -147,7 +272,7 @@ impl PyData {
         // return
         mean_velocity
     } //End mean_velocity
-} // ENd PyData
+} // End PyData
 
 #[pyproto]
 impl pyo3::PyObjectProtocol for PyData {
@@ -219,5 +344,8 @@ fn upppp_rust(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<PyData>()?;
     m.add_class::<PyGrid>()?;
     m.add_class::<PyConverter>()?;
+    m.add_class::<PyVectorPlotter>()?;
+    m.add_class::<PyScalarPlotter>()?;
+    m.add_class::<PyComparisonPlotter>()?;
     Ok(())
 }

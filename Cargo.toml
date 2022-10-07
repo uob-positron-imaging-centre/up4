@@ -2,7 +2,7 @@
 name = "upppp_rust"
 version = "0.1.0"
 edition = "2018"
-authors = ["Kit's little helpers"]
+authors = ["Dominik Werner, Daniel Weston"]
 
 [lib]
 name = "upppp_rust"
@@ -14,11 +14,13 @@ hdf5 = "0.8.0"
 ndarray = "0.15"
 ndarray-stats="0.5.0"
 derive-getters = "0.2.0"
-plotly = {git="https://github.com/DanW97/plotly.git"}
+#plotly = "0.6.0"
+plotly = {git="https://github.com/DanW97/plotly.git", features = ["plotly_ndarray"]}
 dyn-clone = "1.0"
 itertools = "0.10.1"
 regex = "1"
 vtkio ="0.6.0"
+colorous = "1.0.5"
 indicatif = "=0.17.0-beta.1"
 csv= "1.1.6"
 ndarray-csv = {version = "0.5.1"}

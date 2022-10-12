@@ -1,4 +1,4 @@
-//! Module that implements nD grids and basic functionality on them.
+//!
 //! Grids implement ndarrays which hold data. This grid wrapper allows easy grid operations such as
 //! finding a special cell
 
@@ -60,6 +60,9 @@ pub trait GridFunctions3D: DynClone + std::fmt::Display + std::fmt::Debug + Send
 
     // Return cell ID of Data/Particle
     fn cell_id(&self, pos: Position) -> CellId;
+
+    // add a number to a cell given its cel id
+    fn add_to_cell(&mut self, cell_id: CellId, value: f64);
 
     // Needed for python interface ( check that again, might be not needed)
     fn as_any(&self) -> &dyn Any;

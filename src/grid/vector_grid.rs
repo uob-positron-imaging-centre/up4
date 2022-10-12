@@ -148,6 +148,12 @@ impl GridFunctions3D for VectorGrid {
         self
     }
 
+    fn add_to_cell(&mut self, cell_id: CellId, value: f64) {
+        self.data[0].add_to_cell(cell_id, value);
+        self.data[1].add_to_cell(cell_id, value);
+        self.data[2].add_to_cell(cell_id, value);
+    }
+
     // return a new instance of grid with zeros
     fn new_zeros(&self) -> Box<dyn GridFunctions3D> {
         Box::new(VectorGrid::new(self.data[0].new_zeros()))

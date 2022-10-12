@@ -16,6 +16,7 @@ pub use converter::*;
 pub mod functions;
 pub mod utilities;
 
+use datamanager::pdata::PData;
 use datamanager::tdata::TData;
 use datamanager::DataManager;
 use functions::Granular;
@@ -49,7 +50,7 @@ fn main() {
 
 fn main() {
     let now = Instant::now();
-    let mut pdata = TData::new("tests/fixtures/drum.hdf5");
+    let mut pdata = PData::new("tests/fixtures/1p5u_HD1_glass.hdf5");
     let stats = pdata.global_stats();
     let dim = stats.dimensions();
     let grid = Box::new(CartesianGrid3D::new(
@@ -61,16 +62,10 @@ fn main() {
             [dim[[0, 2]], dim[[1, 2]]],
         ]),
     ));
+    let mut selector = ParticleSelector::default();
+    let disp = pdata.dispersion(grid, &selector, 0.1);
     let _y = 0;
-    let x = pdata.numberfield(grid, &ParticleSelector::default());
-    let vec2d = x
-        .collapse(1)
-        .outer_iter()
-        .map(|arr| arr.to_vec())
-        .collect::<Vec<_>>();
-    let trace = HeatMap::new_z(vec2d);
-    let mut plot = Plot::new();
-    plot.add_trace(trace);
+
     //plot.show();
     println!("End time: {}", now.elapsed().as_millis());
 }

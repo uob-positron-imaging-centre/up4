@@ -5,6 +5,39 @@ use ndarray_stats::QuantileExt;
 use numpy::{IntoPyArray, PyArray1, PyArray3};
 use plotly::{HeatMap, Plot};
 use pyo3::prelude::*;
+
+/// A class containing all information for a 3D grid wrapping your system
+///
+/// Methods
+/// -------
+/// cartesian3d_from_data:
+///     Create a 3D cartesian grid with limits and spacing from a PyData object
+///
+/// cartesian3d:
+///     Create a 3D cartesian grid with limits and spacing provided by user
+///
+/// cylindrical3d_from_data:
+///     Create a 3D cylindrical grid with limits and spacing from a PyData object
+///
+/// cylindrical3d:
+///     Create a 3D cylindrical grid with limits and spacing provided by user
+///
+/// cell_positions:
+///     Return the positions of all cells in the grid
+///
+/// is_inside:
+///     Return a boolean array indicating if a point is inside the grid
+///
+/// plot:
+///     Simple plotter using plotly. Data is depth averaged along the axis provided by user
+///
+/// shape:
+///     Return the shape of the grid
+///
+/// to_numpy:
+///     Return the grid as a numpy array
+///
+///
 #[pyclass(name = "Grid")]
 pub struct PyGrid {
     pub grid: Box<dyn grid::GridFunctions3D>,
@@ -12,6 +45,20 @@ pub struct PyGrid {
 
 #[pymethods]
 impl PyGrid {
+    /// Create a 3D cartesian grid with limits and spacing from a PyData object
+    ///
+    /// Parameters
+    /// ----------
+    /// data : PyData
+    ///     A PyData object containing the data to be used to generate the grid
+    /// cells : List(int)
+    ///     A list containing the number of cells in each direction. Must be of length 3
+    ///
+    /// Returns
+    /// -------
+    /// grid : Grid
+    ///     A up4.Grid object with the same dimensions as the input data
+    ///
     #[staticmethod]
     fn cartesian3d_from_data(pydata: &PyData, cells: Vec<usize>) -> Self {
         let stats = pydata.data.global_stats();
@@ -29,11 +76,35 @@ impl PyGrid {
         }
     }
 
+    /// Create a 3D cartesian grid with limits and spacing provided by user
+    ///
+    /// Parameters
+    /// ----------
+    /// cells : List(int)
+    ///     A list containing the number of cells in each direction. Must be of length 3
+    /// limit : List(float)
+    ///     A list containing the limits of the grid in each direction. Must be of length 6
+    ///     The order is [xmin, xmax, ymin, ymax, zmin, zmax]
+    ///
+    /// Returns
+    /// -------
+    /// grid : Grid
+    ///    A up4.Grid object with the same dimensions dimensions defined by user
     #[staticmethod]
-    fn cartesian3d_from_file(_filename: &str) -> Self {
+    fn cartesian3d(cells: Vec<usize>, limit: Vec<f64>) -> Self {
+        if cells.len() != 3 {
+            panic!("Cylindrical3D requires cells for 3 dimensions --> shape mismatch");
+        }
+        if limit.len() != 6 {
+            panic!("Cylindrical3D requires 2 limits for all 3 Dimensions --> shape mismatch ");
+        }
         let grid = Box::new(grid::CartesianGrid3D::new(
-            [1, 60, 60],
-            grid::Dim::ThreeD([[0., 1.], [0., 1.], [0., 1.]]),
+            [cells[0], cells[1], cells[2]],
+            grid::Dim::ThreeD([
+                [limit[0], limit[1]],
+                [limit[2], limit[3]],
+                [limit[4], limit[5]],
+            ]),
         ));
         let grid = PyGrid {
             grid: grid, //Box::new(grid),
@@ -41,6 +112,13 @@ impl PyGrid {
         grid
     }
 
+    /// Return the positions of all cells in the grid
+    /// Parameters
+    ///
+    /// Returns
+    /// -------
+    /// positions : Touple( ndarray )
+    ///    A touple containing the 1D arrays of the x, y and z positions of the cells
     fn cell_positions<'py>(
         &self,
         _py: Python<'py>,
@@ -51,6 +129,25 @@ impl PyGrid {
             self.grid.get_zpositions().to_owned().into_pyarray(_py),
         )
     }
+
+    /// Create a 3D cylindrical grid with limits provided by user
+    ///
+    /// Parameters
+    /// ----------
+    /// cells : List(int)
+    ///     A list containing the number of cells in each direction. Must be of length 3
+    /// limit : List(float)
+    ///     A list containing the limits of the grid in each direction. Must be of length 6
+    ///     The order is [rmin, rmax, zmin, zmax, phimin, phimax]
+    /// mode: str, optional
+    ///     The mode of the grid. Can be "volume". Other methods are not implemented yet.
+    ///     Default is "volume" (what a surprise)
+    ///
+    /// Returns
+    /// -------
+    /// grid : Grid
+    ///     A up4.Grid object with the same dimensions dimensions defined by user
+    #[args(mode = "\"volume\"")]
     #[staticmethod]
     fn cylindrical3d(cells: Vec<usize>, limit: Vec<f64>, mode: &str) -> Self {
         if cells.len() != 3 {
@@ -74,6 +171,22 @@ impl PyGrid {
         grid
     }
 
+    /// Create a 3D cylindrical grid with limits and spacing from a PyData object
+    ///
+    /// Parameters
+    /// ----------
+    /// data : PyData
+    ///     A PyData object containing the data to be used to generate the grid
+    /// cells : List(int)
+    ///     A list containing the number of cells in each direction. Must be of length 3
+    /// mode: str, optional
+    ///     The mode of the grid. Can be "volume". Other methods are not implemented yet.
+    ///     Default is "volume" (what a surprise)
+    ///
+    /// Returns
+    /// -------
+    /// grid : Grid
+    ///     A up4.Grid object with the same dimensions as the input data
     #[args(mode = "\"volume\"")]
     #[staticmethod]
     fn cylindrical3d_from_data(pydata: &PyData, cells: Vec<usize>, mode: &str) -> Self {
@@ -93,11 +206,33 @@ impl PyGrid {
         }
     }
 
+    /// Check if the particle is within the grid
+    ///
+    /// Parameters
+    /// ----------
+    /// position : List(float)
+    ///    A list containing the position of the particle. Must be of length 3
+    ///
+    /// Returns
+    /// -------
+    /// is_inside : bool
+    ///   True if the particle is inside the grid, False otherwise
     fn is_inside(&self, position: Vec<f64>) -> bool {
         self.grid.is_inside([position[0], position[1], position[2]])
     }
 
-    // plot using plotly
+    /// Plot the grid using plotly plotter. A simple depth averaged plot.
+    ///
+    /// Parameters
+    /// ----------
+    /// axis : int, optional
+    ///     The axis to plot the grid on
+    ///     Default is 0
+    ///
+    /// Returns
+    /// -------
+    /// None
+    ///
     fn plot(&self, axis: usize) {
         let mut plot = Plot::new();
         let vec2d = self
@@ -129,11 +264,31 @@ impl PyGrid {
         plot.add_trace(trace);
         plot.show()
     }
-    // return shape of the data grid
+
+    /// Return the shape of the grid
+    ///
+    /// Parameters
+    /// ----------
+    /// None
+    ///
+    /// Returns
+    /// -------
+    /// shape : List(int)
+    ///     A list containing the number of cells in each dimension.
     fn shape(&self) -> Vec<usize> {
         self.grid.get_cells().to_vec()
     }
-    //return the data
+
+    /// Return the grid as a numpy array
+    ///
+    /// Parameters
+    /// ----------
+    /// None
+    ///
+    /// Returns
+    /// -------
+    /// grid : ndarray
+    ///    A numpy array containing the grid-data with the same shape as grid
     fn to_numpy<'py>(&self, _py: Python<'py>) -> &'py PyArray3<f64> {
         self.grid.get_data().to_owned().into_pyarray(_py)
     }

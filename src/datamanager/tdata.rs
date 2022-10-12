@@ -33,12 +33,12 @@ impl TData {
             &filename,
             BUFFERSIZE
         );
-        let file = hdf5::File::open(filename)
-            .unwrap_or_else(|_| panic!("Can not read HDF5 file {}. ", &filename));
+        let file =
+            hdf5::File::open(filename).expect(&format!("Can not read HDF5 file {}. ", &filename));
         let buffer = vec![Timestep::default(); BUFFERSIZE];
         let mut data = TData {
-            file,
-            buffer,
+            file: file,
+            buffer: buffer,
             range: (0, 0),
             buffersize: BUFFERSIZE,
             single_data: Timestep::default(),
@@ -55,7 +55,7 @@ impl TData {
         data
     }
 
-    fn read_single(&mut self, timestep: usize) -> &Timestep {
+    fn read_single(&self, timestep: usize) -> Timestep {
         print_debug!("TData: Reading a single timestep.");
 
         print_debug!("TData: Looping over all particles.");
@@ -64,27 +64,21 @@ impl TData {
         let position = self
             .file
             .group(&format!("timestep {}", timestep))
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not find group \"timestep {}\" in file {}",
-                    timestep,
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not find group \"timestep {}\" in file {}",
+                timestep,
+                self.file.filename()
+            ))
             .dataset("position")
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not find dataset \"position\" in file {}",
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not find dataset \"position\" in file {}",
+                self.file.filename()
+            ))
             .read_2d::<f64>()
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not read dataset \"position\" in file {}",
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not read dataset \"position\" in file {}",
+                self.file.filename()
+            ))
             .to_owned()
             .axis_iter(Axis(0))
             .map(|x| [x[0], x[1], x[2]])
@@ -94,79 +88,63 @@ impl TData {
         let velocity = self
             .file
             .group(&format!("timestep {}", timestep))
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not find group \"timestep {}\" in file {}",
-                    timestep,
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not find group \"timestep {}\" in file {}",
+                timestep,
+                self.file.filename()
+            ))
             .dataset("velocity")
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not find dataset \"velocity\" in file {}",
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not find dataset \"velocity\" in file {}",
+                self.file.filename()
+            ))
             .read_2d::<f64>()
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not read dataset \"velocity\" in file {}",
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not read dataset \"velocity\" in file {}",
+                self.file.filename()
+            ))
             .to_owned();
 
         //Radius
         let radius = self
             .file
             .group(&format!("timestep {}", timestep))
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not find timestep {} in file {}",
-                    timestep,
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not find timestep {} in file {}",
+                timestep,
+                self.file.filename()
+            ))
             .dataset("radius")
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not find dataset \"radius\" in HDF5 file \"{:?}\"",
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not find dataset \"radius\" in HDF5 file \"{:?}\"",
+                self.file.filename()
+            ))
             .read_1d::<f64>()
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not read data from \"radius\" dataset. \
+            .expect(&format!(
+                "Can not read data from \"radius\" dataset. \
                 Data type or data format might be wrong. \
                 Check creation of HDF5 file  \"{:?}\"",
-                    self.file.filename()
-                )
-            })
+                self.file.filename()
+            ))
             .to_owned();
         let density = match self
             .file
             .group(&format!("timestep {}", timestep))
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not find timestep {} in file {}",
-                    timestep,
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not find timestep {} in file {}",
+                timestep,
+                self.file.filename()
+            ))
             .dataset("density")
         {
             Ok(s) => s
                 .read_1d::<f64>()
-                .unwrap_or_else(|_| {
-                    panic!(
-                        "Can not read data from \"density\" dataset. \
+                .expect(&format!(
+                    "Can not read data from \"density\" dataset. \
                         Data type or data format might be wrong. \
                         Check creation of HDF5 file  \"{:?}\"",
-                        self.file.filename()
-                    )
-                })
+                    self.file.filename()
+                ))
                 .to_owned(),
             Err(_) => {
                 print_warning!(
@@ -183,99 +161,81 @@ impl TData {
         let clouds = self
             .file
             .group(&format!("timestep {}", timestep))
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not find timestep {} in file {}",
-                    timestep,
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not find timestep {} in file {}",
+                timestep,
+                self.file.filename()
+            ))
             .dataset("ppcloud")
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not find dataset \"ppcloud\" in HDF5 file \"{:?}\"",
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not find dataset \"ppcloud\" in HDF5 file \"{:?}\"",
+                self.file.filename()
+            ))
             .read_1d::<f64>()
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not read data from \"ppcloud\" dataset. \
+            .expect(&format!(
+                "Can not read data from \"ppcloud\" dataset. \
                 Data type or data format might be wrong. \
                 Check creation of HDF5 file  \"{:?}\"",
-                    self.file.filename()
-                )
-            })
+                self.file.filename()
+            ))
             .to_owned();
 
         let time = self
             .file
             .group(&format!("timestep {}", timestep))
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not fine timestep {} in file {}",
-                    timestep,
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not fine timestep {} in file {}",
+                timestep,
+                self.file.filename()
+            ))
             .dataset("time")
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not find dataset \"time\" in HDF5 file \"{:?}\"",
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not find dataset \"time\" in HDF5 file \"{:?}\"",
+                self.file.filename()
+            ))
             .read_scalar::<f64>()
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not read data from \"time\" dataset. \
+            .expect(&format!(
+                "Can not read data from \"time\" dataset. \
                 Data type or data format might be wrong. \
                 Check creation of HDF5 file  \"{:?}\"",
-                    self.file.filename()
-                )
-            })
+                self.file.filename()
+            ))
             .to_owned();
         let particleid = self
             .file
             .group(&format!("timestep {}", timestep))
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not find timestep {} in file {}",
-                    timestep,
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not find timestep {} in file {}",
+                timestep,
+                self.file.filename()
+            ))
             .dataset("particleid")
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not find dataset \"particleid\" in HDF5 file \"{:?}\"",
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not find dataset \"particleid\" in HDF5 file \"{:?}\"",
+                self.file.filename()
+            ))
             .read_1d::<f64>()
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not read data from \"particleid\" dataset. \
+            .expect(&format!(
+                "Can not read data from \"particleid\" dataset. \
                 Data type or data format might be wrong. \
                 Check creation of HDF5 file  \"{:?}\"",
-                    self.file.filename()
-                )
-            })
+                self.file.filename()
+            ))
             .to_owned();
 
         let dt = Timestep {
-            time,
-            position,
-            velocity,
-            radius,
-            particleid,
-            clouds,
-            density,
+            time: time,
+            position: position,
+            velocity: velocity,
+            radius: radius,
+            particleid: particleid,
+            clouds: clouds,
+            density: density,
         };
         print_debug!("TData: Data read. Saving new timestap and return reference.");
         //let dt = Timestep::default();
-        self.single_data = dt;
-        &self.single_data
+        //self.single_data = dt;
+        dt
     }
 
     pub fn update(&mut self, mut range: (usize, usize)) {
@@ -293,27 +253,21 @@ impl TData {
             let position = self
                 .file
                 .group(&format!("timestep {}", timestep))
-                .unwrap_or_else(|_| {
-                    panic!(
-                        "Can not find group \"timestep {}\" in file {}",
-                        timestep,
-                        self.file.filename()
-                    )
-                })
+                .expect(&format!(
+                    "Can not find group \"timestep {}\" in file {}",
+                    timestep,
+                    self.file.filename()
+                ))
                 .dataset("position")
-                .unwrap_or_else(|_| {
-                    panic!(
-                        "Can not find dataset \"position\" in file {}",
-                        self.file.filename()
-                    )
-                })
+                .expect(&format!(
+                    "Can not find dataset \"position\" in file {}",
+                    self.file.filename()
+                ))
                 .read_2d::<f64>()
-                .unwrap_or_else(|_| {
-                    panic!(
-                        "Can not read dataset \"position\" in file {}",
-                        self.file.filename()
-                    )
-                })
+                .expect(&format!(
+                    "Can not read dataset \"position\" in file {}",
+                    self.file.filename()
+                ))
                 .to_owned();
             let position = position
                 .axis_iter(Axis(0))
@@ -323,79 +277,63 @@ impl TData {
             let velocity = self
                 .file
                 .group(&format!("timestep {}", timestep))
-                .unwrap_or_else(|_| {
-                    panic!(
-                        "Can not find group \"timestep {}\" in file {}",
-                        timestep,
-                        self.file.filename()
-                    )
-                })
+                .expect(&format!(
+                    "Can not find group \"timestep {}\" in file {}",
+                    timestep,
+                    self.file.filename()
+                ))
                 .dataset("velocity")
-                .unwrap_or_else(|_| {
-                    panic!(
-                        "Can not find dataset \"velocity\" in file {}",
-                        self.file.filename()
-                    )
-                })
+                .expect(&format!(
+                    "Can not find dataset \"velocity\" in file {}",
+                    self.file.filename()
+                ))
                 .read_2d::<f64>()
-                .unwrap_or_else(|_| {
-                    panic!(
-                        "Can not read dataset \"velocity\" in file {}",
-                        self.file.filename()
-                    )
-                })
+                .expect(&format!(
+                    "Can not read dataset \"velocity\" in file {}",
+                    self.file.filename()
+                ))
                 .to_owned();
 
             //Radius
             let radius = self
                 .file
                 .group(&format!("timestep {}", timestep))
-                .unwrap_or_else(|_| {
-                    panic!(
-                        "Can not find timestep {} in file {}",
-                        timestep,
-                        self.file.filename()
-                    )
-                })
+                .expect(&format!(
+                    "Can not find timestep {} in file {}",
+                    timestep,
+                    self.file.filename()
+                ))
                 .dataset("radius")
-                .unwrap_or_else(|_| {
-                    panic!(
-                        "Can not find dataset \"radius\" in HDF5 file \"{:?}\"",
-                        self.file.filename()
-                    )
-                })
+                .expect(&format!(
+                    "Can not find dataset \"radius\" in HDF5 file \"{:?}\"",
+                    self.file.filename()
+                ))
                 .read_1d::<f64>()
-                .unwrap_or_else(|_| {
-                    panic!(
-                        "Can not read data from \"radius\" dataset. \
+                .expect(&format!(
+                    "Can not read data from \"radius\" dataset. \
                     Data type or data format might be wrong. \
                     Check creation of HDF5 file  \"{:?}\"",
-                        self.file.filename()
-                    )
-                })
+                    self.file.filename()
+                ))
                 .to_owned();
             let density = match self
                 .file
                 .group(&format!("timestep {}", timestep))
-                .unwrap_or_else(|_| {
-                    panic!(
-                        "Can not find timestep {} in file {}",
-                        timestep,
-                        self.file.filename()
-                    )
-                })
+                .expect(&format!(
+                    "Can not find timestep {} in file {}",
+                    timestep,
+                    self.file.filename()
+                ))
                 .dataset("density")
             {
                 Ok(s) => s
                     .read_1d::<f64>()
-                    .unwrap_or_else(|_| {
-                        panic!(
-                            "Can not read data from \"density\" dataset. \
+                    .expect(&format!(
+                        "Can not read data from \"density\" dataset. \
                             Data type or data format might be wrong. \
                             Check creation of HDF5 file  \"{:?}\"",
-                            self.file.filename()
-                        )
-                    })
+                        self.file.filename()
+                    ))
                     .to_owned(),
                 Err(_) => {
                     print_warning!(
@@ -412,94 +350,76 @@ impl TData {
             let clouds = self
                 .file
                 .group(&format!("timestep {}", timestep))
-                .unwrap_or_else(|_| {
-                    panic!(
-                        "Can not find timestep {} in file {}",
-                        timestep,
-                        self.file.filename()
-                    )
-                })
+                .expect(&format!(
+                    "Can not find timestep {} in file {}",
+                    timestep,
+                    self.file.filename()
+                ))
                 .dataset("ppcloud")
-                .unwrap_or_else(|_| {
-                    panic!(
-                        "Can not find dataset \"ppcloud\" in HDF5 file \"{:?}\"",
-                        self.file.filename()
-                    )
-                })
+                .expect(&format!(
+                    "Can not find dataset \"ppcloud\" in HDF5 file \"{:?}\"",
+                    self.file.filename()
+                ))
                 .read_1d::<f64>()
-                .unwrap_or_else(|_| {
-                    panic!(
-                        "Can not read data from \"ppcloud\" dataset. \
+                .expect(&format!(
+                    "Can not read data from \"ppcloud\" dataset. \
                     Data type or data format might be wrong. \
                     Check creation of HDF5 file  \"{:?}\"",
-                        self.file.filename()
-                    )
-                })
+                    self.file.filename()
+                ))
                 .to_owned();
 
             let time = self
                 .file
                 .group(&format!("timestep {}", timestep))
-                .unwrap_or_else(|_| {
-                    panic!(
-                        "Can not fine timestep {} in file {}",
-                        timestep,
-                        self.file.filename()
-                    )
-                })
+                .expect(&format!(
+                    "Can not fine timestep {} in file {}",
+                    timestep,
+                    self.file.filename()
+                ))
                 .dataset("time")
-                .unwrap_or_else(|_| {
-                    panic!(
-                        "Can not find dataset \"time\" in HDF5 file \"{:?}\"",
-                        self.file.filename()
-                    )
-                })
+                .expect(&format!(
+                    "Can not find dataset \"time\" in HDF5 file \"{:?}\"",
+                    self.file.filename()
+                ))
                 .read_scalar::<f64>()
-                .unwrap_or_else(|_| {
-                    panic!(
-                        "Can not read data from \"time\" dataset. \
+                .expect(&format!(
+                    "Can not read data from \"time\" dataset. \
                     Data type or data format might be wrong. \
                     Check creation of HDF5 file  \"{:?}\"",
-                        self.file.filename()
-                    )
-                })
+                    self.file.filename()
+                ))
                 .to_owned();
             let particleid = self
                 .file
                 .group(&format!("timestep {}", timestep))
-                .unwrap_or_else(|_| {
-                    panic!(
-                        "Can not find timestep {} in file {}",
-                        timestep,
-                        self.file.filename()
-                    )
-                })
+                .expect(&format!(
+                    "Can not find timestep {} in file {}",
+                    timestep,
+                    self.file.filename()
+                ))
                 .dataset("particleid")
-                .unwrap_or_else(|_| {
-                    panic!(
-                        "Can not find dataset \"particleid\" in HDF5 file \"{:?}\"",
-                        self.file.filename()
-                    )
-                })
+                .expect(&format!(
+                    "Can not find dataset \"particleid\" in HDF5 file \"{:?}\"",
+                    self.file.filename()
+                ))
                 .read_1d::<f64>()
-                .unwrap_or_else(|_| {
-                    panic!(
-                        "Can not read data from \"particleid\" dataset. \
+                .expect(&format!(
+                    "Can not read data from \"particleid\" dataset. \
                     Data type or data format might be wrong. \
                     Check creation of HDF5 file  \"{:?}\"",
-                        self.file.filename()
-                    )
-                })
+                    self.file.filename()
+                ))
                 .to_owned();
 
             let dt = Timestep {
-                time,
-                position,
-                velocity,
-                radius,
-                particleid,
-                clouds,
-                density,
+                time: time,
+                position: position,
+                velocity: velocity,
+                radius: radius,
+                particleid: particleid,
+                clouds: clouds,
+                density: density,
             };
             print_debug!(
                 "\tTimestep {}: Saving struct in buffer with len: {}.",
@@ -535,7 +455,7 @@ impl TData {
                 {
                     continue;
                 }
-                x += positions[0][0];
+                x = x + positions[0][0];
             }
         }
         println!("Elapsed time: {}", now.elapsed().as_millis());
@@ -561,7 +481,8 @@ impl DataManager for TData {
         }
         // If a timestep below the current range is requested, read in single timestep
         if timestep < self.range.0 {
-            self.read_single(timestep)
+            self.single_data = self.read_single(timestep);
+            &self.single_data
         } else {
             // use mem::swap to swap it with a option(None)
             &self.buffer[timestep - self.range.0]
@@ -572,126 +493,109 @@ impl DataManager for TData {
         let dimensions = self
             .file
             .attr("dimensions")
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not find dataset \"dimensions\" in HDF5 file \"{:?}\"",
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not find dataset \"dimensions\" in HDF5 file \"{:?}\"",
+                self.file.filename()
+            ))
             .read_2d::<f64>()
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not read data from \"dimensions\" dataset. \
+            .expect(&format!(
+                "Can not read data from \"dimensions\" dataset. \
                 Data type or data format might be wrong. \
                 Check creation of HDF5 file  \"{:?}\"",
-                    self.file.filename()
-                )
-            });
+                self.file.filename()
+            ));
         let nparticles = self
             .file
             .attr("particle number")
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not find attribute \"particle number\" in file {}",
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not find attribute \"particle number\" in file {}",
+                self.file.filename()
+            ))
             .read_scalar()
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not read scalar from attribute \"particle number\" in file {}",
-                    self.file.filename()
-                )
-            });
+            .expect(&format!(
+                "Can not read scalar from attribute \"particle number\" in file {}",
+                self.file.filename()
+            ));
         let timesteps = self
             .file
             .attr("timesteps")
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not find attribute \"timesteps\" in file {}",
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not find attribute \"timesteps\" in file {}",
+                self.file.filename()
+            ))
             .read_scalar()
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not read scalar from attribute \"timesteps\" in file {}",
-                    self.file.filename()
-                )
-            });
+            .expect(&format!(
+                "Can not read scalar from attribute \"timesteps\" in file {}",
+                self.file.filename()
+            ));
         let time = self
             .file
             .attr("time")
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not find attribute \"time\" in file {}",
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not find attribute \"time\" in file {}",
+                self.file.filename()
+            ))
             .read_raw()
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not read vector from attribute \"time\" in file {}",
-                    self.file.filename()
-                )
-            });
+            .expect(&format!(
+                "Can not read vector from attribute \"time\" in file {}",
+                self.file.filename()
+            ));
         let sample_rate = self
             .file
             .attr("sample rate")
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not find attribute \"sample rate\" in file {}",
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not find attribute \"sample rate\" in file {}",
+                self.file.filename()
+            ))
             .read_scalar()
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not read scalar from attribute \"sample rate\" in file {}",
-                    self.file.filename()
-                )
-            });
+            .expect(&format!(
+                "Can not read scalar from attribute \"sample rate\" in file {}",
+                self.file.filename()
+            ));
         let velocity = self
             .file
             .attr("velocity")
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not find attribute \"velocity\" in file {}",
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not find attribute \"velocity\" in file {}",
+                self.file.filename()
+            ))
             .read_2d()
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not read scalar from attribute \"velocity\" in file {}",
-                    self.file.filename()
-                )
-            });
+            .expect(&format!(
+                "Can not read scalar from attribute \"velocity\" in file {}",
+                self.file.filename()
+            ));
         let velocity_mag = self
             .file
             .attr("velocity magnitude")
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not find attribute \"velocity magnitude\" in file {}",
-                    self.file.filename()
-                )
-            })
+            .expect(&format!(
+                "Can not find attribute \"velocity magnitude\" in file {}",
+                self.file.filename()
+            ))
             .read_1d()
-            .unwrap_or_else(|_| {
-                panic!(
-                    "Can not read scalar from attribute \"velocity magnitude\" in file {}",
-                    self.file.filename()
-                )
-            });
+            .expect(&format!(
+                "Can not read scalar from attribute \"velocity magnitude\" in file {}",
+                self.file.filename()
+            ));
+        let time_array = self
+            .file
+            .dataset("time array")
+            .expect(
+                "Can not find attribute \"time array\" in file, \
+            You might have a old version of a HDF5 file. please include the \
+            time as an array in attributes",
+            )
+            .read_1d()
+            .expect("Can not read vector from attribute \"time array\" in file");
         GlobalStats {
-            dimensions,
-            nparticles,
+            dimensions: dimensions,
+            nparticles: nparticles,
             ntimesteps: timesteps,
             min_time: time[0],
             max_time: time[1],
-            sample_rate,
-            velocity,
-            velocity_mag,
+            sample_rate: sample_rate,
+            velocity: velocity,
+            velocity_mag: velocity_mag,
+            time_array: time_array,
         }
     }
     fn stats(&self) {
@@ -708,6 +612,11 @@ impl DataManager for TData {
             "Minimum velocity {} m/s \nMaximum Velocity {} m/s",
             vel_mag[0usize], vel_mag[2usize]
         );
+    }
+
+    fn get_timestep_unbuffered(&self, timestep: usize) -> Timestep {
+        print_debug!("TData: Extracting timestep number {}", timestep);
+        self.read_single(timestep)
     }
 }
 

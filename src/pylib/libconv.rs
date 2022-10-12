@@ -4,11 +4,46 @@
 use crate::converter::*;
 use pyo3::prelude::*;
 
+/// Convert particle data from a given format to HDF5 (H5Part-like)
+///
+/// Methods
+/// -------
+/// vtk:
+///     Convert VTK file to a HDF5 file
+///
+/// vtk_from_folder:
+///     Convert all VTK files in a folder to a HDF5 file
+///
+/// csv:
+///     Convert CSV file to a HDF5 file
 #[pyclass(name = "Converter")]
 pub struct PyConverter {}
 
 #[pymethods]
 impl PyConverter {
+    /// Convert VTK file to a HDF5 file
+    ///
+    /// Parameters
+    /// ----------
+    /// filenames: List(str)
+    ///     List of VTK files to convert
+    ///     List must be ordered by time
+    ///     Filenames must contain the timestep
+    ///
+    /// timestep: float
+    ///     Time between two timesteps
+    ///
+    /// outname: str
+    ///     Name of the output HDF5 file
+    ///
+    /// filter: str, optional
+    ///     Regex Filter to apply to the data in order to extract the time for each file
+    ///     Default: "r\"(\\d+).vtk\""
+    ///
+    /// Returns
+    /// -------
+    /// None
+    ///
     #[args(filter = "r\"(\\d+).vtk\"")]
     #[staticmethod]
     fn vtk(
@@ -19,6 +54,29 @@ impl PyConverter {
     ) {
         vtk(filenames, timestep, outname, filter);
     }
+
+    /// Convert all VTK files in a folder to a HDF5 file
+    ///
+    /// Parameters
+    /// ----------
+    /// folder: str
+    ///     Path to the folder containing the VTK files
+    ///     Folder must only contain one type of vtk files
+    ///
+    /// timestep: float
+    ///     Time between two timesteps
+    ///
+    /// outname: str
+    ///     Name of the output HDF5 file
+    ///
+    /// filter: str, optional
+    ///     Regex Filter to apply to the data in order to extract the time for each file
+    ///     Default: "r\"(\\d+).vtk\""
+    ///
+    /// Returns
+    /// -------
+    /// None
+    ///
     #[args(filter = "r\"(\\d+).vtk\"")]
     #[staticmethod]
     fn vtk_from_folder(
@@ -29,6 +87,43 @@ impl PyConverter {
     ) {
         vtk_from_folder(folder, timestep, outname, filter);
     }
+
+    /// Convert CSV file to a HDF5 file
+    ///
+    /// Parameters
+    /// ----------
+    /// filename: str
+    ///    Path to the CSV file
+    ///
+    /// outname: str
+    ///    Name of the output HDF5 file
+    ///
+    /// columns: List(int), optional
+    ///     List of columns to convert containing t,x,y,z,(optional vx,vy,vz)
+    ///     Default: [0,1,2,3]
+    /// header: bool, optional
+    ///     True if the CSV file contains a header
+    ///     Default: True
+    ///
+    /// comment: str, optional
+    ///     Comment character to ignore
+    ///     Default: "#"
+    ///
+    /// vel : bool, optional
+    ///     If true the velocity will be computed from the position using the savitzky-golay filter
+    ///     Default: False
+    ///
+    /// interpolate: bool, optional
+    ///     If true the particle positions will be interpolated in order to have a constant timestep
+    ///     Default: False
+    ///
+    /// radius: float, optional
+    ///     Radius of the particle
+    ///
+    /// Returns
+    /// -------
+    /// None
+    ///
     #[args(
         columns = "vec![0,1,2,3]",
         delimiter = "\",\"",

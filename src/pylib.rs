@@ -47,6 +47,9 @@ use libplot::*;
 ///
 /// mean_velocity:
 ///     Return the mean velocity of all valid particles in the system.
+///
+/// dispersion:
+///    Return the dispersion of all valid particles in the system for a given time
 #[pyclass(name = "Data")]
 struct PyData {
     data: Box<dyn Manager + Send>,
@@ -55,7 +58,7 @@ struct PyData {
 
 #[pymethods]
 impl PyData {
-    /// Create new instance of up4.Data class. Time or particle oriented formats are parsed automatically.
+    /// Create new i0nstance of up4.Data class. Time or particle oriented formats are parsed automatically.
     ///
     /// Parameters
     /// ----------
@@ -272,6 +275,41 @@ impl PyData {
         // return
         mean_velocity
     } //End mean_velocity
+
+    /// Return the dispersion of the particles in the system.
+    /// See Martin, T. W., J. P. K. Seville, and D. J. Parker. "A general method for quantifying dispersion in multiscale systems using trajectory analysis."
+    ///
+    /// parameters
+    /// ----------
+    /// grid : up4.Grid
+    ///    Grid class containing the grid layout.
+    /// time_for_dispersion : float
+    ///   Time for which the dispersion is calculated.
+    ///
+    /// returns
+    /// -------
+    /// up4.Grid
+    ///   Grid class containing the dispersion field.
+    ///
+    ///
+    fn dispersion<'py>(
+        &mut self,
+        _py: Python<'py>,
+        grid: &PyGrid,
+        time_for_dispersion: f64,
+    ) -> PyGrid {
+        print_debug!("Starting Dispersion function");
+        let selector: &ParticleSelector =
+            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
+                Some(b) => b,
+                None => panic!("Can not convert PyGrid to Grid1D as "),
+            };
+        let grid = self
+            .data
+            .dispersion(grid.grid.clone(), selector, time_for_dispersion);
+
+        PyGrid { grid: grid }
+    }
 } // End PyData
 
 #[pyproto]

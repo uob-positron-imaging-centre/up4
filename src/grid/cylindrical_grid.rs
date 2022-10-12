@@ -111,7 +111,7 @@ impl CylindricalGrid3D {
         let theta = pos[1].atan2(pos[0]);
         let z = pos[2];
 
-        print_debug!("Cart to cyl: {:?}-->{:?}", pos, new_pos);
+        print_debug!("Cart to cyl: {:?}-->{:?}", pos, [r, theta, z]);
         [r, theta, z]
     }
 }
@@ -197,6 +197,11 @@ impl GridFunctions3D for CylindricalGrid3D {
     }
     fn as_any(&self) -> &dyn Any {
         self
+    }
+
+    fn add_to_cell(&mut self, cell_id: CellId, value: f64) {
+        self.data[(cell_id[0], cell_id[1], cell_id[2])] += value;
+        self.weight[(cell_id[0], cell_id[1], cell_id[2])] += 1.;
     }
 
     fn get_value(&self, pos: Position) -> f64 {

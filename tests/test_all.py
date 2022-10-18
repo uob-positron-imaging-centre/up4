@@ -126,3 +126,21 @@ class TestGrid:
         assert slice_xz.shape == (10,8)
         slice_xy = grid.slice(2,5)
         assert slice_xy.shape == (10,9)
+
+    def test_vector_slice(self,grid):
+        data = up4.Data.from_tdata(os.path.join(location,"fixtures","drum.hdf5"))
+        grid = grid(data, cells = [10,9,8])
+        vector_grid = data.vectorfield(grid)
+        slice_yz_1,slice_yz_2,slice_yz_3 = vector_grid.slice(0,5)
+        assert slice_yz_1.shape == (9,8)
+        assert slice_yz_2.shape == (9,8)
+        assert slice_yz_3.shape == (9,8)
+        slice_xz_1,slice_xz_2,slice_xz_3 = vector_grid.slice(1,5)
+        assert slice_xz_1.shape == (10,8)
+        assert slice_xz_2.shape == (10,8)
+        assert slice_xz_3.shape == (10,8)
+        slice_xy_1,slice_xy_2,slice_xy_3 = vector_grid.slice(2,5)
+        assert slice_xy_1.shape == (10,9)
+        assert slice_xy_2.shape == (10,9)
+        assert slice_xy_3.shape == (10,9)
+

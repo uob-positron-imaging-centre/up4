@@ -2,7 +2,7 @@ use super::PyData;
 use crate::grid;
 use crate::grid::*;
 use ndarray_stats::QuantileExt;
-use numpy::{IntoPyArray, PyArray1, PyArray3};
+use numpy::{IntoPyArray, PyArray1, PyArray2, PyArray3};
 use plotly::{HeatMap, Plot};
 use pyo3::prelude::*;
 
@@ -291,6 +291,27 @@ impl PyGrid {
     ///    A numpy array containing the grid-data with the same shape as grid
     fn to_numpy<'py>(&self, _py: Python<'py>) -> &'py PyArray3<f64> {
         self.grid.get_data().to_owned().into_pyarray(_py)
+    }
+
+    /// Return a slice of the grid as a numpy array
+    ///
+    /// Parameters
+    /// ----------
+    /// axis : int
+    ///    The axis to slice the grid on
+    /// index : int
+    ///   The index of the slice
+    #[args(axis = "0")]
+    fn slice<'py>(&self, _py: Python<'py>, axis: usize, index: usize) -> &'py PyArray2<f64> {
+        self.grid
+            .slice_idx(axis, index)
+            .to_owned()
+            .into_pyarray(_py)
+    }
+
+    #[args(axis = "0")]
+    fn slice_pos<'py>(&self, _py: Python<'py>, axis: usize, position: f64) -> &'py PyArray2<f64> {
+        self.grid.slice(axis, position).to_owned().into_pyarray(_py)
     }
 }
 

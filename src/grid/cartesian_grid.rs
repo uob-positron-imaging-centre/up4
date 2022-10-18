@@ -170,6 +170,36 @@ impl GridFunctions3D for CartesianGrid3D {
         result
     }
 
+    fn slice(&self, axis: usize, position: f64) -> Array2<f64> {
+        // find the length of theplane in each direction with triangulation
+        let cell_id = ((position - self.limits[axis][0])
+            / (self.limits[axis][1] - self.limits[axis][0])
+            * self.cells[axis] as f64) as usize;
+
+        if axis == 0 {
+            self.data.slice(s![cell_id, .., ..]).to_owned()
+        } else if axis == 1 {
+            self.data.slice(s![.., cell_id, ..]).to_owned()
+        } else if axis == 2 {
+            self.data.slice(s![.., .., cell_id]).to_owned()
+        } else {
+            panic!("Cartesian Grid: Axis {:?} not supported in 3D array", axis);
+        }
+    }
+
+    fn slice_idx(&self, axis: usize, cell_id: usize) -> Array2<f64> {
+        // find the length of theplane in each direction with triangulation
+        if axis == 0 {
+            self.data.slice(s![cell_id, .., ..]).to_owned()
+        } else if axis == 1 {
+            self.data.slice(s![.., cell_id, ..]).to_owned()
+        } else if axis == 2 {
+            self.data.slice(s![.., .., cell_id]).to_owned()
+        } else {
+            panic!("Cartesian Grid: Axis {:?} not supported in 3D array", axis);
+        }
+    }
+
     fn get_xpositions(&self) -> &Array1<f64> {
         &self.xpositions
     }

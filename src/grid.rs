@@ -71,9 +71,13 @@ pub trait GridFunctions3D: DynClone + std::fmt::Display + std::fmt::Debug + Send
     fn new_zeros(&self) -> Box<dyn GridFunctions3D>;
 
     fn collapse(&self, axis: usize) -> Array2<f64>;
-    //slice
+
+    fn slice(&self, axis: usize, position: f64) -> Array2<f64>;
+
+    fn slice_idx(&self, axis: usize, index: usize) -> Array2<f64>;
     //cellcenters
 
+    // histogram
     // Need to write getters in here
     fn get_xpositions(&self) -> &Array1<f64>;
     fn get_ypositions(&self) -> &Array1<f64>;

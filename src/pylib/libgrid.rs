@@ -352,6 +352,10 @@ impl pyo3::PyObjectProtocol for PyGrid {
     }
 }
 
+/// A 3D Grid containing Vector Data
+/// This grid is generated in the vectorfield function and contains the arrow
+/// directions and size corresponding to the magnitude of the velocity.
+/// It has no constructor in python.
 #[pyclass(name = "VectorGrid")]
 pub struct PyVecGrid {
     pub grid: vector_grid::VectorGrid,
@@ -418,5 +422,49 @@ impl PyVecGrid {
     }
     fn shape(&self) -> Vec<usize> {
         self.grid.data[0].get_cells().to_vec()
+    }
+
+    fn slice<'py>(
+        &self,
+        _py: Python<'py>,
+        axis: usize,
+        index: usize,
+    ) -> (&'py PyArray2<f64>, &'py PyArray2<f64>, &'py PyArray2<f64>) {
+        (
+            self.grid.data[0]
+                .slice_idx(axis, index)
+                .to_owned()
+                .into_pyarray(_py),
+            self.grid.data[1]
+                .slice_idx(axis, index)
+                .to_owned()
+                .into_pyarray(_py),
+            self.grid.data[2]
+                .slice_idx(axis, index)
+                .to_owned()
+                .into_pyarray(_py),
+        )
+    }
+
+    fn slice_pos<'py>(
+        &self,
+        _py: Python<'py>,
+        axis: usize,
+        position: f64,
+    ) -> (&'py PyArray2<f64>, &'py PyArray2<f64>, &'py PyArray2<f64>) {
+        (
+            self.grid.data[0]
+                .slice(axis, position)
+                .to_owned()
+                .into_pyarray(_py),
+            self.grid.data[1]
+                .slice(axis, position)
+                .to_owned()
+                .into_pyarray(_py),
+            self.grid.data[2]
+                .slice(axis, position)
+                .to_owned()
+                .into_pyarray(_py),
+        )
     }
 }

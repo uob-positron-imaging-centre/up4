@@ -115,3 +115,14 @@ class TestFields:
 
 
 
+@pytest.mark.parametrize("grid",["cylidrical", "cartesian"], indirect=True)
+class TestGrid:
+
+    def test_slice(self,grid):
+        grid = grid(up4.Data.from_tdata(os.path.join(location,"fixtures","drum.hdf5")), cells = [10,9,8])
+        slice_yz = grid.slice(0,5)
+        assert slice_yz.shape == (9,8)
+        slice_xz = grid.slice(1,5)
+        assert slice_xz.shape == (10,8)
+        slice_xy = grid.slice(2,5)
+        assert slice_xy.shape == (10,9)

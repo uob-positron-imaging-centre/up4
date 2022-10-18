@@ -162,7 +162,15 @@ impl GridFunctions3D for VectorGrid {
     fn collapse(&self, _axis: usize) -> Array2<f64> {
         unimplemented!()
     }
-    //slice
+
+    fn slice(&self, _axis: usize, _position: f64) -> Array2<f64> {
+        unimplemented!()
+    }
+
+    fn slice_idx(&self, _axis: usize, _cell_id: usize) -> Array2<f64> {
+        // find the length of theplane in each direction with triangulation
+        unimplemented!()
+    }
     //cellcenters
 
     // Need to write getters in here

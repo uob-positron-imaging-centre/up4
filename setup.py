@@ -8,7 +8,7 @@
 
 import sys
 from setuptools.command.install import install
-from setuptools import setup
+from setuptools import setup, find_packages
 import numpy as np
 import os
 
@@ -56,7 +56,9 @@ setup(
     description="analysing toolset for particle data",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=["up4"],
+    packages = find_packages(
+        exclude = ["tests", "*.tests", "*.tests.*", "tests.*"]
+    ),
     rust_extensions=[
         RustExtension("upppp_rust", features=features, binding=Binding.PyO3)
     ],

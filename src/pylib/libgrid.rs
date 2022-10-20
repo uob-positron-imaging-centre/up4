@@ -288,7 +288,7 @@ impl PyGrid {
     /// Returns
     /// -------
     /// grid : ndarray
-    ///    A numpy array containing the grid-data with the same shape as grid
+    ///     A numpy array containing the grid-data with the same shape as grid
     fn to_numpy<'py>(&self, _py: Python<'py>) -> &'py PyArray3<f64> {
         self.grid.get_data().to_owned().into_pyarray(_py)
     }
@@ -298,9 +298,9 @@ impl PyGrid {
     /// Parameters
     /// ----------
     /// axis : int
-    ///    The axis to slice the grid on
+    ///     The axis to slice the grid on
     /// index : int
-    ///   The index of the slice
+    ///     The index of the slice
     #[args(axis = "0")]
     fn slice<'py>(&self, _py: Python<'py>, axis: usize, index: usize) -> &'py PyArray2<f64> {
         self.grid
@@ -308,10 +308,34 @@ impl PyGrid {
             .to_owned()
             .into_pyarray(_py)
     }
-
+    /// Return a slice of the grid as a numpy array at a given position and axis
+    ///
+    /// Parameters
+    /// ----------
+    /// axis : int
+    ///     The axis to slice the grid on
+    /// position : f64
+    ///     The position of the slice
     #[args(axis = "0")]
     fn slice_pos<'py>(&self, _py: Python<'py>, axis: usize, position: f64) -> &'py PyArray2<f64> {
         self.grid.slice(axis, position).to_owned().into_pyarray(_py)
+    }
+
+    /// Collaps the grid along an axis
+    /// This is basically cell based depth averaging
+    ///
+    /// Parameters
+    /// ----------
+    /// axis : int
+    ///     The axis to collapse the grid on
+    ///
+    /// Returns
+    /// -------
+    /// grid : ndarray
+    ///     A numpy array containing the collapsed grid
+    ///
+    fn collaps<'py>(&self, _py: Python<'py>, axis: usize) -> &'py PyArray2<f64> {
+        self.grid.collapse(axis).to_owned().into_pyarray(_py)
     }
 }
 
@@ -463,6 +487,27 @@ impl PyVecGrid {
                 .into_pyarray(_py),
             self.grid.data[2]
                 .slice(axis, position)
+                .to_owned()
+                .into_pyarray(_py),
+        )
+    }
+
+    fn collaps<'py>(
+        &self,
+        _py: Python<'py>,
+        axis: usize,
+    ) -> (&'py PyArray2<f64>, &'py PyArray2<f64>, &'py PyArray2<f64>) {
+        (
+            self.grid.data[0]
+                .collapse(axis)
+                .to_owned()
+                .into_pyarray(_py),
+            self.grid.data[1]
+                .collapse(axis)
+                .to_owned()
+                .into_pyarray(_py),
+            self.grid.data[2]
+                .collapse(axis)
                 .to_owned()
                 .into_pyarray(_py),
         )

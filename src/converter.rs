@@ -80,7 +80,7 @@ pub fn vtk(
     velocity_mag[2] = f64::MIN;
 
     let mut mean_counter: usize = 0;
-    for filename in filenames.iter() {
+    for (id, filename) in filenames.iter().enumerate() {
         print_debug!("Creating a new group \"timestep {}\"", step);
         let group = hdf5file
             .create_group(&format!("timestep {}", step))
@@ -222,8 +222,10 @@ pub fn vtk(
         mean_counter += particle_id.len();
         sample_rate = current_time - old_time;
         old_time = current_time;
-        bar.inc(1);
-        check_signals!();
+        if id % 10 == 0 {
+            bar.inc(10);
+            check_signals!();
+        }
     } // end filename forloop
     velocity_mag[1] /= mean_counter as f64;
     velocity[[0, 1]] /= mean_counter as f64;
@@ -417,7 +419,11 @@ pub fn csv_converter(
                 time, x, y, z -position "
                 )
             }
-            data = convertertools::velocity_polynom(data, 9, 2);
+            if data.column(0).len() < 200000 {
+                data = convertertools::velocity_polynom(data, 9, 2);
+            } else {
+                data = convertertools::velocity_paralell::velocity_polynom_parallel(data, 9, 2);
+            }
         }
         data
     };
@@ -549,8 +555,10 @@ pub fn csv_converter(
             time[1] = current_time;
         }
         old_time = current_time;
-        bar.inc(1);
-        check_signals!();
+        if line_id % 1000 == 0 {
+            bar.inc(1000);
+            check_signals!();
+        }
     } // end filename forloop
       // write data into HDF5 file
     let builder = group.new_dataset_builder();

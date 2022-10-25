@@ -27,6 +27,7 @@ ndarray-csv = {version = "0.5.1"}
 polyfit-rs = "0.2.0"
 num-traits="0.2.14"
 natord = "1.0.9"
+rayon = "1.5.3"
 [dependencies.pyo3]
 version = "=0.14.5"
 features = ["extension-module"]

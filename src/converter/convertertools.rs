@@ -4,6 +4,7 @@ use super::check_signals;
 use indicatif::{ProgressBar, ProgressStyle};
 use ndarray::{self, ArrayView1};
 use polyfit_rs;
+pub mod velocity_paralell;
 pub fn interpolate(data: ndarray::Array2<f64>) -> ndarray::Array2<f64> {
     // TODO implement different types of interpolation
     //let bar = ProgressBar::new(data.column(0).len() as u64);
@@ -91,8 +92,10 @@ pub fn interpolate(data: ndarray::Array2<f64>) -> ndarray::Array2<f64> {
         interp_data[[step, 1]] = x_new;
         interp_data[[step, 2]] = y_new;
         interp_data[[step, 3]] = z_new;
-        check_signals!();
-        bar.inc(1);
+        if step % 20000 == 0 {
+            bar.inc(20000);
+            check_signals!();
+        }
     }
     bar.finish();
     data
@@ -163,9 +166,10 @@ pub fn velocity_polynom(
         new_data[[id - (sampling_steps - 1) / 2, 6]] = vz;
         print_debug!("{},{},{}", vx, vy, vz);
         print_debug!("{:?},{:?},{:?}", param_x, param_y, param_z);
-        bar.inc(1);
-
-        check_signals!();
+        if id % 2000 == 0 {
+            bar.inc(2000);
+            check_signals!();
+        }
     } // End loop over dataset
     bar.finish();
     new_data

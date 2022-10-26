@@ -162,13 +162,14 @@ impl PyData {
     fn dimensions<'py>(&self, py: Python<'py>) -> &'py pyo3::types::PyDict {
         let stats = self.data.global_stats();
         let dim = stats.dimensions();
+        println!("{:?}", dim);
         let key_vals: Vec<(&str, PyObject)> = vec![
             ("xmin", dim[[0, 0]].to_object(py)),
-            ("xmax", dim[[0, 1]].to_object(py)),
-            ("ymin", dim[[1, 0]].to_object(py)),
+            ("xmax", dim[[1, 0]].to_object(py)),
+            ("ymin", dim[[0, 1]].to_object(py)),
             ("ymax", dim[[1, 1]].to_object(py)),
-            ("zmin", dim[[2, 0]].to_object(py)),
-            ("zmax", dim[[2, 1]].to_object(py)),
+            ("zmin", dim[[0, 2]].to_object(py)),
+            ("zmax", dim[[1, 2]].to_object(py)),
         ];
         let dict = key_vals.into_py_dict(py);
         dict
@@ -182,7 +183,7 @@ impl PyData {
     fn min_position<'py>(&self, py: Python<'py>) -> &'py numpy::PyArray1<f64> {
         let stats = self.data.global_stats();
         let dim = stats.dimensions();
-        let min_pos = dim.column(0).to_owned();
+        let min_pos = dim.row(0).to_owned();
         min_pos.into_pyarray(py)
     }
 
@@ -194,8 +195,13 @@ impl PyData {
     fn max_position<'py>(&self, py: Python<'py>) -> &'py numpy::PyArray1<f64> {
         let stats = self.data.global_stats();
         let dim = stats.dimensions();
-        let max_pos = dim.column(1).to_owned();
+        let max_pos = dim.row(1).to_owned();
         max_pos.into_pyarray(py)
+    }
+
+    /// Number of particles in the system.
+    fn nparticles(&self) -> usize {
+        *self.data.global_stats().nparticles()
     }
 
     /// Select the dataset between two different times.

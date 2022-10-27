@@ -19,8 +19,11 @@ pub struct TData {
     // H5Part format or H5TimePart information
     file: hdf5::File,
     buffer: Vec<Timestep>,
+    buffer_extra: Vec<Vec<Timestep>>,
     range: (usize, usize),
+    range_extra: Vec<(usize, usize)>,
     pub buffersize: usize,
+    pub buffersize_extra: Vec<usize>,
     single_data: Timestep,
     global_stats_: GlobalStats,
 }
@@ -39,8 +42,11 @@ impl TData {
         let mut data = TData {
             file: file,
             buffer: buffer,
+            buffer_extra: vec![],
             range: (0, 0),
+            range_extra: vec![],
             buffersize: BUFFERSIZE,
+            buffersize_extra: vec![],
             single_data: Timestep::default(),
             global_stats_: GlobalStats::default(),
         };
@@ -432,6 +438,200 @@ impl TData {
         print_debug!("TData: Finished buffer update")
     }
 
+    pub fn update_extra(&mut self, mut range: (usize, usize), buffer_id: usize) {
+        print_debug!("TData: Updating buffer");
+        let timesteps = *self.global_stats_.timesteps();
+        if range.1 >= timesteps {
+            range.1 = timesteps;
+        }
+        self.buffersize_extra[buffer_id] = range.1 - range.0;
+
+        print_debug!("TData: Looping over all particles:");
+        for timestep in range.0..range.1 {
+            // for each particle find the Position at the
+            print_debug!("Timestep {}: Extracting position from HDF5.", timestep);
+            let position = self
+                .file
+                .group(&format!("timestep {}", timestep))
+                .expect(&format!(
+                    "Can not find group \"timestep {}\" in file {}",
+                    timestep,
+                    self.file.filename()
+                ))
+                .dataset("position")
+                .expect(&format!(
+                    "Can not find dataset \"position\" in file {}",
+                    self.file.filename()
+                ))
+                .read_2d::<f64>()
+                .expect(&format!(
+                    "Can not read dataset \"position\" in file {}",
+                    self.file.filename()
+                ))
+                .to_owned();
+            let position = position
+                .axis_iter(Axis(0))
+                .map(|x| [x[0], x[1], x[2]])
+                .collect::<Array1<Position>>();
+            // for each particle find the velocuty at the
+            let velocity = self
+                .file
+                .group(&format!("timestep {}", timestep))
+                .expect(&format!(
+                    "Can not find group \"timestep {}\" in file {}",
+                    timestep,
+                    self.file.filename()
+                ))
+                .dataset("velocity")
+                .expect(&format!(
+                    "Can not find dataset \"velocity\" in file {}",
+                    self.file.filename()
+                ))
+                .read_2d::<f64>()
+                .expect(&format!(
+                    "Can not read dataset \"velocity\" in file {}",
+                    self.file.filename()
+                ))
+                .to_owned();
+
+            //Radius
+            let radius = self
+                .file
+                .group(&format!("timestep {}", timestep))
+                .expect(&format!(
+                    "Can not find timestep {} in file {}",
+                    timestep,
+                    self.file.filename()
+                ))
+                .dataset("radius")
+                .expect(&format!(
+                    "Can not find dataset \"radius\" in HDF5 file \"{:?}\"",
+                    self.file.filename()
+                ))
+                .read_1d::<f64>()
+                .expect(&format!(
+                    "Can not read data from \"radius\" dataset. \
+                    Data type or data format might be wrong. \
+                    Check creation of HDF5 file  \"{:?}\"",
+                    self.file.filename()
+                ))
+                .to_owned();
+            let density = match self
+                .file
+                .group(&format!("timestep {}", timestep))
+                .expect(&format!(
+                    "Can not find timestep {} in file {}",
+                    timestep,
+                    self.file.filename()
+                ))
+                .dataset("density")
+            {
+                Ok(s) => s
+                    .read_1d::<f64>()
+                    .expect(&format!(
+                        "Can not read data from \"density\" dataset. \
+                            Data type or data format might be wrong. \
+                            Check creation of HDF5 file  \"{:?}\"",
+                        self.file.filename()
+                    ))
+                    .to_owned(),
+                Err(_) => {
+                    print_warning!(
+                        "Can not find dataset \"density\" in file {} \
+                        \n using ones instead ",
+                        self.file.filename()
+                    );
+                    let mut arr = radius.clone();
+                    arr.fill(1.0);
+                    arr
+                }
+            };
+
+            let clouds = self
+                .file
+                .group(&format!("timestep {}", timestep))
+                .expect(&format!(
+                    "Can not find timestep {} in file {}",
+                    timestep,
+                    self.file.filename()
+                ))
+                .dataset("ppcloud")
+                .expect(&format!(
+                    "Can not find dataset \"ppcloud\" in HDF5 file \"{:?}\"",
+                    self.file.filename()
+                ))
+                .read_1d::<f64>()
+                .expect(&format!(
+                    "Can not read data from \"ppcloud\" dataset. \
+                    Data type or data format might be wrong. \
+                    Check creation of HDF5 file  \"{:?}\"",
+                    self.file.filename()
+                ))
+                .to_owned();
+
+            let time = self
+                .file
+                .group(&format!("timestep {}", timestep))
+                .expect(&format!(
+                    "Can not fine timestep {} in file {}",
+                    timestep,
+                    self.file.filename()
+                ))
+                .dataset("time")
+                .expect(&format!(
+                    "Can not find dataset \"time\" in HDF5 file \"{:?}\"",
+                    self.file.filename()
+                ))
+                .read_scalar::<f64>()
+                .expect(&format!(
+                    "Can not read data from \"time\" dataset. \
+                    Data type or data format might be wrong. \
+                    Check creation of HDF5 file  \"{:?}\"",
+                    self.file.filename()
+                ))
+                .to_owned();
+            let particleid = self
+                .file
+                .group(&format!("timestep {}", timestep))
+                .expect(&format!(
+                    "Can not find timestep {} in file {}",
+                    timestep,
+                    self.file.filename()
+                ))
+                .dataset("particleid")
+                .expect(&format!(
+                    "Can not find dataset \"particleid\" in HDF5 file \"{:?}\"",
+                    self.file.filename()
+                ))
+                .read_1d::<f64>()
+                .expect(&format!(
+                    "Can not read data from \"particleid\" dataset. \
+                    Data type or data format might be wrong. \
+                    Check creation of HDF5 file  \"{:?}\"",
+                    self.file.filename()
+                ))
+                .to_owned();
+
+            let dt = Timestep {
+                time: time,
+                position: position,
+                velocity: velocity,
+                radius: radius,
+                particleid: particleid,
+                clouds: clouds,
+                density: density,
+            };
+            print_debug!(
+                "\tTimestep {}: Saving struct in buffer with len: {}.",
+                timestep,
+                self.buffer.len()
+            );
+            self.buffer_extra[buffer_id][timestep - range.0] = dt;
+        }
+        self.range_extra[buffer_id] = range; //(range.0,range.1-1);
+        print_debug!("TData: Finished buffer update")
+    }
+
     pub fn test(&mut self) {
         let now = Instant::now();
         let _time = self.global_stats_.max_time();
@@ -617,6 +817,38 @@ impl DataManager for TData {
     fn get_timestep_unbuffered(&self, timestep: usize) -> Timestep {
         print_debug!("TData: Extracting timestep number {}", timestep);
         self.read_single(timestep)
+    }
+    /// setup a new buffer
+    fn setup_buffer(&mut self) {
+        self.buffer_extra
+            .push(vec![Timestep::default(); BUFFERSIZE]);
+        let buffer_id = self.buffer_extra.len() - 1;
+        let range = (0, BUFFERSIZE);
+        self.range_extra.push(range);
+        self.buffersize_extra.push(BUFFERSIZE);
+        self.update_extra(range, buffer_id)
+    }
+
+    /// read from other buffer then the main one
+    fn get_timestep_buffer(&mut self, timestep: usize, buffer_id: usize) -> &Timestep {
+        print_debug!("PData: Extracting timestep number {}", timestep);
+        // If a timestep is requested that is higher then the current range
+        // update buffer with new range
+        print_debug!(
+            "PData: Checking requested timestep {} in range {:?}",
+            timestep,
+            self.range_extra[buffer_id]
+        );
+        if timestep > self.range_extra[buffer_id].1 - 1 {
+            self.update_extra((timestep, timestep + self.buffersize), buffer_id);
+        } else if &self.range.1 == &self.global_stats_.ntimesteps && timestep < self.range.0 {
+            self.update_extra((0, BUFFERSIZE), buffer_id);
+        }
+        // If a timestep below the current range is requested, update buffer
+        if timestep < self.range.0 {
+            self.update_extra((timestep, timestep + self.buffersize), buffer_id);
+        }
+        &self.buffer[timestep - self.range.0]
     }
 }
 

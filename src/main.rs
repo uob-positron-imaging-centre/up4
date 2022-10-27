@@ -47,7 +47,7 @@ fn main() {
 
 
 } */
-
+#[allow(dead_code, unused_imports, unused_variables)]
 fn main() {
     let now = Instant::now();
     let mut pdata = PData::new("tests/fixtures/1p5u_HD1_glass.hdf5");
@@ -62,8 +62,8 @@ fn main() {
             [dim[[0, 2]], dim[[1, 2]]],
         ]),
     ));
-    let mut selector = ParticleSelector::default();
-    let disp = pdata.dispersion(grid, &selector, 0.1);
+    let selector = ParticleSelector::default();
+    let disp = pdata.dispersion_new(grid, &selector, 4.0);
     let _y = 0;
 
     //plot.show();

@@ -24,6 +24,12 @@ pub trait DataManager {
 
     /// return a timetsep that is not in the buffer
     fn get_timestep_unbuffered(&self, timestep: usize) -> Timestep;
+
+    /// setup a new buffer
+    fn setup_buffer(&mut self);
+
+    /// read from other buffer then the main one
+    fn get_timestep_buffer(&mut self, timestep: usize, buffer: usize) -> &Timestep;
 }
 
 pub trait Manager: DataManager + Granular + Extraction {}

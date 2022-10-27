@@ -114,6 +114,7 @@ pub fn velocity_polynom(
     }
     let mut new_data =
         ndarray::Array2::<f64>::zeros((data.column(0).len() - (sampling_steps - 1), 7));
+
     let bar = setup_bar!("Velocity Calc", new_data.column(0).len());
     for id in (sampling_steps - 1) / 2..data.column(0).len() - (sampling_steps - 1) / 2 {
         let datasegment = data.slice(ndarray::s![

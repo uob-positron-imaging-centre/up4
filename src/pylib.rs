@@ -162,7 +162,6 @@ impl PyData {
     fn dimensions<'py>(&self, py: Python<'py>) -> &'py pyo3::types::PyDict {
         let stats = self.data.global_stats();
         let dim = stats.dimensions();
-        println!("{:?}", dim);
         let key_vals: Vec<(&str, PyObject)> = vec![
             ("xmin", dim[[0, 0]].to_object(py)),
             ("xmax", dim[[1, 0]].to_object(py)),

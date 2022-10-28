@@ -192,6 +192,9 @@ impl GridFunctions3D for VectorGrid {
     fn get_data(&self) -> &Array3<f64> {
         self.data[0].get_data()
     }
+    fn get_weights(&self) -> &Array3<f64> {
+        self.data[0].get_weights()
+    }
     fn is_cylindrical(&self) -> bool {
         self.data[0].is_cylindrical()
     }

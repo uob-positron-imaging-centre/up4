@@ -359,7 +359,7 @@ impl PyData {
             };
         let grid = self
             .data
-            .dispersion(grid.grid.clone(), selector, time_for_dispersion);
+            .dispersion_new(grid.grid.clone(), selector, time_for_dispersion);
 
         PyGrid { grid: grid }
     }

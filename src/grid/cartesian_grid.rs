@@ -218,6 +218,9 @@ impl GridFunctions3D for CartesianGrid3D {
     fn get_data(&self) -> &Array3<f64> {
         &self.data
     }
+    fn get_weights(&self) -> &Array3<f64> {
+        &self.weight
+    }
     fn is_cylindrical(&self) -> bool {
         false
     }

@@ -295,6 +295,10 @@ impl GridFunctions3D for CylindricalGrid3D {
     fn get_cells(&self) -> &CellId {
         &self.cells
     }
+    fn get_weights(&self) -> &Array3<f64> {
+        &self.weight
+    }
+
     fn get_data(&self) -> &Array3<f64> {
         &self.data
     }

@@ -85,6 +85,7 @@ pub trait GridFunctions3D: DynClone + std::fmt::Display + std::fmt::Debug + Send
     fn get_limits(&self) -> &[[f64; 2]; 3];
     fn get_cells(&self) -> &CellId;
     fn get_data(&self) -> &Array3<f64>;
+    fn get_weights(&self) -> &Array3<f64>;
     fn is_cylindrical(&self) -> bool;
 }
 clone_trait_object!(GridFunctions3D);

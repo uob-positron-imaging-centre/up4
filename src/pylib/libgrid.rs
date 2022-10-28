@@ -293,6 +293,20 @@ impl PyGrid {
         self.grid.get_data().to_owned().into_pyarray(_py)
     }
 
+    /// Return the weights of each cell as a numpy array
+    ///
+    /// Parameters
+    /// ----------
+    /// None
+    ///
+    /// Returns
+    /// -------
+    /// weights : ndarray
+    ///    A numpy array containing the weights of each cell with the same shape as grid
+    fn weights_to_numpy<'py>(&self, _py: Python<'py>) -> &'py PyArray3<f64> {
+        self.grid.get_weights().to_owned().into_pyarray(_py)
+    }
+
     /// Return a slice of the grid as a numpy array
     ///
     /// Parameters

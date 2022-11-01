@@ -1,4 +1,4 @@
-#![allow(dead_code)]
+#![allow(dead_code, unused_variables, unused_imports)]
 mod datamanager;
 //use std::time::{Duration, Instant};
 /// Module that implements nD grids and basic functionality on them.
@@ -63,9 +63,16 @@ fn main() {
         ]),
     ));
     let selector = ParticleSelector::default();
-    let disp = pdata.dispersion_new(grid, &selector, 4.0);
+    let disp = pdata.velocityfield(grid.clone(), &selector);
+    println!("Disp: {}", disp);
+    let disp = pdata.numberfield(grid.clone(), &selector);
+    println!("Disp: {}", disp);
+    let disp = pdata.vectorfield(grid.clone(), &selector);
+    println!("Disp: {}", disp);
+
+    println!("time needed: {} milliseconds", now.elapsed().as_millis());
     let _y = 0;
 
     //plot.show();
-    println!("End time: {}", now.elapsed().as_millis());
+    //println!("End time: {}", now.elapsed().as_millis());
 }

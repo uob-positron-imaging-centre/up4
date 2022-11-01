@@ -2,6 +2,7 @@ extern crate ndarray;
 use super::{CellId, Dim, GridFunctions3D, Position, ThreeD};
 use crate::print_debug;
 use derive_getters::Getters;
+use itertools::Itertools;
 use ndarray::{prelude::*, RemoveAxis};
 use ndarray_stats::QuantileExt;
 use std::any::Any;
@@ -118,6 +119,93 @@ impl GridFunctions3D for CartesianGrid3D {
 
         [cell_idx, cell_idy, cell_idz]
     }
+    #[allow(dead_code, unused_variables, unreachable_code)]
+    fn cell_ids_in_trajectory(&self, pos1: Position, pos2: Position) -> (Vec<CellId>, Vec<f64>) {
+        unimplemented!("Not implemented for 3D grid yet.");
+        // This code was written on a friday evening. so please look over it
+        // might be improvable
+        let cell_ids = Vec::new();
+        let weights = Vec::new();
+        // check if both points are inside the grid
+        if !self.is_inside(pos1) || !self.is_inside(pos2) {
+            return (cell_ids, weights);
+        }
+        let (init_cell, end_cell) = (self.cell_id(pos1), self.cell_id(pos2));
+        if init_cell == end_cell {
+            return (vec![init_cell], vec![1.]);
+        }
+        let mut vec_distances = Vec::new();
+        let mut vec_cell_ids = Vec::new();
+        for dim in 0..3 {
+            let pos_start = pos1[dim];
+            let pos_end = pos2[dim];
+            let cell_start = init_cell[dim];
+            let cell_end = end_cell[dim];
+            let cell_size = (self.limits[dim][1] - self.limits[dim][0]) / self.cells[dim] as f64;
+            let cells_traversed = (cell_end as f64 - cell_start as f64).abs() as usize;
+            let direction = if cell_end > cell_start { 1 } else { -1 };
+            // get a vec with locations where a cell is crossed
+            let mut distance = Vec::new();
+            let cell_positions = self.xpositions();
+            distance.push(
+                cell_size / 2.0 + direction as f64 * (pos_start - cell_positions[cell_start]),
+            );
+            for cell in 1..cells_traversed - 1 {
+                distance.push(cell_size);
+            }
+            distance
+                .push(cell_size / 2.0 + direction as f64 * (pos_end - cell_positions[cell_end]));
+            vec_distances.push(distance);
+            vec_cell_ids.push(cell_ids);
+        }
+        let x_distances = vec_distances[0].clone();
+        let y_distances = vec_distances[1].clone();
+        let z_distances = vec_distances[2].clone();
+        let dx = pos2[0] - pos1[0];
+        let dy = pos2[1] - pos1[1];
+        let dz = pos2[2] - pos1[2];
+        // transform distances to absolute distances and add them in a vector
+        // use the gradient dx dy and dz to calculate the distance traveled
+        let mut distances = Vec::new();
+        for x in x_distances {
+            let t = x / dx;
+            distances.push((x * x + (dy * t) * (dy * t) + (dz * t) * (dz * t)).sqrt());
+        }
+        for y in y_distances {
+            let t = y / dy;
+            distances.push((y * y + (dx * t) * (dx * t) + (dz * t) * (dz * t)).sqrt());
+        }
+        for z in z_distances {
+            let t = z / dz;
+            distances.push((z * z + (dy * t) * (dy * t) + (dx * t) * (dx * t)).sqrt());
+        }
+        // sort the distances and the cell ids
+        let mut distances = distances
+            .iter()
+            .sorted_by(|a, b| a.partial_cmp(b).unwrap())
+            .map(f64::clone)
+            .collect::<Vec<f64>>();
+        let whole_distance = distances.iter().sum::<f64>();
+        let mut weights = distances
+            .iter()
+            .map(|x| x / whole_distance)
+            .collect::<Vec<f64>>();
+        let mut cell_ids = Vec::new();
+        let size_x = (self.limits[0][1] - self.limits[0][0]) / self.cells[0] as f64;
+        let size_y = (self.limits[1][1] - self.limits[1][0]) / self.cells[1] as f64;
+        let size_z = (self.limits[2][1] - self.limits[2][0]) / self.cells[2] as f64;
+        cell_ids.push(init_cell);
+        for distance in distances {
+            let cell_id = self.cell_id([
+                pos1[0] + (distance + size_x / 2.) * dx,
+                pos1[1] + (distance + size_y / 2.) * dy,
+                pos1[2] + (distance + size_z / 2.) * dz,
+            ]);
+            cell_ids.push(cell_id);
+        }
+        (cell_ids, weights)
+    }
+
     fn as_any(&self) -> &dyn Any {
         self
     }
@@ -135,6 +223,16 @@ impl GridFunctions3D for CartesianGrid3D {
         let cell_id = self.cell_id(pos);
         self.data[(cell_id[0], cell_id[1], cell_id[2])] += value;
         self.weight[(cell_id[0], cell_id[1], cell_id[2])] += 1.;
+    }
+
+    fn add_trajectory_value(&mut self, pos1: Position, pos2: Position, value: f64) {
+        // find all cells the particle has been in and their fraction of the whole distance
+        let (cell_ids, fractions) = self.cell_ids_in_trajectory(pos1, pos2);
+        // add the value to the cells
+        for (cell_id, fraction) in cell_ids.iter().zip(fractions.iter()) {
+            self.data[(cell_id[0], cell_id[1], cell_id[2])] += value * fraction;
+            self.weight[(cell_id[0], cell_id[1], cell_id[2])] += fraction;
+        }
     }
 
     fn divide_by(&mut self, other: &Array3<f64>) {

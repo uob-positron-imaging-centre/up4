@@ -408,6 +408,33 @@ impl PyData {
                 .histogram(grid.grid.clone(), selector, property, bins);
         (histogram.into_pyarray(_py), bin_edges.into_pyarray(_py))
     }
+
+    /// Calculate the granular temperature of the system.
+    /// The granular temperature is defined as the mean fluctuating velocity of the particles.
+    ///
+    /// Parameters
+    /// ----------
+    ///
+    /// grid : PyGrid
+    ///     The grid that defines the region of the system.
+    ///
+    /// Returns
+    /// -------
+    /// granular_temperature : PyGrid
+    ///     The granular temperature of the system.
+    fn granular_temperature<'py>(&mut self, _py: Python<'py>, grid: &PyGrid) -> PyGrid {
+        print_debug!("Starting Granular Temperature function");
+        let selector: &ParticleSelector =
+            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
+                Some(b) => b,
+                None => panic!("Can not convert PyGrid to Grid1D as "),
+            };
+        let grid = self
+            .data
+            .granular_temperature_field(grid.grid.clone(), selector);
+
+        PyGrid { grid: grid }
+    }
 } // End PyData
 
 #[pyproto]

@@ -143,6 +143,9 @@ impl GridFunctions3D for VectorGrid {
         self.data[0].cell_id(pos)
     }
 
+    fn cell_ids_in_trajectory(&self, pos1: Position, pos2: Position) -> (Vec<CellId>, Vec<f64>) {
+        self.data[0].cell_ids_in_trajectory(pos1, pos2)
+    }
     // Needed for python interface ( check that again, might be not needed)
     fn as_any(&self) -> &dyn Any {
         self
@@ -154,6 +157,11 @@ impl GridFunctions3D for VectorGrid {
         self.data[2].add_to_cell(cell_id, value);
     }
 
+    fn add_trajectory_value(&mut self, pos1: Position, pos2: Position, value: f64) {
+        self.data[0].add_trajectory_value(pos1, pos2, value);
+        self.data[1].add_trajectory_value(pos1, pos2, value);
+        self.data[2].add_trajectory_value(pos1, pos2, value);
+    }
     // return a new instance of grid with zeros
     fn new_zeros(&self) -> Box<dyn GridFunctions3D> {
         Box::new(VectorGrid::new(self.data[0].new_zeros()))

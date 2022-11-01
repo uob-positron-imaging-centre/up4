@@ -46,6 +46,9 @@ pub trait GridFunctions3D: DynClone + std::fmt::Display + std::fmt::Debug + Send
     // add to the value at the same position
     fn add_value(&mut self, pos: Position, value: f64);
 
+    // add values to the grid according to the trajectories between two points
+    fn add_trajectory_value(&mut self, pos1: Position, pos2: Position, value: f64);
+
     // divide the whole array by another
     fn divide_by(&mut self, other: &Array3<f64>);
 
@@ -60,6 +63,8 @@ pub trait GridFunctions3D: DynClone + std::fmt::Display + std::fmt::Debug + Send
 
     // Return cell ID of Data/Particle
     fn cell_id(&self, pos: Position) -> CellId;
+
+    fn cell_ids_in_trajectory(&self, pos1: Position, pos2: Position) -> (Vec<CellId>, Vec<f64>);
 
     // add a number to a cell given its cel id
     fn add_to_cell(&mut self, cell_id: CellId, value: f64);

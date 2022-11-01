@@ -613,6 +613,116 @@ pub trait Granular: DataManager {
         }
         (histogram, bin_edges)
     }
+
+    /// Calculate the granular temperature of the system.
+    /// The granular temperature is defined as the mean fluctuating velocity of the particles.
+    ///
+    /// Parameters
+    /// ----------
+    /// selector : ParticleSelector
+    ///     The particleselector that defines which particles are valid.
+    ///
+    /// grid : GridFunctions3D
+    ///     The grid that defines the region of the system.
+    ///
+    /// Returns
+    /// -------
+    /// granular_temperature : GridData
+    ///     The granular temperature of the system.
+    ///
+    fn granular_temperature_field(
+        &mut self,
+        grid: Box<dyn GridFunctions3D>,
+        selector: &ParticleSelector,
+    ) -> Box<dyn GridFunctions3D> {
+        //read the number of timesteps inside this hdf5file
+        let global_stats = self.global_stats();
+        let timesteps: &usize = global_stats.timesteps();
+        // calculating the mean fluicitaing velcity using a algroythm that allows
+        // to only use one loop over the data
+        let mut squared_sum_x = grid.get_data().clone();
+        let mut squared_sum_y = grid.get_data().clone();
+        let mut squared_sum_z = grid.get_data().clone();
+        let mut sum_x = grid.get_data().clone();
+        let mut sum_y = grid.get_data().clone();
+        let mut sum_z = grid.get_data().clone();
+        let mut num_counts = grid.get_data().clone();
+        let mut grantemp = grid.new_zeros();
+        print_debug!("velocityfield: Initiation over, entering time loop");
+        for timestep in 0..timesteps - 1 {
+            let timestep_data = self.get_timestep(timestep);
+            let current_time = *timestep_data.time();
+            // check if timestep is in the timeframe given
+            if !selector.timestep_valid(current_time) {
+                print_debug!("Timestep {} is not valid", timestep);
+                continue;
+            }
+            print_debug!("Timestep {} is valid", timestep);
+            let positions = timestep_data.position();
+            let velocities = timestep_data.velocity();
+            let particle_ids = timestep_data.particleid();
+            let rad_array = timestep_data.radius();
+            let clouds = timestep_data.clouds();
+            let density = timestep_data.density();
+            let particles = positions.len();
+            // loop over all particles in this timestep, calculate the velocity vector and add it to the
+            // vectorfield array
+            print_debug!(
+                "velocityfield: looping over particles form 0 to {}",
+                particles
+            );
+
+            for particle in 0..particles {
+                if !selector.is_valid(
+                    rad_array[particle],
+                    clouds[particle],
+                    density[particle],
+                    particle_ids[particle] as usize,
+                ) {
+                    print_debug!("Particle {} is not valid", particle);
+                    continue;
+                }
+
+                print_debug!("Particle {} is valid", particle);
+                let position = positions[particle];
+                if !grid.is_inside(position) {
+                    // the particle is out of the field of view
+                    print_debug!("Particle {} is out of FoV", particle);
+                    continue;
+                }
+                print_debug!("Particle {} is in the grid", particle);
+                print_debug!("Cell ids: {:?}", grid.cell_id(position));
+                print_debug!(
+                    "Grid Positions \n{:?},\n{:?},\n{:?}",
+                    grid.get_xpositions(),
+                    grid.get_ypositions(),
+                    grid.get_zpositions()
+                );
+                let velocity = velocities.slice(s![particle, ..]);
+                let cell_id = grid.cell_id(position);
+                num_counts[cell_id] += 1.0;
+                sum_x[cell_id] += velocity[0];
+                sum_y[cell_id] += velocity[1];
+                sum_z[cell_id] += velocity[2];
+                squared_sum_x[cell_id] += velocity[0] * velocity[0];
+                squared_sum_y[cell_id] += velocity[1] * velocity[1];
+                squared_sum_z[cell_id] += velocity[2] * velocity[2];
+            }
+            // checking for kill signals after each timestep
+            check_signals!();
+        }
+
+        let fluct_x = &squared_sum_x - &sum_x * &sum_x / &num_counts;
+        let fluct_y = &squared_sum_y - &sum_y * &sum_y / &num_counts;
+        let fluct_z = &squared_sum_z - &sum_z * &sum_z / &num_counts;
+        let mut temp = &fluct_x + &fluct_y + &fluct_z;
+        temp /= &num_counts;
+        temp /= 3.0;
+        temp.mapv_inplace(|x| x.sqrt());
+        grantemp.set_data(temp);
+        grantemp.set_weights(num_counts);
+        grantemp
+    }
 } //End Granular trait
 
 impl<T> Granular for T where T: DataManager {}

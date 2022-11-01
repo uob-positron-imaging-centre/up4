@@ -114,6 +114,10 @@ class TestFields:
         dispersion,me = data.dispersion(grid,0.2)
         assert dispersion.shape() == [10,10,10]
 
+    def test_granular_temperature(self,data,grid):
+        grid = grid(data, cells = [10,10,10])
+        field = data.granular_temperature(grid)
+        assert field.shape() == [10,10,10]
 
 
 @pytest.mark.parametrize("grid",["cylidrical", "cartesian"], indirect=True)

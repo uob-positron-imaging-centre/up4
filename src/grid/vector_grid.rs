@@ -206,4 +206,15 @@ impl GridFunctions3D for VectorGrid {
     fn is_cylindrical(&self) -> bool {
         self.data[0].is_cylindrical()
     }
+
+    #[allow(unused_variables)]
+    fn set_data(&mut self, data: Array3<f64>) {
+        unimplemented!("Not implemented for VectorGrid")
+    }
+
+    fn set_weights(&mut self, weights: Array3<f64>) {
+        self.data[0].set_weights(weights.clone());
+        self.data[1].set_weights(weights.clone());
+        self.data[2].set_weights(weights);
+    }
 }

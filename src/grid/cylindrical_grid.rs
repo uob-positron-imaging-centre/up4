@@ -315,4 +315,19 @@ impl GridFunctions3D for CylindricalGrid3D {
     fn is_cylindrical(&self) -> bool {
         true
     }
+
+    fn set_data(&mut self, data: Array3<f64>) {
+        if self.data.shape() == data.shape() {
+            self.data = data;
+        } else {
+            panic!("CylindricalGrid3D: set_data: shape of data does not match shape of grid");
+        }
+    }
+    fn set_weights(&mut self, weights: Array3<f64>) {
+        if self.weight.shape() == weights.shape() {
+            self.weight = weights;
+        } else {
+            panic!("CylindricalGrid3D: set_weights: shape of data does not match shape of grid");
+        }
+    }
 }

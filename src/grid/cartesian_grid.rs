@@ -322,4 +322,19 @@ impl GridFunctions3D for CartesianGrid3D {
     fn is_cylindrical(&self) -> bool {
         false
     }
+
+    fn set_data(&mut self, data: Array3<f64>) {
+        if self.data.shape() == data.shape() {
+            self.data = data;
+        } else {
+            panic!("Cartesian Grid: Data shape does not match grid shape");
+        }
+    }
+    fn set_weights(&mut self, weights: Array3<f64>) {
+        if self.weight.shape() == weights.shape() {
+            self.weight = weights;
+        } else {
+            panic!("Cartesian Grid: Weight shape does not match grid shape");
+        }
+    }
 }

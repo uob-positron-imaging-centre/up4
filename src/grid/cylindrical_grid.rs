@@ -195,6 +195,11 @@ impl GridFunctions3D for CylindricalGrid3D {
             .unwrap_or_else(|_| panic!("Can not find min of {:?} in Gri3D", pos));
         [cell_idr, cell_ido, cell_idz]
     }
+    #[allow(unused_variables)]
+    fn cell_ids_in_trajectory(&self, pos1: Position, pos2: Position) -> (Vec<CellId>, Vec<f64>) {
+        unimplemented!("Not implemented for cylindrical grid")
+    }
+
     fn as_any(&self) -> &dyn Any {
         self
     }
@@ -213,6 +218,10 @@ impl GridFunctions3D for CylindricalGrid3D {
         let cell_id = self.cell_id(pos);
         self.data[(cell_id[0], cell_id[1], cell_id[2])] += value;
         self.weight[(cell_id[0], cell_id[1], cell_id[2])] += 1.;
+    }
+    #[allow(unused_variables)]
+    fn add_trajectory_value(&mut self, pos1: Position, pos2: Position, value: f64) {
+        unimplemented!("Not implemented for cylindrical grid")
     }
 
     fn divide_by(&mut self, other: &Array3<f64>) {

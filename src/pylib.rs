@@ -350,18 +350,63 @@ impl PyData {
         _py: Python<'py>,
         grid: &PyGrid,
         time_for_dispersion: f64,
-    ) -> PyGrid {
+    ) -> (PyGrid, f64) {
         print_debug!("Starting Dispersion function");
         let selector: &ParticleSelector =
             match self.selector.as_any().downcast_ref::<ParticleSelector>() {
                 Some(b) => b,
                 None => panic!("Can not convert PyGrid to Grid1D as "),
             };
-        let grid = self
-            .data
-            .dispersion_new(grid.grid.clone(), selector, time_for_dispersion);
+        let (grid, mixing_efficiency) =
+            self.data
+                .dispersion(grid.grid.clone(), selector, time_for_dispersion);
 
-        PyGrid { grid: grid }
+        (PyGrid { grid: grid }, mixing_efficiency)
+    }
+
+    /// Calculate a histogram of a specific property in a region of the system.
+    /// The histogram is calculated for all particles that are valid according to the particleselector.
+    /// The histogram is calculated for the region defined by the grid.
+    ///
+    /// Parameters
+    /// ----------
+    ///
+    /// grid : pygrid
+    ///     The grid that defines the region of the system.
+    ///
+    /// property : str
+    ///     The property that is used to calculate the histogram.
+    ///    The following properties are available:
+    ///     - 'velocity'
+    ///
+    /// bins : int
+    ///    The number of bins in the histogram.
+    ///
+    /// Returns
+    /// -------
+    /// histogram : numpy.ndarray
+    ///     The histogram.
+    ///
+    /// bin_edges : numpy.ndarray
+    ///     The bin edges.
+    ///
+    #[args(property = "\"velocity\"", bins = "100")]
+    fn histogram<'py>(
+        &mut self,
+        _py: Python<'py>,
+        grid: &PyGrid,
+        property: &str,
+        bins: usize,
+    ) -> (&'py numpy::PyArray1<f64>, &'py numpy::PyArray1<f64>) {
+        let selector: &ParticleSelector =
+            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
+                Some(b) => b,
+                None => panic!("Can not convert PyGrid to Grid1D as "),
+            };
+        let (histogram, bin_edges) =
+            self.data
+                .histogram(grid.grid.clone(), selector, property, bins);
+        (histogram.into_pyarray(_py), bin_edges.into_pyarray(_py))
     }
 } // End PyData
 

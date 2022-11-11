@@ -118,7 +118,7 @@ If you use this library in your research, you are kindly asked to cite:
 ## Licensing
 
 ## TODO add licence details
-
+PoincarePlotter
 ### Project to-do list
 
 - [ ] HDF5 converter

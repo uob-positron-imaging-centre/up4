@@ -15,7 +15,7 @@ from glob import glob
 import pytest
 from natsort import natsorted as sorted
 
-location = os.path.abspath(os.getcwd())
+location = os.path.dirname(os.path.abspath(__file__))
 # add your function to this command list
 
 @pytest.fixture
@@ -89,6 +89,7 @@ class TestCSV:
 
 
 
+
 @pytest.mark.parametrize("data",["exp","exp2","sim"], indirect=True)
 @pytest.mark.parametrize("grid",["cylidrical", "cartesian"], indirect=True)
 class TestFields:
@@ -110,9 +111,13 @@ class TestFields:
 
     def test_dispersion(self,data,grid):
         grid = grid(data, cells = [10,10,10])
-        dispersion = data.dispersion(grid,0.2)
+        dispersion,me = data.dispersion(grid,0.2)
         assert dispersion.shape() == [10,10,10]
 
+    def test_granular_temperature(self,data,grid):
+        grid = grid(data, cells = [10,10,10])
+        field = data.granular_temperature(grid)
+        assert field.shape() == [10,10,10]
 
 
 @pytest.mark.parametrize("grid",["cylidrical", "cartesian"], indirect=True)
@@ -144,3 +149,10 @@ class TestGrid:
         assert slice_xy_2.shape == (10,9)
         assert slice_xy_3.shape == (10,9)
 
+@pytest.mark.parametrize("data",["exp","exp2","sim"], indirect=True)
+@pytest.mark.parametrize("grid",["cylidrical", "cartesian"], indirect=True)
+class TestFunctions:
+    def histogram(self,data,grid):
+        hist,bins = data.histogram(grid)
+        assert len(hist) == 10
+        assert len(bins) == 11

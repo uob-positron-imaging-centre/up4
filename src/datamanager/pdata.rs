@@ -18,8 +18,12 @@ pub struct PData {
     // H5Part format or H5TimePart information
     file: hdf5::File,
     buffer: Vec<Timestep>, // Replace with Option(Timestep, None)
-    range: (usize, usize),
+    number_buffers: usize, // number of extra buffers
+    extra_buffers: Vec<Vec<Timestep>>,
+    range: (usize, usize), // current range of timesteps loaded
+    range_extra: Vec<(usize, usize)>,
     pub buffersize: usize,
+    pub buffersize_extra: Vec<usize>,
     single_data: Timestep,
     global_stats_: GlobalStats,
 }
@@ -39,8 +43,12 @@ impl PData {
         let mut data = PData {
             file: file,
             buffer: buffer,
+            number_buffers: 0,
+            extra_buffers: vec![],
             range: (0, 0),
+            range_extra: vec![],
             buffersize: BUFFERSIZE,
+            buffersize_extra: vec![],
             single_data: Timestep::default(),
             global_stats_: GlobalStats::default(),
         };
@@ -437,6 +445,211 @@ impl PData {
         print_debug!("PData: Finished buffer update")
     }
 
+    /// Update   of the extra buffers
+    #[inline(never)]
+    pub fn update_extra(&mut self, mut range: (usize, usize), buffer_id: usize) {
+        print_debug!("PData: Updating Extra buffer");
+        let timesteps = *self.global_stats_.timesteps();
+        if range.1 >= timesteps {
+            range.1 = timesteps;
+        }
+        self.buffersize_extra[buffer_id] = range.1 - range.0;
+        let particles = *self.global_stats_.nparticles();
+        let mut position: Array2<Position> =
+            Array2::<Position>::from_elem((self.buffersize, particles), [0.0, 0.0, 0.0]);
+        let mut velocity: Array3<f64> = Array3::<f64>::zeros((self.buffersize, particles, 3));
+        let mut radius: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
+        let mut density: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
+        let mut particleid: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
+        let mut time: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
+        let clouds: Array2<f64> = Array2::<f64>::ones((self.buffersize, particles));
+        print_debug!("PData: Looping over all particles:");
+        for particle_id in 0..particles {
+            // for each particle find the Position at the
+            print_debug!("\tParticle {}: Extracting position from HDF5.", particle_id);
+            let part_pos = self
+                .file
+                .group(&format!("particle {}", particle_id))
+                .expect(&format!(
+                    "Can not find group \"particle {}\" in file {}",
+                    particle_id,
+                    self.file.filename()
+                ))
+                .dataset("position")
+                .expect(&format!(
+                    "Can not find dataset \"position\" in file {}",
+                    self.file.filename()
+                ))
+                .read_2d::<f64>()
+                .expect(&format!(
+                    "Can not read dataset \"position\" in file {}",
+                    self.file.filename()
+                ))
+                .slice(s![range.0..range.1, ..])
+                .to_owned()
+                .into_shape((range.1-range.0, 3))
+                .expect(&format!(
+                    "Can not shape dataset \"position\" in file {} into a ({}, 3) array, range: {:?}",
+                    self.file.filename(),
+                    range.1-range.0,
+                    range
+                ))
+                .axis_iter(Axis(0))
+                .map(|x| [x[0], x[1], x[2]])
+                .collect::<Array1<Position>>();
+
+            // for each particle find the velocuty at the
+            print_debug!("\tParticle {}: Extracting velocity from HDF5.", particle_id);
+            let part_vel = self
+                .file
+                .group(&format!("particle {}", particle_id))
+                .expect(&format!(
+                    "Can not find group \"particle {}\" in file {}",
+                    particle_id,
+                    self.file.filename()
+                ))
+                .dataset("velocity")
+                .expect(&format!(
+                    "Can not find dataset \"velocity\" in file {}",
+                    self.file.filename()
+                ))
+                .read_2d::<f64>()
+                .expect(&format!(
+                    "Can not read dataset \"velocity\" in file {}",
+                    self.file.filename()
+                ))
+                .slice(s![range.0..range.1, ..])
+                .to_owned();
+
+            //Radius
+            print_debug!("\tParticle {}: Extracting radius from HDF5.", particle_id);
+            let part_rad = match self
+                .file
+                .group(&format!("particle {}", particle_id))
+                .expect(&format!(
+                    "Can not find particle {} in file {}",
+                    particle_id,
+                    self.file.filename()
+                ))
+                .dataset("radius")
+            {
+                Ok(s) => s
+                    .read_1d::<f64>()
+                    .expect(&format!(
+                        "Can not read data from \"radius\" dataset. \
+                        Data type or data format might be wrong. \
+                        Check creation of HDF5 file  \"{:?}\"",
+                        self.file.filename()
+                    ))
+                    .slice(s![range.0..range.1])
+                    .to_owned(),
+                Err(_) => {
+                    print_warning!(
+                        "\tParticle {}: Could not find radius in HDF5 file {}. \
+                        Using zeros instead.",
+                        particle_id,
+                        self.file.filename()
+                    );
+                    Array1::<f64>::zeros(part_vel.len() / 3)
+                }
+            };
+            print_debug!("\tParticle {}: Extracting density from HDF5.", particle_id);
+            let part_density = match self
+                .file
+                .group(&format!("particle {}", particle_id))
+                .expect(&format!(
+                    "Can not find particle {} in file {}",
+                    particle_id,
+                    self.file.filename()
+                ))
+                .dataset("density")
+            {
+                Ok(s) => s
+                    .read_1d::<f64>()
+                    .expect(&format!(
+                        "Can not read data from \"density\" dataset. \
+                        Data type or data format might be wrong. \
+                        Check creation of HDF5 file  \"{:?}\"",
+                        self.file.filename()
+                    ))
+                    .slice(s![range.0..range.1])
+                    .to_owned(),
+                Err(_) => {
+                    print_warning!(
+                        "\tParticle {}: Could not find density in HDF5 file {}. \
+                        Using one instead.",
+                        particle_id,
+                        self.file.filename()
+                    );
+                    Array1::<f64>::zeros(part_vel.len() / 3)
+                }
+            };
+
+            print_debug!("\tParticle {}: Extracting time from HDF5.", particle_id);
+            let part_time = self
+                .file
+                .group(&format!("particle {}", 0))
+                .expect(&format!(
+                    "Can not fine particle {} in file {}",
+                    0,
+                    self.file.filename()
+                ))
+                .dataset("time")
+                .expect(&format!(
+                    "Can not find dataset \"time\" in HDF5 file \"{:?}\"",
+                    self.file.filename()
+                ))
+                .read_1d::<f64>()
+                .expect(&format!(
+                    "Can not read data from \"time\" dataset. \
+                    Data type or data format might be wrong. \
+                    Check creation of HDF5 file  \"{:?}\"",
+                    self.file.filename()
+                ))
+                .slice(s![range.0..range.1])
+                .to_owned();
+
+            print_debug!("\tParticle {}: generating particle ID array.", particle_id);
+            let mut part_id: Array1<f64> = Array1::<f64>::zeros(self.buffersize);
+            part_id.fill(particle_id as f64);
+
+            print_debug!(
+                "\tParticle {}: Inserting all information in Arrays.",
+                particle_id
+            );
+            position.slice_mut(s![.., particle_id]).assign(&part_pos);
+            velocity
+                .slice_mut(s![.., particle_id, ..])
+                .assign(&part_vel);
+            radius.slice_mut(s![.., particle_id]).assign(&part_rad);
+            density.slice_mut(s![.., particle_id]).assign(&part_density);
+            time.slice_mut(s![.., particle_id]).assign(&part_time);
+            particleid.slice_mut(s![.., particle_id]).assign(&part_id);
+            print_debug!("\tParticle {}: Finish.", particle_id);
+        }
+        //let mut  clouds = particleid.clone();
+        //clouds.fill(1.);
+
+        print_debug!("PData: Generating Timestep structs.");
+        for timestep in 0..range.1 - range.0 {
+            let dt = Timestep {
+                time: time[[timestep, 0]], //.slice(s![timestep,..]),
+                position: position.slice(s![timestep, ..]).to_owned(),
+                velocity: velocity.slice(s![timestep, .., ..]).to_owned(),
+                radius: radius.slice(s![timestep, ..]).to_owned(),
+                particleid: particleid.slice(s![timestep, ..]).to_owned(),
+                clouds: clouds.slice(s![timestep, ..]).to_owned(),
+                density: density.slice(s![timestep, ..]).to_owned(),
+            };
+
+            //self.buffer[timestep] = dt;
+            self.extra_buffers[buffer_id][timestep] = dt;
+        }
+
+        self.range_extra[buffer_id] = range; //(range.0,range.1-1);
+        print_debug!("PData: Finished buffer update")
+    }
+
     pub fn test(&mut self) {
         let now = Instant::now();
         let _time = self.global_stats_.max_time();
@@ -630,6 +843,39 @@ impl DataManager for PData {
 
     fn get_timestep_unbuffered(&self, timestep: usize) -> Timestep {
         self.read_single(timestep)
+    }
+
+    /// setup a new buffer
+    fn setup_buffer(&mut self) {
+        self.extra_buffers
+            .push(vec![Timestep::default(); BUFFERSIZE]);
+        let buffer_id = self.extra_buffers.len() - 1;
+        let range = (0, BUFFERSIZE);
+        self.range_extra.push(range);
+        self.buffersize_extra.push(BUFFERSIZE);
+        self.update_extra(range, buffer_id)
+    }
+
+    /// read from other buffer then the main one
+    fn get_timestep_buffer(&mut self, timestep: usize, buffer_id: usize) -> &Timestep {
+        print_debug!("PData: Extracting timestep number {}", timestep);
+        // If a timestep is requested that is higher then the current range
+        // update buffer with new range
+        print_debug!(
+            "PData: Checking requested timestep {} in range {:?}",
+            timestep,
+            self.range_extra[buffer_id]
+        );
+        if timestep > self.range_extra[buffer_id].1 - 1 {
+            self.update_extra((timestep, timestep + self.buffersize), buffer_id);
+        } else if &self.range.1 == &self.global_stats_.ntimesteps && timestep < self.range.0 {
+            self.update_extra((0, BUFFERSIZE), buffer_id);
+        }
+        // If a timestep below the current range is requested, update buffer
+        if timestep < self.range.0 {
+            self.update_extra((timestep, timestep + self.buffersize), buffer_id);
+        }
+        &self.buffer[timestep - self.range.0]
     }
 }
 

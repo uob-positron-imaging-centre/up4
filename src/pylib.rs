@@ -1,5 +1,6 @@
 //! Create Python bindings for crate.
 use pyo3::prelude::*;
+use pyo3::types::IntoPyDict;
 extern crate ndarray;
 extern crate plotly;
 use crate::particleselector::*;
@@ -150,6 +151,58 @@ impl PyData {
         self.data.stats();
     }
 
+    /// Return the dimensions of the system as a dictionary.
+    /// The dictionary contains the following keys:
+    /// * ``xmin``: Minimum x coordinate.
+    /// * ``xmax``: Maximum x coordinate.
+    /// * ``ymin``: Minimum y coordinate.
+    /// * ``ymax``: Maximum y coordinate.
+    /// * ``zmin``: Minimum z coordinate.
+    /// * ``zmax``: Maximum z coordinate.
+    fn dimensions<'py>(&self, py: Python<'py>) -> &'py pyo3::types::PyDict {
+        let stats = self.data.global_stats();
+        let dim = stats.dimensions();
+        let key_vals: Vec<(&str, PyObject)> = vec![
+            ("xmin", dim[[0, 0]].to_object(py)),
+            ("xmax", dim[[1, 0]].to_object(py)),
+            ("ymin", dim[[0, 1]].to_object(py)),
+            ("ymax", dim[[1, 1]].to_object(py)),
+            ("zmin", dim[[0, 2]].to_object(py)),
+            ("zmax", dim[[1, 2]].to_object(py)),
+        ];
+        let dict = key_vals.into_py_dict(py);
+        dict
+    }
+
+    /// Return the min position of the system as a array
+    /// The array contains the following values at positions:
+    /// * ``0``: Minimum x coordinate.
+    /// * ``1``: Minimum y coordinate.
+    /// * ``2``: Minimum z coordinate.
+    fn min_position<'py>(&self, py: Python<'py>) -> &'py numpy::PyArray1<f64> {
+        let stats = self.data.global_stats();
+        let dim = stats.dimensions();
+        let min_pos = dim.row(0).to_owned();
+        min_pos.into_pyarray(py)
+    }
+
+    /// Return the max position of the system as a array
+    /// The array contains the following values at positions:
+    /// * ``0``: Maximum x coordinate.
+    /// * ``1``: Maximum y coordinate.
+    /// * ``2``: Maximum z coordinate.
+    fn max_position<'py>(&self, py: Python<'py>) -> &'py numpy::PyArray1<f64> {
+        let stats = self.data.global_stats();
+        let dim = stats.dimensions();
+        let max_pos = dim.row(1).to_owned();
+        max_pos.into_pyarray(py)
+    }
+
+    /// Number of particles in the system.
+    fn nparticles(&self) -> usize {
+        *self.data.global_stats().nparticles()
+    }
+
     /// Select the dataset between two different times.
     ///
     /// Parameters
@@ -297,8 +350,80 @@ impl PyData {
         _py: Python<'py>,
         grid: &PyGrid,
         time_for_dispersion: f64,
-    ) -> PyGrid {
+    ) -> (PyGrid, f64) {
         print_debug!("Starting Dispersion function");
+        let selector: &ParticleSelector =
+            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
+                Some(b) => b,
+                None => panic!("Can not convert PyGrid to Grid1D as "),
+            };
+        let (grid, mixing_efficiency) =
+            self.data
+                .dispersion(grid.grid.clone(), selector, time_for_dispersion);
+
+        (PyGrid { grid: grid }, mixing_efficiency)
+    }
+
+    /// Calculate a histogram of a specific property in a region of the system.
+    /// The histogram is calculated for all particles that are valid according to the particleselector.
+    /// The histogram is calculated for the region defined by the grid.
+    ///
+    /// Parameters
+    /// ----------
+    ///
+    /// grid : pygrid
+    ///     The grid that defines the region of the system.
+    ///
+    /// property : str
+    ///     The property that is used to calculate the histogram.
+    ///    The following properties are available:
+    ///     - 'velocity'
+    ///
+    /// bins : int
+    ///    The number of bins in the histogram.
+    ///
+    /// Returns
+    /// -------
+    /// histogram : numpy.ndarray
+    ///     The histogram.
+    ///
+    /// bin_edges : numpy.ndarray
+    ///     The bin edges.
+    ///
+    #[args(property = "\"velocity\"", bins = "100")]
+    fn histogram<'py>(
+        &mut self,
+        _py: Python<'py>,
+        grid: &PyGrid,
+        property: &str,
+        bins: usize,
+    ) -> (&'py numpy::PyArray1<f64>, &'py numpy::PyArray1<f64>) {
+        let selector: &ParticleSelector =
+            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
+                Some(b) => b,
+                None => panic!("Can not convert PyGrid to Grid1D as "),
+            };
+        let (histogram, bin_edges) =
+            self.data
+                .histogram(grid.grid.clone(), selector, property, bins);
+        (histogram.into_pyarray(_py), bin_edges.into_pyarray(_py))
+    }
+
+    /// Calculate the granular temperature of the system.
+    /// The granular temperature is defined as the mean fluctuating velocity of the particles.
+    ///
+    /// Parameters
+    /// ----------
+    ///
+    /// grid : PyGrid
+    ///     The grid that defines the region of the system.
+    ///
+    /// Returns
+    /// -------
+    /// granular_temperature : PyGrid
+    ///     The granular temperature of the system.
+    fn granular_temperature<'py>(&mut self, _py: Python<'py>, grid: &PyGrid) -> PyGrid {
+        print_debug!("Starting Granular Temperature function");
         let selector: &ParticleSelector =
             match self.selector.as_any().downcast_ref::<ParticleSelector>() {
                 Some(b) => b,
@@ -306,7 +431,7 @@ impl PyData {
             };
         let grid = self
             .data
-            .dispersion(grid.grid.clone(), selector, time_for_dispersion);
+            .granular_temperature_field(grid.grid.clone(), selector);
 
         PyGrid { grid: grid }
     }

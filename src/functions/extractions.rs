@@ -23,7 +23,6 @@ pub trait Extraction: DataManager {
             let current_time = *timestep_data.time();
             let positions = timestep_data.position();
             let velocities = timestep_data.velocity();
-            println!("{:?}", positions.shape());
             let position = positions[particle_id];
             let velocity = velocities.slice(s![particle_id, ..]).to_owned();
             let x = array![

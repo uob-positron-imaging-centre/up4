@@ -127,7 +127,7 @@ impl VectorPlotter {
         self.wdata *= &scale_factor;
     }
 
-    // FIXME select the smallest circle for each cell so that we can handle cuboid cells
+    // FIXME fit an ellipsoid inside the cells to scale properly
     /// Constrain all arrows to lie within circle of radius dx/2 from each node.
     /// On a non-uniform grid, this *will* distort the plot.
     pub fn bound_node(&mut self, dx: f64) {

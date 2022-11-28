@@ -62,6 +62,10 @@ pub trait Granular: DataManager {
                 }
                 print_debug!("Particle {} is valid", particle);
                 let position = positions[particle];
+                if position[0].is_nan() || position[1].is_nan() || position[2].is_nan() {
+                    print_debug!("Position is NaN");
+                    continue;
+                }
                 let velocity = velocities.slice(s![particle, ..]).to_owned();
                 //reset the position. the lowest value should be at 0,0,0
                 if !vectorgrid.is_inside(position) {
@@ -125,7 +129,10 @@ pub trait Granular: DataManager {
                 }
                 print_debug!("Particle {} is valid", particle);
                 let position = positions[particle];
-
+                if position[0].is_nan() || position[1].is_nan() || position[2].is_nan() {
+                    print_debug!("Position is NaN");
+                    continue;
+                }
                 let velocity = velocities.slice(s![particle, ..]).to_owned();
                 //reset the position. the lowest value should be at 0,0,0
 
@@ -208,6 +215,7 @@ pub trait Granular: DataManager {
 
                 print_debug!("Particle {} is valid", particle);
                 let position = positions[particle];
+
                 if !grid.is_inside(position) {
                     // the particle is out of the field of view
                     print_debug!("Particle {} is out of FoV", particle);
@@ -529,6 +537,7 @@ pub trait Granular: DataManager {
         grid: Box<dyn GridFunctions3D>,
         selector: &ParticleSelector,
         property: &str,
+        max_limit: f64,
         bins: usize,
     ) -> (Array1<f64>, Array1<f64>) {
         let property_list = vec!["velocity"];
@@ -549,7 +558,12 @@ pub trait Granular: DataManager {
         if property == "velocity" {
             let velocity_mag = global_stats.velocity_mag();
             let min = velocity_mag[0];
-            let max = velocity_mag[1];
+            let mut max;
+            if max_limit == 0.0 {
+                max = velocity_mag[2];
+            } else {
+                max = max_limit;
+            }
             let bin_width = (max - min) / (bins as f64);
             for i in 0..bins {
                 println!("{} {}", i, bin_width);

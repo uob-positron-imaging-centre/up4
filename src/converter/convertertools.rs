@@ -5,7 +5,7 @@ use indicatif::{ProgressBar, ProgressStyle};
 use ndarray::{self, ArrayView1};
 use polyfit_rs;
 pub mod velocity_paralell;
-pub fn interpolate(data: ndarray::Array2<f64>) -> ndarray::Array2<f64> {
+pub fn interpolate(data: ndarray::Array2<f64>, max: f64, steps: usize) -> ndarray::Array2<f64> {
     // TODO implement different types of interpolation
     //let bar = ProgressBar::new(data.column(0).len() as u64);
     /*bar.set_style(ProgressStyle::default_bar()
@@ -13,32 +13,31 @@ pub fn interpolate(data: ndarray::Array2<f64>) -> ndarray::Array2<f64> {
     .with_key("eta", |state| format!("Time left: {:.1}s", state.eta().as_secs_f64()))
     .with_key("per_sec", |state| format!("{:.1} steps/s", state.per_sec()))
     .progress_chars("#>-"));*/
-    let bar = setup_bar!("Interpolate", data.column(0).len());
+    //let bar = setup_bar!("Interpolate", data.column(0).len());
     let time: ArrayView1<f64> = data.slice(ndarray::s![.., 0 as usize]);
     let x: ArrayView1<f64> = data.slice(ndarray::s![.., 1 as usize]);
     let y: ArrayView1<f64> = data.slice(ndarray::s![.., 2 as usize]);
     let z: ArrayView1<f64> = data.slice(ndarray::s![.., 3 as usize]);
-    let maxtime = time[time.len() - 1];
-    let timesteps = time.len();
+
+    let maxtime = max;
+    let timesteps = steps;
     let dt = maxtime / timesteps as f64;
     // First timestep:
-    let mut interp_data = ndarray::Array2::<f64>::zeros((timesteps, 4));
+    let mut interp_data = ndarray::Array2::<f64>::zeros((steps, 4));
     // first timestep:
     interp_data[[0, 0]] = time[0];
     interp_data[[0, 1]] = x[0];
     interp_data[[0, 2]] = y[0];
     interp_data[[0, 3]] = z[0];
     // last timestep:
-    interp_data[[timesteps - 1, 0]] = time[timesteps - 1];
-    interp_data[[timesteps - 1, 1]] = x[timesteps - 1];
-    interp_data[[timesteps - 1, 2]] = y[timesteps - 1];
-    interp_data[[timesteps - 1, 3]] = z[timesteps - 1];
-
+    interp_data[[timesteps - 1, 0]] = time[time.len() - 1];
+    interp_data[[timesteps - 1, 1]] = x[time.len() - 1];
+    interp_data[[timesteps - 1, 2]] = y[time.len() - 1];
+    interp_data[[timesteps - 1, 3]] = z[time.len() - 1];
     // loop over whole dataset and figure out the location at each timestep
     let mut real_step = 1;
     for step in 1..timesteps - 1 {
         let time_new = step as f64 * dt;
-
         // find the next indx in the real data which may be the old one
         real_step = {
             // if the temporal distance between new time and old time is smaller
@@ -46,7 +45,6 @@ pub fn interpolate(data: ndarray::Array2<f64>) -> ndarray::Array2<f64> {
             if !(real_step >= time.len() - 1) {
                 let old_time = time[real_step];
                 let new_time = time[real_step + 1];
-
                 if (time_new - old_time).abs() < (time_new - new_time).abs() {
                 } else {
                     real_step += 1;
@@ -64,41 +62,45 @@ pub fn interpolate(data: ndarray::Array2<f64>) -> ndarray::Array2<f64> {
             real_step
         };
 
-        if real_step > data.shape()[0] - 1 {
-            panic!("Soemthing is Wrong in the interpolation. Timestep larger then time");
+        if real_step >= data.shape()[0] - 1 {
+            interp_data[[step, 0]] = time_new;
+            interp_data[[step, 1]] = f64::NAN;
+            interp_data[[step, 2]] = f64::NAN;
+            interp_data[[step, 3]] = f64::NAN;
+        } else {
+            let x_new = interpolate_step(
+                data[[real_step - 1, 0]],
+                data[[real_step + 1, 0]],
+                time_new,
+                data[[real_step - 1, 1]],
+                data[[real_step + 1, 1]],
+            );
+            let y_new = interpolate_step(
+                data[[real_step - 1, 0]],
+                data[[real_step + 1, 0]],
+                time_new,
+                data[[real_step - 1, 2]],
+                data[[real_step + 1, 2]],
+            );
+            let z_new = interpolate_step(
+                data[[real_step - 1, 0]],
+                data[[real_step + 1, 0]],
+                time_new,
+                data[[real_step - 1, 3]],
+                data[[real_step + 1, 3]],
+            );
+            interp_data[[step, 0]] = time_new;
+            interp_data[[step, 1]] = x_new;
+            interp_data[[step, 2]] = y_new;
+            interp_data[[step, 3]] = z_new;
         }
-        let x_new = interpolate_step(
-            data[[real_step - 1, 0]],
-            data[[real_step + 1, 0]],
-            time_new,
-            data[[real_step - 1, 1]],
-            data[[real_step + 1, 1]],
-        );
-        let y_new = interpolate_step(
-            data[[real_step - 1, 0]],
-            data[[real_step + 1, 0]],
-            time_new,
-            data[[real_step - 1, 2]],
-            data[[real_step + 1, 2]],
-        );
-        let z_new = interpolate_step(
-            data[[real_step - 1, 0]],
-            data[[real_step + 1, 0]],
-            time_new,
-            data[[real_step - 1, 3]],
-            data[[real_step + 1, 3]],
-        );
-        interp_data[[step, 0]] = time_new;
-        interp_data[[step, 1]] = x_new;
-        interp_data[[step, 2]] = y_new;
-        interp_data[[step, 3]] = z_new;
         if step % 20000 == 0 {
-            bar.inc(20000);
+            //bar.inc(20000);
             check_signals!();
         }
     }
-    bar.finish();
-    data
+    //bar.finish();
+    interp_data
 }
 
 pub fn velocity_polynom(
@@ -115,7 +117,7 @@ pub fn velocity_polynom(
     let mut new_data =
         ndarray::Array2::<f64>::zeros((data.column(0).len() - (sampling_steps - 1), 7));
 
-    let bar = setup_bar!("Velocity Calc", new_data.column(0).len());
+    //let bar = setup_bar!("Velocity Calc", new_data.column(0).len());
     for id in (sampling_steps - 1) / 2..data.column(0).len() - (sampling_steps - 1) / 2 {
         let datasegment = data.slice(ndarray::s![
             id - (sampling_steps - 1) / 2..id + (sampling_steps - 1) / 2,
@@ -168,11 +170,11 @@ pub fn velocity_polynom(
         print_debug!("{},{},{}", vx, vy, vz);
         print_debug!("{:?},{:?},{:?}", param_x, param_y, param_z);
         if id % 2000 == 0 {
-            bar.inc(2000);
+            //bar.inc(2000);
             check_signals!();
         }
     } // End loop over dataset
-    bar.finish();
+      //bar.finish();
     new_data
 }
 

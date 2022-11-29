@@ -258,6 +258,77 @@ impl GridFunctions3D for CylindricalGrid3D {
         result
     }
 
+    fn collapse_weight(&self, axis: usize) -> Array2<f64> {
+        //check for Nans and     Infs and replace with 0
+        let axis = Axis(axis);
+        let mut result: Array2<f64> = Array::zeros(self.data.raw_dim().remove_axis(axis));
+        let mut result_weight: Array2<f64> = Array::zeros(self.data.raw_dim().remove_axis(axis));
+
+        for weight in self.weight.axis_iter(axis) {
+            result_weight += &weight;
+        }
+        result_weight
+    }
+
+    fn collapse_two(&self, axis1: usize, axis2: usize) -> Array1<f64> {
+        //check for Nans and     Infs and replace with 0
+        if axis1 == axis2 {
+            panic!("axis1 and axis2 must be different");
+        }
+        let mut axis1 = axis1;
+        let mut axis2 = axis2;
+        if axis1 > axis2 {
+            // swap axis1 and axis2
+            let temp = axis1;
+            axis1 = axis2;
+            axis2 = temp;
+        }
+        let axis1 = Axis(axis1);
+        let axis2 = Axis(axis2 - 1); // we removed axis1 so axis2 is now one smaller
+        let first_collaps = self.collapse(axis1.index());
+        let first_collaps_weight = self.collapse_weight(axis1.index());
+        let mut result: Array1<f64> = Array::zeros(first_collaps.raw_dim().remove_axis(axis2));
+        let mut result_weight: Array1<f64> =
+            Array::zeros(first_collaps.raw_dim().remove_axis(axis2));
+
+        for (data_arr, weight) in first_collaps
+            .axis_iter(axis2)
+            .zip(first_collaps_weight.axis_iter(axis2))
+        {
+            // check for nans
+            let data_arr = data_arr.mapv(|x| if x.is_nan() { 0. } else { x });
+            result = result + &data_arr * &weight;
+            result_weight += &weight;
+        }
+        result /= &result_weight;
+        result
+    }
+
+    fn collapse_two_weight(&self, axis1: usize, axis2: usize) -> Array1<f64> {
+        //check for Nans and     Infs and replace with 0
+        if axis1 == axis2 {
+            panic!("axis1 and axis2 must be different");
+        }
+        let mut axis1 = axis1;
+        let mut axis2 = axis2;
+        if axis1 > axis2 {
+            // swap axis1 and axis2
+            let temp = axis1;
+            axis1 = axis2;
+            axis2 = temp;
+        }
+        let axis1 = Axis(axis1);
+        let axis2 = Axis(axis2 - 1);
+        let first_collaps_weight = self.collapse_weight(axis1.index());
+        let mut result_weight: Array1<f64> =
+            Array::zeros(first_collaps_weight.raw_dim().remove_axis(axis2));
+
+        for weight in first_collaps_weight.axis_iter(axis2) {
+            result_weight += &weight;
+        }
+        result_weight
+    }
+
     fn slice(&self, axis: usize, position: f64) -> Array2<f64> {
         // find the length of theplane in each direction with triangulation
         let cell_id = ((position - self.limits[axis][0])

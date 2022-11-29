@@ -77,6 +77,12 @@ pub trait GridFunctions3D: DynClone + std::fmt::Display + std::fmt::Debug + Send
 
     fn collapse(&self, axis: usize) -> Array2<f64>;
 
+    fn collapse_weight(&self, axis: usize) -> Array2<f64>;
+
+    fn collapse_two(&self, axis1: usize, axis2: usize) -> Array1<f64>;
+
+    fn collapse_two_weight(&self, axis1: usize, axis2: usize) -> Array1<f64>;
+
     fn slice(&self, axis: usize, position: f64) -> Array2<f64>;
 
     fn slice_idx(&self, axis: usize, index: usize) -> Array2<f64>;

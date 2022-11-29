@@ -200,15 +200,20 @@ impl PyConverter {
     ///
     /// method: str, optional
     ///     Method to use to convert the CSV file. Can be one of the following:
-    ///     - `chain`:   The particles are chained in the file, i.e. the first particle
+    ///     - `chain`:  The particles are chained in the file, i.e. the first particle
     ///                 is followed by the second, the second by the third, etc.
     ///                 all particles are stored in one file
+    ///     - `id_line`: This algorithm sorts the particles by their id column and
+    ///                  their time column. The `columns` argument must contain the
+    ///                  id column as the first element.
+    ///
     ///     Default: `chain`
     ///
     /// Returns
     /// -------
     /// None
     ///
+    #[allow(unreachable_code, unused_variables)]
     #[args(
         columns = "vec![0,1,2,3]",
         delimiter = "\",\"",
@@ -217,7 +222,7 @@ impl PyConverter {
         vel = "false",
         interpolate = "false",
         radius = "0.0",
-        method = "\"chain\""
+        method = "\"id_line\""
     )]
     #[staticmethod]
     fn csv_multi(
@@ -231,7 +236,11 @@ impl PyConverter {
         interpolate: bool,
         radius: f64,
         method: &str,
-    ) {
+    ) -> PyResult<()> {
+        // errors out immediately because of the function is not implemented
+        return Err(PyErr::new::<pyo3::exceptions::PyNotImplementedError, _>(
+            "Multi CSV reader is not implemented yet. This feature comes in future!",
+        ));
         csv_multi_converter(
             filename,
             outname,
@@ -243,6 +252,7 @@ impl PyConverter {
             interpolate,
             radius,
             method,
-        )
+        );
+        Ok(())
     }
 }

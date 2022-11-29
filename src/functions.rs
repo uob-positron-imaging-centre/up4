@@ -558,7 +558,7 @@ pub trait Granular: DataManager {
         if property == "velocity" {
             let velocity_mag = global_stats.velocity_mag();
             let min = velocity_mag[0];
-            let mut max;
+            let max;
             if max_limit == 0.0 {
                 max = velocity_mag[2];
             } else {

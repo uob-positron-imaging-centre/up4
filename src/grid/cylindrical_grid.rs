@@ -261,7 +261,6 @@ impl GridFunctions3D for CylindricalGrid3D {
     fn collapse_weight(&self, axis: usize) -> Array2<f64> {
         //check for Nans and     Infs and replace with 0
         let axis = Axis(axis);
-        let mut result: Array2<f64> = Array::zeros(self.data.raw_dim().remove_axis(axis));
         let mut result_weight: Array2<f64> = Array::zeros(self.data.raw_dim().remove_axis(axis));
 
         for weight in self.weight.axis_iter(axis) {

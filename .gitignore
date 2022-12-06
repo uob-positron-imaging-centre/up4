@@ -5,8 +5,17 @@ Cargo.lock
 
 # Python
 **/*/__pycache__
-tests/fixtures/drum.hdf5
+tests/fixtures/*
 tests/text.txt
+docs/make_docs.sh
+flamegraph_disp_after.svg
+perf.data
+perf.data.old
+src/flamegraph.svg
+tests/assets/
+tests/fixtures/1p5u_HD1_glass.hdf5
+tests/fixtures/26mbq_day2.hdf5
+tests/pytest_report.html
 .idea
 up4.egg-info
 build

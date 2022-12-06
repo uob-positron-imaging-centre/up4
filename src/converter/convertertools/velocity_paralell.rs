@@ -18,7 +18,7 @@ pub fn velocity_polynom_parallel(
         )
     }
 
-    let bar = setup_bar!("Velocity Calc", data.column(0).len());
+    //let bar = setup_bar!("Velocity Calc", data.column(0).len());
     let x: Vec<ndarray::Array2<f64>> = data
         .windows((7, 7))
         .into_iter()
@@ -81,14 +81,14 @@ pub fn velocity_polynom_parallel(
             print_debug!("{},{},{}", vx, vy, vz);
             print_debug!("{:?},{:?},{:?}", param_x, param_y, param_z);
             if id % 10000 == 0 {
-                bar.inc(10000);
+                //bar.inc(10000);
                 check_signals!();
             }
             result_array
         })
         .collect(); // End loop over dataset
 
-    bar.finish();
+    //bar.finish();
     to_array2(new_data).unwrap()
 }
 

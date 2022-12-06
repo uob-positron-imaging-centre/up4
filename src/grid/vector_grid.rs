@@ -171,6 +171,18 @@ impl GridFunctions3D for VectorGrid {
         unimplemented!()
     }
 
+    fn collapse_two(&self, axis1: usize, axis2: usize) -> Array1<f64> {
+        self.data[0].collapse_two(axis1, axis2)
+    }
+
+    fn collapse_two_weight(&self, axis1: usize, axis2: usize) -> Array1<f64> {
+        self.data[0].collapse_two_weight(axis1, axis2)
+    }
+
+    fn collapse_weight(&self, axis: usize) -> Array2<f64> {
+        self.data[0].collapse_weight(axis)
+    }
+
     fn slice(&self, _axis: usize, _position: f64) -> Array2<f64> {
         unimplemented!()
     }

@@ -390,13 +390,14 @@ impl PyData {
     /// bin_edges : numpy.ndarray
     ///     The bin edges.
     ///
-    #[args(property = "\"velocity\"", bins = "100")]
+    #[args(property = "\"velocity\"", bins = "100", limit = "0.0")]
     fn histogram<'py>(
         &mut self,
         _py: Python<'py>,
         grid: &PyGrid,
         property: &str,
         bins: usize,
+        limit: f64,
     ) -> (&'py numpy::PyArray1<f64>, &'py numpy::PyArray1<f64>) {
         let selector: &ParticleSelector =
             match self.selector.as_any().downcast_ref::<ParticleSelector>() {
@@ -405,7 +406,7 @@ impl PyData {
             };
         let (histogram, bin_edges) =
             self.data
-                .histogram(grid.grid.clone(), selector, property, bins);
+                .histogram(grid.grid.clone(), selector, property, limit, bins);
         (histogram.into_pyarray(_py), bin_edges.into_pyarray(_py))
     }
 

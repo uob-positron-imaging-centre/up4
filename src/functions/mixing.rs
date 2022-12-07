@@ -11,6 +11,7 @@ pub trait Mixing: DataManager {
         selector: &ParticleSelector,
         type_a: usize,
         type_b: usize,
+        threshhold: usize,
     ) -> (Array1<f64>, Array1<f64>) {
         //read the number of timesteps inside this hdf5file
         let global_stats = self.global_stats();
@@ -90,7 +91,13 @@ pub trait Mixing: DataManager {
             let mean_concentration =
                 type_counter[type_a] as f64 / (type_counter[type_a] + type_counter[type_b]) as f64;
             let mut mixing_value = 0.0;
-            for conc in concentration.iter() {
+            for (conc, num) in concentration
+                .iter()
+                .zip((type_a_grid.get_weights() + type_b_grid.get_weights()).iter())
+            {
+                if *num < threshhold as f64 {
+                    continue;
+                }
                 if conc.is_nan() {
                     continue;
                 }
@@ -184,6 +191,7 @@ pub trait Mixing: DataManager {
             check_signals!();
         }
         let mut grid = grid.new_zeros();
+
         grid.set_data(type_a_grid.get_data() / (type_a_grid.get_data() + type_b_grid.get_data()));
         grid.set_weights(type_a_grid.get_weights() + type_b_grid.get_weights());
         grid

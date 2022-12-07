@@ -457,13 +457,14 @@ impl PyData {
     ///
     /// mixing_index : numpy.ndarray
     ///   The mixing index.
-    #[args(type_a = "0", type_b = "1")]
+    #[args(type_a = "0", type_b = "1", threshold = "10")]
     fn lacey_mixing_index<'py>(
         &mut self,
         _py: Python<'py>,
         grid: &PyGrid,
         type_a: usize,
         type_b: usize,
+        threshold: usize,
     ) -> (&'py numpy::PyArray1<f64>, &'py numpy::PyArray1<f64>) {
         print_debug!("Starting Lacey Mixing Index function");
         let selector: &ParticleSelector =
@@ -473,7 +474,7 @@ impl PyData {
             };
         let (time, mixing_index) =
             self.data
-                .lacey_mixing(grid.grid.clone(), selector, type_a, type_b);
+                .lacey_mixing(grid.grid.clone(), selector, type_a, type_b, threshold);
 
         (time.into_pyarray(_py), mixing_index.into_pyarray(_py))
     }

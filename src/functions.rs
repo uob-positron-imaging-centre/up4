@@ -1,4 +1,6 @@
+pub mod conditional;
 pub mod extractions;
+pub mod mixing;
 use crate::datamanager::DataManager;
 //use crate::utilities::print_debug;
 use crate::{check_signals, print_debug};
@@ -566,7 +568,6 @@ pub trait Granular: DataManager {
             }
             let bin_width = (max - min) / (bins as f64);
             for i in 0..bins {
-                println!("{} {}", i, bin_width);
                 bin_edges[i] = min + i as f64 * bin_width;
             }
             bin_edges[bins] = max;
@@ -741,3 +742,5 @@ pub trait Granular: DataManager {
 
 impl<T> Granular for T where T: DataManager {}
 impl<T> extractions::Extraction for T where T: DataManager {}
+impl<T> mixing::Mixing for T where T: DataManager {}
+impl<T> conditional::Conditional for T where T: DataManager {}

@@ -348,7 +348,7 @@ impl PyGrid {
     /// grid : ndarray
     ///     A numpy array containing the collapsed grid
     ///
-    fn collaps<'py>(&self, _py: Python<'py>, axis: usize) -> &'py PyArray2<f64> {
+    fn collapse<'py>(&self, _py: Python<'py>, axis: usize) -> &'py PyArray2<f64> {
         self.grid.collapse(axis).to_owned().into_pyarray(_py)
     }
 }
@@ -506,7 +506,7 @@ impl PyVecGrid {
         )
     }
 
-    fn collaps<'py>(
+    fn collapse<'py>(
         &self,
         _py: Python<'py>,
         axis: usize,

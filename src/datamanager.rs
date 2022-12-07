@@ -1,7 +1,9 @@
 //! Data Managment Module. Organizes file access.
 //use crate::functions::*;
 //use crate::functions::fields::*;
+use super::functions::conditional::Conditional;
 use super::functions::extractions::Extraction;
+use super::functions::mixing::Mixing;
 use super::functions::Granular;
 use crate::{print_warning, types::*};
 use derive_getters::Getters;
@@ -32,7 +34,7 @@ pub trait DataManager {
     fn get_timestep_buffer(&mut self, timestep: usize, buffer: usize) -> &Timestep;
 }
 
-pub trait Manager: DataManager + Granular + Extraction {}
+pub trait Manager: DataManager + Granular + Extraction + Mixing + Conditional {}
 
 /// Data-struct containing all necessery information for a timestep
 #[derive(Debug, Default, Getters, Clone)]
@@ -44,6 +46,7 @@ pub struct Timestep {
     particleid: Array1<f64>,
     clouds: Array1<f64>,
     density: Array1<f64>,
+    ptype: Array1<f64>, // type of particles
 }
 
 /// Data-struct containing overall stats for a dataset. (e.g system dimensions)

@@ -280,9 +280,9 @@ pub fn csv_multi_idline(
         let builder = group.new_dataset_builder();
         builder
             .with_data(&particle_type_array)
-            .create("particleid")
+            .create("particletype")
             .expect(&format!(
-                "Unable to create dataset \"particleid\" in file {}",
+                "Unable to create dataset \"particletype\" in file {}",
                 filename
             ));
 

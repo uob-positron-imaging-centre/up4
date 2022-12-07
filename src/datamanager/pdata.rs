@@ -72,6 +72,7 @@ impl PData {
         let mut position: Array1<Position> = Array1::from_elem(particles, [0.0, 0.0, 0.0]);
         let mut velocity: Array2<f64> = Array2::<f64>::zeros((particles, 3));
         let mut radius: Array1<f64> = Array1::<f64>::zeros(particles);
+        let mut ptype: Array1<f64> = Array1::<f64>::zeros(particles);
         let mut density: Array1<f64> = Array1::<f64>::zeros(particles);
         let mut particleid: Array1<f64> = Array1::<f64>::zeros(particles);
         let mut time: Array1<f64> = Array1::<f64>::zeros(particles);
@@ -155,6 +156,50 @@ impl PData {
                     self.file.filename()
                 ))
                 .to_owned()[timestep];
+
+            let part_type = self
+                .file
+                .group(&format!("particle {}", particle_id))
+                .expect(&format!(
+                    "Can not fine particle {} in file {}",
+                    particle_id,
+                    self.file.filename()
+                ))
+                .dataset("particletype")
+                .expect(&format!(
+                    "Can not find dataset \"particletype\" in HDF5 file \"{:?}\"",
+                    self.file.filename()
+                ))
+                .read_1d::<f64>()
+                .expect(&format!(
+                    "Can not read data from \"particletype\" dataset. \
+                    Data type or data format might be wrong. \
+                    Check creation of HDF5 file  \"{:?}\"",
+                    self.file.filename()
+                ))
+                .to_owned()[timestep];
+            let part_id = self
+                .file
+                .group(&format!("particle {}", particle_id))
+                .expect(&format!(
+                    "Can not fine particle {} in file {}",
+                    particle_id,
+                    self.file.filename()
+                ))
+                .dataset("id")
+                .expect(&format!(
+                    "Can not find dataset \"id\" in HDF5 file \"{:?}\"",
+                    self.file.filename()
+                ))
+                .read_1d::<f64>()
+                .expect(&format!(
+                    "Can not read data from \"id\" dataset. \
+                    Data type or data format might be wrong. \
+                    Check creation of HDF5 file  \"{:?}\"",
+                    self.file.filename()
+                ))
+                .to_owned()[timestep];
+
             //.slice(s![timestep])
 
             print_debug!("\tParticle {}: Extracting density from HDF5.", particle_id);
@@ -210,13 +255,13 @@ impl PData {
                 ))
                 .to_owned()[timestep];
 
-            let part_id = 1.;
             //position.slice_mut(s![particle_id]).assign(&part_pos);
             position[particle_id] = part_pos[particle_id];
             velocity.slice_mut(s![particle_id, ..]).assign(&part_vel);
 
             //radius.slice_mut(s![particle_id]).assign(&part_rad);
             radius[particle_id] = part_rad;
+            ptype[particle_id] = part_type;
             //density.slice_mut(s![particle_id]).assign(&part_density);
             density[particle_id] = part_density;
             //time.slice_mut(s![particle_id]).assign(&part_time);
@@ -233,6 +278,7 @@ impl PData {
             particleid: particleid,
             clouds: clouds,
             density: density,
+            ptype: ptype,
         };
         print_debug!("PData: Data read. Saving new timestap and return reference.");
         //let dt = Timestep::default();
@@ -256,6 +302,7 @@ impl PData {
             Array2::<Position>::from_elem((self.buffersize, particles), [0.0, 0.0, 0.0]);
         let mut velocity: Array3<f64> = Array3::<f64>::zeros((self.buffersize, particles, 3));
         let mut radius: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
+        let mut ptype: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
         let mut density: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
         let mut particleid: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
         let mut time: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
@@ -350,6 +397,37 @@ impl PData {
                     Array1::<f64>::zeros(part_vel.len() / 3)
                 }
             };
+
+            let part_type = match self
+                .file
+                .group(&format!("particle {}", particle_id))
+                .expect(&format!(
+                    "Can not find particle {} in file {}",
+                    particle_id,
+                    self.file.filename()
+                ))
+                .dataset("particletype")
+            {
+                Ok(s) => s
+                    .read_1d::<f64>()
+                    .expect(&format!(
+                        "Can not read data from \"particletype\" dataset. \
+                        Data type or data format might be wrong. \
+                        Check creation of HDF5 file  \"{:?}\"",
+                        self.file.filename()
+                    ))
+                    .slice(s![range.0..range.1])
+                    .to_owned(),
+                Err(_) => {
+                    print_warning!(
+                        "\tParticle {}: Could not find particletype in HDF5 file {}. \
+                        Using zeros instead.",
+                        particle_id,
+                        self.file.filename()
+                    );
+                    Array1::<f64>::zeros(part_vel.len() / 3)
+                }
+            };
             print_debug!("\tParticle {}: Extracting density from HDF5.", particle_id);
             let part_density = match self
                 .file
@@ -419,6 +497,7 @@ impl PData {
                 .slice_mut(s![.., particle_id, ..])
                 .assign(&part_vel);
             radius.slice_mut(s![.., particle_id]).assign(&part_rad);
+            ptype.slice_mut(s![.., particle_id]).assign(&part_type);
             density.slice_mut(s![.., particle_id]).assign(&part_density);
             time.slice_mut(s![.., particle_id]).assign(&part_time);
             particleid.slice_mut(s![.., particle_id]).assign(&part_id);
@@ -437,6 +516,7 @@ impl PData {
                 particleid: particleid.slice(s![timestep, ..]).to_owned(),
                 clouds: clouds.slice(s![timestep, ..]).to_owned(),
                 density: density.slice(s![timestep, ..]).to_owned(),
+                ptype: ptype.slice(s![timestep, ..]).to_owned(),
             };
 
             self.buffer[timestep] = dt;
@@ -459,6 +539,7 @@ impl PData {
             Array2::<Position>::from_elem((self.buffersize, particles), [0.0, 0.0, 0.0]);
         let mut velocity: Array3<f64> = Array3::<f64>::zeros((self.buffersize, particles, 3));
         let mut radius: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
+        let mut ptype: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
         let mut density: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
         let mut particleid: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
         let mut time: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
@@ -553,6 +634,37 @@ impl PData {
                     Array1::<f64>::zeros(part_vel.len() / 3)
                 }
             };
+
+            let part_type = match self
+                .file
+                .group(&format!("particle {}", particle_id))
+                .expect(&format!(
+                    "Can not find particle {} in file {}",
+                    particle_id,
+                    self.file.filename()
+                ))
+                .dataset("particletype")
+            {
+                Ok(s) => s
+                    .read_1d::<f64>()
+                    .expect(&format!(
+                        "Can not read data from \"particletype\" dataset. \
+                        Data type or data format might be wrong. \
+                        Check creation of HDF5 file  \"{:?}\"",
+                        self.file.filename()
+                    ))
+                    .slice(s![range.0..range.1])
+                    .to_owned(),
+                Err(_) => {
+                    print_warning!(
+                        "\tParticle {}: Could not find particletype in HDF5 file {}. \
+                        Using zeros instead.",
+                        particle_id,
+                        self.file.filename()
+                    );
+                    Array1::<f64>::zeros(part_vel.len() / 3)
+                }
+            };
             print_debug!("\tParticle {}: Extracting density from HDF5.", particle_id);
             let part_density = match self
                 .file
@@ -622,6 +734,7 @@ impl PData {
                 .slice_mut(s![.., particle_id, ..])
                 .assign(&part_vel);
             radius.slice_mut(s![.., particle_id]).assign(&part_rad);
+            ptype.slice_mut(s![.., particle_id]).assign(&part_type);
             density.slice_mut(s![.., particle_id]).assign(&part_density);
             time.slice_mut(s![.., particle_id]).assign(&part_time);
             particleid.slice_mut(s![.., particle_id]).assign(&part_id);
@@ -640,6 +753,7 @@ impl PData {
                 particleid: particleid.slice(s![timestep, ..]).to_owned(),
                 clouds: clouds.slice(s![timestep, ..]).to_owned(),
                 density: density.slice(s![timestep, ..]).to_owned(),
+                ptype: ptype.slice(s![timestep, ..]).to_owned(),
             };
 
             //self.buffer[timestep] = dt;

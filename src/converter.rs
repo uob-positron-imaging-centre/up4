@@ -124,11 +124,15 @@ pub fn vtk(
         print_debug!("Recieving data from VTKio and creating datasets");
         let particle_id = vtktools::get_field::<u64>(filename, "id");
         let sort_list = make_sortlist(&particle_id);
+        print_debug!("  Made sortlist");
         let particle_id = sort_by_array(particle_id, &sort_list);
+        print_debug!("  Sorted");
         let max_particle = particle_id.iter().max().unwrap().clone();
+        print_debug!("  Made sortlist");
         if max_particle > nparticles {
             nparticles = max_particle
         }
+        print_debug!("  Creating particle id dataset");
         let builder = group.new_dataset_builder();
         builder
             .with_data(&particle_id)
@@ -137,7 +141,7 @@ pub fn vtk(
                 "Unable to create dataset \"id\" in file {}",
                 filename
             ));
-
+        print_debug!("  Creating radius dataset");
         let particle_radius =
             sort_by_array(vtktools::get_field::<f64>(filename, "radius"), &sort_list);
         let builder = group.new_dataset_builder();
@@ -148,6 +152,7 @@ pub fn vtk(
                 "Unable to create dataset \"radius\" in file {}",
                 filename
             ));
+        print_debug!("  Creating ppclouds dataset");
         let ppclouds = ndarray::Array1::<u64>::ones(particle_radius.len());
         let builder = group.new_dataset_builder();
         builder
@@ -157,16 +162,19 @@ pub fn vtk(
                 "Unable to create dataset \"radius\" in file {}",
                 filename
             ));
-        let particle_type = vtktools::get_field::<i64>(filename, "type");
+        print_debug!("  Creating type dataset");
+        let particle_type = sort_by_array(vtktools::get_field::<i64>(filename, "type"), &sort_list);
         let builder = group.new_dataset_builder();
         builder
             .with_data(&particle_type)
-            .create("particleid")
+            .create("particletype")
             .expect(&format!(
-                "Unable to create dataset \"particleid\" in file {}",
+                "Unable to create dataset \"particletype\" in file {}",
                 filename
             ));
-        let particle_velocity = vtktools::get_field::<f64>(filename, "v");
+        print_debug!("  Creating velocity dataset");
+        let particle_velocity =
+            sort_by_array(vtktools::get_field::<f64>(filename, "v"), &sort_list);
         let particle_velocity =
             ndarray::Array::from_shape_vec((particle_velocity.len() / 3, 3), particle_velocity)
                 .unwrap();
@@ -197,7 +205,9 @@ pub fn vtk(
                 "Unable to create dataset \"velocity\" in file {}",
                 filename
             ));
-        let particle_positions = vtktools::get_positions::<f64>(filename);
+        print_debug!("  Creating position dataset");
+        let particle_positions =
+            sort_by_array(vtktools::get_positions::<f64>(filename), &sort_list);
 
         let particle_positions =
             ndarray::Array::from_shape_vec((particle_positions.len() / 3, 3), particle_positions)
@@ -410,10 +420,14 @@ pub fn csv_converter(
             panic!("No columns selected to extract!");
         }
         if interpolate {
-            let t = data.slice(ndarray::s![.., 0 as usize]);
+            let mut t = data.slice_mut(ndarray::s![.., 0 as usize]);
+            //set first timestep to 0 by substracting the first timestep from all timesteps
+            t -= t[0];
             let max_t = t[t.len() - 1];
             let steps = t.len();
+            print_debug!("Data before interpolation: {}", data);
             data = convertertools::interpolate(data, max_t, steps);
+            print_debug!("Data after interpolation: {}", data);
         }
         if vel {
             if columns.len() >= 5 {
@@ -424,7 +438,8 @@ pub fn csv_converter(
                 time, x, y, z -position "
                 )
             }
-            if data.column(0).len() < 200000 {
+            if true {
+                //data.column(0).len() < 100000000000 {
                 data = convertertools::velocity_polynom(data, 9, 2);
             } else {
                 data = convertertools::velocity_paralell::velocity_polynom_parallel(data, 9, 2);
@@ -432,6 +447,9 @@ pub fn csv_converter(
         }
         data
     };
+    print_debug!("Data: {:?}", data);
+    print_debug!("Data shape: {:?}", data.shape());
+
     // progress bar
     let data_length = data.column(0).len();
 
@@ -598,9 +616,9 @@ pub fn csv_converter(
     let builder = group.new_dataset_builder();
     builder
         .with_data(&particle_type_array)
-        .create("particleid")
+        .create("particletype")
         .expect(&format!(
-            "Unable to create dataset \"particleid\" in file {}",
+            "Unable to create dataset \"particletype\" in file {}",
             filename
         ));
 

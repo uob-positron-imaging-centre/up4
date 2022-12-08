@@ -2,7 +2,7 @@ use crate::{print_debug, setup_bar};
 
 use super::check_signals;
 use indicatif::{ProgressBar, ProgressStyle};
-use itertools::Itertools;
+use itertools::{Itertools, TakeWhileRef};
 use ndarray::{self, ArrayView1};
 use polyfit_rs;
 pub mod velocity_paralell;
@@ -239,4 +239,28 @@ pub fn make_sortlist(particle_ids: &Vec<u64>) -> Vec<usize> {
     let mut indices = (0..particle_ids.len()).collect::<Vec<_>>();
     indices.sort_by_key(|&i| &particle_ids[i]);
     indices
+}
+
+pub fn sort_by_column<T>(data: ndarray::Array2<T>, column: usize) -> ndarray::Array2<T>
+where
+    T: std::cmp::PartialOrd + Clone + Copy + num_traits::Zero,
+{
+    let mut indices = (0..data.column(0).len()).collect::<Vec<_>>();
+    let mut new_data = ndarray::Array2::<T>::zeros((data.shape()[0], data.shape()[1]));
+    indices.sort_by(|a, b| {
+        let one = data[[*a, column]];
+        let two = data[[*b, column]];
+        one.partial_cmp(&two).unwrap()
+    });
+    for i in 0..indices.len() {
+        new_data.row_mut(i).assign(&data.row(indices[i]));
+    }
+    new_data
+}
+
+pub fn is_sorted<T>(data: &ndarray::ArrayView1<T>) -> bool
+where
+    T: std::cmp::PartialOrd + Clone + Copy,
+{
+    data.into_iter().tuple_windows().all(|(a, b)| a <= b)
 }

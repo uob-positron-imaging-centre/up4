@@ -419,6 +419,15 @@ pub fn csv_converter(
         } else {
             panic!("No columns selected to extract!");
         }
+        // Check if time is sorted if not sort the time
+        if convertertools::is_sorted(&data.slice(ndarray::s![.., 0])) {
+            print_debug!("Time is sorted");
+        } else {
+            print_debug!("Time is not sorted");
+            print_warning!("Sorting data according to time");
+            let new_data = data;
+            data = convertertools::sort_by_column(new_data, 0);
+        }
         if interpolate {
             let mut t = data.slice_mut(ndarray::s![.., 0 as usize]);
             //set first timestep to 0 by substracting the first timestep from all timesteps

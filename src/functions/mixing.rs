@@ -86,7 +86,7 @@ pub trait Mixing: DataManager {
             }
 
             let sum_grid = type_b_grid.get_data() + type_a_grid.get_data();
-            type_a_grid.divide_by(&sum_grid);
+            type_a_grid.divide_by_array(&sum_grid);
             let concentration = type_a_grid.get_data();
             let mean_concentration =
                 type_counter[type_a] as f64 / (type_counter[type_a] + type_counter[type_b]) as f64;

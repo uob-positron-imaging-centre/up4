@@ -113,10 +113,15 @@ impl GridFunctions3D for VectorGrid {
     }
 
     // divide the whole array by another
-    fn divide_by(&mut self, other: &Array3<f64>) {
-        self.data[0].divide_by(other);
-        self.data[1].divide_by(other);
-        self.data[2].divide_by(other);
+    fn divide_by_array(&mut self, other: &Array3<f64>) {
+        self.data[0].divide_by_array(other);
+        self.data[1].divide_by_array(other);
+        self.data[2].divide_by_array(other);
+    }
+    fn divide_by_scalar(&mut self, other: f64) {
+        self.data[0].divide_by_scalar(other);
+        self.data[1].divide_by_scalar(other);
+        self.data[2].divide_by_scalar(other);
     }
 
     // divide by the weights
@@ -228,5 +233,11 @@ impl GridFunctions3D for VectorGrid {
         self.data[0].set_weights(weights.clone());
         self.data[1].set_weights(weights.clone());
         self.data[2].set_weights(weights);
+    }
+
+    fn outlier_removal(&mut self, threshold: f64, mode: usize) {
+        self.data[0].outlier_removal(threshold, mode);
+        self.data[1].outlier_removal(threshold, mode);
+        self.data[2].outlier_removal(threshold, mode);
     }
 }

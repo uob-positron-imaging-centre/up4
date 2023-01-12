@@ -6,7 +6,11 @@ use itertools::{Itertools, TakeWhileRef};
 use ndarray::{self, ArrayView1};
 use polyfit_rs;
 pub mod velocity_paralell;
-pub fn interpolate(data: ndarray::Array2<f64>, max: f64, steps: usize) -> ndarray::Array2<f64> {
+pub fn interpolate(
+    data: ndarray::Array2<f64>,
+    max_time: f64,
+    steps: usize,
+) -> ndarray::Array2<f64> {
     // TODO implement different types of interpolation
     //let bar = ProgressBar::new(data.column(0).len() as u64);
     /*bar.set_style(ProgressStyle::default_bar()
@@ -15,12 +19,15 @@ pub fn interpolate(data: ndarray::Array2<f64>, max: f64, steps: usize) -> ndarra
     .with_key("per_sec", |state| format!("{:.1} steps/s", state.per_sec()))
     .progress_chars("#>-"));*/
     //let bar = setup_bar!("Interpolate", data.column(0).len());
+    if !is_sorted(&data.column(0)) {
+        panic!("Data is not sorted by time. Please sort the data before interpolation.")
+    }
     let time: ArrayView1<f64> = data.slice(ndarray::s![.., 0 as usize]);
     let x: ArrayView1<f64> = data.slice(ndarray::s![.., 1 as usize]);
     let y: ArrayView1<f64> = data.slice(ndarray::s![.., 2 as usize]);
     let z: ArrayView1<f64> = data.slice(ndarray::s![.., 3 as usize]);
 
-    let maxtime = max;
+    let maxtime = max_time;
     let timesteps = steps;
     let dt = maxtime / timesteps as f64;
     // First timestep:

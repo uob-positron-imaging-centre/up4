@@ -1,7 +1,7 @@
 //! This file provides coupling of functions to convert data to HDF5 file format
 //! Functions are taken from base::converter.rs
 //!
-use crate::converter::*;
+use crate::converter::{self, *};
 use pyo3::prelude::*;
 
 /// Convert particle data from a given format to HDF5 (H5Part-like)
@@ -213,7 +213,7 @@ impl PyConverter {
     /// -------
     /// None
     ///
-    #[allow(unreachable_code, unused_variables)]
+    //#[allow(unreachable_code, unused_variables)]
     #[args(
         columns = "vec![0,1,2,3]",
         delimiter = "\",\"",
@@ -238,9 +238,9 @@ impl PyConverter {
         method: &str,
     ) -> PyResult<()> {
         // errors out immediately because of the function is not implemented
-        return Err(PyErr::new::<pyo3::exceptions::PyNotImplementedError, _>(
-            "Multi CSV reader is not implemented yet. This feature comes in future!",
-        ));
+        //return Err(PyErr::new::<pyo3::exceptions::PyNotImplementedError, _>(
+        //    "Multi CSV reader is not implemented yet. This feature comes in future!",
+        //));
         csv_multi_converter(
             filename,
             outname,
@@ -252,6 +252,103 @@ impl PyConverter {
             interpolate,
             radius,
             method,
+        );
+        Ok(())
+    }
+
+    /// Convert CSV file containing multiple particles into a HDF5 file.
+    /// There can be different ways how this is achieved, therefore the function
+    /// takes an argument called `method` which can be one of the following:
+    ///    - `chain`:   The particles are chained in the file, i.e. the first particle
+    ///                 is followed by the second, the second by the third, etc.
+    ///                 all particles are stored in one file
+    /// no other method is implemented yet. If you want to use another method, please
+    /// contact the developers.
+    ///
+    /// Parameters
+    /// ----------
+    /// filename: str
+    ///     Path to the CSV file
+    ///
+    /// outname: str
+    ///     Name of the output HDF5 file
+    ///
+    /// columns: List(int), optional
+    ///     List of columns to convert containing pid,x,y,z,(optional vx,vy,vz)
+    ///     Default: [0,1,2,3]
+    ///
+    /// header: bool, optional
+    ///     True if the CSV file contains a header
+    ///     Default: True
+    ///
+    /// comment: str, optional
+    ///     Comment character to ignore
+    ///     Default: "#"
+    ///
+    /// vel : bool, optional
+    ///     If true the velocity will be computed from the position using the savitzky-golay filter
+    ///     Default: False
+    ///
+    /// interpolate: bool, optional
+    ///     If true the particle positions will be interpolated in order to have a constant timestep
+    ///     Default: False
+    ///
+    /// radius: float, optional
+    ///     Radius of the particle
+    ///
+    /// method: str, optional
+    ///     Method to use to convert the CSV file. Can be one of the following:
+    ///     - `chain`:  The particles are chained in the file, i.e. the first particle
+    ///                 is followed by the second, the second by the third, etc.
+    ///                 all particles are stored in one file
+    ///     - `id_line`: This algorithm sorts the particles by their id column and
+    ///                  their time column. The `columns` argument must contain the
+    ///                  id column as the first element.
+    ///
+    ///     Default: `chain`
+    ///
+    /// Returns
+    /// -------
+    /// None
+    ///
+    //#[allow(unreachable_code, unused_variables)]
+    #[args(
+        columns = "vec![0,1,2,3]",
+        delimiter = "\",\"",
+        header = "true",
+        comment = "\"#\"",
+        vel = "false",
+        interpolate = "false",
+        radius = "0.0"
+    )]
+    #[staticmethod]
+    fn csv_multi_files(
+        filenames: Vec<&str>,
+        outname: &str,
+        times: Vec<f64>,
+        columns: Vec<i64>,
+        delimiter: &str,
+        header: bool,
+        comment: &str,
+        vel: bool,
+        interpolate: bool,
+        radius: f64,
+    ) -> PyResult<()> {
+        // errors out immediately because of the function is not implemented
+        //return Err(PyErr::new::<pyo3::exceptions::PyNotImplementedError, _>(
+        //    "Multi CSV reader is not implemented yet. This feature comes in future!",
+        //));
+        converter::csv_multi_file_time_sep(
+            filenames,
+            outname,
+            columns,
+            times,
+            delimiter,
+            header,
+            comment,
+            vel,
+            interpolate,
+            radius,
         );
         Ok(())
     }

@@ -1,4 +1,5 @@
 //! Create Python bindings for crate.
+
 use pyo3::prelude::*;
 use pyo3::types::IntoPyDict;
 extern crate ndarray;
@@ -222,6 +223,26 @@ impl PyData {
         self.selector.set_time(min_time, max_time)
     }
 
+    /// Return the time array of the dataset.
+    ///
+    /// Parameters
+    /// ----------
+    ///
+    /// None
+    ///
+    /// Returns
+    /// -------
+    ///
+    /// Array of time values.
+    ///
+    fn time<'py>(&self, py: Python<'py>) -> &'py numpy::PyArray1<f64> {
+        self.data
+            .global_stats()
+            .time_array()
+            .to_owned()
+            .into_pyarray(py)
+    }
+
     /// Return vector data as a vector field.
     ///
     /// Parameters
@@ -318,18 +339,24 @@ impl PyData {
     /// grid : up4.Grid
     ///     Grid class containing the grid layout.
     ///
+    /// min_vel : float, optional
+    ///    Minimum velocity to be considered as occupied.
+    ///
     /// Returns
     /// -------
     /// up4.Grid
     ///     Grid class containing the number field
-    fn occupancyfield<'py>(&mut self, _py: Python<'py>, grid: &PyGrid) -> PyGrid {
+    #[args(min_vel = "0.0")]
+    fn occupancyfield<'py>(&mut self, _py: Python<'py>, grid: &PyGrid, min_vel: f64) -> PyGrid {
         print_debug!("Starting Vectorfield function");
         let selector: &ParticleSelector =
             match self.selector.as_any().downcast_ref::<ParticleSelector>() {
                 Some(b) => b,
                 None => panic!("Can not convert PyGrid to Grid1D as "),
             };
-        let grid = self.data.occupancyfield(grid.grid.clone(), selector);
+        let grid = self
+            .data
+            .occupancyfield(grid.grid.clone(), selector, min_vel);
 
         PyGrid { grid: grid }
     }
@@ -577,15 +604,16 @@ impl PyData {
     ///
     /// grid : PyGrid
     ///   The grid that defines the region of the system.
-    ///
-    fn homogenity_index<'py>(&mut self, _py: Python<'py>, grid: &PyGrid) -> f64 {
+    #[args(min_vel = "0.0")]
+    fn homogenity_index<'py>(&mut self, _py: Python<'py>, grid: &PyGrid, min_vel: f64) -> f64 {
         print_debug!("Starting Homogenity Index function");
         let selector: &ParticleSelector =
             match self.selector.as_any().downcast_ref::<ParticleSelector>() {
                 Some(b) => b,
                 None => panic!("Can not convert PyGrid to Grid1D as "),
             };
-        self.data.homogenity_index(grid.grid.clone(), selector)
+        self.data
+            .homogenity_index(grid.grid.clone(), selector, min_vel)
     }
 }
 

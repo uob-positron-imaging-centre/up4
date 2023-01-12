@@ -8,6 +8,7 @@ use crate::{
     print_debug, print_warning, setup_bar,
 };
 use csv;
+pub use csv_modes::csv_multi_file_time_sep;
 use hdf5::File;
 use indicatif::{ProgressBar, ProgressStyle};
 use ndarray;

@@ -119,6 +119,9 @@ pub fn csv_multi_chain(
                 .slice_mut(ndarray::s![.., 6])
                 .assign(&data.slice(ndarray::s![indx_start[idx]..indx_start[idx + 1], 6]));
             if interpolate {
+                if !vel {
+                    panic!("Interpolation is activated but velocity computation is not. Currently this will lead to a loss of information. Please activate velocity computation or deactivate interpolation.");
+                }
                 temp_data =
                     convertertools::interpolate(temp_data, max_duration, max_steps as usize);
             }

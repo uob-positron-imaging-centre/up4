@@ -535,15 +535,24 @@ impl PData {
         }
         self.buffersize_extra[buffer_id] = range.1 - range.0;
         let particles = *self.global_stats_.nparticles();
-        let mut position: Array2<Position> =
-            Array2::<Position>::from_elem((self.buffersize, particles), [0.0, 0.0, 0.0]);
-        let mut velocity: Array3<f64> = Array3::<f64>::zeros((self.buffersize, particles, 3));
-        let mut radius: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
-        let mut ptype: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
-        let mut density: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
-        let mut particleid: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
-        let mut time: Array2<f64> = Array2::<f64>::zeros((self.buffersize, particles));
-        let clouds: Array2<f64> = Array2::<f64>::ones((self.buffersize, particles));
+        let mut position: Array2<Position> = Array2::<Position>::from_elem(
+            (self.buffersize_extra[buffer_id], particles),
+            [0.0, 0.0, 0.0],
+        );
+        let mut velocity: Array3<f64> =
+            Array3::<f64>::zeros((self.buffersize_extra[buffer_id], particles, 3));
+        let mut radius: Array2<f64> =
+            Array2::<f64>::zeros((self.buffersize_extra[buffer_id], particles));
+        let mut ptype: Array2<f64> =
+            Array2::<f64>::zeros((self.buffersize_extra[buffer_id], particles));
+        let mut density: Array2<f64> =
+            Array2::<f64>::zeros((self.buffersize_extra[buffer_id], particles));
+        let mut particleid: Array2<f64> =
+            Array2::<f64>::zeros((self.buffersize_extra[buffer_id], particles));
+        let mut time: Array2<f64> =
+            Array2::<f64>::zeros((self.buffersize_extra[buffer_id], particles));
+        let clouds: Array2<f64> =
+            Array2::<f64>::ones((self.buffersize_extra[buffer_id], particles));
         print_debug!("PData: Looping over all particles:");
         for particle_id in 0..particles {
             // for each particle find the Position at the
@@ -722,7 +731,7 @@ impl PData {
                 .to_owned();
 
             print_debug!("\tParticle {}: generating particle ID array.", particle_id);
-            let mut part_id: Array1<f64> = Array1::<f64>::zeros(self.buffersize);
+            let mut part_id: Array1<f64> = Array1::<f64>::zeros(self.buffersize_extra[buffer_id]);
             part_id.fill(particle_id as f64);
 
             print_debug!(
@@ -982,14 +991,17 @@ impl DataManager for PData {
         );
         if timestep > self.range_extra[buffer_id].1 - 1 {
             self.update_extra((timestep, timestep + self.buffersize), buffer_id);
-        } else if &self.range.1 == &self.global_stats_.ntimesteps && timestep < self.range.0 {
+        } else if &self.range_extra[buffer_id].1 == &self.global_stats_.ntimesteps
+            && timestep < self.range_extra[buffer_id].0
+        {
             self.update_extra((0, BUFFERSIZE), buffer_id);
         }
         // If a timestep below the current range is requested, update buffer
-        if timestep < self.range.0 {
+        if timestep < self.range_extra[buffer_id].0 {
             self.update_extra((timestep, timestep + self.buffersize), buffer_id);
         }
-        &self.buffer[timestep - self.range.0]
+
+        &self.buffer[timestep - self.range_extra[buffer_id].0]
     }
 }
 

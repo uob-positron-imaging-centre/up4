@@ -311,6 +311,29 @@ impl PyData {
         PyGrid { grid: grid }
     }
 
+    /// Return the occupancy field.
+    ///
+    /// Parameters
+    /// ----------
+    /// grid : up4.Grid
+    ///     Grid class containing the grid layout.
+    ///
+    /// Returns
+    /// -------
+    /// up4.Grid
+    ///     Grid class containing the number field
+    fn occupancyfield<'py>(&mut self, _py: Python<'py>, grid: &PyGrid) -> PyGrid {
+        print_debug!("Starting Vectorfield function");
+        let selector: &ParticleSelector =
+            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
+                Some(b) => b,
+                None => panic!("Can not convert PyGrid to Grid1D as "),
+            };
+        let grid = self.data.occupancyfield(grid.grid.clone(), selector);
+
+        PyGrid { grid: grid }
+    }
+
     /// Return the mean velocity of all valid particles in the system.
     ///
     /// Returns
@@ -546,7 +569,25 @@ impl PyData {
 
         PyGrid { grid: grid }
     }
-} // End PyData
+
+    /// Calculate the homogenity index
+    ///
+    /// Parameters
+    /// ----------
+    ///
+    /// grid : PyGrid
+    ///   The grid that defines the region of the system.
+    ///
+    fn homogenity_index<'py>(&mut self, _py: Python<'py>, grid: &PyGrid) -> f64 {
+        print_debug!("Starting Homogenity Index function");
+        let selector: &ParticleSelector =
+            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
+                Some(b) => b,
+                None => panic!("Can not convert PyGrid to Grid1D as "),
+            };
+        self.data.homogenity_index(grid.grid.clone(), selector)
+    }
+}
 
 #[pyproto]
 impl pyo3::PyObjectProtocol for PyData {

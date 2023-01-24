@@ -139,12 +139,19 @@ pub fn velocity_polynom(
 
     //let bar = setup_bar!("Velocity Calc", new_data.column(0).len());
     for id in (sampling_steps - 1) / 2..data.column(0).len() - (sampling_steps - 1) / 2 {
+        //println!("ID: {}", id);
+        //println!("sampling_steps: {}", sampling_steps);
+        //println!("{}", id - (sampling_steps - 1) / 2);
+        //println!("{}", id + (sampling_steps - 1) / 2);
         let datasegment = data.slice(ndarray::s![
-            id - (sampling_steps - 1) / 2..id + (sampling_steps - 1) / 2,
+            id - (sampling_steps - 1) / 2..id + (sampling_steps - 1) / 2 + 1,
             ..
         ]);
         let time = datasegment.column(0).to_owned();
         let time = (&time - time[0]).to_vec();
+        //println!("Time len: {}", time.len());
+        //println!("Time: {:?}", time);
+
         // fit a cur:?ve using polyfit-rs
         // do this for each dimension
         let param_x: Vec<f64> =

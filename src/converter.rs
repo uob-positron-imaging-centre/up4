@@ -377,6 +377,7 @@ pub fn csv_converter(
     vel: bool,
     interpolate: bool,
     radius: f64,
+    sampling_steps: usize,
 ) {
     if !Path::new(&filename).exists() {
         panic!("CSV file {} does not exist.", &filename);
@@ -450,9 +451,13 @@ pub fn csv_converter(
             }
             if true {
                 //data.column(0).len() < 100000000000 {
-                data = convertertools::velocity_polynom(data, 9, 2);
+                data = convertertools::velocity_polynom(data, sampling_steps, 2);
             } else {
-                data = convertertools::velocity_paralell::velocity_polynom_parallel(data, 9, 2);
+                data = convertertools::velocity_paralell::velocity_polynom_parallel(
+                    data,
+                    sampling_steps,
+                    2,
+                );
             }
         }
         data

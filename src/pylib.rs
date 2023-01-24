@@ -243,7 +243,7 @@ impl PyData {
             .into_pyarray(py)
     }
 
-    /// Return vector data as a vector field.
+    /// Return velocity data as a vector field.
     ///
     /// Parameters
     /// ----------

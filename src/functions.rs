@@ -246,6 +246,7 @@ pub trait Granular: DataManager {
         &mut self,
         grid: Box<dyn GridFunctions3D>,
         selector: &ParticleSelector,
+        min_vel: f64,
     ) -> Box<dyn GridFunctions3D> {
         //read the number of timesteps inside this hdf5file
         let global_stats = self.global_stats();
@@ -266,6 +267,7 @@ pub trait Granular: DataManager {
             print_debug!("Timestep {} is valid", timestep);
             let positions = timestep_data.position();
             let next_positions = next_timestep_data.position();
+            let velocities = timestep_data.velocity();
             let particle_ids = timestep_data.particleid();
             let rad_array = timestep_data.radius();
             let clouds = timestep_data.clouds();
@@ -304,6 +306,15 @@ pub trait Granular: DataManager {
                     grid.get_ypositions(),
                     grid.get_zpositions()
                 );
+                if (velocities
+                    .slice(s![particle, ..])
+                    .iter()
+                    .fold(0.0, |res, x| res + x * x))
+                .sqrt()
+                    < min_vel
+                {
+                    continue;
+                }
                 //here bug already
                 let time_spent = next_time - current_time;
                 if time_spent < 0.0 {
@@ -745,8 +756,9 @@ pub trait Granular: DataManager {
         &mut self,
         grid: Box<dyn GridFunctions3D>,
         selector: &ParticleSelector,
+        min_velocity: f64,
     ) -> f64 {
-        let field = self.occupancyfield(grid, selector);
+        let field = self.occupancyfield(grid, selector, min_velocity);
         let field = field.collapse_two(0, 1);
         let mean = field.iter().fold(
             0.0,

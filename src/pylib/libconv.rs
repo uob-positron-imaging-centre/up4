@@ -120,6 +120,9 @@ impl PyConverter {
     /// radius: float, optional
     ///     Radius of the particle
     ///
+    /// sampling_steps: int, optional
+    ///    Number of sampling steps for the savitzky-golay filter to calculate the velocity
+    ///
     /// Returns
     /// -------
     /// None
@@ -131,7 +134,8 @@ impl PyConverter {
         comment = "\"#\"",
         vel = "false",
         interpolate = "false",
-        radius = "0.0"
+        radius = "0.0",
+        sampling_steps = "9"
     )]
     #[staticmethod]
     fn csv(
@@ -144,7 +148,12 @@ impl PyConverter {
         vel: bool,
         interpolate: bool,
         radius: f64,
+        sampling_steps: usize,
     ) {
+        // check if sampling_steps is odd
+        if sampling_steps % 2 == 0 {
+            panic!("Sampling steps must be a odd number!");
+        }
         csv_converter(
             filename,
             outname,
@@ -155,6 +164,7 @@ impl PyConverter {
             vel,
             interpolate,
             radius,
+            sampling_steps,
         )
     }
 

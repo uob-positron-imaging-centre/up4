@@ -321,6 +321,11 @@ pub trait Granular: DataManager {
                     print_warning!("Occupyfield: timestep is negative");
                     continue;
                 }
+                //TODO BUG this is not valit code. we must check which particle is at which position
+                if next_positions.len() <= particle {
+                    print_warning!("Occupyfield: next timestep has less particles");
+                    continue;
+                }
                 occupancy_grid.add_trajectory_value(position, next_positions[particle], time_spent);
                 complete_time += time_spent;
             }

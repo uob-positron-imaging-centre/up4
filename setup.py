@@ -59,6 +59,7 @@ setup(
     packages = find_packages(
         exclude = ["tests", "*.tests", "*.tests.*", "tests.*"]
     ),
+    package_data={"up4": ["py.typed"]},
     rust_extensions=[
         RustExtension("upppp_rust", features=features, binding=Binding.PyO3)
     ],

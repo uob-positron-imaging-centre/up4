@@ -51,13 +51,12 @@ fn unit_vector_2d() {
     // create VectorData2D struct
     let mut arrows: VectorPlotter = VectorPlotter::new(grid);
     // define properties for plot
-    let uniform: bool = true;
     let arrow_scale: Option<f64> = None; // default scaling
                                          // create arrow traces
     let axis: usize = 2;
     let index: usize = 0;
     let mut traces: Vec<Box<dyn Trace>> = Vec::new();
-    let scatter_traces = arrows.create_unit_vector_traces(arrow_scale, uniform, axis, index);
+    let scatter_traces = arrows.create_unit_vector_traces(arrow_scale, axis, index);
     // set layout
     // FIXME layout settings
     let layout: Layout = Layout::new()

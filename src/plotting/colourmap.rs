@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use itertools::Itertools;
 use plotly::common::ColorScalePalette;
 
@@ -31,7 +30,7 @@ impl Rgb {
         [self.r, self.g, self.b]
     }
     // taken from Agoston's Computer Graphics and Geometric Modeling: 
-    // Implementation and Algorithms p. 303, with H ∈ [0, 360] and S,V ∈ [0, 1]
+    // Implementation and Algorithms p. 303, with H -> [0, 360] and S,V -> [0, 1]
     fn to_hsv(self) -> Hsv {
         let max = self.as_array().iter().fold(f64::NEG_INFINITY, |a, &b| a.max(b));
         let min = self.as_array().iter().fold(f64::INFINITY, |a, &b| a.min(b));
@@ -73,7 +72,12 @@ struct Hsv{
 // the provided colourmap
 pub fn interpolate_cmap(cmap: ColorScalePalette, cmap_loc: f64) //-> String 
 {
-    let raw_values = ColorScalePaletteRawValues::get_values(cmap);
+    let cmap_strings = ColorScalePaletteRawValues::get_values(cmap);
+    let mut cmap_rgb_values: Vec<Rgb>= Vec::with_capacity(cmap_strings.len());
+    for colour in cmap_strings {
+        cmap_rgb_values.push(Rgb::from_rgb_string(colour));
+    }
+
 
 }
 

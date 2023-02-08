@@ -8,6 +8,5 @@
 # Licence :   GNU v3.0
 # Desc    :   None
 
-from upppp_rust import Data, Grid, Converter
-
+from upppp_rust import Converter, Data, Grid
 from . import plotting

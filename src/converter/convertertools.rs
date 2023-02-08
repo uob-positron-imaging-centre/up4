@@ -2,10 +2,15 @@ use crate::{print_debug, setup_bar};
 
 use super::check_signals;
 use indicatif::{ProgressBar, ProgressStyle};
+use itertools::{Itertools, TakeWhileRef};
 use ndarray::{self, ArrayView1};
 use polyfit_rs;
 pub mod velocity_paralell;
-pub fn interpolate(data: ndarray::Array2<f64>, max: f64, steps: usize) -> ndarray::Array2<f64> {
+pub fn interpolate(
+    data: ndarray::Array2<f64>,
+    max_time: f64,
+    steps: usize,
+) -> ndarray::Array2<f64> {
     // TODO implement different types of interpolation
     //let bar = ProgressBar::new(data.column(0).len() as u64);
     /*bar.set_style(ProgressStyle::default_bar()
@@ -14,12 +19,15 @@ pub fn interpolate(data: ndarray::Array2<f64>, max: f64, steps: usize) -> ndarra
     .with_key("per_sec", |state| format!("{:.1} steps/s", state.per_sec()))
     .progress_chars("#>-"));*/
     //let bar = setup_bar!("Interpolate", data.column(0).len());
+    if !is_sorted(&data.column(0)) {
+        panic!("Data is not sorted by time. Please sort the data before interpolation.")
+    }
     let time: ArrayView1<f64> = data.slice(ndarray::s![.., 0 as usize]);
     let x: ArrayView1<f64> = data.slice(ndarray::s![.., 1 as usize]);
     let y: ArrayView1<f64> = data.slice(ndarray::s![.., 2 as usize]);
     let z: ArrayView1<f64> = data.slice(ndarray::s![.., 3 as usize]);
 
-    let maxtime = max;
+    let maxtime = max_time;
     let timesteps = steps;
     let dt = maxtime / timesteps as f64;
     // First timestep:
@@ -42,10 +50,14 @@ pub fn interpolate(data: ndarray::Array2<f64>, max: f64, steps: usize) -> ndarra
         real_step = {
             // if the temporal distance between new time and old time is smaller
             // then distance between new time and next time return old timestep
+            print_debug!("Real_step:{} time_len {}", real_step, time.len());
             if !(real_step >= time.len() - 1) {
                 let old_time = time[real_step];
                 let new_time = time[real_step + 1];
-                if (time_new - old_time).abs() < (time_new - new_time).abs() {
+                print_debug!("Old time: {} New time: {}", old_time, new_time);
+                if new_time < old_time {
+                    real_step += 1;
+                } else if (time_new - old_time).abs() < (time_new - new_time).abs() {
                 } else {
                     real_step += 1;
                     if !(real_step >= time.len() - 1) {
@@ -61,6 +73,7 @@ pub fn interpolate(data: ndarray::Array2<f64>, max: f64, steps: usize) -> ndarra
             }
             real_step
         };
+        print_debug!("Interpolate:  step: {}, real_step: {}, time_new: {}, time[real_step]: {}, time[real_step+1]: {}", step, real_step, time_new, time[real_step], time[real_step+1]);
 
         if real_step >= data.shape()[0] - 1 {
             interp_data[[step, 0]] = time_new;
@@ -68,6 +81,13 @@ pub fn interpolate(data: ndarray::Array2<f64>, max: f64, steps: usize) -> ndarra
             interp_data[[step, 2]] = f64::NAN;
             interp_data[[step, 3]] = f64::NAN;
         } else {
+            if data[[real_step - 1, 0]] == data[[real_step + 1, 0]] {
+                interp_data[[step, 0]] = time_new;
+                interp_data[[step, 1]] = f64::NAN;
+                interp_data[[step, 2]] = f64::NAN;
+                interp_data[[step, 3]] = f64::NAN;
+                continue;
+            }
             let x_new = interpolate_step(
                 data[[real_step - 1, 0]],
                 data[[real_step + 1, 0]],
@@ -119,12 +139,19 @@ pub fn velocity_polynom(
 
     //let bar = setup_bar!("Velocity Calc", new_data.column(0).len());
     for id in (sampling_steps - 1) / 2..data.column(0).len() - (sampling_steps - 1) / 2 {
+        //println!("ID: {}", id);
+        //println!("sampling_steps: {}", sampling_steps);
+        //println!("{}", id - (sampling_steps - 1) / 2);
+        //println!("{}", id + (sampling_steps - 1) / 2);
         let datasegment = data.slice(ndarray::s![
-            id - (sampling_steps - 1) / 2..id + (sampling_steps - 1) / 2,
+            id - (sampling_steps - 1) / 2..id + (sampling_steps - 1) / 2 + 1,
             ..
         ]);
         let time = datasegment.column(0).to_owned();
         let time = (&time - time[0]).to_vec();
+        //println!("Time len: {}", time.len());
+        //println!("Time: {:?}", time);
+
         // fit a cur:?ve using polyfit-rs
         // do this for each dimension
         let param_x: Vec<f64> =
@@ -167,8 +194,14 @@ pub fn velocity_polynom(
         new_data[[id - (sampling_steps - 1) / 2, 4]] = vx;
         new_data[[id - (sampling_steps - 1) / 2, 5]] = vy;
         new_data[[id - (sampling_steps - 1) / 2, 6]] = vz;
-        print_debug!("{},{},{}", vx, vy, vz);
-        print_debug!("{:?},{:?},{:?}", param_x, param_y, param_z);
+        print_debug!("Vel: {},{},{}", vx, vy, vz);
+        print_debug!(
+            "T: {:?} Pos:{:?},{:?},{:?}",
+            data[[id, 0]],
+            data[[id, 1]],
+            data[[id, 2]],
+            data[[id, 3]]
+        );
         if id % 2000 == 0 {
             //bar.inc(2000);
             check_signals!();
@@ -195,18 +228,53 @@ pub fn sort_by_array<T>(data: Vec<T>, idx: &Vec<usize>) -> Vec<T>
 where
     T: std::cmp::PartialOrd + Clone + Copy,
 {
-    let mut array_sorted = data.to_vec();
-    for i in 0..data.len() {
-        array_sorted[i] = data[idx[i] as usize];
+    print_debug!("      Sorting data");
+
+    let mut array_sorted = Vec::new();
+    if data.len() == idx.len() {
+        for i in 0..idx.len() {
+            array_sorted.push(data[idx[i]]);
+        }
+    } else {
+        for i in 0..idx.len() {
+            array_sorted.push(data[3 * idx[i]]);
+            array_sorted.push(data[3 * idx[i] + 1]);
+            array_sorted.push(data[3 * idx[i] + 2]);
+        }
     }
+
+    print_debug!("      Done");
     array_sorted
 }
 
 pub fn make_sortlist(particle_ids: &Vec<u64>) -> Vec<usize> {
     // make vec with length of particle_ids
-    let mut sortlist = vec![0; particle_ids.len()];
-    for (idx, part_id) in particle_ids.iter().enumerate() {
-        sortlist[*part_id as usize - 1] = idx;
+    // thanks to that stackoverflow....
+    let mut indices = (0..particle_ids.len()).collect::<Vec<_>>();
+    indices.sort_by_key(|&i| &particle_ids[i]);
+    indices
+}
+
+pub fn sort_by_column<T>(data: ndarray::Array2<T>, column: usize) -> ndarray::Array2<T>
+where
+    T: std::cmp::PartialOrd + Clone + Copy + num_traits::Zero,
+{
+    let mut indices = (0..data.column(0).len()).collect::<Vec<_>>();
+    let mut new_data = ndarray::Array2::<T>::zeros((data.shape()[0], data.shape()[1]));
+    indices.sort_by(|a, b| {
+        let one = data[[*a, column]];
+        let two = data[[*b, column]];
+        one.partial_cmp(&two).unwrap()
+    });
+    for i in 0..indices.len() {
+        new_data.row_mut(i).assign(&data.row(indices[i]));
     }
-    sortlist
+    new_data
+}
+
+pub fn is_sorted<T>(data: &ndarray::ArrayView1<T>) -> bool
+where
+    T: std::cmp::PartialOrd + Clone + Copy,
+{
+    data.into_iter().tuple_windows().all(|(a, b)| a <= b)
 }

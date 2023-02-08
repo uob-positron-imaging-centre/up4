@@ -17,13 +17,17 @@ pub fn velocity_polynom_parallel(
             sampling_steps
         )
     }
-
     //let bar = setup_bar!("Velocity Calc", data.column(0).len());
     let x: Vec<ndarray::Array2<f64>> = data
         .windows((7, 7))
         .into_iter()
-        .map(|x| x.to_owned().into_shape((7, 7)).unwrap())
+        .map(|x| {
+            println!("{:?}", x);
+            x.to_owned().into_shape((7, 7)).unwrap()
+        })
         .collect();
+
+    println!("x.shape(): {:?}", x.len());
     let new_data: Vec<ndarray::Array1<f64>> = x
         .par_iter()
         .enumerate()
@@ -89,14 +93,15 @@ pub fn velocity_polynom_parallel(
         .collect(); // End loop over dataset
 
     //bar.finish();
-    to_array2(new_data).unwrap()
+    to_array2(new_data)
 }
 
-fn to_array2<T: Copy>(
-    source: Vec<ndarray::Array1<T>>,
-) -> Result<ndarray::Array2<T>, impl std::error::Error> {
+fn to_array2<T: Copy>(source: Vec<ndarray::Array1<T>>) -> ndarray::Array2<T> {
+    if source.len() == 0 {
+        panic!("Source is empty");
+    }
     let width = source.len();
     let flattened: ndarray::Array1<T> = source.into_iter().flat_map(|row| row.to_vec()).collect();
     let height = flattened.len() / width;
-    flattened.into_shape((width, height))
+    flattened.into_shape((width, height)).unwrap()
 }

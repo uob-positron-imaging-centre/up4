@@ -224,9 +224,14 @@ impl GridFunctions3D for CylindricalGrid3D {
         unimplemented!("Not implemented for cylindrical grid")
     }
 
-    fn divide_by(&mut self, other: &Array3<f64>) {
+    fn divide_by_array(&mut self, other: &Array3<f64>) {
         self.data = &self.data / other;
     }
+
+    fn divide_by_scalar(&mut self, other: f64) {
+        self.data = &self.data / other;
+    }
+
     fn divide_by_weight(&mut self) {
         self.data = &self.data / &self.weight;
     }
@@ -398,6 +403,79 @@ impl GridFunctions3D for CylindricalGrid3D {
             self.weight = weights;
         } else {
             panic!("CylindricalGrid3D: set_weights: shape of data does not match shape of grid");
+        }
+    }
+
+    // mode 0: set all values above threshold to zero, mode 1: set all values above threshold to threshold mode 2: set all values above threshold to mean of surrounding all values
+    fn outlier_removal(&mut self, threshold: f64, mode: usize) {
+        if mode == 0 {
+            self.data = self.data.mapv(|x| if x > threshold { 0. } else { x });
+        } else if mode == 1 {
+            self.data = self
+                .data
+                .mapv(|x| if x > threshold { threshold } else { x });
+        } else if mode == 2 {
+            let mut result: Array3<f64> = Array::zeros(self.data.raw_dim());
+            let mut weight: Array3<f64> = Array::zeros(self.data.raw_dim());
+            for (idx, data) in self.data.indexed_iter() {
+                if *data > threshold {
+                    let mut sum: f64 = 0.;
+                    let mut weight_sum: f64 = 0.;
+                    let mut counter_sum: f64 = 0.;
+                    // now check every surrounding index, only one cell away from idx
+                    // 26 idx must be checked
+                    let indexes = [
+                        (idx.0 - 1, idx.1 - 1, idx.2 - 1),
+                        (idx.0 - 1, idx.1 - 1, idx.2),
+                        (idx.0 - 1, idx.1 - 1, idx.2 + 1),
+                        (idx.0 - 1, idx.1, idx.2 - 1),
+                        (idx.0 - 1, idx.1, idx.2),
+                        (idx.0 - 1, idx.1, idx.2 + 1),
+                        (idx.0 - 1, idx.1 + 1, idx.2 - 1),
+                        (idx.0 - 1, idx.1 + 1, idx.2),
+                        (idx.0 - 1, idx.1 + 1, idx.2 + 1),
+                        (idx.0, idx.1 - 1, idx.2 - 1),
+                        (idx.0, idx.1 - 1, idx.2),
+                        (idx.0, idx.1 - 1, idx.2 + 1),
+                        (idx.0, idx.1, idx.2 - 1),
+                        (idx.0, idx.1, idx.2 + 1),
+                        (idx.0, idx.1 + 1, idx.2 - 1),
+                        (idx.0, idx.1 + 1, idx.2),
+                        (idx.0, idx.1 + 1, idx.2 + 1),
+                        (idx.0 + 1, idx.1 - 1, idx.2 - 1),
+                        (idx.0 + 1, idx.1 - 1, idx.2),
+                        (idx.0 + 1, idx.1 - 1, idx.2 + 1),
+                        (idx.0 + 1, idx.1, idx.2 - 1),
+                        (idx.0 + 1, idx.1, idx.2),
+                        (idx.0 + 1, idx.1, idx.2 + 1),
+                        (idx.0 + 1, idx.1 + 1, idx.2 - 1),
+                        (idx.0 + 1, idx.1 + 1, idx.2),
+                        (idx.0 + 1, idx.1 + 1, idx.2 + 1),
+                    ];
+
+                    for index in &indexes {
+                        if index.0 < self.data.shape()[0]
+                            && index.1 < self.data.shape()[1]
+                            && index.2 < self.data.shape()[2]
+                        {
+                            sum +=
+                                self.data[[index.0 as usize, index.1 as usize, index.2 as usize]];
+                            weight_sum +=
+                                self.weight[[index.0 as usize, index.1 as usize, index.2 as usize]];
+                            counter_sum += 1.0;
+                        }
+                    }
+                    result[idx] = sum / counter_sum;
+                    weight[idx] = weight_sum / counter_sum;
+                } else {
+                    result[idx] = *data;
+                    weight[idx] = self.weight[idx];
+                }
+            }
+            self.data = result;
+            self.weight = weight;
+        } else {
+            panic!("Cartesian Grid: Mode {:?} not supported", mode);
         }
     }
 }

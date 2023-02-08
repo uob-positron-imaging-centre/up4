@@ -50,7 +50,10 @@ pub trait GridFunctions3D: DynClone + std::fmt::Display + std::fmt::Debug + Send
     fn add_trajectory_value(&mut self, pos1: Position, pos2: Position, value: f64);
 
     // divide the whole array by another
-    fn divide_by(&mut self, other: &Array3<f64>);
+    fn divide_by_array(&mut self, other: &Array3<f64>);
+
+    // divide the whole array by another
+    fn divide_by_scalar(&mut self, other: f64);
 
     // divide by the weights
     fn divide_by_weight(&mut self);
@@ -102,6 +105,8 @@ pub trait GridFunctions3D: DynClone + std::fmt::Display + std::fmt::Debug + Send
     fn set_data(&mut self, data: Array3<f64>);
 
     fn set_weights(&mut self, weights: Array3<f64>);
+
+    fn outlier_removal(&mut self, threshold: f64, mode: usize); // mode 0: set all values above threshold to zero, mode 1: set all values above threshold to threshold mode 2: set all values above threshold to mean of surrounding all values
 }
 clone_trait_object!(GridFunctions3D);
 

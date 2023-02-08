@@ -207,6 +207,27 @@ impl TData {
                 self.file.filename()
             ))
             .to_owned();
+        let particletype = self
+            .file
+            .group(&format!("timestep {}", timestep))
+            .expect(&format!(
+                "Can not find timestep {} in file {}",
+                timestep,
+                self.file.filename()
+            ))
+            .dataset("particletype")
+            .expect(&format!(
+                "Can not find dataset \"particletype\" in HDF5 file \"{:?}\"",
+                self.file.filename()
+            ))
+            .read_1d::<f64>()
+            .expect(&format!(
+                "Can not read data from \"particletype\" dataset. \
+                Data type or data format might be wrong. \
+                Check creation of HDF5 file  \"{:?}\"",
+                self.file.filename()
+            ))
+            .to_owned();
         let particleid = self
             .file
             .group(&format!("timestep {}", timestep))
@@ -215,14 +236,14 @@ impl TData {
                 timestep,
                 self.file.filename()
             ))
-            .dataset("particleid")
+            .dataset("id")
             .expect(&format!(
-                "Can not find dataset \"particleid\" in HDF5 file \"{:?}\"",
+                "Can not find dataset \"id\" in HDF5 file \"{:?}\"",
                 self.file.filename()
             ))
             .read_1d::<f64>()
             .expect(&format!(
-                "Can not read data from \"particleid\" dataset. \
+                "Can not read data from \"id\" dataset. \
                 Data type or data format might be wrong. \
                 Check creation of HDF5 file  \"{:?}\"",
                 self.file.filename()
@@ -237,6 +258,7 @@ impl TData {
             particleid: particleid,
             clouds: clouds,
             density: density,
+            ptype: particletype,
         };
         print_debug!("TData: Data read. Saving new timestap and return reference.");
         //let dt = Timestep::default();
@@ -404,14 +426,35 @@ impl TData {
                     timestep,
                     self.file.filename()
                 ))
-                .dataset("particleid")
+                .dataset("id")
                 .expect(&format!(
-                    "Can not find dataset \"particleid\" in HDF5 file \"{:?}\"",
+                    "Can not find dataset \"id\" in HDF5 file \"{:?}\"",
                     self.file.filename()
                 ))
                 .read_1d::<f64>()
                 .expect(&format!(
-                    "Can not read data from \"particleid\" dataset. \
+                    "Can not read data from \"id\" dataset. \
+                    Data type or data format might be wrong. \
+                    Check creation of HDF5 file  \"{:?}\"",
+                    self.file.filename()
+                ))
+                .to_owned();
+            let particletype = self
+                .file
+                .group(&format!("timestep {}", timestep))
+                .expect(&format!(
+                    "Can not find timestep {} in file {}",
+                    timestep,
+                    self.file.filename()
+                ))
+                .dataset("particletype")
+                .expect(&format!(
+                    "Can not find dataset \"particletype\" in HDF5 file \"{:?}\"",
+                    self.file.filename()
+                ))
+                .read_1d::<f64>()
+                .expect(&format!(
+                    "Can not read data from \"particletype\" dataset. \
                     Data type or data format might be wrong. \
                     Check creation of HDF5 file  \"{:?}\"",
                     self.file.filename()
@@ -426,6 +469,7 @@ impl TData {
                 particleid: particleid,
                 clouds: clouds,
                 density: density,
+                ptype: particletype,
             };
             print_debug!(
                 "\tTimestep {}: Saving struct in buffer with len: {}.",
@@ -598,20 +642,40 @@ impl TData {
                     timestep,
                     self.file.filename()
                 ))
-                .dataset("particleid")
+                .dataset("id")
                 .expect(&format!(
-                    "Can not find dataset \"particleid\" in HDF5 file \"{:?}\"",
+                    "Can not find dataset \"id\" in HDF5 file \"{:?}\"",
                     self.file.filename()
                 ))
                 .read_1d::<f64>()
                 .expect(&format!(
-                    "Can not read data from \"particleid\" dataset. \
+                    "Can not read data from \"id\" dataset. \
                     Data type or data format might be wrong. \
                     Check creation of HDF5 file  \"{:?}\"",
                     self.file.filename()
                 ))
                 .to_owned();
-
+            let particletype = self
+                .file
+                .group(&format!("timestep {}", timestep))
+                .expect(&format!(
+                    "Can not find timestep {} in file {}",
+                    timestep,
+                    self.file.filename()
+                ))
+                .dataset("particletype")
+                .expect(&format!(
+                    "Can not find dataset \"particletype\" in HDF5 file \"{:?}\"",
+                    self.file.filename()
+                ))
+                .read_1d::<f64>()
+                .expect(&format!(
+                    "Can not read data from \"particletype\" dataset. \
+                    Data type or data format might be wrong. \
+                    Check creation of HDF5 file  \"{:?}\"",
+                    self.file.filename()
+                ))
+                .to_owned();
             let dt = Timestep {
                 time: time,
                 position: position,
@@ -620,6 +684,7 @@ impl TData {
                 particleid: particleid,
                 clouds: clouds,
                 density: density,
+                ptype: particletype,
             };
             print_debug!(
                 "\tTimestep {}: Saving struct in buffer with len: {}.",

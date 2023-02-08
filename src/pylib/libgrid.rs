@@ -348,8 +348,104 @@ impl PyGrid {
     /// grid : ndarray
     ///     A numpy array containing the collapsed grid
     ///
-    fn collaps<'py>(&self, _py: Python<'py>, axis: usize) -> &'py PyArray2<f64> {
+    fn collapse<'py>(&self, _py: Python<'py>, axis: usize) -> &'py PyArray2<f64> {
         self.grid.collapse(axis).to_owned().into_pyarray(_py)
+    }
+
+    /// Collaps the grid along an axis
+    /// This is basically cell based depth averaging
+    ///
+    /// Parameters
+    /// ----------
+    /// axis1 : int
+    ///     The first axis to collapse the grid on
+    ///
+    /// axis2 : int
+    ///     The second axis to collapse the grid on
+    ///
+    /// Returns
+    /// -------
+    /// grid : ndarray
+    ///     A numpy array containing the collapsed grid
+    ///
+    fn collapse_two<'py>(
+        &self,
+        _py: Python<'py>,
+        axis1: usize,
+        axis2: usize,
+    ) -> &'py PyArray1<f64> {
+        self.grid
+            .collapse_two(axis1, axis2)
+            .to_owned()
+            .into_pyarray(_py)
+    }
+
+    /// Return the x-positions of the grid
+    ///
+    /// Parameters
+    /// ----------
+    /// None
+    ///
+    /// Returns
+    /// -------
+    ///
+    /// x : ndarray
+    ///     A numpy array containing the x-positions of the grid
+    fn xpositions<'py>(&self, _py: Python<'py>) -> &'py PyArray1<f64> {
+        self.grid.get_xpositions().to_owned().into_pyarray(_py)
+    }
+
+    /// Return the y-positions of the grid
+    ///
+    /// Parameters
+    /// ----------
+    /// None
+    ///
+    /// Returns
+    /// -------
+    ///
+    /// y : ndarray
+    ///     A numpy array containing the y-positions of the grid
+    fn ypositions<'py>(&self, _py: Python<'py>) -> &'py PyArray1<f64> {
+        self.grid.get_ypositions().to_owned().into_pyarray(_py)
+    }
+
+    /// Return the z-positions of the grid
+    ///
+    /// Parameters
+    /// ----------
+    /// None
+    ///
+    /// Returns
+    /// -------
+    ///
+    /// z : ndarray
+    ///     A numpy array containing the z-positions of the grid
+    fn zpositions<'py>(&self, _py: Python<'py>) -> &'py PyArray1<f64> {
+        self.grid.get_zpositions().to_owned().into_pyarray(_py)
+    }
+
+    /// Detect outliers and remove them depending on the mode
+    /// Three different modes are available:
+    /// 1. Set the outlier to zero
+    /// 2. Set the outlier to the threshold
+    /// 3. Set the outlier to the mean of surrounding cells.
+    ///
+    /// Parameters
+    /// ----------
+    ///
+    /// mode : int
+    ///    The mode to use for outlier detection
+    ///
+    /// threshold : float
+    ///   The threshold to use for outlier detection
+    ///
+    /// Returns
+    /// -------
+    ///
+    /// None
+    fn remove_outliers(&mut self, mode: usize, threshold: f64) {
+        self.grid.outlier_removal(threshold, mode);
     }
 }
 
@@ -506,7 +602,7 @@ impl PyVecGrid {
         )
     }
 
-    fn collaps<'py>(
+    fn collapse<'py>(
         &self,
         _py: Python<'py>,
         axis: usize,

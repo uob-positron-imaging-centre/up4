@@ -1,7 +1,9 @@
+pub mod conditional;
 pub mod extractions;
+pub mod mixing;
 use crate::datamanager::DataManager;
 //use crate::utilities::print_debug;
-use crate::{check_signals, print_debug};
+use crate::{check_signals, print_debug, print_warning};
 extern crate ndarray;
 //extern crate ndarray_linalg;
 extern crate numpy;
@@ -244,16 +246,17 @@ pub trait Granular: DataManager {
         &mut self,
         grid: Box<dyn GridFunctions3D>,
         selector: &ParticleSelector,
+        min_vel: f64,
     ) -> Box<dyn GridFunctions3D> {
         //read the number of timesteps inside this hdf5file
         let global_stats = self.global_stats();
         let timesteps: &usize = global_stats.timesteps();
-        let mut number_grid = grid.new_zeros();
+        let mut occupancy_grid = grid.new_zeros();
+        let mut complete_time = 0.0;
         self.setup_buffer(); //setup another buffer
-        print_debug!("velocityfield: Initiation over, entering time loop");
-        for timestep in 0..timesteps - 2 {
+        for timestep in 0..timesteps - 3 {
             let timestep_data = self.get_timestep(timestep).clone();
-            let next_timestep_data = self.get_timestep_buffer(timestep, 0);
+            let next_timestep_data = self.get_timestep_buffer(timestep + 1, 0);
             let current_time = *timestep_data.time();
             let next_time = *next_timestep_data.time();
             // check if timestep is in the timeframe given
@@ -264,6 +267,7 @@ pub trait Granular: DataManager {
             print_debug!("Timestep {} is valid", timestep);
             let positions = timestep_data.position();
             let next_positions = next_timestep_data.position();
+            let velocities = timestep_data.velocity();
             let particle_ids = timestep_data.particleid();
             let rad_array = timestep_data.radius();
             let clouds = timestep_data.clouds();
@@ -302,18 +306,34 @@ pub trait Granular: DataManager {
                     grid.get_ypositions(),
                     grid.get_zpositions()
                 );
+                if (velocities
+                    .slice(s![particle, ..])
+                    .iter()
+                    .fold(0.0, |res, x| res + x * x))
+                .sqrt()
+                    < min_vel
+                {
+                    continue;
+                }
                 //here bug already
-
-                number_grid.add_trajectory_value(
-                    position,
-                    next_positions[particle],
-                    next_time - current_time,
-                );
+                let time_spent = next_time - current_time;
+                if time_spent < 0.0 {
+                    print_warning!("Occupyfield: timestep is negative");
+                    continue;
+                }
+                //TODO BUG this is not valit code. we must check which particle is at which position
+                if next_positions.len() <= particle {
+                    print_warning!("Occupyfield: next timestep has less particles");
+                    continue;
+                }
+                occupancy_grid.add_trajectory_value(position, next_positions[particle], time_spent);
+                complete_time += time_spent;
             }
             // checking for kill signals after each timestep
             check_signals!();
         }
-        number_grid
+        occupancy_grid.divide_by_scalar(complete_time);
+        occupancy_grid
     }
 
     /// Calculate the mean velocity of the valid particles within the system.
@@ -566,7 +586,6 @@ pub trait Granular: DataManager {
             }
             let bin_width = (max - min) / (bins as f64);
             for i in 0..bins {
-                println!("{} {}", i, bin_width);
                 bin_edges[i] = min + i as f64 * bin_width;
             }
             bin_edges[bins] = max;
@@ -737,7 +756,32 @@ pub trait Granular: DataManager {
         grantemp.set_weights(num_counts);
         grantemp
     }
+
+    fn homogenity_index(
+        &mut self,
+        grid: Box<dyn GridFunctions3D>,
+        selector: &ParticleSelector,
+        min_velocity: f64,
+    ) -> f64 {
+        let field = self.occupancyfield(grid, selector, min_velocity);
+        let field = field.collapse_two(0, 1);
+        let mean = field.iter().fold(
+            0.0,
+            |sum: f64, x: &f64| if x.is_nan() { sum } else { sum + x },
+        ) / field.len() as f64;
+        let mut ih: f64 = 0.0;
+        for value in field.iter() {
+            if value.is_nan() {
+                continue;
+            }
+            ih += (value - &mean) * (value - &mean);
+        }
+        ih /= field.len() as f64;
+        ih.sqrt()
+    }
 } //End Granular trait
 
 impl<T> Granular for T where T: DataManager {}
 impl<T> extractions::Extraction for T where T: DataManager {}
+impl<T> mixing::Mixing for T where T: DataManager {}
+impl<T> conditional::Conditional for T where T: DataManager {}

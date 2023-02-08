@@ -1,6 +1,6 @@
 use crate::{
     check_signals,
-    converter::convertertools::{make_sortlist, sort_by_array},
+    converter::convertertools::{make_sortlist, sort_by_array, sort_by_column},
     print_debug, print_warning, setup_bar,
 };
 use csv;
@@ -29,7 +29,7 @@ pub fn csv_multi_idline(
 ) {
     // check if the column stack is either 5 or 8 long
     let bar = setup_bar!("CSV converter", 100);
-    if !(columns.len() == 5 || columns.len() != 8) {
+    if !(columns.len() == 5 || columns.len() == 8) {
         panic!("The column stack must be either 5 or 8 long, containing the columns: t, id, x, y, z,  (vx, vy, vz)");
     }
     // TODO: CHeck if we can buffer that for big datafiles!
@@ -56,9 +56,11 @@ pub fn csv_multi_idline(
     print_debug!("{:?}", rdr);
     bar.inc(1);
     let particle_data: Vec<ndarray::Array2<f64>> = {
+        // read in the data from the csv file
         let mut data: ndarray::ArrayBase<ndarray::OwnedRepr<f64>, ndarray::Dim<[usize; 2]>> = rdr
             .deserialize_array2_dynamic()
             .expect("Unable to extract CSV data to ndarray! \nYour delimiter might be wrong.\n");
+        // make a temporary array so we can reorder the columns
 
         let mut temp_data = ndarray::Array2::<f64>::from_elem((data.shape()[0], 8), f64::NAN);
         for (i, column) in columns.iter().enumerate() {
@@ -67,31 +69,38 @@ pub fn csv_multi_idline(
                 .assign(&data.slice(ndarray::s![.., *column as usize]));
         }
         data = temp_data;
-        println!("{:?}", data);
         // at this point the array has the following shape:
         // [t, id, x, y, z, vx, vy, vz] where vx, vy, vz are maybe 0.0
         bar.inc(2);
-        let (data, max_t, max_steps) = sort_by_id_and_time(data);
+        // sort the data by id and time
+        let (data, max_t, max_steps) = sort_by_id(data);
         bar.inc(20);
-        println!("{:?}", data);
         let mut particle_data: Vec<ndarray::Array2<f64>> = Vec::new();
-        // go through each particle and save its data into a Vector
 
+        // here, data is a vec of all particles, each particle is an array of [t, id, x, y, z, vx, vy, vz]
         for idx in 0..data.len() {
+            let particle_id = data[idx].slice(ndarray::s![.., 1]).to_vec();
             let mut temp_data = data[idx].clone();
+            // sort by time
+            temp_data = sort_by_column(temp_data, 0);
+            // remove id column because it was not implemented
+            temp_data = remove_columns(temp_data, vec![1]);
             if interpolate {
                 temp_data = convertertools::interpolate(temp_data, max_t, max_steps);
             }
+            print!("Data after interpolation: {:?}\n", temp_data);
             if vel {
                 if columns.len() > 5 {
                     panic!(
-                        "Your columns are specified with more then 4 values and velocity \
+                        "Your columns are specified with more then 5 values and velocity \
                         computation is activated. If you wish to ignore the velocity data \
-                        in your current data, only specify 4 columns indexing \
-                        time, x, y, z -position "
+                        in your current data, only specify 5 columns indexing \
+                        time, id, x, y, z -position "
                     )
                 }
-                if temp_data.column(0).len() < 200000 {
+                // if condition to check weather to use the parallel version of the velocity computation
+                // currently turned of due to bug in parralel computation
+                if true {
                     temp_data = convertertools::velocity_polynom(temp_data, 9, 2);
                 } else {
                     temp_data = convertertools::velocity_paralell::velocity_polynom_parallel(
@@ -99,12 +108,16 @@ pub fn csv_multi_idline(
                     );
                 }
             }
-
+            print!("Data after velocity calc: {:?}\n", temp_data);
+            // push the current particle data into the vector
             particle_data.push(temp_data);
         }
-
+        // returns the vector of particle data to a variable called
+        // particle_data
         particle_data
     };
+    // next step is constructing the hdf5 file
+
     bar.inc(30);
     print_debug!("Constructing data arrays for attributes!");
 
@@ -143,7 +156,6 @@ pub fn csv_multi_idline(
             timesteps = data_length;
         }
         // Attributes
-        println!("here");
         // arrays that will be saved:
         time_array = ndarray::Array1::<f64>::zeros(data_length);
         let mut particle_id_array = ndarray::Array1::<f64>::ones(data_length);
@@ -185,17 +197,17 @@ pub fn csv_multi_idline(
             // resetfailcount. we only dont allow them do be in a row!
             failcount = 0;
             old_time = current_time;
-            let pos_x = line[2];
-            let pos_y = line[3];
-            let pos_z = line[4];
+            let pos_x = line[1];
+            let pos_y = line[2];
+            let pos_z = line[3];
             let pos = ndarray::array![pos_x, pos_y, pos_z];
             pos_array[[line_id, 0]] = pos_x;
             pos_array[[line_id, 1]] = pos_y;
             pos_array[[line_id, 2]] = pos_z;
             println!("{:?}", line);
-            let v_x = line[5];
-            let v_y = line[6];
-            let v_z = line[7];
+            let v_x = line[4];
+            let v_y = line[5];
+            let v_z = line[6];
             vel_array[[line_id, 0]] = v_x;
             vel_array[[line_id, 1]] = v_y;
             vel_array[[line_id, 2]] = v_z;
@@ -280,9 +292,9 @@ pub fn csv_multi_idline(
         let builder = group.new_dataset_builder();
         builder
             .with_data(&particle_type_array)
-            .create("particleid")
+            .create("particletype")
             .expect(&format!(
-                "Unable to create dataset \"particleid\" in file {}",
+                "Unable to create dataset \"particletype\" in file {}",
                 filename
             ));
 
@@ -362,7 +374,7 @@ pub fn csv_multi_idline(
     bar.finish()
 }
 
-fn sort_by_id_and_time(data: ndarray::Array2<f64>) -> (Vec<ndarray::Array2<f64>>, f64, usize) {
+fn sort_by_id(data: ndarray::Array2<f64>) -> (Vec<ndarray::Array2<f64>>, f64, usize) {
     // data has shape (n, 8)
     // [t, id, x, y, z, vx, vy, vz]
     let mut sorted_data = Vec::new();
@@ -430,10 +442,19 @@ fn sort_by_id_and_time(data: ndarray::Array2<f64>) -> (Vec<ndarray::Array2<f64>>
         last_line_pushed[index] += 1;
         line.assign(&data.slice(ndarray::s![i, ..]));
     }
-    // sort by time
-    for arr in sorted_data.iter_mut() {
-        arr.axis_iter(ndarray::Axis(0))
-            .sorted_by(|a, b| a[0].partial_cmp(&b[0]).unwrap());
-    }
     (sorted_data, max_t, max_steps)
+}
+
+fn remove_columns(data: ndarray::Array2<f64>, columns: Vec<usize>) -> ndarray::Array2<f64> {
+    let mut new_data = ndarray::Array2::zeros((data.shape()[0], data.shape()[1] - columns.len()));
+    let mut new_data_index = 0;
+    for i in 0..data.shape()[1] {
+        if !columns.contains(&i) {
+            let mut new_data_line = new_data.slice_mut(ndarray::s![.., new_data_index]);
+            new_data_index += 1;
+            let data_line = data.slice(ndarray::s![.., i]);
+            new_data_line.assign(&data_line);
+        }
+    }
+    new_data
 }

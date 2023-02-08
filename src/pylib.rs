@@ -1,4 +1,5 @@
 //! Create Python bindings for crate.
+
 use pyo3::prelude::*;
 use pyo3::types::IntoPyDict;
 extern crate ndarray;
@@ -222,7 +223,27 @@ impl PyData {
         self.selector.set_time(min_time, max_time)
     }
 
-    /// Return vector data as a vector field.
+    /// Return the time array of the dataset.
+    ///
+    /// Parameters
+    /// ----------
+    ///
+    /// None
+    ///
+    /// Returns
+    /// -------
+    ///
+    /// Array of time values.
+    ///
+    fn time<'py>(&self, py: Python<'py>) -> &'py numpy::PyArray1<f64> {
+        self.data
+            .global_stats()
+            .time_array()
+            .to_owned()
+            .into_pyarray(py)
+    }
+
+    /// Return velocity data as a vector field.
     ///
     /// Parameters
     /// ----------
@@ -307,6 +328,35 @@ impl PyData {
                 None => panic!("Can not convert PyGrid to Grid1D as "),
             };
         let grid = self.data.numberfield(grid.grid.clone(), selector);
+
+        PyGrid { grid: grid }
+    }
+
+    /// Return the occupancy field.
+    ///
+    /// Parameters
+    /// ----------
+    /// grid : up4.Grid
+    ///     Grid class containing the grid layout.
+    ///
+    /// min_vel : float, optional
+    ///    Minimum velocity to be considered as occupied.
+    ///
+    /// Returns
+    /// -------
+    /// up4.Grid
+    ///     Grid class containing the number field
+    #[args(min_vel = "0.0")]
+    fn occupancyfield<'py>(&mut self, _py: Python<'py>, grid: &PyGrid, min_vel: f64) -> PyGrid {
+        print_debug!("Starting Vectorfield function");
+        let selector: &ParticleSelector =
+            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
+                Some(b) => b,
+                None => panic!("Can not convert PyGrid to Grid1D as "),
+            };
+        let grid = self
+            .data
+            .occupancyfield(grid.grid.clone(), selector, min_vel);
 
         PyGrid { grid: grid }
     }
@@ -436,7 +486,136 @@ impl PyData {
 
         PyGrid { grid: grid }
     }
-} // End PyData
+
+    /// Calculate the Lacey mixing index for two particle types in a region of the system for a time period.
+    ///
+    /// Parameters
+    /// ----------
+    /// grid : PyGrid
+    ///    The grid that defines the region of the system.
+    ///
+    /// type_a : int
+    ///     The particle type of the first particle.
+    ///
+    /// type_b : int
+    ///     The particle type of the second particle.
+    ///
+    /// Returns
+    /// -------
+    /// time : numpy.ndarray
+    ///    The time of the mixing index.
+    ///
+    /// mixing_index : numpy.ndarray
+    ///   The mixing index.
+    #[args(type_a = "0", type_b = "1", threshold = "10")]
+    fn lacey_mixing_index<'py>(
+        &mut self,
+        _py: Python<'py>,
+        grid: &PyGrid,
+        type_a: usize,
+        type_b: usize,
+        threshold: usize,
+    ) -> (&'py numpy::PyArray1<f64>, &'py numpy::PyArray1<f64>) {
+        print_debug!("Starting Lacey Mixing Index function");
+        let selector: &ParticleSelector =
+            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
+                Some(b) => b,
+                None => panic!("Can not convert PyGrid to Grid1D as "),
+            };
+        let (time, mixing_index) =
+            self.data
+                .lacey_mixing(grid.grid.clone(), selector, type_a, type_b, threshold);
+
+        (time.into_pyarray(_py), mixing_index.into_pyarray(_py))
+    }
+
+    /// Calculate the circulation time of a particle in a system.
+    /// This algorithm works by setting a single boundary, which the particle has to cross 3 times.
+    ///
+    /// Parameters
+    /// ----------
+    /// position : float
+    ///     The position of the boundary.
+    ///
+    /// axis : int
+    ///     The axis along which the boundary is set. Default 0.
+    ///
+    /// Returns
+    /// -------
+    /// circulation_time : list
+    ///     The circulation time of the particle.
+    #[args(axis = "0")]
+    fn circulation_time<'py>(&mut self, _py: Python<'py>, position: f64, axis: usize) -> Vec<f64> {
+        print_debug!("Starting Circulation Time function");
+        let selector: &ParticleSelector =
+            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
+                Some(b) => b,
+                None => panic!("Can not convert PyGrid to Grid1D as "),
+            };
+        let circulation_time = self.data.circulation_time(selector, axis, position);
+
+        circulation_time
+    }
+
+    /// Calculate the concentration field of the system
+    /// The concentration field is calculated by counting the number of particles of type a and b in a region of the system.
+    /// The concentration is calculated by n_a / (n_a + n_b).
+    ///
+    /// Parameters
+    /// ----------
+    /// grid : PyGrid
+    ///    The grid that defines the region of the system.
+    ///
+    /// type_a : int
+    ///    The particle type of the first particle.
+    ///
+    /// type_b : int
+    ///   The particle type of the second particle.
+    ///
+    /// Returns
+    /// -------
+    /// concentration_field : PyGrid
+    ///   The concentration field of the system.
+    #[args(type_a = "1", type_b = "2")]
+    fn concentration_field<'py>(
+        &mut self,
+        _py: Python<'py>,
+        grid: &PyGrid,
+        type_a: usize,
+        type_b: usize,
+    ) -> PyGrid {
+        print_debug!("Starting Concentration Field function");
+        let selector: &ParticleSelector =
+            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
+                Some(b) => b,
+                None => panic!("Can not convert PyGrid to Grid1D as "),
+            };
+        let grid = self
+            .data
+            .concentration_field(grid.grid.clone(), selector, type_a, type_b);
+
+        PyGrid { grid: grid }
+    }
+
+    /// Calculate the homogenity index
+    ///
+    /// Parameters
+    /// ----------
+    ///
+    /// grid : PyGrid
+    ///   The grid that defines the region of the system.
+    #[args(min_vel = "0.0")]
+    fn homogenity_index<'py>(&mut self, _py: Python<'py>, grid: &PyGrid, min_vel: f64) -> f64 {
+        print_debug!("Starting Homogenity Index function");
+        let selector: &ParticleSelector =
+            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
+                Some(b) => b,
+                None => panic!("Can not convert PyGrid to Grid1D as "),
+            };
+        self.data
+            .homogenity_index(grid.grid.clone(), selector, min_vel)
+    }
+}
 
 #[pyproto]
 impl pyo3::PyObjectProtocol for PyData {

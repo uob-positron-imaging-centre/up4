@@ -21,6 +21,9 @@ use plotly::{
 use plotly::{Cone, Scatter3D, Surface};
 use std::f64::consts::PI;
 
+// TODO consider removing all the unnecessary versions of "get_this_plane" by having an option for a 2D vec struct
+
+
 /// Vector data handling struct. The `true_norm` field contains the original vector norms, and is used for shading. 
 /// Norms used for drawing arrows are not necessarily the same as they may be scaled for display reasons.
 #[derive(Getters, Clone)]
@@ -130,7 +133,23 @@ impl VectorPlotter {
     // FIXME fit an ellipsoid inside the cells to scale properly
     /// Constrain all arrows to lie within circle of radius dx/2 from each node.
     /// On a non-uniform grid, this *will* distort the plot.
-    pub fn bound_node(&mut self, dx: f64) {
+    pub fn bound_node(&mut self, dx: f64, dy: f64, axis: usize) {
+        // start with vectors with a unit norm
+        self.normalise_vectors();
+        // TODO make this cleaner
+        if (axis == 0) { // along yz plane
+            self.vdata *= 0.5*dx;
+            self.wdata *= 0.5*dy;
+        }
+        else if (axis == 1) { // along xz plane
+            self.udata *= 0.5*dx;
+            self.wdata *= 0.5*dy;
+            
+        }
+        else { // along xy plane
+            self.udata *= 0.5*dx;
+            self.vdata *= 0.5*dy;
+        }
         let scale_factor: f64 = 0.5 * dx / self.true_norm.max_skipnan();
         self.scale_global(scale_factor);
     }
@@ -317,15 +336,12 @@ impl VectorPlotter {
     pub fn create_unit_vector_traces(
         &mut self,
         arrow_scale: Option<f64>,
-        uniform: bool,
         axis: usize,
         index: usize,
     ) -> Vec<Box<Scatter<f64, f64>>> {
-        self.normalise_vectors();
-        if uniform {
-            let dx: f64 = self.xdata[1] - self.xdata[0];
-            self.bound_node(dx);
-        }
+        let dx: f64 = self.xdata[1] - self.xdata[0];
+        let dy: f64 = self.ydata[1] - self.ydata[0];
+        self.bound_node(dx, dy, axis);
         let (barb_x, barb_y) = self.create_quiver_barbs(axis, index);
         let (arrow_x, arrow_y) = self.create_quiver_arrows(axis, index);
         let mut traces: Vec<Box<Scatter<f64, f64>>> = Vec::new();
@@ -497,13 +513,10 @@ impl VectorPlotter {
         range: [usize; 3],
         axis: usize,
         arrow_scale: Option<f64>,
-        uniform: bool,
     ) -> Vec<Box<Scatter3D<f64, f64, f64>>> {
-        self.normalise_vectors();
-        if uniform {
-            let dx: f64 = self.ydata[1] - self.ydata[0];
-            self.bound_node(dx);
-        }
+        let dx: f64 = self.xdata[1] - self.xdata[0];
+        let dy: f64 = self.ydata[1] - self.ydata[0];
+        self.bound_node(dx, dy, axis);
         let mut traces = Vec::new();
         for index in (range[0]..range[1]).step_by(range[2]) {
             let (barb_x, barb_y) = self.create_quiver_barbs(axis, index);

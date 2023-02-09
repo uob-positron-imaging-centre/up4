@@ -150,8 +150,8 @@ impl VectorPlotter {
             self.udata *= 0.5*dx;
             self.vdata *= 0.5*dy;
         }
-        let scale_factor: f64 = 0.5 * dx / self.true_norm.max_skipnan();
-        self.scale_global(scale_factor);
+        //let scale_factor: f64 = 0.5 * dx / self.true_norm.max_skipnan();
+        //self.scale_global(scale_factor);
     }
 
     /// Convert vectors into unit vectors.
@@ -335,7 +335,6 @@ impl VectorPlotter {
     /// Create arrow traces, but for the data converted into unit vectors.
     pub fn create_unit_vector_traces(
         &mut self,
-        arrow_scale: Option<f64>,
         axis: usize,
         index: usize,
     ) -> Vec<Box<Scatter<f64, f64>>> {

@@ -278,3 +278,19 @@ where
 {
     data.into_iter().tuple_windows().all(|(a, b)| a <= b)
 }
+
+#[cfg(feature = "blosc")]
+use hdf5::filters::{blosc_get_nthreads, blosc_set_nthreads};
+//// Make a builder for blosc datasets in hdf5 so we dont have to change stuff all the time
+
+macro_rules! make_dataset_builder {
+    ($group:expr) => {{
+        let builder = $group.new_dataset_builder();
+        #[cfg(feature = "blosc")]
+        let builder = builder.blosc_zstd(BLOSC_COMPRESSION, BLOSC_SHUFFLE);
+        // return builder
+        builder
+    }};
+}
+
+pub(crate) use make_dataset_builder;

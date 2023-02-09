@@ -125,6 +125,11 @@ class TestFields:
         field = data.granular_temperature(grid)
         assert field.shape() == [10, 10, 10]
 
+    def test_occupancyfield(self, data, grid):
+        grid = grid(data, cells=[10, 10, 10])
+        field = data.occupancyfield(grid)
+        assert field.shape() == [10, 10, 10]
+
 
 @pytest.mark.parametrize("grid", ["cylidrical", "cartesian"], indirect=True)
 class TestGrid:

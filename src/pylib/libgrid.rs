@@ -38,13 +38,23 @@ use pyo3::prelude::*;
 ///     Return the grid as a numpy array
 ///
 ///
-#[pyclass(name = "Grid")]
+#[pyclass(name = "Grid", subclass)]
 pub struct PyGrid {
     pub grid: Box<dyn grid::GridFunctions3D>,
 }
 
 #[pymethods]
 impl PyGrid {
+    #[new]
+    fn new() -> Self {
+        PyGrid {
+            grid: Box::new(CartesianGrid3D::new(
+                [1, 1, 1],
+                grid::Dim::ThreeD([[0., 0.], [0., 0.], [0., 0.]]),
+            )),
+        }
+    }
+
     /// Create a 3D cartesian grid with limits and spacing from a PyData object
     ///
     /// Parameters

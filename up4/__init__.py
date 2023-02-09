@@ -8,6 +8,9 @@
 # Licence :   GNU v3.0
 # Desc    :   None
 
-from upppp_rust import Data, Grid, Converter
+from upppp_rust import Data, Converter
+from .grid import Grid
 
 from . import plotting
+
+__all__ = ["Data", "Converter", "Grid", "plotting"]

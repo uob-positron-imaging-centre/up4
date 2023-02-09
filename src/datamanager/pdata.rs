@@ -3,11 +3,14 @@
 //! Implementation of reading + buffering functions.
 
 use super::{DataManager, GlobalStats, Manager, Timestep};
+
 extern crate ndarray;
 use crate::particleselector::Selector;
 use crate::types::*;
 use crate::ParticleSelector;
 use crate::{print_debug, print_warning};
+#[cfg(feature = "blosc")]
+use hdf5::filters::blosc_set_nthreads;
 use ndarray::prelude::*;
 use std::time::Instant;
 const BUFFERSIZE: usize = 2000000;
@@ -26,11 +29,16 @@ pub struct PData {
     pub buffersize_extra: Vec<usize>,
     single_data: Timestep,
     global_stats_: GlobalStats,
+    rotation_is_set: bool,
+    rotation: [f64; 3],
+    rotation_center: [f64; 3],
 }
 
 impl PData {
     ///new conste
     pub fn new(filename: &str) -> Self {
+        #[cfg(feature = "blosc")]
+        blosc_set_nthreads(8);
         print_debug!(
             "PData: Generating new instance with file: {}\
             and buffersize: {}",
@@ -51,6 +59,9 @@ impl PData {
             buffersize_extra: vec![],
             single_data: Timestep::default(),
             global_stats_: GlobalStats::default(),
+            rotation_is_set: false,
+            rotation: [0.0, 0.0, 0.0],
+            rotation_center: [0.0, 0.0, 0.0],
         };
         print_debug!(
             "PData: Generation complete. First buffer update starting, buffer size: {}",
@@ -288,6 +299,7 @@ impl PData {
 
     pub fn reset_buffer() {
         //TODO
+        unimplemented!("Buffer reset not implemented yet.")
     }
     #[inline(never)]
     pub fn update(&mut self, mut range: (usize, usize)) {
@@ -1002,6 +1014,72 @@ impl DataManager for PData {
         }
 
         &self.buffer[timestep - self.range_extra[buffer_id].0]
+    }
+
+    fn info(&self) -> Result<String, &'static str> {
+        let global_stats = self.global_stats();
+        let time = global_stats.max_time();
+        let timesteps = global_stats.timesteps();
+        let dim = global_stats.dimensions();
+        let part_num = global_stats.nparticles();
+        let vel_mag = global_stats.velocity_mag();
+        let mut base_string = format!(
+            "Particle-Based HDF5 Dataset.\n\
+            Dimensions of the system:\n\
+            \t x {:.2}-->{:.2}  ||  {:.2}\n\
+            \t y {:.2}-->{:.2}  ||  {:.2}\n\
+            \t z {:.2}-->{:.2}  ||  {:.2}\n\
+            The max time of this set is : {:.2}\n\
+            Number of Particles: {:.2}\n\
+            Number of Timesteps: {:.2}\n\
+            Mean velocity of: {:.2} m/s\n\
+            Minimum velocity {:.2} m/s \nMaximum Velocity {:.2} m/s\n",
+            dim[[0, 0]],
+            dim[[1, 0]],
+            dim[[0, 0]] - dim[[1, 0]],
+            dim[[0, 1]],
+            dim[[1, 1]],
+            dim[[0, 1]] - dim[[1, 1]],
+            dim[[0, 2]],
+            dim[[1, 2]],
+            dim[[0, 2]] - dim[[1, 2]],
+            time,
+            part_num,
+            timesteps,
+            vel_mag[1usize],
+            vel_mag[0usize],
+            vel_mag[2usize]
+        );
+        if self.rotation_is_set {
+            base_string.push_str(&format!(
+                "Rotation is set to: \n\
+                \t x: {:.2} degree\n\
+                \t y: {:.2} degree\n\
+                \t z: {:.2} degree\n",
+                self.rotation[0], self.rotation[1], self.rotation[2]
+            ));
+            base_string.push_str(&format!(
+                "Rotation is performed around: \n\
+                \t x: {:.2} degree\n\
+                \t y: {:.2} degree\n\
+                \t z: {:.2} degree\n",
+                self.rotation_center[0], self.rotation_center[1], self.rotation_center[2]
+            ))
+        }
+        Ok(base_string)
+    }
+
+    fn set_rotation_angle(&mut self, angle: f64, axis: f64) {
+        self.rotation_is_set = true;
+        self.rotation[axis as usize] = angle;
+        // check if now all elements are zero
+        if self.rotation.iter().all(|&x| x == 0.0) {
+            self.rotation_is_set = false;
+        }
+    }
+
+    fn set_rotation_anker(&mut self, point: [f64; 3]) {
+        self.rotation_center = point;
     }
 }
 

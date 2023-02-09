@@ -4,11 +4,13 @@
 #![allow(unused_imports)]
 use crate::{
     check_signals,
-    converter::convertertools::{make_sortlist, sort_by_array},
+    converter::convertertools::{make_dataset_builder, make_sortlist, sort_by_array},
     print_debug, print_warning, setup_bar,
 };
 use csv;
 pub use csv_modes::csv_multi_file_time_sep;
+#[cfg(feature = "blosc")]
+use hdf5::filters::{blosc_get_nthreads, blosc_set_nthreads};
 use hdf5::File;
 use indicatif::{ProgressBar, ProgressStyle};
 use ndarray;
@@ -21,7 +23,11 @@ mod csv_modes;
 mod vtktools;
 // Maximum amount of failiures in a row available for a process
 const MAX_FAILS: i64 = 500;
-
+// Shuffle for blosc filter
+const BLOSC_SHUFFLE: bool = true;
+// Compression level for blosc filter
+const BLOSC_COMPRESSION: u8 = 9;
+// Chunk size for blosc filter
 /// Convert a vtk file into a HDF5 file
 ///
 ///
@@ -115,12 +121,12 @@ pub fn vtk(
         }
         time[1] = current_time;
         time_array.push(current_time);
-        group
-            .new_dataset::<f64>()
+        let builder = group.new_dataset::<f64>();
+        builder
             .create("time")
-            .unwrap()
+            .expect("Unable to create dataset time")
             .write_scalar(&current_time)
-            .unwrap();
+            .expect("Unable to write time to dataset");
         // VTK data reading
         print_debug!("Recieving data from VTKio and creating datasets");
         let particle_id = vtktools::get_field::<u64>(filename, "id");
@@ -134,7 +140,7 @@ pub fn vtk(
             nparticles = max_particle
         }
         print_debug!("  Creating particle id dataset");
-        let builder = group.new_dataset_builder();
+        let builder = make_dataset_builder!(group);
         builder
             .with_data(&particle_id)
             .create("id")
@@ -145,7 +151,7 @@ pub fn vtk(
         print_debug!("  Creating radius dataset");
         let particle_radius =
             sort_by_array(vtktools::get_field::<f64>(filename, "radius"), &sort_list);
-        let builder = group.new_dataset_builder();
+        let builder = make_dataset_builder!(group);
         builder
             .with_data(&particle_radius)
             .create("radius")
@@ -155,7 +161,7 @@ pub fn vtk(
             ));
         print_debug!("  Creating ppclouds dataset");
         let ppclouds = ndarray::Array1::<u64>::ones(particle_radius.len());
-        let builder = group.new_dataset_builder();
+        let builder = make_dataset_builder!(group);
         builder
             .with_data(&ppclouds)
             .create("ppcloud")
@@ -165,7 +171,7 @@ pub fn vtk(
             ));
         print_debug!("  Creating type dataset");
         let particle_type = sort_by_array(vtktools::get_field::<i64>(filename, "type"), &sort_list);
-        let builder = group.new_dataset_builder();
+        let builder = make_dataset_builder!(group);
         builder
             .with_data(&particle_type)
             .create("particletype")
@@ -198,7 +204,7 @@ pub fn vtk(
             }
             velocity_mag[1] += vel_mag;
         }
-        let builder = group.new_dataset_builder();
+        let builder = make_dataset_builder!(group);
         builder
             .with_data(&particle_velocity)
             .create("velocity")
@@ -223,7 +229,7 @@ pub fn vtk(
                 }
             }
         }
-        let builder = group.new_dataset_builder();
+        let builder = make_dataset_builder!(group);
         builder
             .with_data(&particle_positions)
             .create("position")
@@ -393,7 +399,16 @@ pub fn csv_converter(
         .unwrap()
         .write_scalar(&0x2_i32)
         .unwrap();
-
+    #[cfg(feature = "blosc")]
+    let threads = blosc_get_nthreads();
+    let threads = 8;
+    #[cfg(feature = "blosc")]
+    println!(
+        "Using {} threads for blosc compression. (Not working currently",
+        threads
+    );
+    #[cfg(feature = "blosc")]
+    blosc_set_nthreads(threads);
     // Read csv data
     let mut rdr = csv::ReaderBuilder::new()
         .has_headers(header)
@@ -599,12 +614,12 @@ pub fn csv_converter(
         }
     } // end filename forloop
       // write data into HDF5 file
-    let builder = group.new_dataset_builder();
+    let builder = make_dataset_builder!(group);
     builder
         .with_data(&time_array)
         .create("time")
         .expect("Unable to create dataset \"time\"");
-    let builder = group.new_dataset_builder();
+    let builder = make_dataset_builder!(group);
     builder
         .with_data(&particle_id_array)
         .create("id")
@@ -612,7 +627,7 @@ pub fn csv_converter(
             "Unable to create dataset \"id\" in file {}",
             filename
         ));
-    let builder = group.new_dataset_builder();
+    let builder = make_dataset_builder!(group);
     builder
         .with_data(&particle_radius_array)
         .create("radius")
@@ -620,7 +635,7 @@ pub fn csv_converter(
             "Unable to create dataset \"radius\" in file {}",
             filename
         ));
-    let builder = group.new_dataset_builder();
+    let builder = make_dataset_builder!(group);
     builder
         .with_data(&ppclouds_array)
         .create("ppcloud")
@@ -628,7 +643,7 @@ pub fn csv_converter(
             "Unable to create dataset \"radius\" in file {}",
             filename
         ));
-    let builder = group.new_dataset_builder();
+    let builder = make_dataset_builder!(group);
     builder
         .with_data(&particle_type_array)
         .create("particletype")
@@ -637,7 +652,7 @@ pub fn csv_converter(
             filename
         ));
 
-    let builder = group.new_dataset_builder();
+    let builder = make_dataset_builder!(group);
     builder
         .with_data(&vel_array)
         .create("velocity")
@@ -645,7 +660,7 @@ pub fn csv_converter(
             "Unable to create dataset \"velocity\" in file {}",
             filename
         ));
-    let builder = group.new_dataset_builder();
+    let builder = make_dataset_builder!(group);
     builder
         .with_data(&pos_array)
         .create("position")

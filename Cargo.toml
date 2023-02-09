@@ -10,7 +10,7 @@ crate-type = ["cdylib","rlib"]
 
 [dependencies]
 numpy = "0.14.0"
-hdf5 = "0.8.0"
+hdf5 = {version = "0.8.1", features = ["blosc"]}
 ndarray = "0.15"
 ndarray-stats="0.5.0"
 derive-getters = "0.2.0"
@@ -35,10 +35,11 @@ features = ["extension-module"]
 [features]
 # Debuging feature to print statements
 # if activated
+# default = ["blosc"]
 uPPPP_debug = []
 uPPPP_warning = []
 python = []
-
+blosc = []
 #[profile.dev]#
 #opt-level = 0              # Use slightly better optimizations.
 

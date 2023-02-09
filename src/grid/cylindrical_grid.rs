@@ -219,9 +219,13 @@ impl GridFunctions3D for CylindricalGrid3D {
         self.data[(cell_id[0], cell_id[1], cell_id[2])] += value;
         self.weight[(cell_id[0], cell_id[1], cell_id[2])] += 1.;
     }
-    #[allow(unused_variables)]
+
     fn add_trajectory_value(&mut self, pos1: Position, pos2: Position, value: f64) {
-        unimplemented!("Not implemented for cylindrical grid")
+        print_warning!(
+            "This feature is not yet implemented for cylindrical grid\
+        Falling back to add_value"
+        );
+        self.add_value(pos1, value);
     }
 
     fn divide_by_array(&mut self, other: &Array3<f64>) {

@@ -1,5 +1,5 @@
-use ndarray::prelude::*;
-
+use crate::types::*;
+/***
 pub fn dimensions(file: &hdf5::File)->(Array1<f64>,Array1<f64>){
         let array = file
         .dataset("dimensions")
@@ -62,4 +62,63 @@ pub fn find_type(file: &hdf5::File)-> String{
                           the version with the function TODO!", ),
     };
     type_
+}
+
+
+*/
+
+fn rotate_position(position: Position, angle: [f64; 3], anchor: [f64; 3]) -> Position {
+    let mut new_position = [
+        position[0] - anchor[0],
+        position[1] - anchor[1],
+        position[2] - anchor[2],
+    ];
+    for axis in 0..3 {
+        let (sin, cos) = angle[axis].sin_cos();
+        let (x, y, z) = (new_position[0], new_position[1], new_position[2]);
+        match axis {
+            0 => {
+                new_position[1] = y * cos - z * sin;
+                new_position[2] = y * sin + z * cos;
+            }
+            1 => {
+                new_position[0] = x * cos + z * sin;
+                new_position[2] = -x * sin + z * cos;
+            }
+            2 => {
+                new_position[0] = x * cos - y * sin;
+                new_position[1] = x * sin + y * cos;
+            }
+            _ => unreachable!(),
+        }
+    }
+    [
+        new_position[0] + anchor[0],
+        new_position[1] + anchor[1],
+        new_position[2] + anchor[2],
+    ]
+}
+
+fn rotate_velocity(velocity: [f64; 3], angle: [f64; 3]) -> [f64; 3] {
+    let mut new_velocity = [velocity[0], velocity[1], velocity[2]];
+    for axis in 0..3 {
+        let (sin, cos) = angle[axis].sin_cos();
+        let (x, y, z) = (new_velocity[0], new_velocity[1], new_velocity[2]);
+        match axis {
+            0 => {
+                new_velocity[1] = y * cos - z * sin;
+                new_velocity[2] = y * sin + z * cos;
+            }
+            1 => {
+                new_velocity[0] = x * cos + z * sin;
+                new_velocity[2] = -x * sin + z * cos;
+            }
+            2 => {
+                new_velocity[0] = x * cos - y * sin;
+                new_velocity[1] = x * sin + y * cos;
+            }
+            _ => unreachable!(),
+        }
+    }
+    [new_velocity[0], new_velocity[1], new_velocity[2]]
 }

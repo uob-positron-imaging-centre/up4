@@ -59,7 +59,7 @@ impl PyVectorPlotter {
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
         let arrows = self
             .plotting_data
-            .create_unit_vector_traces(None, true, axis, index);
+            .create_unit_vector_traces(axis, index);
         let layout: Layout = Layout::new();
         let square: bool = false;
         let smoothing = Some(Smoothing::False);
@@ -83,7 +83,7 @@ impl PyVectorPlotter {
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
         let arrows = self
             .plotting_data
-            .unit_vector_slice_traces(range, axis, None, false);
+            .unit_vector_slice_traces(range, axis, None);
         let backgrounds = self.plotting_data.unit_vector_slice_background(range, axis);
         for (arrow, background) in izip!(arrows, backgrounds) {
             traces.push(arrow);

@@ -61,6 +61,10 @@ To ensure that the installation was successful, you can run tests with [pytest](
     python3 -m pytest tests/test_all.py
 ```
 
+### VSCode users
+
+Currently, type hinting/ autocomplete is only possible if the [Python language server is set to Jedi](https://github.com/microsoft/pylance-release/issues/1942).
+
 ## To DO / Dev notes
 
 ### Tests

@@ -21,7 +21,11 @@ use plotly::{
 use plotly::{Cone, Scatter3D, Surface};
 use std::f64::consts::PI;
 
-/// Vector data handling struct. The `true_norm` field contains the original vector norms, and is used for shading. Norms used for drawing arrows are not necessarily the same as they may be scaled for display reasons.
+// TODO consider removing all the unnecessary versions of "get_this_plane" by having an option for a 2D vec struct
+
+
+/// Vector data handling struct. The `true_norm` field contains the original vector norms, and is used for shading. 
+/// Norms used for drawing arrows are not necessarily the same as they may be scaled for display reasons.
 #[derive(Getters, Clone)]
 pub struct VectorPlotter {
     xdata: Array1<f64>,
@@ -126,12 +130,28 @@ impl VectorPlotter {
         self.wdata *= &scale_factor;
     }
 
-    // FIXME select the smallest circle for each cell so that we can handle cuboid cells
+    // FIXME fit an ellipsoid inside the cells to scale properly
     /// Constrain all arrows to lie within circle of radius dx/2 from each node.
     /// On a non-uniform grid, this *will* distort the plot.
-    pub fn bound_node(&mut self, dx: f64) {
-        let scale_factor: f64 = 0.5 * dx / self.true_norm.max_skipnan();
-        self.scale_global(scale_factor);
+    pub fn bound_node(&mut self, dx: f64, dy: f64, axis: usize) {
+        // start with vectors with a unit norm
+        self.normalise_vectors();
+        // TODO make this cleaner
+        if (axis == 0) { // along yz plane
+            self.vdata *= 0.5*dx;
+            self.wdata *= 0.5*dy;
+        }
+        else if (axis == 1) { // along xz plane
+            self.udata *= 0.5*dx;
+            self.wdata *= 0.5*dy;
+            
+        }
+        else { // along xy plane
+            self.udata *= 0.5*dx;
+            self.vdata *= 0.5*dy;
+        }
+        //let scale_factor: f64 = 0.5 * dx / self.true_norm.max_skipnan();
+        //self.scale_global(scale_factor);
     }
 
     /// Convert vectors into unit vectors.
@@ -164,7 +184,6 @@ impl VectorPlotter {
     /// Create arrow traces for vectors.
     pub fn create_quiver_traces(
         &self,
-        arrow_scale: Option<f64>,
         colourmap: Gradient,
         colour_bounds: Option<(f64, f64)>,
         axis: usize,
@@ -172,7 +191,7 @@ impl VectorPlotter {
     ) -> Vec<Box<Scatter<f64, f64>>> {
         let (colour_vector, min, max) = self.normalise_colour(colour_bounds);
         let (barb_x, barb_y) = self.create_quiver_barbs(axis, index);
-        let (arrow_x, arrow_y) = self.create_quiver_arrows(arrow_scale, axis, index);
+        let (arrow_x, arrow_y) = self.create_quiver_arrows(axis, index);
         let mut traces = Vec::new();
         let colour_elements: Vec<ColorScaleElement> = Vec::new();
         //unpack the vectors of arrow barbs and heads into new vector containing each arrow as a tuple
@@ -250,7 +269,6 @@ impl VectorPlotter {
     /// Create the arrowheads.
     fn create_quiver_arrows(
         &self,
-        arrow_scale: Option<f64>,
         axis: usize,
         index: usize,
     ) -> (Vec<(f64, f64, f64)>, Vec<(f64, f64, f64)>) {
@@ -267,8 +285,8 @@ impl VectorPlotter {
 
         // angle between arrows
         const ANGLE: f64 = PI / 9.0;
-        // default scale is 0.5
-        let scale_factor: f64 = arrow_scale.unwrap_or(0.5);
+        // default scale in plotly's quiver plot is 0.5
+        let scale_factor: f64 = 0.5;
 
         let arrow_len: Array1<f64> = scale_factor * norm;
         // get barb angles
@@ -317,18 +335,14 @@ impl VectorPlotter {
     /// Create arrow traces, but for the data converted into unit vectors.
     pub fn create_unit_vector_traces(
         &mut self,
-        arrow_scale: Option<f64>,
-        uniform: bool,
         axis: usize,
         index: usize,
     ) -> Vec<Box<Scatter<f64, f64>>> {
-        self.normalise_vectors();
-        if uniform {
-            let dx: f64 = self.xdata[1] - self.xdata[0];
-            self.bound_node(dx);
-        }
+        let dx: f64 = self.xdata[1] - self.xdata[0];
+        let dy: f64 = self.ydata[1] - self.ydata[0];
+        self.bound_node(dx, dy, axis);
         let (barb_x, barb_y) = self.create_quiver_barbs(axis, index);
-        let (arrow_x, arrow_y) = self.create_quiver_arrows(arrow_scale, axis, index);
+        let (arrow_x, arrow_y) = self.create_quiver_arrows(axis, index);
         let mut traces: Vec<Box<Scatter<f64, f64>>> = Vec::new();
         for (x_line, y_line, x_head, y_head) in izip!(barb_x, barb_y, arrow_x, arrow_y) {
             let xpl: Vec<f64> = vec![x_line.0, x_line.1, x_head.0, x_head.1, x_head.2];
@@ -418,9 +432,71 @@ impl VectorPlotter {
     }
 
     // TODO create
-    //fn quiver_slices(&self, nevery: usize,  traces: Vec<Box<Scatter<f64, f64>>>, layout: Layout, square: bool, axes: Vec<Option<Axis>>) {
-
-    //}
+    pub fn quiver_slices(&self, slice_dims: Vec<usize>, dim_indices: Vec<Vec<usize>>,  traces: Vec<Box<Scatter<f64, f64>>>, layout: Layout, square: bool, axes: Vec<Option<plotly::layout::Axis>>) {
+        // ensure that each requested axis has at least one entry
+        if slice_dims.len() != dim_indices.len() {
+            panic!("For each axis, a list of indices must be provided!");
+        }
+        let mut traces = Vec::new();
+        for (i, axis) in slice_dims.into_iter().enumerate() {
+            for index in &dim_indices[i] {
+                let (barb_x, barb_y) = self.create_quiver_barbs(axis, *index);
+                let (arrow_x, arrow_y) = self.create_quiver_arrows(axis, *index);
+                for (i, (x_line, y_line, x_head, y_head)) in izip!(barb_x, barb_y, arrow_x, arrow_y).enumerate() {
+                    let x: Vec<f64> = vec![x_line.0, x_line.1, x_head.0, x_head.1, x_head.2];
+                    let y: Vec<f64> = vec![y_line.0, y_line.1, y_head.0, y_head.1, y_head.2];
+                    let trace = self.sliced_arrows(axis, *index, x, y);                   
+                    traces.push(trace);
+                }
+            }
+        }
+    }
+    // return the necessary "other axis" points for fake 3D plots
+    fn sliced_arrows(&self, axis: usize, index: usize, x: Vec<f64>, y: Vec<f64>) -> Box<Scatter3D<f64, f64, f64>> {
+        let mut z: Array1<f64> = Array1::zeros(5);
+        match axis {
+            // slicing along x axis
+            0 => {
+                z.fill(self.xdata()[index]);
+                let z = z.into_raw_vec();
+                let trace = Scatter3D::new(z, x, y)
+                    .mode(Mode::Lines)
+                    .show_legend(false)
+                    //.fill_color(NamedColor::Black)
+                    .show_legend(false)
+                    .line(Line::new());
+                return trace;
+            }
+            // slicing along y axis
+            1 => {
+                z.fill(self.ydata()[index]);
+                let z = z.into_raw_vec();
+                let trace = Scatter3D::new(x, z, y)
+                    .mode(Mode::Lines)
+                    .show_legend(false)
+                    //.fill_color(NamedColor::Black)
+                    .show_legend(false)
+                    .line(Line::new());
+                return trace;
+            }
+            // slicing along z axis
+            2 => {
+                z.fill(self.zdata()[index]);
+                let z = z.into_raw_vec();
+                let trace = Scatter3D::new(x, y, z)
+                    .mode(Mode::Lines)
+                    .show_legend(false)
+                    //.fill_color(NamedColor::Black)
+                    .show_legend(false)
+                    .line(Line::new());
+                return trace;
+            }
+            _ => {
+                panic!("Accepted axis values are 0, 1 or 2 only!")
+            }
+        }
+        
+    }
 
     // TODO create
     //fn save(&self, plot: Plot, filename: &str, dpi: usize) {
@@ -436,17 +512,14 @@ impl VectorPlotter {
         range: [usize; 3],
         axis: usize,
         arrow_scale: Option<f64>,
-        uniform: bool,
     ) -> Vec<Box<Scatter3D<f64, f64, f64>>> {
-        self.normalise_vectors();
-        if uniform {
-            let dx: f64 = self.ydata[1] - self.ydata[0];
-            self.bound_node(dx);
-        }
+        let dx: f64 = self.xdata[1] - self.xdata[0];
+        let dy: f64 = self.ydata[1] - self.ydata[0];
+        self.bound_node(dx, dy, axis);
         let mut traces = Vec::new();
         for index in (range[0]..range[1]).step_by(range[2]) {
             let (barb_x, barb_y) = self.create_quiver_barbs(axis, index);
-            let (arrow_x, arrow_y) = self.create_quiver_arrows(arrow_scale, axis, index);
+            let (arrow_x, arrow_y) = self.create_quiver_arrows(axis, index);
             for (x_line, y_line, x_head, y_head) in izip!(barb_x, barb_y, arrow_x, arrow_y) {
                 let xpl: Vec<f64> = vec![x_line.0, x_line.1, x_head.0, x_head.1, x_head.2];
                 let mut ypl: Array1<f64> = Array1::ones(5);

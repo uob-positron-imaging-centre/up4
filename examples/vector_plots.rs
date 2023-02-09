@@ -27,7 +27,7 @@ fn unit_vector_2d() {
                            // create values for vortices
                            // create the grids for the data
     let limit: Dim = Dim::ThreeD([[0., 2. * PI], [0., 2. * PI], [0., 0.]]);
-    let cells: [usize; 3] = [PTS, PTS, 1];
+    let cells: [usize; 3] = [20, PTS, 1];
     let mut xgrid: Box<dyn GridFunctions3D> = Box::new(CartesianGrid3D::new(cells, limit));
     let mut ygrid: Box<dyn GridFunctions3D> = xgrid.clone();
     let mut zgrid: Box<dyn GridFunctions3D> = xgrid.clone();
@@ -35,15 +35,26 @@ fn unit_vector_2d() {
     let posx = xgrid.get_xpositions().to_owned();
     let posy = xgrid.get_ypositions().to_owned();
     let posz = xgrid.get_zpositions().to_owned();
-    for i in 0..PTS {
+    for i in 0..20 {
         for j in 0..PTS {
-            let xvalue = posx[i].sin() * posy[j].cos();
-            let yvalue = -posy[j].sin() * posx[i].cos();
-            xgrid.insert([posx[i], posy[j], posz[0]], xvalue);
-            ygrid.insert([posx[i], posy[j], posz[0]], yvalue);
-            zgrid.insert([posx[i], posy[j], posz[0]], 0.);
+            if j == 14 && i == 9 {
+                let xvalue = 1.;
+                let yvalue = 500.;
+                xgrid.insert([posx[i], posy[j], posz[0]], xvalue);
+                ygrid.insert([posx[i], posy[j], posz[0]], yvalue);
+                zgrid.insert([posx[i], posy[j], posz[0]], 0.);
+            } else {
+                let xvalue = posx[i].sin() * (posy[j]).cos();
+                let yvalue = -(posy[j]).sin() * posx[i].cos();
+                xgrid.insert([posx[i], posy[j], posz[0]], xvalue);
+                ygrid.insert([posx[i], posy[j], posz[0]], yvalue);
+                zgrid.insert([posx[i], posy[j], posz[0]], 0.);
+            }
+            
+            
         }
     }
+    println!("{:?}", ygrid);
     // create VectorGrid struct
     let mut grid: VectorGrid = VectorGrid::new(xgrid);
     grid.data[1] = ygrid;
@@ -51,13 +62,10 @@ fn unit_vector_2d() {
     // create VectorData2D struct
     let mut arrows: VectorPlotter = VectorPlotter::new(grid);
     // define properties for plot
-    let uniform: bool = true;
-    let arrow_scale: Option<f64> = None; // default scaling
-                                         // create arrow traces
     let axis: usize = 2;
     let index: usize = 0;
     let mut traces: Vec<Box<dyn Trace>> = Vec::new();
-    let scatter_traces = arrows.create_unit_vector_traces(arrow_scale, uniform, axis, index);
+    let scatter_traces = arrows.create_unit_vector_traces(axis, index);
     // set layout
     // FIXME layout settings
     let layout: Layout = Layout::new()

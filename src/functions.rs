@@ -256,6 +256,7 @@ pub trait Granular: DataManager {
         self.setup_buffer(); //setup another buffer
         for timestep in 0..timesteps - 3 {
             let timestep_data = self.get_timestep(timestep).clone();
+            //BUG this is not working, try to acces a point in the buffer that doesnt excist
             let next_timestep_data = self.get_timestep_buffer(timestep + 1, 0);
             let current_time = *timestep_data.time();
             let next_time = *next_timestep_data.time();

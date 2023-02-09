@@ -52,8 +52,7 @@ jobs:
           export HDF5_DIR="$CONDA_PREFIX"
           export PYO3_PYTHON=python3
           [ "${{runner.os}}" != "Windows" ] && export RUSTFLAGS="-C link-args=-Wl,-rpath,$CONDA_PREFIX/lib"
-          cargo clean
-        #cargo check
+          cargo check
       - name: "Install dependencies"
         run: |
           pwd
@@ -76,15 +75,15 @@ jobs:
         run: |
           export LD_LIBRARY_PATH="$CONDA_PREFIX/lib"
           python3 -c "import up4; print(up4.__file__)"
-      #    python3 -m pytest tests/test_all.py
+          python3 -m pytest tests/test_all.py
 
       - name: Setup Sphinx
         run: |
           conda install -y -c ${{matrix.channel}} --file docs/requirements.txt
-      #- name: Generate Rust docs
-      #  run: |
-      #    export HDF5_DIR="$CONDA_PREFIX"
-      #    cargo doc --no-deps --target-dir docs/_static/
+      - name: Generate Rust docs
+        run: |
+          export HDF5_DIR="$CONDA_PREFIX"
+          cargo doc --no-deps --target-dir docs/_static/
       - name: Build HTML
         run: |
           pwd

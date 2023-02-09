@@ -1,5 +1,5 @@
-Data Class
-==========
+Data
+====
 
 .. currentmodule:: up4 
 .. automodule:: up4 

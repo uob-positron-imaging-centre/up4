@@ -1,5 +1,5 @@
-Converter Class 
-===============
+Converter
+=========
 
 .. currentmodule:: up4 
 .. automodule:: up4 
@@ -8,5 +8,5 @@ Converter Class
 .. -------
 .. we can do stuff like this too if a class ends up having lots of subclasses
 
-.. autoclass:: Dummy
+.. autoclass:: Converter
     :members:

@@ -6,29 +6,31 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Index &#8212; up4 v0.1.0 Manual</title>
-  <script>
+  
+  
+  
+  <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
-<link href="_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+  <link href="_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
 
   
-  <link rel="stylesheet"
-    href="_static/vendor/fontawesome/6.1.2/css/all.min.css">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+  <link href="_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
 
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
@@ -36,6 +38,8 @@
     <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'genindex';</script>
     <link rel="author" title="About these documents" href="about.html" />
     <link rel="index" title="Index" href="#" />
@@ -46,6 +50,10 @@
   
   
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
 
   
   <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
@@ -108,32 +116,32 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="getting_started.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="getting_started.html">
                         Getting Started
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="tutorials/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tutorials/index.html">
                         Tutorials
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="api/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="api/index.html">
                         Manual
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="about.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="about.html">
                         About
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
     </ul>
 </nav>
@@ -142,12 +150,14 @@
     </div>
 
     <div id="navbar-end">
-      <div class="navbar-end-item navbar-end__search-button-container">
-        
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
   <i class="fa-solid fa-magnifying-glass"></i>
 </button>
-      </div>
+        </div>
+      
       
       <div class="navbar-end-item">
         
@@ -179,11 +189,13 @@
 
 
   
-  <div class="search-button-container--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
   <i class="fa-solid fa-magnifying-glass"></i>
 </button>
-  </div>
+    </div>
+  
 
   
   <label class="sidebar-toggle secondary-toggle" for="__secondary">
@@ -213,32 +225,32 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="getting_started.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="getting_started.html">
                         Getting Started
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="tutorials/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="tutorials/index.html">
                         Tutorials
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="api/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="api/index.html">
                         Manual
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="about.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="about.html">
                         About
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
     </ul>
 </nav>
@@ -288,8 +300,11 @@
     </div>
   </div>
 
+  
+  <div id="rtd-footer-container"></div>
+
       </div>
-      <main class="bd-main">
+      <main id="main-content" class="bd-main">
         
         
         <div class="bd-content">
@@ -306,20 +321,84 @@
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
- <a href="#D"><strong>D</strong></a>
+ <a href="#C"><strong>C</strong></a>
+ | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
+ | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
+ | <a href="#I"><strong>I</strong></a>
+ | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
+ | <a href="#P"><strong>P</strong></a>
+ | <a href="#Q"><strong>Q</strong></a>
+ | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
+ | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
  | <a href="#V"><strong>V</strong></a>
+ | <a href="#W"><strong>W</strong></a>
+ | <a href="#X"><strong>X</strong></a>
+ | <a href="#Y"><strong>Y</strong></a>
+ | <a href="#Z"><strong>Z</strong></a>
  
 </div>
+<h2 id="C">C</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/converter.html#up4.Grid.cartesian3d">cartesian3d() (up4.Grid static method)</a>, <a href="api/data.html#up4.Grid.cartesian3d">[1]</a>, <a href="api/grid.html#id1">[2]</a>, <a href="api/grid.html#up4.Grid.cartesian3d">[3]</a>
+</li>
+      <li><a href="api/converter.html#up4.Grid.cartesian3d_from_data">cartesian3d_from_data() (up4.Grid static method)</a>, <a href="api/data.html#up4.Grid.cartesian3d_from_data">[1]</a>, <a href="api/grid.html#id2">[2]</a>, <a href="api/grid.html#up4.Grid.cartesian3d_from_data">[3]</a>
+</li>
+      <li><a href="api/converter.html#up4.Grid.cell_positions">cell_positions() (up4.Grid method)</a>, <a href="api/data.html#up4.Grid.cell_positions">[1]</a>, <a href="api/grid.html#id3">[2]</a>, <a href="api/grid.html#up4.Grid.cell_positions">[3]</a>
+</li>
+      <li><a href="api/converter.html#up4.Data.circulation_time">circulation_time() (up4.Data method)</a>, <a href="api/data.html#id1">[1]</a>, <a href="api/data.html#up4.Data.circulation_time">[2]</a>, <a href="api/grid.html#up4.Data.circulation_time">[3]</a>
+</li>
+      <li><a href="api/converter.html#up4.Grid.collapse">collapse() (up4.Grid method)</a>, <a href="api/data.html#up4.Grid.collapse">[1]</a>, <a href="api/grid.html#id4">[2]</a>, <a href="api/grid.html#up4.Grid.collapse">[3]</a>
+</li>
+      <li><a href="api/converter.html#up4.Grid.collapse_two">collapse_two() (up4.Grid method)</a>, <a href="api/data.html#up4.Grid.collapse_two">[1]</a>, <a href="api/grid.html#id5">[2]</a>, <a href="api/grid.html#up4.Grid.collapse_two">[3]</a>
+</li>
+      <li><a href="api/plotting.html#up4.plotting.ComparisonPlotter.comparison_contour">comparison_contour() (up4.plotting.ComparisonPlotter method)</a>
+</li>
+      <li><a href="api/plotting.html#up4.plotting.ComparisonPlotter.comparison_map">comparison_map() (up4.plotting.ComparisonPlotter method)</a>
+</li>
+      <li><a href="api/plotting.html#up4.plotting.ComparisonPlotter">ComparisonPlotter (class in up4.plotting)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/converter.html#up4.Data.concentration_field">concentration_field() (up4.Data method)</a>, <a href="api/data.html#id2">[1]</a>, <a href="api/data.html#up4.Data.concentration_field">[2]</a>, <a href="api/grid.html#up4.Data.concentration_field">[3]</a>
+</li>
+      <li><a href="api/plotting.html#up4.plotting.VectorPlotter.cone_plot">cone_plot() (up4.plotting.VectorPlotter method)</a>
+</li>
+      <li><a href="api/converter.html#id0">Converter (class in up4)</a>, <a href="api/converter.html#up4.Converter">[1]</a>, <a href="api/data.html#up4.Converter">[2]</a>, <a href="api/grid.html#up4.Converter">[3]</a>
+</li>
+      <li><a href="api/plotting.html#up4.plotting.create_plot">create_plot() (in module up4.plotting)</a>
+</li>
+      <li><a href="api/converter.html#id1">csv() (up4.Converter static method)</a>, <a href="api/converter.html#up4.Converter.csv">[1]</a>, <a href="api/data.html#up4.Converter.csv">[2]</a>, <a href="api/grid.html#up4.Converter.csv">[3]</a>
+</li>
+      <li><a href="api/converter.html#id2">csv_multi() (up4.Converter static method)</a>, <a href="api/converter.html#up4.Converter.csv_multi">[1]</a>, <a href="api/data.html#up4.Converter.csv_multi">[2]</a>, <a href="api/grid.html#up4.Converter.csv_multi">[3]</a>
+</li>
+      <li><a href="api/converter.html#id3">csv_multi_files() (up4.Converter static method)</a>, <a href="api/converter.html#up4.Converter.csv_multi_files">[1]</a>, <a href="api/data.html#up4.Converter.csv_multi_files">[2]</a>, <a href="api/grid.html#up4.Converter.csv_multi_files">[3]</a>
+</li>
+      <li><a href="api/converter.html#up4.Grid.cylindrical3d">cylindrical3d() (up4.Grid static method)</a>, <a href="api/data.html#up4.Grid.cylindrical3d">[1]</a>, <a href="api/grid.html#id6">[2]</a>, <a href="api/grid.html#up4.Grid.cylindrical3d">[3]</a>
+</li>
+      <li><a href="api/converter.html#up4.Grid.cylindrical3d_from_data">cylindrical3d_from_data() (up4.Grid static method)</a>, <a href="api/data.html#up4.Grid.cylindrical3d_from_data">[1]</a>, <a href="api/grid.html#id7">[2]</a>, <a href="api/grid.html#up4.Grid.cylindrical3d_from_data">[3]</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/data.html#up4.Data">Data (class in up4)</a>
+      <li><a href="api/converter.html#up4.Data">Data (class in up4)</a>, <a href="api/data.html#id0">[1]</a>, <a href="api/data.html#up4.Data">[2]</a>, <a href="api/grid.html#up4.Data">[3]</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/converter.html#up4.Data.dimensions">dimensions() (up4.Data method)</a>, <a href="api/data.html#id3">[1]</a>, <a href="api/data.html#up4.Data.dimensions">[2]</a>, <a href="api/grid.html#up4.Data.dimensions">[3]</a>
+</li>
+      <li><a href="api/converter.html#up4.Data.dispersion">dispersion() (up4.Data method)</a>, <a href="api/data.html#id4">[1]</a>, <a href="api/data.html#up4.Data.dispersion">[2]</a>, <a href="api/grid.html#up4.Data.dispersion">[3]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -327,7 +406,7 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/data.html#up4.Data.extract">extract() (up4.Data method)</a>
+      <li><a href="api/converter.html#up4.Data.extract">extract() (up4.Data method)</a>, <a href="api/data.html#id5">[1]</a>, <a href="api/data.html#up4.Data.extract">[2]</a>, <a href="api/grid.html#up4.Data.extract">[3]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -335,11 +414,51 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/data.html#up4.Data.from_pdata">from_pdata() (up4.Data static method)</a>
+      <li><a href="api/converter.html#up4.Data.from_pdata">from_pdata() (up4.Data static method)</a>, <a href="api/data.html#id6">[1]</a>, <a href="api/data.html#up4.Data.from_pdata">[2]</a>, <a href="api/grid.html#up4.Data.from_pdata">[3]</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/data.html#up4.Data.from_tdata">from_tdata() (up4.Data static method)</a>
+      <li><a href="api/converter.html#up4.Data.from_tdata">from_tdata() (up4.Data static method)</a>, <a href="api/data.html#id7">[1]</a>, <a href="api/data.html#up4.Data.from_tdata">[2]</a>, <a href="api/grid.html#up4.Data.from_tdata">[3]</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="G">G</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/converter.html#up4.Data.granular_temperature">granular_temperature() (up4.Data method)</a>, <a href="api/data.html#id8">[1]</a>, <a href="api/data.html#up4.Data.granular_temperature">[2]</a>, <a href="api/grid.html#up4.Data.granular_temperature">[3]</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/converter.html#up4.Grid">Grid (class in up4)</a>, <a href="api/data.html#up4.Grid">[1]</a>, <a href="api/grid.html#id0">[2]</a>, <a href="api/grid.html#up4.Grid">[3]</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/converter.html#up4.Data.histogram">histogram() (up4.Data method)</a>, <a href="api/data.html#id9">[1]</a>, <a href="api/data.html#up4.Data.histogram">[2]</a>, <a href="api/grid.html#up4.Data.histogram">[3]</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/converter.html#up4.Data.homogenity_index">homogenity_index() (up4.Data method)</a>, <a href="api/data.html#id10">[1]</a>, <a href="api/data.html#up4.Data.homogenity_index">[2]</a>, <a href="api/grid.html#up4.Data.homogenity_index">[3]</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="I">I</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/converter.html#up4.Grid.is_inside">is_inside() (up4.Grid method)</a>, <a href="api/data.html#up4.Grid.is_inside">[1]</a>, <a href="api/grid.html#id8">[2]</a>, <a href="api/grid.html#up4.Grid.is_inside">[3]</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/converter.html#up4.Data.lacey_mixing_index">lacey_mixing_index() (up4.Data method)</a>, <a href="api/data.html#id11">[1]</a>, <a href="api/data.html#up4.Data.lacey_mixing_index">[2]</a>, <a href="api/grid.html#up4.Data.lacey_mixing_index">[3]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -347,9 +466,11 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/data.html#up4.Data.mean_velocity">mean_velocity() (up4.Data method)</a>
+      <li><a href="api/converter.html#up4.Data.max_position">max_position() (up4.Data method)</a>, <a href="api/data.html#id12">[1]</a>, <a href="api/data.html#up4.Data.max_position">[2]</a>, <a href="api/grid.html#up4.Data.max_position">[3]</a>
 </li>
-      <li><a href="api/data.html#up4.Data.mean_velocity_showcase">mean_velocity_showcase() (up4.Data method)</a>
+      <li><a href="api/converter.html#up4.Data.mean_velocity">mean_velocity() (up4.Data method)</a>, <a href="api/data.html#id13">[1]</a>, <a href="api/data.html#up4.Data.mean_velocity">[2]</a>, <a href="api/grid.html#up4.Data.mean_velocity">[3]</a>
+</li>
+      <li><a href="api/converter.html#up4.Data.min_position">min_position() (up4.Data method)</a>, <a href="api/data.html#id14">[1]</a>, <a href="api/data.html#up4.Data.min_position">[2]</a>, <a href="api/grid.html#up4.Data.min_position">[3]</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -357,7 +478,9 @@
     module
 
       <ul>
-        <li><a href="api/converter.html#module-up4">up4</a>, <a href="api/data.html#module-up4">[1]</a>
+        <li><a href="api/converter.html#module-up4">up4</a>, <a href="api/data.html#module-up4">[1]</a>, <a href="api/grid.html#module-up4">[2]</a>
+</li>
+        <li><a href="api/plotting.html#module-up4.plotting">up4.plotting</a>
 </li>
       </ul></li>
   </ul></td>
@@ -366,7 +489,63 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/data.html#up4.Data.numberfield">numberfield() (up4.Data method)</a>
+      <li><a href="api/converter.html#up4.Data.nparticles">nparticles() (up4.Data method)</a>, <a href="api/data.html#id15">[1]</a>, <a href="api/data.html#up4.Data.nparticles">[2]</a>, <a href="api/grid.html#up4.Data.nparticles">[3]</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/converter.html#up4.Data.numberfield">numberfield() (up4.Data method)</a>, <a href="api/data.html#id16">[1]</a>, <a href="api/data.html#up4.Data.numberfield">[2]</a>, <a href="api/grid.html#up4.Data.numberfield">[3]</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/converter.html#up4.Data.occupancyfield">occupancyfield() (up4.Data method)</a>, <a href="api/data.html#id17">[1]</a>, <a href="api/data.html#up4.Data.occupancyfield">[2]</a>, <a href="api/grid.html#up4.Data.occupancyfield">[3]</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="P">P</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/plotting.html#up4.plotting.ComparisonPlotter.parity_plot">parity_plot() (up4.plotting.ComparisonPlotter method)</a>
+</li>
+      <li><a href="api/converter.html#up4.Grid.plot">plot() (up4.Grid method)</a>, <a href="api/data.html#up4.Grid.plot">[1]</a>, <a href="api/grid.html#id9">[2]</a>, <a href="api/grid.html#up4.Grid.plot">[3]</a>
+
+      <ul>
+        <li><a href="api/plotting.html#up4.plotting.ComparisonPlotter.plot">(up4.plotting.ComparisonPlotter method)</a>
+</li>
+        <li><a href="api/plotting.html#up4.plotting.ScalarPlotter.plot">(up4.plotting.ScalarPlotter method)</a>
+</li>
+        <li><a href="api/plotting.html#up4.plotting.VectorPlotter.plot">(up4.plotting.VectorPlotter method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/plotting.html#up4.plotting.ComparisonPlotter.plotting_string">plotting_string (up4.plotting.ComparisonPlotter attribute)</a>
+
+      <ul>
+        <li><a href="api/plotting.html#up4.plotting.ScalarPlotter.plotting_string">(up4.plotting.ScalarPlotter attribute)</a>
+</li>
+        <li><a href="api/plotting.html#up4.plotting.VectorPlotter.plotting_string">(up4.plotting.VectorPlotter attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Q">Q</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/plotting.html#up4.plotting.VectorPlotter.quiver_plot">quiver_plot() (up4.plotting.VectorPlotter method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/converter.html#up4.Grid.remove_outliers">remove_outliers() (up4.Grid method)</a>, <a href="api/data.html#up4.Grid.remove_outliers">[1]</a>, <a href="api/grid.html#id10">[2]</a>, <a href="api/grid.html#up4.Grid.remove_outliers">[3]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -374,11 +553,45 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/data.html#up4.Data.set_time">set_time() (up4.Data method)</a>
+      <li><a href="api/plotting.html#up4.plotting.save_fig">save_fig() (in module up4.plotting)</a>
+
+      <ul>
+        <li><a href="api/plotting.html#up4.plotting.ComparisonPlotter.save_fig">(up4.plotting.ComparisonPlotter method)</a>
+</li>
+        <li><a href="api/plotting.html#up4.plotting.ScalarPlotter.save_fig">(up4.plotting.ScalarPlotter method)</a>
+</li>
+        <li><a href="api/plotting.html#up4.plotting.VectorPlotter.save_fig">(up4.plotting.VectorPlotter method)</a>
+</li>
+      </ul></li>
+      <li><a href="api/plotting.html#up4.plotting.ScalarPlotter.scalar_contour_plot">scalar_contour_plot() (up4.plotting.ScalarPlotter method)</a>
+</li>
+      <li><a href="api/plotting.html#up4.plotting.ScalarPlotter.scalar_map_plot">scalar_map_plot() (up4.plotting.ScalarPlotter method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/data.html#up4.Data.stats">stats() (up4.Data method)</a>
+      <li><a href="api/plotting.html#up4.plotting.ScalarPlotter">ScalarPlotter (class in up4.plotting)</a>
+</li>
+      <li><a href="api/converter.html#up4.Data.set_time">set_time() (up4.Data method)</a>, <a href="api/data.html#id18">[1]</a>, <a href="api/data.html#up4.Data.set_time">[2]</a>, <a href="api/grid.html#up4.Data.set_time">[3]</a>
+</li>
+      <li><a href="api/converter.html#up4.Grid.shape">shape() (up4.Grid method)</a>, <a href="api/data.html#up4.Grid.shape">[1]</a>, <a href="api/grid.html#id11">[2]</a>, <a href="api/grid.html#up4.Grid.shape">[3]</a>
+</li>
+      <li><a href="api/converter.html#up4.Grid.slice">slice() (up4.Grid method)</a>, <a href="api/data.html#up4.Grid.slice">[1]</a>, <a href="api/grid.html#id12">[2]</a>, <a href="api/grid.html#up4.Grid.slice">[3]</a>
+</li>
+      <li><a href="api/converter.html#up4.Grid.slice_pos">slice_pos() (up4.Grid method)</a>, <a href="api/data.html#up4.Grid.slice_pos">[1]</a>, <a href="api/grid.html#id13">[2]</a>, <a href="api/grid.html#up4.Grid.slice_pos">[3]</a>
+</li>
+      <li><a href="api/converter.html#up4.Data.stats">stats() (up4.Data method)</a>, <a href="api/data.html#id19">[1]</a>, <a href="api/data.html#up4.Data.stats">[2]</a>, <a href="api/grid.html#up4.Data.stats">[3]</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/converter.html#up4.Data.time">time() (up4.Data method)</a>, <a href="api/data.html#id20">[1]</a>, <a href="api/data.html#up4.Data.time">[2]</a>, <a href="api/grid.html#up4.Data.time">[3]</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/converter.html#up4.Grid.to_numpy">to_numpy() (up4.Grid method)</a>, <a href="api/data.html#up4.Grid.to_numpy">[1]</a>, <a href="api/grid.html#id14">[2]</a>, <a href="api/grid.html#up4.Grid.to_numpy">[3]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -386,11 +599,24 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/plotting.html#up4.plotting.VectorPlotter.unit_vector_plot">unit_vector_plot() (up4.plotting.VectorPlotter method)</a>
+</li>
+      <li><a href="api/plotting.html#up4.plotting.VectorPlotter.unit_vector_slice_plot">unit_vector_slice_plot() (up4.plotting.VectorPlotter method)</a>
+</li>
       <li>
     up4
 
       <ul>
-        <li><a href="api/converter.html#module-up4">module</a>, <a href="api/data.html#module-up4">[1]</a>
+        <li><a href="api/converter.html#module-up4">module</a>, <a href="api/data.html#module-up4">[1]</a>, <a href="api/grid.html#module-up4">[2]</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    up4.plotting
+
+      <ul>
+        <li><a href="api/plotting.html#module-up4.plotting">module</a>
 </li>
       </ul></li>
   </ul></td>
@@ -399,11 +625,51 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/data.html#up4.Data.vectorfield">vectorfield() (up4.Data method)</a>
+      <li><a href="api/converter.html#up4.Data.vectorfield">vectorfield() (up4.Data method)</a>, <a href="api/data.html#id21">[1]</a>, <a href="api/data.html#up4.Data.vectorfield">[2]</a>, <a href="api/grid.html#up4.Data.vectorfield">[3]</a>
+</li>
+      <li><a href="api/plotting.html#up4.plotting.VectorPlotter">VectorPlotter (class in up4.plotting)</a>
+</li>
+      <li><a href="api/converter.html#up4.Data.velocityfield">velocityfield() (up4.Data method)</a>, <a href="api/data.html#id22">[1]</a>, <a href="api/data.html#up4.Data.velocityfield">[2]</a>, <a href="api/grid.html#up4.Data.velocityfield">[3]</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/data.html#up4.Data.velocityfield">velocityfield() (up4.Data method)</a>
+      <li><a href="api/plotting.html#up4.plotting.ScalarPlotter.volume_plot">volume_plot() (up4.plotting.ScalarPlotter method)</a>
+</li>
+      <li><a href="api/converter.html#id4">vtk() (up4.Converter static method)</a>, <a href="api/converter.html#up4.Converter.vtk">[1]</a>, <a href="api/data.html#up4.Converter.vtk">[2]</a>, <a href="api/grid.html#up4.Converter.vtk">[3]</a>
+</li>
+      <li><a href="api/converter.html#id5">vtk_from_folder() (up4.Converter static method)</a>, <a href="api/converter.html#up4.Converter.vtk_from_folder">[1]</a>, <a href="api/data.html#up4.Converter.vtk_from_folder">[2]</a>, <a href="api/grid.html#up4.Converter.vtk_from_folder">[3]</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/converter.html#up4.Grid.weights_to_numpy">weights_to_numpy() (up4.Grid method)</a>, <a href="api/data.html#up4.Grid.weights_to_numpy">[1]</a>, <a href="api/grid.html#id15">[2]</a>, <a href="api/grid.html#up4.Grid.weights_to_numpy">[3]</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="X">X</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/converter.html#up4.Grid.xpositions">xpositions() (up4.Grid method)</a>, <a href="api/data.html#up4.Grid.xpositions">[1]</a>, <a href="api/grid.html#id16">[2]</a>, <a href="api/grid.html#up4.Grid.xpositions">[3]</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Y">Y</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/converter.html#up4.Grid.ypositions">ypositions() (up4.Grid method)</a>, <a href="api/data.html#up4.Grid.ypositions">[1]</a>, <a href="api/grid.html#id17">[2]</a>, <a href="api/grid.html#up4.Grid.ypositions">[3]</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="Z">Z</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/converter.html#up4.Grid.zpositions">zpositions() (up4.Grid method)</a>, <a href="api/data.html#up4.Grid.zpositions">[1]</a>, <a href="api/grid.html#id18">[2]</a>, <a href="api/grid.html#up4.Grid.zpositions">[3]</a>
 </li>
   </ul></td>
 </tr></table>
@@ -456,7 +722,8 @@
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
+  <script src="_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   
@@ -471,9 +738,19 @@
   </div>
   
   <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
 
   </div>

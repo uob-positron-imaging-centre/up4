@@ -119,6 +119,7 @@ impl TData {
                 self.file.filename()
             ))
             .to_owned();
+        //test
 
         //Radius
         let radius = self
@@ -913,9 +914,6 @@ impl DataManager for TData {
             timestep,
             self.range_extra[buffer_id]
         );
-        println!("Timestep {}", timestep);
-
-        println!("Range {:?}", self.range_extra[buffer_id]);
         if timestep > self.range_extra[buffer_id].1 - 1 {
             self.update_extra(
                 (timestep, timestep + self.buffersize_extra[buffer_id]),

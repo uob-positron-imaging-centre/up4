@@ -13,6 +13,7 @@ pub mod pdata;
 pub use pdata::PData;
 pub mod tdata;
 pub use tdata::TData;
+mod utilities;
 /// Defines main access functions for post processing functions.
 pub trait DataManager {
     /// return the pointer to `Timestep` at the step `timestep`
@@ -32,6 +33,16 @@ pub trait DataManager {
 
     /// read from other buffer then the main one
     fn get_timestep_buffer(&mut self, timestep: usize, buffer: usize) -> &Timestep;
+
+    /// Return a string containung information about the dataset
+    fn info(&self) -> Result<String, &'static str>;
+
+    /// set rotation angle
+    fn set_rotation_angle(&mut self, angle: f64, axis: f64);
+
+    /// set rotation anker, the point around which the rotation is performed
+    /// default is zero
+    fn set_rotation_anker(&mut self, point: [f64; 3]);
 }
 
 pub trait Manager: DataManager + Granular + Extraction + Mixing + Conditional {}

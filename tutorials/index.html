@@ -7,29 +7,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>Tutorials &#8212; up4 v0.1.0 Manual</title>
-  <script>
+  
+  
+  
+  <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+  <link href="../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
 
   
-  <link rel="stylesheet"
-    href="../_static/vendor/fontawesome/6.1.2/css/all.min.css">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
@@ -37,6 +39,8 @@
     <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/index';</script>
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
@@ -49,6 +53,10 @@
   
   
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
 
   
   <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
@@ -111,32 +119,32 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="../getting_started.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started.html">
                         Getting Started
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item current active">
-                    <a class="nav-link" href="#">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
                         Tutorials
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../api/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api/index.html">
                         Manual
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../about.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../about.html">
                         About
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
     </ul>
 </nav>
@@ -145,12 +153,14 @@
     </div>
 
     <div id="navbar-end">
-      <div class="navbar-end-item navbar-end__search-button-container">
-        
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
   <i class="fa-solid fa-magnifying-glass"></i>
 </button>
-      </div>
+        </div>
+      
       
       <div class="navbar-end-item">
         
@@ -182,11 +192,13 @@
 
 
   
-  <div class="search-button-container--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
   <i class="fa-solid fa-magnifying-glass"></i>
 </button>
-  </div>
+    </div>
+  
 
   
   <label class="sidebar-toggle secondary-toggle" for="__secondary">
@@ -216,32 +228,32 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="../getting_started.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started.html">
                         Getting Started
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item current active">
-                    <a class="nav-link" href="#">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
                         Tutorials
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../api/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api/index.html">
                         Manual
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../about.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../about.html">
                         About
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
     </ul>
 </nav>
@@ -291,8 +303,11 @@
     </div>
   </div>
 
+  
+  <div id="rtd-footer-container"></div>
+
       </div>
-      <main class="bd-main">
+      <main id="main-content" class="bd-main">
         
         
         <div class="bd-content">
@@ -407,7 +422,7 @@ Those functions automatically apply the system boundaries of the data given as t
 <ul class="simple">
 <li><p><code class="code docutils literal notranslate"><span class="pre">up4.Data.vectorfield</span></code>: Calculates the velocity vector field of the data</p></li>
 <li><p><code class="code docutils literal notranslate"><span class="pre">up4.Data.velocityfield</span></code>: Calculates the magnitude velocity field of the data</p></li>
-<li><p><code class="code docutils literal notranslate"><span class="pre">up4.Data.numbersfield</span></code>: Calculates the number field of the data</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">up4.Data.numberfield</span></code>: Calculates the number field of the data</p></li>
 </ul>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">up4</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="s2">&quot;path/to/data.hdf5&quot;</span><span class="p">)</span>
@@ -426,7 +441,27 @@ The velocity field in this example can also be calculated in cylindrical coordin
 </section>
 <section id="plotting">
 <h2>Plotting<a class="headerlink" href="#plotting" title="Permalink to this heading">#</a></h2>
-<p>for mr Weston</p>
+<p>Plotting is done by one of the classes in <code class="code docutils literal notranslate"><span class="pre">up4.plotting</span></code>. These are:</p>
+<ul class="simple">
+<li><p><code class="code docutils literal notranslate"><span class="pre">up4.plotting.VectorPlotter</span></code>: Calculates the velocity vector field of the data</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">up4.plotting.ScalarPlotter</span></code>: Calculates the magnitude velocity field of the data</p></li>
+<li><p><code class="code docutils literal notranslate"><span class="pre">up4.plotting.ComparisonPlotter</span></code>: Calculates the number field of the data</p></li>
+</ul>
+<p>If we reuse the example from above, plotting can be done by adding the following lines:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">up4.plotting</span> <span class="kn">import</span> <span class="n">VectorPlotter</span><span class="p">,</span> <span class="n">ScalarPlotter</span>
+<span class="n">dpi</span> <span class="o">=</span> <span class="mi">600</span> <span class="c1"># nice quality image saving</span>
+<span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># look along y-axis</span>
+<span class="n">index</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="n">vector_field</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">vector_field</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span> <span class="c1"># for vector plotting</span>
+
+<span class="c1"># plot vector field</span>
+<span class="n">vec_field_plotter</span> <span class="o">=</span> <span class="n">VectorPlotter</span><span class="p">(</span><span class="n">vector_field</span><span class="p">)</span>
+<span class="n">vec_field_plotter</span><span class="o">.</span><span class="n">unit_vector_plot</span><span class="p">(</span><span class="n">vector_field</span><span class="p">)</span>
+<span class="n">vec_fig</span> <span class="o">=</span> <span class="n">vec_field_plotter</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Which, if used on the <code class="xref py py-obj docutils literal notranslate"><span class="pre">tests/fixtures/drum.hdf5</span></code> file, looks a little like this:</p>
+<img alt="../_images/unitv.png" src="../_images/unitv.png" />
 </section>
 </section>
 
@@ -502,7 +537,7 @@ The velocity field in this example can also be calculated in cylindrical coordin
   
 
 <div class="tocsection editthispage">
-    <a href="https://github.com/uob-positron-imaging-centre/up4/edit/DanW-dev/tutorials/index.rst">
+    <a href="https://github.com/uob-positron-imaging-centre/up4/edit/uPPPP/tutorials/index.rst">
         <i class="fa-solid fa-pencil"></i> Edit this page
     </a>
 </div>
@@ -536,7 +571,8 @@ The velocity field in this example can also be calculated in cylindrical coordin
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   
@@ -551,9 +587,19 @@ The velocity field in this example can also be calculated in cylindrical coordin
   </div>
   
   <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
 
   </div>

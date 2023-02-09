@@ -7,29 +7,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>Manual &#8212; up4 v0.1.0 Manual</title>
-  <script>
+  
+  
+  
+  <script data-cfasync="false">
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=1e1de1a1873e13ef5536" rel="stylesheet">
+  <link href="../_static/styles/theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/bootstrap.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=796348d33e8b1d947c94" rel="stylesheet">
 
   
-  <link rel="stylesheet"
-    href="../_static/vendor/fontawesome/6.1.2/css/all.min.css">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
-  <link rel="preload" as="font" type="font/woff2" crossorigin
-    href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=796348d33e8b1d947c94" rel="stylesheet">
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536">
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94">
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
 
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
@@ -37,11 +39,13 @@
     <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <script src="../_static/sphinx_highlight.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/index';</script>
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Converter Class" href="converter.html" />
+    <link rel="next" title="Converter" href="converter.html" />
     <link rel="prev" title="Tutorials" href="../tutorials/index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
@@ -49,6 +53,10 @@
   
   
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
 
   
   <input type="checkbox" class="sidebar-toggle" name="__primary" id="__primary">
@@ -111,32 +119,32 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="../getting_started.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started.html">
                         Getting Started
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../tutorials/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../tutorials/index.html">
                         Tutorials
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item current active">
-                    <a class="nav-link" href="#">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
                         Manual
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../about.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../about.html">
                         About
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
     </ul>
 </nav>
@@ -145,12 +153,14 @@
     </div>
 
     <div id="navbar-end">
-      <div class="navbar-end-item navbar-end__search-button-container">
-        
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+      
+        <div class="navbar-end-item navbar-persistent--container">
+          
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
   <i class="fa-solid fa-magnifying-glass"></i>
 </button>
-      </div>
+        </div>
+      
       
       <div class="navbar-end-item">
         
@@ -182,11 +192,13 @@
 
 
   
-  <div class="search-button-container--mobile">
-<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" data-toggle="tooltip">
+  
+    <div class="navbar-persistent--mobile">
+<button class="btn btn-sm navbar-btn search-button search-button__button" title="Search" aria-label="Search" data-toggle="tooltip">
   <i class="fa-solid fa-magnifying-glass"></i>
 </button>
-  </div>
+    </div>
+  
 
   
   <label class="sidebar-toggle secondary-toggle" for="__secondary">
@@ -216,32 +228,32 @@
     </p>
     <ul id="navbar-main-elements" class="navbar-nav">
         
-                <li class="nav-item">
-                    <a class="nav-link" href="../getting_started.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started.html">
                         Getting Started
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../tutorials/index.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../tutorials/index.html">
                         Tutorials
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item current active">
-                    <a class="nav-link" href="#">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="#">
                         Manual
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
 
-                <li class="nav-item">
-                    <a class="nav-link" href="../about.html">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../about.html">
                         About
-                    </a>
-                </li>
+                      </a>
+                    </li>
                 
     </ul>
 </nav>
@@ -291,11 +303,10 @@
   </p>
   <div class="bd-toc-item navbar-nav">
     <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="converter.html">Converter Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="data.html">Data Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="grid.html">Grid Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="utilities.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converter.html">Converter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grid.html">Grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
 </ul>
 
   </div>
@@ -310,8 +321,11 @@
     </div>
   </div>
 
+  
+  <div id="rtd-footer-container"></div>
+
       </div>
-      <main class="bd-main">
+      <main id="main-content" class="bd-main">
         
         
         <div class="bd-content">
@@ -328,16 +342,38 @@
 <h1>Manual<a class="headerlink" href="#manual" title="Permalink to this heading">#</a></h1>
 <p>From here on out, UPPPP will be referred to its Python package name, <code class="docutils literal notranslate"><span class="pre">up4</span></code>, for brevity. All public <code class="docutils literal notranslate"><span class="pre">up4</span></code> members are documented here alongside some examples that can be copied and pasted. You can also use the <code class="xref py py-obj docutils literal notranslate"><span class="pre">Search</span></code> bar to directly find what you need.</p>
 <p>We really want to make this library simplify the analysis of particle data in a quick, reproducible, transparent and easy to use manner; if you feel that something can be improved/ added, or care to share examples/ showcases, <em>please</em> feel free to get in contact with any of us!</p>
+<p>These docs cover the Python API, but the Rust source code is located <a class="reference external" href="../_static/doc/upppp_rust/index.html">here</a>.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="converter.html">Converter Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="data.html">Data Class</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="data.html#up4.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="converter.html">Converter</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="converter.html#up4.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="converter.html#up4.Converter"><code class="docutils literal notranslate"><span class="pre">Converter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="converter.html#up4.Grid"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="converter.html#id0"><code class="docutils literal notranslate"><span class="pre">Converter</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="grid.html">Grid Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting Class</a></li>
-<li class="toctree-l1"><a class="reference internal" href="utilities.html">Utilities</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="data.html#up4.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#up4.Converter"><code class="docutils literal notranslate"><span class="pre">Converter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#up4.Grid"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#id0"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="grid.html">Grids</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="grid.html#up4.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid.html#up4.Converter"><code class="docutils literal notranslate"><span class="pre">Converter</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid.html#up4.Grid"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="grid.html#id0"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="plotting.html#up4.plotting.create_plot"><code class="docutils literal notranslate"><span class="pre">create_plot()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting.html#up4.plotting.save_fig"><code class="docutils literal notranslate"><span class="pre">save_fig()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting.html#vector-plotting">Vector Plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting.html#scalar-plotting">Scalar Plotting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plotting.html#comparison-plotting">Comparison Plotting</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </section>
@@ -360,7 +396,7 @@
   <a class='right-next' id="next-link" href="converter.html" title="next page">
   <div class="prev-next-info">
       <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">Converter Class</p>
+      <p class="prev-next-title">Converter</p>
   </div>
   <i class="fa-solid fa-angle-right"></i>
   </a>
@@ -382,7 +418,7 @@
   
 
 <div class="tocsection editthispage">
-    <a href="https://github.com/uob-positron-imaging-centre/up4/edit/DanW-dev/api/index.rst">
+    <a href="https://github.com/uob-positron-imaging-centre/up4/edit/uPPPP/api/index.rst">
         <i class="fa-solid fa-pencil"></i> Edit this page
     </a>
 </div>
@@ -416,7 +452,8 @@
   
     
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1e1de1a1873e13ef5536"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=796348d33e8b1d947c94"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94"></script>
 
   <footer class="bd-footer"><div class="bd-footer__inner container">
   
@@ -431,9 +468,19 @@
   </div>
   
   <div class="footer-item">
+    <p class="theme-version">
+    Built with the
+    <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">
+        PyData Sphinx Theme
+    </a>
+    0.12.0.
+</p>
+  </div>
+  
+  <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
 
   </div>

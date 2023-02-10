@@ -944,9 +944,10 @@ impl DataManager for TData {
         let mut base_string = format!(
             "Time-Based HDF5 Dataset.\n\
             Dimensions of the system:\n\
-            \t x {:.2}-->{:.2}  ||  {:.2}\n\
-            \t y {:.2}-->{:.2}  ||  {:.2}\n\
-            \t z {:.2}-->{:.2}  ||  {:.2}\n\
+            |   Min --> Max\t||   Diff\n\
+            |x {:.2}-->{:.2}\t||  {:.2}\n\
+            |y {:.2}-->{:.2}\t||  {:.2}\n\
+            |z {:.2}-->{:.2}\t||  {:.2}\n\
             The max time of this set is : {:.2}\n\
             Number of Particles: {:.2}\n\
             Number of Timesteps: {:.2}\n\

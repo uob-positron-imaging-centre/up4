@@ -34,8 +34,8 @@ impl PyVectorPlotter {
     /// up4.plotting.VectorPlotter
     ///     Vector plotting class.
     #[new]
-    fn constructor(vector_grid: &PyVecGrid) -> PyVectorPlotter {
-        let plotter: VectorPlotter = VectorPlotter::new(vector_grid.grid.to_owned());
+    fn constructor(vector_grid: &PyVecGrid, axis: usize) -> PyVectorPlotter {
+        let plotter: VectorPlotter = VectorPlotter::new(vector_grid.grid.to_owned(), axis);
         return PyVectorPlotter {
             plotting_string: String::new(),
             plotting_data: plotter,
@@ -55,11 +55,11 @@ impl PyVectorPlotter {
     ///     Axis that the plane is perpendicular to.
     /// index : int
     ///     Index along supplied `axis` to select data from.
-    fn unit_vector_plot(&mut self, axis: usize, index: usize) {
+    fn unit_vector_plot(&mut self) {
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
         let arrows = self
             .plotting_data
-            .create_unit_vector_traces(axis, index);
+            .create_unit_vector_traces();
         let layout: Layout = Layout::new();
         let square: bool = false;
         let smoothing = Some(Smoothing::False);
@@ -69,7 +69,7 @@ impl PyVectorPlotter {
         let show = false;
         let (heatmap, layout) = self
             .plotting_data
-            .create_unit_vector_background(layout, square, axes, smoothing, axis, index);
+            .create_unit_vector_background(layout, square, axes, smoothing);
         for trace in arrows {
             traces.push(trace);
         }
@@ -79,22 +79,22 @@ impl PyVectorPlotter {
         self.plotting_string = plotting_string;
     }
 
-    fn unit_vector_slice_plot(&mut self, axis: usize, range: [usize; 3]) {
-        let mut traces: Vec<Box<dyn Trace>> = Vec::new();
-        let arrows = self
-            .plotting_data
-            .unit_vector_slice_traces(range, axis, None);
-        let backgrounds = self.plotting_data.unit_vector_slice_background(range, axis);
-        for (arrow, background) in izip!(arrows, backgrounds) {
-            traces.push(arrow);
-            traces.push(background);
-        }
-        let layout: Layout = Layout::new();
-        let show: bool = false;
-        let plot: Plot = self.plotting_data.plot(traces, layout, show);
-        let plotting_string = plot.to_json();
-        self.plotting_string = plotting_string;
-    }
+    // fn unit_vector_slice_plot(&mut self, axis: usize, range: [usize; 3]) {
+    //     let mut traces: Vec<Box<dyn Trace>> = Vec::new();
+    //     let arrows = self
+    //         .plotting_data
+    //         .unit_vector_slice_traces(range, axis);
+    //     let backgrounds = self.plotting_data.unit_vector_slice_background(range, axis);
+    //     for (arrow, background) in izip!(arrows, backgrounds) {
+    //         traces.push(arrow);
+    //         traces.push(background);
+    //     }
+    //     let layout: Layout = Layout::new();
+    //     let show: bool = false;
+    //     let plot: Plot = self.plotting_data.plot(traces, layout, show);
+    //     let plotting_string = plot.to_json();
+    //     self.plotting_string = plotting_string;
+    // }
 
     // TODO see if serde deserialise works for enum selection
     // TODO offer a sliced variant

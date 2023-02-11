@@ -30,33 +30,30 @@ use std::f64::consts::PI;
 pub struct VectorPlotter {
     xdata: Array1<f64>,
     ydata: Array1<f64>,
-    zdata: Array1<f64>,
-    udata: Array3<f64>,
-    vdata: Array3<f64>,
-    wdata: Array3<f64>,
-    true_norm: Array3<f64>,
+    udata: Array2<f64>,
+    vdata: Array2<f64>,
+    true_norm: Array2<f64>,
 }
 
 impl VectorPlotter {
     /// Constructor
-    pub fn new(grid: VectorGrid) -> VectorPlotter {
-        let xdata: Array1<f64> = grid.get_xpositions().to_owned();
-        let ydata: Array1<f64> = grid.get_ypositions().to_owned();
-        let zdata: Array1<f64> = grid.get_zpositions().to_owned();
-        let udata: Array3<f64> = grid.data[0].get_data().to_owned();
-        let vdata: Array3<f64> = grid.data[1].get_data().to_owned();
-        let wdata: Array3<f64> = grid.data[2].get_data().to_owned();
-        let norm: Vec<f64> = izip!(&udata, &vdata, &wdata)
-            .map(|x| (x.0.powi(2) + x.1.powi(2) + x.2.powi(2)).powf(0.5))
+    pub fn new(grid: VectorGrid, axis: usize) -> VectorPlotter {
+        let xdata = if axis == 0 {grid.get_ypositions().to_owned()} else if axis == 1 {grid.get_xpositions().to_owned()} else {grid.get_xpositions().to_owned()};
+        let ydata = if axis == 0 {grid.get_zpositions().to_owned()} else if axis == 1 {grid.get_zpositions().to_owned()} else {grid.get_ypositions().to_owned()};
+        // select yz, xz or xy plane
+        let i = if axis == 0 {1} else if axis == 1 {0} else {0};
+        let j = if axis == 0 {2} else if axis == 1 {2} else {1};
+        let udata: Array2<f64> = grid.data[i].collapse(axis);
+        let vdata: Array2<f64> = grid.data[j].collapse(axis);
+        let norm: Vec<f64> = izip!(&udata, &vdata)
+            .map(|x| (x.0.powi(2) + x.1.powi(2)).powf(0.5))
             .collect::<Vec<f64>>();
-        let true_norm: Array3<f64> = Array3::from_shape_vec(udata.raw_dim(), norm).unwrap();
+        let true_norm: Array2<f64> = Array2::from_shape_vec(udata.raw_dim(), norm).unwrap();
         return VectorPlotter {
             xdata: xdata,
             ydata: ydata,
-            zdata: zdata,
             udata: udata,
             vdata: vdata,
-            wdata: wdata,
             true_norm: true_norm,
         };
     }
@@ -65,45 +62,38 @@ impl VectorPlotter {
     pub fn scale_global(&mut self, scale_factor: f64) {
         self.udata *= scale_factor;
         self.vdata *= scale_factor;
-        self.wdata *= scale_factor;
     }
     /// Scale vector elements elementwise. Each component with the same indices will be scaled identically.
-    pub fn scale_elementwise(&mut self, scale_factor: Array3<f64>) {
+    pub fn scale_elementwise(&mut self, scale_factor: Array2<f64>) {
         self.udata = &self.udata * &scale_factor;
         self.vdata = &self.vdata * &scale_factor;
-        self.wdata = &self.wdata * &scale_factor;
     }
 
     /// Set minimum length for arrows.    
     pub fn bound_min(&mut self, min: f64) {
-        let mut scale_factor: Array3<f64> = Array3::ones(self.udata.raw_dim());
+        let mut scale_factor: Array2<f64> = Array2::ones(self.udata.raw_dim());
         for i in 0..self.xdata.len() {
             for j in 0..self.xdata.len() {
-                for k in 0..self.xdata.len() {
-                    if self.true_norm[[i, j, k]] < min {
-                        scale_factor[[i, j, k]] = min / self.true_norm[[i, j, k]];
-                    } else {
-                        scale_factor[[i, j, k]] = 1.;
-                    }
+                if self.true_norm[[i, j]] < min {
+                    scale_factor[[i, j]] = min / self.true_norm[[i, j]];
+                } else {
+                    scale_factor[[i, j]] = 1.;
                 }
             }
         }
         self.udata *= &scale_factor;
         self.vdata *= &scale_factor;
-        self.wdata *= &scale_factor;
     }
 
     /// Set maximum length for arrows.
     pub fn bound_max(&mut self, max: f64) {
-        let mut scale_factor: Array3<f64> = Array3::ones(self.udata.raw_dim());
+        let mut scale_factor: Array2<f64> = Array2::ones(self.udata.raw_dim());
         for i in 0..self.xdata.len() {
             for j in 0..self.xdata.len() {
-                for k in 0..self.xdata.len() {
-                    if self.true_norm[[i, j, k]] > max {
-                        scale_factor[[i, j, k]] = max / self.true_norm[[i, j, k]];
-                    } else {
-                        scale_factor[[i, j, k]] = 1.;
-                    }
+                if self.true_norm[[i, j]] > max {
+                    scale_factor[[i, j]] = max / self.true_norm[[i, j]];
+                } else {
+                    scale_factor[[i, j]] = 1.;
                 }
             }
         }
@@ -111,63 +101,43 @@ impl VectorPlotter {
 
     /// Set minimum and maximum lengths for arrows.
     pub fn bound_min_max(&mut self, min: f64, max: f64) {
-        let mut scale_factor: Array3<f64> = Array3::ones(self.udata.raw_dim());
+        let mut scale_factor: Array2<f64> = Array2::ones(self.udata.raw_dim());
         for i in 0..self.xdata.len() {
             for j in 0..self.xdata.len() {
-                for k in 0..self.xdata.len() {
-                    if self.true_norm[[i, j, k]] > max {
-                        scale_factor[[i, j, k]] = max / self.true_norm[[i, j, k]];
-                    } else if self.true_norm[[i, j, k]] < min {
-                        scale_factor[[i, j, k]] = min / self.true_norm[[i, j, k]];
-                    } else {
-                        scale_factor[[i, j, k]] = 1.;
-                    }
+                if self.true_norm[[i, j]] > max {
+                    scale_factor[[i, j]] = max / self.true_norm[[i, j]];
+                } else if self.true_norm[[i, j]] < min {
+                    scale_factor[[i, j]] = min / self.true_norm[[i, j]];
+                } else {
+                    scale_factor[[i, j]] = 1.;
                 }
             }
         }
         self.udata *= &scale_factor;
         self.vdata *= &scale_factor;
-        self.wdata *= &scale_factor;
     }
 
     // FIXME fit an ellipsoid inside the cells to scale properly
     /// Constrain all arrows to lie within circle of radius dx/2 from each node.
     /// On a non-uniform grid, this *will* distort the plot.
-    pub fn bound_node(&mut self, dx: f64, dy: f64, axis: usize) {
-        // start with vectors with a unit norm
-        self.normalise_vectors();
-        // TODO make this cleaner
-        if (axis == 0) { // along yz plane
-            self.vdata *= 0.5*dx;
-            self.wdata *= 0.5*dy;
-        }
-        else if (axis == 1) { // along xz plane
-            self.udata *= 0.5*dx;
-            self.wdata *= 0.5*dy;
-            
-        }
-        else { // along xy plane
-            self.udata *= 0.5*dx;
-            self.vdata *= 0.5*dy;
-        }
-        //let scale_factor: f64 = 0.5 * dx / self.true_norm.max_skipnan();
-        //self.scale_global(scale_factor);
+    pub fn bound_node(&mut self, dx: f64) {
+        let scale_factor: f64 = 0.5 * dx / self.true_norm.max_skipnan();
+        self.scale_global(scale_factor);
     }
 
     /// Convert vectors into unit vectors.
     pub fn normalise_vectors(&mut self) {
         self.udata /= &self.true_norm;
         self.vdata /= &self.true_norm;
-        self.wdata /= &self.true_norm;
     }
 
     /// Map vector norm values to the interval [0, 1]
-    pub fn normalise_colour(&self, colour_bounds: Option<(f64, f64)>) -> (Array3<f64>, f64, f64) {
+    pub fn normalise_colour(&self, colour_bounds: Option<(f64, f64)>) -> (Array2<f64>, f64, f64) {
         match colour_bounds {
             None => {
                 let min: f64 = *self.true_norm.min_skipnan();
                 let max: f64 = *self.true_norm.max_skipnan();
-                let colour_vector: Array3<f64> = (&self.true_norm - min) / (max - min);
+                let colour_vector: Array2<f64> = (&self.true_norm - min) / (max - min);
                 return (colour_vector, min, max);
             }
 
@@ -190,8 +160,8 @@ impl VectorPlotter {
         index: usize,
     ) -> Vec<Box<Scatter<f64, f64>>> {
         let (colour_vector, min, max) = self.normalise_colour(colour_bounds);
-        let (barb_x, barb_y) = self.create_quiver_barbs(axis, index);
-        let (arrow_x, arrow_y) = self.create_quiver_arrows(axis, index);
+        let (barb_x, barb_y) = self.create_quiver_barbs();
+        let (arrow_x, arrow_y) = self.create_quiver_arrows();
         let mut traces = Vec::new();
         let colour_elements: Vec<ColorScaleElement> = Vec::new();
         //unpack the vectors of arrow barbs and heads into new vector containing each arrow as a tuple
@@ -232,33 +202,30 @@ impl VectorPlotter {
 
     // TODO choose dims to select min and max from
     /// Automatically set axis limits for 2D plots.
-    pub fn auto_axis_range(
-        &self,
-        layout: Layout,
-        axes: Vec<plotly::layout::Axis>,
-        dtick: f64,
-    ) -> Layout {
-        let xmin: f64 = self.xdata.min_skipnan() - dtick;
-        let xmax: f64 = self.xdata.max_skipnan() + dtick;
-        let ymin: f64 = self.ydata.min_skipnan() - dtick;
-        let ymax: f64 = self.ydata.max_skipnan() + dtick;
-        let mut axes_iter = axes.into_iter();
-        let xaxis: plotly::layout::Axis = axes_iter.next().unwrap();
-        let yaxis: plotly::layout::Axis = axes_iter.next().unwrap();
-        let x_auto: Layout = axis_range_x(layout, xaxis, xmin, xmax);
-        let xy_auto: Layout = axis_range_y(x_auto, yaxis, ymin, ymax);
-        return xy_auto;
-    }
+    // pub fn auto_axis_range(
+    //     &self,
+    //     layout: Layout,
+    //     axes: Vec<plotly::layout::Axis>,
+    //     dtick: f64,
+    // ) -> Layout {
+    //     let xmin: f64 = self.xdata.min_skipnan() - dtick;
+    //     let xmax: f64 = self.xdata.max_skipnan() + dtick;
+    //     let ymin: f64 = self.ydata.min_skipnan() - dtick;
+    //     let ymax: f64 = self.ydata.max_skipnan() + dtick;
+    //     let mut axes_iter = axes.into_iter();
+    //     let xaxis: plotly::layout::Axis = axes_iter.next().unwrap();
+    //     let yaxis: plotly::layout::Axis = axes_iter.next().unwrap();
+    //     let x_auto: Layout = axis_range_x(layout, xaxis, xmin, xmax);
+    //     let xy_auto: Layout = axis_range_y(x_auto, yaxis, ymin, ymax);
+    //     return xy_auto;
+    // }
 
     /// Create the arrow shafts.
-    fn create_quiver_barbs(&self, axis: usize, index: usize) -> (Vec<(f64, f64)>, Vec<(f64, f64)>) {
+    fn create_quiver_barbs(&self) -> (Vec<(f64, f64)>, Vec<(f64, f64)>) {
         let mut barb_x = Vec::new();
         let mut barb_y = Vec::new();
-        let (x, y, u, v) = self.component_axis_selector(axis);
-        let (x, y) = meshgrid(x, y);
-        let u = component_data_selector(u, axis, index);
-        let v = component_data_selector(v, axis, index);
-        for (x, y, u, v) in izip!(x, y, u, v) {
+        let (x, y) = meshgrid(self.xdata.to_owned(), self.ydata.to_owned());
+        for (x, y, u, v) in izip!(x, y, self.udata(), self.vdata()) {
             let tupx: (f64, f64) = (x, x + u);
             let tupy: (f64, f64) = (y, y + v);
             barb_x.push(tupx);
@@ -269,16 +236,14 @@ impl VectorPlotter {
     /// Create the arrowheads.
     fn create_quiver_arrows(
         &self,
-        axis: usize,
-        index: usize,
     ) -> (Vec<(f64, f64, f64)>, Vec<(f64, f64, f64)>) {
         // select the required data
-        let (x, y, u, v) = self.component_axis_selector(axis);
-        let (x, y) = meshgrid(x, y);
+        let (x, y) = meshgrid(self.xdata.to_owned(), self.ydata.to_owned());
         let x: Array1<f64> = Array1::from_iter(x);
         let y: Array1<f64> = Array1::from_iter(y);
-        let u: Array1<f64> = Array1::from_iter(component_data_selector(u, axis, index));
-        let v: Array1<f64> = Array1::from_iter(component_data_selector(v, axis, index));
+        let u: Array1<f64> = Array1::from_iter(self.udata.to_owned());
+        let v: Array1<f64> = Array1::from_iter(self.vdata.to_owned());
+
         let norm: Array1<f64> = izip!(&u, &v)
             .map(|(v, u)| f64::hypot(*u, *v))
             .collect::<Array1<f64>>();
@@ -290,7 +255,7 @@ impl VectorPlotter {
 
         let arrow_len: Array1<f64> = scale_factor * norm;
         // get barb angles
-        let barb_ang: Array1<f64> = izip!(&v, &u)
+        let barb_ang: Array1<f64> = izip!(&u, &v)
             .map(|(v, u)| f64::atan2(*v, *u))
             .collect::<Array1<f64>>();
 
@@ -335,14 +300,11 @@ impl VectorPlotter {
     /// Create arrow traces, but for the data converted into unit vectors.
     pub fn create_unit_vector_traces(
         &mut self,
-        axis: usize,
-        index: usize,
     ) -> Vec<Box<Scatter<f64, f64>>> {
         let dx: f64 = self.xdata[1] - self.xdata[0];
-        let dy: f64 = self.ydata[1] - self.ydata[0];
-        self.bound_node(dx, dy, axis);
-        let (barb_x, barb_y) = self.create_quiver_barbs(axis, index);
-        let (arrow_x, arrow_y) = self.create_quiver_arrows(axis, index);
+        self.bound_node(dx);
+        let (barb_x, barb_y) = self.create_quiver_barbs();
+        let (arrow_x, arrow_y) = self.create_quiver_arrows();
         let mut traces: Vec<Box<Scatter<f64, f64>>> = Vec::new();
         for (x_line, y_line, x_head, y_head) in izip!(barb_x, barb_y, arrow_x, arrow_y) {
             let xpl: Vec<f64> = vec![x_line.0, x_line.1, x_head.0, x_head.1, x_head.2];
@@ -366,20 +328,16 @@ impl VectorPlotter {
         square: bool,
         axes: Vec<Option<plotly::layout::Axis>>,
         smoothing: Option<Smoothing>,
-        axis: usize,
-        index: usize,
     ) -> (Box<HeatMap<f64, f64, f64>>, Layout) {
         // TODO remove the need to use bound_node() so that actual unit vectors are plotted
         // TODO ensure that the arrows fit in each cell
         // Add a heatmap background to give the vectors some colour
-        let (xaxis, yaxis) = self.axis_selector(axis);
-        let (xaxis, yaxis) = meshgrid(xaxis, yaxis);
-        let plot_data = component_data_selector(self.true_norm.to_owned(), axis, index);
+        let (xaxis, yaxis) = meshgrid(self.xdata.to_owned(), self.ydata.to_owned());
         let smooth_setting = smoothing.unwrap_or(Smoothing::False);
         let heatmap: Box<HeatMap<f64, f64, f64>> = HeatMap::new(
             xaxis.into_raw_vec(),
             yaxis.into_raw_vec(),
-            plot_data.into_raw_vec(),
+            self.true_norm.to_owned().into_raw_vec(),
         )
         .zsmooth(smooth_setting);
         // if this is true, then perform some additional plotly calls to create a plot where the x and y axes are equal
@@ -432,71 +390,71 @@ impl VectorPlotter {
     }
 
     // TODO create
-    pub fn quiver_slices(&self, slice_dims: Vec<usize>, dim_indices: Vec<Vec<usize>>,  traces: Vec<Box<Scatter<f64, f64>>>, layout: Layout, square: bool, axes: Vec<Option<plotly::layout::Axis>>) {
-        // ensure that each requested axis has at least one entry
-        if slice_dims.len() != dim_indices.len() {
-            panic!("For each axis, a list of indices must be provided!");
-        }
-        let mut traces = Vec::new();
-        for (i, axis) in slice_dims.into_iter().enumerate() {
-            for index in &dim_indices[i] {
-                let (barb_x, barb_y) = self.create_quiver_barbs(axis, *index);
-                let (arrow_x, arrow_y) = self.create_quiver_arrows(axis, *index);
-                for (i, (x_line, y_line, x_head, y_head)) in izip!(barb_x, barb_y, arrow_x, arrow_y).enumerate() {
-                    let x: Vec<f64> = vec![x_line.0, x_line.1, x_head.0, x_head.1, x_head.2];
-                    let y: Vec<f64> = vec![y_line.0, y_line.1, y_head.0, y_head.1, y_head.2];
-                    let trace = self.sliced_arrows(axis, *index, x, y);                   
-                    traces.push(trace);
-                }
-            }
-        }
-    }
-    // return the necessary "other axis" points for fake 3D plots
-    fn sliced_arrows(&self, axis: usize, index: usize, x: Vec<f64>, y: Vec<f64>) -> Box<Scatter3D<f64, f64, f64>> {
-        let mut z: Array1<f64> = Array1::zeros(5);
-        match axis {
-            // slicing along x axis
-            0 => {
-                z.fill(self.xdata()[index]);
-                let z = z.into_raw_vec();
-                let trace = Scatter3D::new(z, x, y)
-                    .mode(Mode::Lines)
-                    .show_legend(false)
-                    //.fill_color(NamedColor::Black)
-                    .show_legend(false)
-                    .line(Line::new());
-                return trace;
-            }
-            // slicing along y axis
-            1 => {
-                z.fill(self.ydata()[index]);
-                let z = z.into_raw_vec();
-                let trace = Scatter3D::new(x, z, y)
-                    .mode(Mode::Lines)
-                    .show_legend(false)
-                    //.fill_color(NamedColor::Black)
-                    .show_legend(false)
-                    .line(Line::new());
-                return trace;
-            }
-            // slicing along z axis
-            2 => {
-                z.fill(self.zdata()[index]);
-                let z = z.into_raw_vec();
-                let trace = Scatter3D::new(x, y, z)
-                    .mode(Mode::Lines)
-                    .show_legend(false)
-                    //.fill_color(NamedColor::Black)
-                    .show_legend(false)
-                    .line(Line::new());
-                return trace;
-            }
-            _ => {
-                panic!("Accepted axis values are 0, 1 or 2 only!")
-            }
-        }
+    // pub fn quiver_slices(&self, slice_dims: Vec<usize>, dim_indices: Vec<Vec<usize>>,  traces: Vec<Box<Scatter<f64, f64>>>, layout: Layout, square: bool, axes: Vec<Option<plotly::layout::Axis>>) {
+    //     // ensure that each requested axis has at least one entry
+    //     if slice_dims.len() != dim_indices.len() {
+    //         panic!("For each axis, a list of indices must be provided!");
+    //     }
+    //     let mut traces = Vec::new();
+    //     for (i, axis) in slice_dims.into_iter().enumerate() {
+    //         for index in &dim_indices[i] {
+    //             let (barb_x, barb_y) = self.create_quiver_barbs(axis, *index);
+    //             let (arrow_x, arrow_y) = self.create_quiver_arrows(axis, *index);
+    //             for (i, (x_line, y_line, x_head, y_head)) in izip!(barb_x, barb_y, arrow_x, arrow_y).enumerate() {
+    //                 let x: Vec<f64> = vec![x_line.0, x_line.1, x_head.0, x_head.1, x_head.2];
+    //                 let y: Vec<f64> = vec![y_line.0, y_line.1, y_head.0, y_head.1, y_head.2];
+    //                 let trace = self.sliced_arrows(axis, *index, x, y);                   
+    //                 traces.push(trace);
+    //             }
+    //         }
+    //     }
+    // }
+    // // return the necessary "other axis" points for fake 3D plots
+    // fn sliced_arrows(&self, axis: usize, index: usize, x: Vec<f64>, y: Vec<f64>) -> Box<Scatter3D<f64, f64, f64>> {
+    //     let mut z: Array1<f64> = Array1::zeros(5);
+    //     match axis {
+    //         // slicing along x axis
+    //         0 => {
+    //             z.fill(self.xdata()[index]);
+    //             let z = z.into_raw_vec();
+    //             let trace = Scatter3D::new(z, x, y)
+    //                 .mode(Mode::Lines)
+    //                 .show_legend(false)
+    //                 //.fill_color(NamedColor::Black)
+    //                 .show_legend(false)
+    //                 .line(Line::new());
+    //             return trace;
+    //         }
+    //         // slicing along y axis
+    //         1 => {
+    //             z.fill(self.ydata()[index]);
+    //             let z = z.into_raw_vec();
+    //             let trace = Scatter3D::new(x, z, y)
+    //                 .mode(Mode::Lines)
+    //                 .show_legend(false)
+    //                 //.fill_color(NamedColor::Black)
+    //                 .show_legend(false)
+    //                 .line(Line::new());
+    //             return trace;
+    //         }
+    //         // slicing along z axis
+    //         2 => {
+    //             z.fill(self.zdata()[index]);
+    //             let z = z.into_raw_vec();
+    //             let trace = Scatter3D::new(x, y, z)
+    //                 .mode(Mode::Lines)
+    //                 .show_legend(false)
+    //                 //.fill_color(NamedColor::Black)
+    //                 .show_legend(false)
+    //                 .line(Line::new());
+    //             return trace;
+    //         }
+    //         _ => {
+    //             panic!("Accepted axis values are 0, 1 or 2 only!")
+    //         }
+    //     }
         
-    }
+    // }
 
     // TODO create
     //fn save(&self, plot: Plot, filename: &str, dpi: usize) {
@@ -511,15 +469,13 @@ impl VectorPlotter {
         &mut self,
         range: [usize; 3],
         axis: usize,
-        arrow_scale: Option<f64>,
     ) -> Vec<Box<Scatter3D<f64, f64, f64>>> {
         let dx: f64 = self.xdata[1] - self.xdata[0];
-        let dy: f64 = self.ydata[1] - self.ydata[0];
-        self.bound_node(dx, dy, axis);
+        self.bound_node(dx);
         let mut traces = Vec::new();
         for index in (range[0]..range[1]).step_by(range[2]) {
-            let (barb_x, barb_y) = self.create_quiver_barbs(axis, index);
-            let (arrow_x, arrow_y) = self.create_quiver_arrows(axis, index);
+            let (barb_x, barb_y) = self.create_quiver_barbs();
+            let (arrow_x, arrow_y) = self.create_quiver_arrows();
             for (x_line, y_line, x_head, y_head) in izip!(barb_x, barb_y, arrow_x, arrow_y) {
                 let xpl: Vec<f64> = vec![x_line.0, x_line.1, x_head.0, x_head.1, x_head.2];
                 let mut ypl: Array1<f64> = Array1::ones(5);
@@ -541,116 +497,116 @@ impl VectorPlotter {
     // FIXME doc
     // FIXME create colorbar separate to traces which covers the whole range of data selected
     // same as above -> slices plotted along y
-    pub fn unit_vector_slice_background(
-        &self,
-        range: [usize; 3],
-        axis: usize,
-    ) -> Vec<Box<Surface<f64, f64, f64>>> {
-        let mut traces = Vec::new();
-        for index in (range[0]..range[1]).step_by(range[2]) {
-            // select data
-            let (x, _y, _, _) = self.component_axis_selector(axis);
-            let norm: Array2<f64> = component_data_selector(self.true_norm.to_owned(), axis, index);
-            let xpl: Vec<f64> = x.to_owned().into_raw_vec();
-            let mut ypl: Array1<f64> = Array1::ones(x.len());
-            ypl *= self.ydata[index];
-            // cast ypl to Vec
-            let ypl = ypl.into_raw_vec();
-            let mut zpl = Vec::new();
-            for row in norm.axis_iter(ndarray::Axis(1)) {
-                let inner_vec = row.to_vec();
-                zpl.push(inner_vec);
-            }
-            let heatmap: Box<Surface<f64, f64, f64>> = Surface::new(zpl).x(xpl).y(ypl);
-            traces.push(heatmap);
-        }
-        return traces;
-    }
+    // pub fn unit_vector_slice_background(
+    //     &self,
+    //     range: [usize; 3],
+    //     axis: usize,
+    // ) -> Vec<Box<Surface<f64, f64, f64>>> {
+    //     let mut traces = Vec::new();
+    //     for index in (range[0]..range[1]).step_by(range[2]) {
+    //         // select data
+    //         let (x, _y, _, _) = self.component_axis_selector(axis);
+    //         let norm: Array2<f64> = component_data_selector(self.true_norm.to_owned(), axis, index);
+    //         let xpl: Vec<f64> = x.to_owned().into_raw_vec();
+    //         let mut ypl: Array1<f64> = Array1::ones(x.len());
+    //         ypl *= self.ydata[index];
+    //         // cast ypl to Vec
+    //         let ypl = ypl.into_raw_vec();
+    //         let mut zpl = Vec::new();
+    //         for row in norm.axis_iter(ndarray::Axis(1)) {
+    //             let inner_vec = row.to_vec();
+    //             zpl.push(inner_vec);
+    //         }
+    //         let heatmap: Box<Surface<f64, f64, f64>> = Surface::new(zpl).x(xpl).y(ypl);
+    //         traces.push(heatmap);
+    //     }
+    //     return traces;
+    // }
 
-    fn create_cone_traces(
-        &self,
-        colour_bounds: Option<(f64, f64)>,
-    ) -> Vec<Box<Cone<f64, f64, f64, f64, f64, f64>>> {
-        let (_colour_vector, _min, _max) = self.normalise_colour(colour_bounds);
-        let (x, y, z) = meshgrid3d(
-            self.xdata.to_owned(),
-            self.ydata.to_owned(),
-            self.zdata.to_owned(),
-        );
-        let x: Vec<f64> = x.into_raw_vec();
-        let y: Vec<f64> = y.into_raw_vec();
-        let z: Vec<f64> = z.into_raw_vec();
-        let u: Vec<f64> = self.udata.clone().into_raw_vec();
-        let v: Vec<f64> = self.vdata.clone().into_raw_vec();
-        let w: Vec<f64> = self.wdata.clone().into_raw_vec();
+    // fn create_cone_traces(
+    //     &self,
+    //     colour_bounds: Option<(f64, f64)>,
+    // ) -> Vec<Box<Cone<f64, f64, f64, f64, f64, f64>>> {
+    //     let (_colour_vector, _min, _max) = self.normalise_colour(colour_bounds);
+    //     let (x, y, z) = meshgrid3d(
+    //         self.xdata.to_owned(),
+    //         self.ydata.to_owned(),
+    //         self.zdata.to_owned(),
+    //     );
+    //     let x: Vec<f64> = x.into_raw_vec();
+    //     let y: Vec<f64> = y.into_raw_vec();
+    //     let z: Vec<f64> = z.into_raw_vec();
+    //     let u: Vec<f64> = self.udata.clone().into_raw_vec();
+    //     let v: Vec<f64> = self.vdata.clone().into_raw_vec();
+    //     let w: Vec<f64> = self.wdata.clone().into_raw_vec();
 
-        let trace = Cone::new(x, y, z, u, v, w)
-            .anchor(Anchor::Tip)
-            .show_legend(false);
-        let cone_trace = vec![trace];
-        return cone_trace;
-    }
+    //     let trace = Cone::new(x, y, z, u, v, w)
+    //         .anchor(Anchor::Tip)
+    //         .show_legend(false);
+    //     let cone_trace = vec![trace];
+    //     return cone_trace;
+    // }
 
     //FIXME doc
-    fn component_axis_selector(
-        &self,
-        axis: usize,
-    ) -> (Array1<f64>, Array1<f64>, Array3<f64>, Array3<f64>) {
-        match axis {
-            // yz view
-            0 => {
-                let xcomponent = self.ydata.to_owned();
-                let ycomponent = self.zdata.to_owned();
-                let xdata = self.vdata.to_owned();
-                let ydata = self.wdata.to_owned();
-                return (xcomponent, ycomponent, xdata, ydata);
-            }
-            // xz view
-            1 => {
-                let xcomponent = self.xdata.to_owned();
-                let ycomponent = self.zdata.to_owned();
-                let xdata = self.udata.to_owned();
-                let ydata = self.wdata.to_owned();
-                return (xcomponent, ycomponent, xdata, ydata);
-            }
-            // xy view
-            2 => {
-                let xcomponent = self.xdata.to_owned();
-                let ycomponent = self.ydata.to_owned();
-                let xdata = self.udata.to_owned();
-                let ydata = self.vdata.to_owned();
-                return (xcomponent, ycomponent, xdata, ydata);
-            }
-            // panic
-            _ => panic!("axis value must be either 0, 1 or 2!"),
-        };
-    }
+    // fn component_axis_selector(
+    //     &self,
+    //     axis: usize,
+    // ) -> (Array1<f64>, Array1<f64>, Array3<f64>, Array3<f64>) {
+    //     match axis {
+    //         // yz view
+    //         0 => {
+    //             let xcomponent = self.ydata.to_owned();
+    //             let ycomponent = self.zdata.to_owned();
+    //             let xdata = self.vdata.to_owned();
+    //             let ydata = self.wdata.to_owned();
+    //             return (xcomponent, ycomponent, xdata, ydata);
+    //         }
+    //         // xz view
+    //         1 => {
+    //             let xcomponent = self.xdata.to_owned();
+    //             let ycomponent = self.zdata.to_owned();
+    //             let xdata = self.udata.to_owned();
+    //             let ydata = self.wdata.to_owned();
+    //             return (xcomponent, ycomponent, xdata, ydata);
+    //         }
+    //         // xy view
+    //         2 => {
+    //             let xcomponent = self.xdata.to_owned();
+    //             let ycomponent = self.ydata.to_owned();
+    //             let xdata = self.udata.to_owned();
+    //             let ydata = self.vdata.to_owned();
+    //             return (xcomponent, ycomponent, xdata, ydata);
+    //         }
+    //         // panic
+    //         _ => panic!("axis value must be either 0, 1 or 2!"),
+    //     };
+    // }
     //FIXME doc
-    fn axis_selector(&self, axis: usize) -> (Array1<f64>, Array1<f64>) {
-        match axis {
-            // yz view
-            0 => {
-                let xcomponent = self.ydata.to_owned();
-                let ycomponent = self.zdata.to_owned();
-                return (xcomponent, ycomponent);
-            }
-            // xz view
-            1 => {
-                let xcomponent = self.xdata.to_owned();
-                let ycomponent = self.zdata.to_owned();
-                return (xcomponent, ycomponent);
-            }
-            // xy view
-            2 => {
-                let xcomponent = self.xdata.to_owned();
-                let ycomponent = self.ydata.to_owned();
-                return (xcomponent, ycomponent);
-            }
-            // panic
-            _ => panic!("axis value must be either 0, 1 or 2!"),
-        };
-    }
-}
+//     fn axis_selector(&self, axis: usize) -> (Array1<f64>, Array1<f64>) {
+//         match axis {
+//             // yz view
+//             0 => {
+//                 let xcomponent = self.ydata.to_owned();
+//                 let ycomponent = self.zdata.to_owned();
+//                 return (xcomponent, ycomponent);
+//             }
+//             // xz view
+//             1 => {
+//                 let xcomponent = self.xdata.to_owned();
+//                 let ycomponent = self.zdata.to_owned();
+//                 return (xcomponent, ycomponent);
+//             }
+//             // xy view
+//             2 => {
+//                 let xcomponent = self.xdata.to_owned();
+//                 let ycomponent = self.ydata.to_owned();
+//                 return (xcomponent, ycomponent);
+//             }
+//             // panic
+//             _ => panic!("axis value must be either 0, 1 or 2!"),
+//         };
+//     }
+// }
 
 /// Manually set x axis range
 pub fn axis_range_x(layout: Layout, xaxis: plotly::layout::Axis, xmin: f64, xmax: f64) -> Layout {
@@ -662,4 +618,5 @@ pub fn axis_range_x(layout: Layout, xaxis: plotly::layout::Axis, xmin: f64, xmax
 pub fn axis_range_y(layout: Layout, yaxis: plotly::layout::Axis, ymin: f64, ymax: f64) -> Layout {
     let new_layout: Layout = layout.y_axis(yaxis.range(vec![ymin, ymax]));
     return new_layout;
+}
 }

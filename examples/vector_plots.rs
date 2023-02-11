@@ -60,12 +60,13 @@ fn unit_vector_2d() {
     grid.data[1] = ygrid;
     grid.data[2] = zgrid;
     // create VectorData2D struct
-    let mut arrows: VectorPlotter = VectorPlotter::new(grid);
-    // define properties for plot
     let axis: usize = 2;
     let index: usize = 0;
+
+    let mut arrows: VectorPlotter = VectorPlotter::new(grid, axis);
+    // define properties for plot
     let mut traces: Vec<Box<dyn Trace>> = Vec::new();
-    let scatter_traces = arrows.create_unit_vector_traces(axis, index);
+    let scatter_traces = arrows.create_unit_vector_traces();
     // set layout
     // FIXME layout settings
     let layout: Layout = Layout::new()
@@ -79,7 +80,7 @@ fn unit_vector_2d() {
     let axes = vec![xaxis, yaxis];
     let smoothing = None;
     let (heatmap, layout) =
-        arrows.create_unit_vector_background(layout, square, axes, smoothing, axis, index);
+        arrows.create_unit_vector_background(layout, square, axes, smoothing);
     // adjust the heatmap colourbar and colourscale
     let color_scale = Palette(ColorScalePalette::Viridis);
     let color_bar = ColorBar::new().title("Vector magnitude".into());

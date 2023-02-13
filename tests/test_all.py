@@ -187,3 +187,4 @@ class TestConditional:
         xmin, xmax = data.min_position()[0], data.max_position()[0]
         circ_time = data.circulation_time(position=(xmin+xmax)/2, axis=0)
         assert np.nanmean(circ_time) > 0
+

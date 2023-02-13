@@ -481,17 +481,20 @@ impl pyo3::PyObjectProtocol for PyGrid {
     }
     fn __repr__(&self) -> PyResult<String> {
         Ok(format!(
-            "3D Mesh containing data with the shape: \n\
-            \tx: {}\n\
-            \ty: {}\n\
-            \tz: {}\n\
-            Data: \n\
-            ---------------------------------------------------------
-            {:?}",
-            self.grid.get_cells()[0],
-            self.grid.get_cells()[1],
-            self.grid.get_cells()[2],
-            self.grid.get_data()
+            "Grid3D: \n\tCells: {:?} \n\txlim: {:?} \
+            \n\tylim: {:?} \n\tzlim: {:?}\n\tData information:\n\t\tMean: {:?}\
+            \n\t\tStd: {:?}\n\t\tMin: {:?}\n\t\tMax: {:?}",
+            self.grid.get_cells(),
+            self.grid.get_limits()[0],
+            self.grid.get_limits()[1],
+            self.grid.get_limits()[2],
+            self.grid
+                .get_data()
+                .mean()
+                .expect("Unable to calculate mean of data"),
+            self.grid.get_data().std(1.),
+            self.grid.get_data().min_skipnan(),
+            self.grid.get_data().max_skipnan()
         ))
     }
 }
@@ -509,26 +512,38 @@ pub struct PyVecGrid {
 impl pyo3::PyObjectProtocol for PyVecGrid {
     fn __str__(&self) -> PyResult<String> {
         Ok(format!(
-            "3D Vector Mesh containing data with the shape: \n\
-            \tx: {}\n\
-            \ty: {}\n\
-            \tz: {}\
-",
-            self.grid.get_cells()[0],
-            self.grid.get_cells()[1],
-            self.grid.get_cells()[2]
+            "3D Vector Grid: \n\tCells: {:?} \n\txlim: {:?} \
+            \n\tylim: {:?} \n\tzlim: {:?}\n\tData information:\n\t\tMean: {:?}\
+            \n\t\tStd: {:?}\n\t\tMin: {:?}\n\t\tMax: {:?}",
+            self.grid.get_cells(),
+            self.grid.get_limits()[0],
+            self.grid.get_limits()[1],
+            self.grid.get_limits()[2],
+            self.grid
+                .get_data()
+                .mean()
+                .expect("Unable to calculate mean of data"),
+            self.grid.get_data().std(1.),
+            self.grid.get_data().min_skipnan(),
+            self.grid.get_data().max_skipnan()
         ))
     }
     fn __repr__(&self) -> PyResult<String> {
         Ok(format!(
-            "3D Vector Mesh containing data with the shape: \n\
-            \tx: {}\n\
-            \ty: {}\n\
-            \tz: {}\
-",
-            self.grid.get_cells()[0],
-            self.grid.get_cells()[1],
-            self.grid.get_cells()[2]
+            "3D Vector Grid: \n\tCells: {:?} \n\txlim: {:?} \
+            \n\tylim: {:?} \n\tzlim: {:?}\n\tData information:\n\t\tMean: {:?}\
+            \n\t\tStd: {:?}\n\t\tMin: {:?}\n\t\tMax: {:?}",
+            self.grid.get_cells(),
+            self.grid.get_limits()[0],
+            self.grid.get_limits()[1],
+            self.grid.get_limits()[2],
+            self.grid
+                .get_data()
+                .mean()
+                .expect("Unable to calculate mean of data"),
+            self.grid.get_data().std(1.),
+            self.grid.get_data().min_skipnan(),
+            self.grid.get_data().max_skipnan()
         ))
     }
 }

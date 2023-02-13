@@ -8,14 +8,16 @@ use crate::particleselector::*;
 
 use crate::print_debug;
 use numpy::{IntoPyArray, PyArray2};
+pub mod libcomp;
 pub mod libconv;
 pub mod libgrid;
 pub mod libplot;
+use crate::comparison::Comparison;
 use crate::datamanager::{Manager, PData, TData};
+use libcomp::*;
 use libconv::*;
 use libgrid::*;
 use libplot::*;
-
 /// Class that holds the particle data for processing, if you have simulation data, you will *probably*
 /// want to use ``Data.from_pdata()`` to instantiate this class as this handles a large number of particles.
 /// For experimental data, ``Data.from_tdata()`` is recommended. However, as the choice ultimately makes no
@@ -620,62 +622,11 @@ impl PyData {
 #[pyproto]
 impl pyo3::PyObjectProtocol for PyData {
     fn __str__(&self) -> PyResult<String> {
-        let global_stats = self.data.global_stats();
-        let time = global_stats.max_time();
-        let dim = global_stats.dimensions();
-        let part_num = global_stats.nparticles();
-        let vel_mag = global_stats.velocity_mag();
-
-        Ok(format!(
-            "Dimensions of the system:\n\
-            \t x {:.2}-->{:.2}\n\
-            \t y {:.2}-->{:.2}\n\
-            \t z {:.2}-->{:.2}\n\
-            The max time of this set is : {:.2}\n\
-            Number of Particles: {:.2}\n\
-            Mean velocity of: {:.2} m/s\n\
-            Minimum velocity {:.2} m/s \nMaximum Velocity {:.2} m/s\n",
-            dim[[0, 0]],
-            dim[[1, 0]],
-            dim[[0, 1]],
-            dim[[1, 1]],
-            dim[[0, 2]],
-            dim[[1, 2]],
-            time,
-            part_num,
-            vel_mag[1usize],
-            vel_mag[0usize],
-            vel_mag[2usize]
-        ))
+        Ok(self.data.info().expect("Could not get info"))
     }
 
     fn __repr__(&self) -> PyResult<String> {
-        let global_stats = self.data.global_stats();
-        let time = global_stats.max_time();
-        let dim = global_stats.dimensions();
-        let part_num = global_stats.nparticles();
-        let vel_mag = global_stats.velocity_mag();
-        Ok(format!(
-            "Dimensions of the system:\n\
-            \t x {:.2}-->{:.2}\n\
-            \t y {:.2}-->{:.2}\n\
-            \t z {:.2}-->{:.2}\n\
-            The max time of this set is : {:.2}\n\
-            Number of Particles: {:.2}\n\
-            Mean velocity of: {:.2} m/s\n\
-            Minimum velocity {:.2} m/s \nMaximum Velocity {:.2} m/s\n",
-            dim[[0, 0]],
-            dim[[1, 0]],
-            dim[[0, 1]],
-            dim[[1, 1]],
-            dim[[0, 2]],
-            dim[[1, 2]],
-            time,
-            part_num,
-            vel_mag[1usize],
-            vel_mag[0usize],
-            vel_mag[2usize]
-        ))
+        Ok(self.data.info().expect("Could not get info"))
     }
 }
 

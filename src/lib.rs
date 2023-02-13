@@ -28,6 +28,7 @@ pub use particleselector::*;
 pub mod converter;
 pub use converter::*;
 
+pub mod comparison;
 pub mod datamanager;
 mod functions;
 pub mod pylib;

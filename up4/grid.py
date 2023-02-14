@@ -142,7 +142,7 @@ class Grid(rustGrid):
         elif grid_style == "cylindrical":
             # data is given but no cell size or limits
             if data is not None and limits is None and xlim is  None and ylim is  None and zlim is  None:
-                return self.cylindrical3d_from_data(data, np.asarray(num_cells))
+                return self.cylindrical3d_from_data(data, np.asarray(num_cells,dtype = np.int64))
 
             # data is given and cell size is given
             elif data is not None and limits is not None:
@@ -151,7 +151,7 @@ class Grid(rustGrid):
                 else:
                     raise ValueError("limits must be positive")
             # data is given and at least one of xlim,ylim,zlim is not none
-            elif data is not None and xlim is not None and ylim is not None and zlim is not None:
+            elif data is not None and (xlim is not None or ylim is not None or zlim is not None):
                 xmin,ymin,zmin = data.min_position()
                 xmax,ymax,zmax = data.max_position()
                 if xlim is not None:

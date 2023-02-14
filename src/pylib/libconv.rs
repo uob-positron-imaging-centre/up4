@@ -44,7 +44,7 @@ impl PyConverter {
     /// -------
     /// None
     ///
-    #[pyo3(signature = (filenames, timestep, outname, filter = "r\"(\\d+).vtk\""))]
+    #[pyo3(signature = (filenames, timestep, outname, filter = "(\\d+).vtk"))]
     #[staticmethod]
     fn vtk(
         filenames: Vec<&str>,
@@ -77,7 +77,7 @@ impl PyConverter {
     /// -------
     /// None
     ///
-    #[pyo3(signature = (folder, timestep, outname, filter = "r\"(\\d+).vtk\""))]
+    #[pyo3(signature = (folder, timestep, outname, filter = "(\\d+).vtk"))]
     #[staticmethod]
     fn vtk_from_folder(
         folder: &str,

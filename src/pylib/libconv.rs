@@ -44,7 +44,7 @@ impl PyConverter {
     /// -------
     /// None
     ///
-    #[args(filter = "r\"(\\d+).vtk\"")]
+    #[pyo3(signature = (filenames, timestep, outname, filter = "r\"(\\d+).vtk\""))]
     #[staticmethod]
     fn vtk(
         filenames: Vec<&str>,
@@ -77,7 +77,7 @@ impl PyConverter {
     /// -------
     /// None
     ///
-    #[args(filter = "r\"(\\d+).vtk\"")]
+    #[pyo3(signature = (folder, timestep, outname, filter = "r\"(\\d+).vtk\""))]
     #[staticmethod]
     fn vtk_from_folder(
         folder: &str,
@@ -127,16 +127,18 @@ impl PyConverter {
     /// -------
     /// None
     ///
-    #[args(
-        columns = "vec![0,1,2,3]",
+    #[pyo3(signature = (
+        filename,
+        outname,
+        columns = vec![0,1,2,3],
         delimiter = "\",\"",
-        header = "true",
+        header = true,
         comment = "\"#\"",
-        vel = "false",
-        interpolate = "false",
-        radius = "0.0",
-        sampling_steps = "9"
-    )]
+        vel = false,
+        interpolate = false,
+        radius = 0.0,
+        sampling_steps = 9
+    ))]
     #[staticmethod]
     fn csv(
         filename: &str,
@@ -224,16 +226,18 @@ impl PyConverter {
     /// None
     ///
     //#[allow(unreachable_code, unused_variables)]
-    #[args(
-        columns = "vec![0,1,2,3]",
+    #[pyo3(signature = (
+        filename,
+        outname,
+        columns = vec![0,1,2,3],
         delimiter = "\",\"",
-        header = "true",
+        header = true,
         comment = "\"#\"",
-        vel = "false",
-        interpolate = "false",
-        radius = "0.0",
+        vel = false,
+        interpolate = false,
+        radius = 0.0,
         method = "\"id_line\""
-    )]
+    ))]
     #[staticmethod]
     fn csv_multi(
         filename: &str,
@@ -322,15 +326,18 @@ impl PyConverter {
     /// None
     ///
     //#[allow(unreachable_code, unused_variables)]
-    #[args(
-        columns = "vec![0,1,2,3]",
+    #[pyo3(signature = (
+        filenames,
+        outname,
+        times,
+        columns = vec![0,1,2,3],
         delimiter = "\",\"",
-        header = "true",
+        header = true,
         comment = "\"#\"",
-        vel = "false",
-        interpolate = "false",
-        radius = "0.0"
-    )]
+        vel = false,
+        interpolate = false,
+        radius = 0.0
+    ))]
     #[staticmethod]
     fn csv_multi_files(
         filenames: Vec<&str>,

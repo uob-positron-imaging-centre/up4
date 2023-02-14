@@ -18,6 +18,7 @@ use libcomp::*;
 use libconv::*;
 use libgrid::*;
 use libplot::*;
+
 /// Class that holds the particle data for processing, if you have simulation data, you will *probably*
 /// want to use ``Data.from_pdata()`` to instantiate this class as this handles a large number of particles.
 /// For experimental data, ``Data.from_tdata()`` is recommended. However, as the choice ultimately makes no
@@ -396,6 +397,8 @@ impl PyData {
     /// up4.Grid
     ///   Grid class containing the dispersion field.
     ///
+    /// float
+    ///   Mixing efficiency
     ///
     fn dispersion<'py>(
         &mut self,

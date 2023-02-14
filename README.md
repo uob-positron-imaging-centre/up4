@@ -2,7 +2,7 @@
 
 ![example workflow](https://github.com/uob-positron-imaging-centre/up4/actions/workflows/main.yaml/badge.svg)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-![docs](https://github.com/uob-positron-imaging-centre/up4/actions/workflows/pages.yaml/badge.svg)
+[![docs](https://img.shields.io/badge/docs-dev-blue)](https://uob-positron-imaging-centre.github.io/up4/)
 
 ## A fast *and* flexible analysis toolset for particle data of all kinds
 

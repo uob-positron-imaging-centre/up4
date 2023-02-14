@@ -638,6 +638,9 @@
 <a href="#638" id="638">638</a>
 <a href="#639" id="639">639</a>
 <a href="#640" id="640">640</a>
+<a href="#641" id="641">641</a>
+<a href="#642" id="642">642</a>
+<a href="#643" id="643">643</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Create Python bindings for crate.
 
 </span><span class="kw">use </span>pyo3::prelude::<span class="kw-2">*</span>;
@@ -657,6 +660,7 @@
 <span class="kw">use </span>libconv::<span class="kw-2">*</span>;
 <span class="kw">use </span>libgrid::<span class="kw-2">*</span>;
 <span class="kw">use </span>libplot::<span class="kw-2">*</span>;
+
 <span class="doccomment">/// Class that holds the particle data for processing, if you have simulation data, you will *probably*
 /// want to use ``Data.from_pdata()`` to instantiate this class as this handles a large number of particles.
 /// For experimental data, ``Data.from_tdata()`` is recommended. However, as the choice ultimately makes no
@@ -1035,6 +1039,8 @@
     /// up4.Grid
     ///   Grid class containing the dispersion field.
     ///
+    /// float
+    ///   Mixing efficiency
     ///
     </span><span class="kw">fn </span>dispersion&lt;<span class="lifetime">&#39;py</span>&gt;(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,

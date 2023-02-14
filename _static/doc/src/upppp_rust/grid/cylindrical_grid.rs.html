@@ -483,6 +483,17 @@
 <a href="#483" id="483">483</a>
 <a href="#484" id="484">484</a>
 <a href="#485" id="485">485</a>
+<a href="#486" id="486">486</a>
+<a href="#487" id="487">487</a>
+<a href="#488" id="488">488</a>
+<a href="#489" id="489">489</a>
+<a href="#490" id="490">490</a>
+<a href="#491" id="491">491</a>
+<a href="#492" id="492">492</a>
+<a href="#493" id="493">493</a>
+<a href="#494" id="494">494</a>
+<a href="#495" id="495">495</a>
+<a href="#496" id="496">496</a>
 </pre><pre class="rust"><code><span class="kw">extern crate </span>ndarray;
 <span class="kw">use super</span>::{CellId, Dim, GridFunctions3D, Position, ThreeD};
 <span class="kw">use crate</span>::{print_debug, print_warning};
@@ -518,7 +529,7 @@
             Dim::ThreeD(x) =&gt; x,
             <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Grid3D got limits for other then three dimensions.&quot;</span>),
         };
-        <span class="comment">// the distance beween two angles is constant
+        <span class="comment">// the distance beween two angles is constant therefore the cell size in omega dimension is
         </span><span class="kw">let </span>ocellsize = (<span class="number">2.0 </span>* <span class="number">3.14159</span>) / cells[<span class="number">1</span>] <span class="kw">as </span>f64;
         <span class="comment">// height distance is also easy to calculate
         </span><span class="kw">let </span>zcellsize = (lim[<span class="number">2</span>][<span class="number">1</span>] - lim[<span class="number">2</span>][<span class="number">0</span>]) / cells[<span class="number">2</span>] <span class="kw">as </span>f64;
@@ -552,7 +563,11 @@
             } <span class="kw">else </span>{
                 (lim[<span class="number">1</span>][<span class="number">0</span>] - center[<span class="number">1</span>]).abs()
             };
-            (x.powf(<span class="number">2.</span>) + y.powf(<span class="number">2.</span>)).sqrt()
+            <span class="kw">if </span>x &gt; y {
+                x
+            } <span class="kw">else </span>{
+                y
+            }
         };
 
         <span class="kw">let </span><span class="kw-2">mut </span>inner_radius = <span class="number">0.0</span>;
@@ -560,11 +575,18 @@
             <span class="kw">if </span>mode == <span class="string">&quot;volume&quot; </span>{
                 <span class="comment">// radial positions should be in a distance so that all cells have the same volume
                 // volume of a cell is pi*h*(r_o**2-r_i**2)*alpha/360
-                </span><span class="kw">let </span>new = (outer_radius * outer_radius / cells[<span class="number">0</span>] <span class="kw">as </span>f64
-                    + inner_radius * inner_radius)
+                // new is the next outer radius calculated by
+                // new = (V +r_before**2).sqrt()
+                // V is the volume of a cell which is siply the volume defided by the num of cells
+
+                </span><span class="kw">let </span>new = (
+                    outer_radius * outer_radius / cells[<span class="number">0</span>] <span class="kw">as </span>f64 <span class="comment">// volume
+                    </span>+ inner_radius * inner_radius
+                    <span class="comment">// radius of cell before
+                </span>)
                     .sqrt();
-                rpositions[cellidx <span class="kw">as </span>usize] = [inner_radius, new];
-                inner_radius = new;
+                rpositions[cellidx <span class="kw">as </span>usize] = [inner_radius, new]; <span class="comment">// inside, outside
+                </span>inner_radius = new;
             }
         }
 

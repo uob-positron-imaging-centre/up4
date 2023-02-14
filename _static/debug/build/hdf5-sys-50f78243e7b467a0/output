@@ -19,7 +19,7 @@ Adding extra link paths (ld)...
     /usr/x86_64-linux-gnu/lib64
     /usr/x86_64-linux-gnu/lib
 Attempting to load: "/usr/share/miniconda/envs/testenv/lib/libhdf5.so"
-    => runtime version = 1.12.0
+    => runtime version = 1.12.2
 HDF5 library runtime version matches headers.
 Config {
     inc_dir: "/usr/share/miniconda/envs/testenv/include",
@@ -28,10 +28,10 @@ Config {
     ],
     header: Header {
         have_stdbool_h: true,
-        have_direct: false,
-        have_parallel: false,
+        have_direct: true,
+        have_parallel: true,
         have_threadsafe: true,
-        version: 1.12.0,
+        version: 1.12.2,
     },
 }
 cargo:rustc-link-lib=dylib=hdf5
@@ -94,6 +94,12 @@ cargo:rustc-cfg=feature="1.10.8"
 cargo:version_1_10_8=1
 cargo:rustc-cfg=feature="1.12.0"
 cargo:version_1_12_0=1
+cargo:rustc-cfg=feature="1.12.1"
+cargo:version_1_12_1=1
 cargo:rustc-cfg=have_stdbool_h
+cargo:rustc-cfg=feature="have-direct"
+cargo:have_direct=1
+cargo:rustc-cfg=feature="have-parallel"
+cargo:have_parallel=1
 cargo:rustc-cfg=feature="have-threadsafe"
 cargo:have_threadsafe=1

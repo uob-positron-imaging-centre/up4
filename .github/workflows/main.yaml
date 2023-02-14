@@ -79,11 +79,11 @@ jobs:
 
       - name: Setup Sphinx
         run: |
-          conda install -y -c ${{matrix.channel}} --file docs/requirements.txt
+          conda install -y -c ${{matrix.channel}} --file docs/source/requirements.txt
       - name: Generate Rust docs
         run: |
           export HDF5_DIR="$CONDA_PREFIX"
-          cargo doc --no-deps --target-dir docs/_static/
+          cargo doc --no-deps --target-dir docs/source/_static/
       - name: Build HTML
         run: |
           pwd

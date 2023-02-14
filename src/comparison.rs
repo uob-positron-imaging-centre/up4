@@ -1,8 +1,6 @@
-use crate::datamanager::{DataManager, Manager};
-use crate::functions::Granular;
+use crate::datamanager::Manager;
 use crate::grid::{self, *};
 use crate::particleselector::ParticleSelector;
-use crate::types::*;
 use itertools::Itertools;
 use ndarray::prelude::*;
 
@@ -76,7 +74,7 @@ impl Comparison for Comparer {
         let max_x = f64::max(size[0], size2[0] * set2_adjustment);
         let max_y = f64::max(size[1], size2[1] * set2_adjustment);
         let max_z = f64::max(size[2], size2[2] * set2_adjustment);
-        let system_size = [max_x, max_y, max_z];
+        let _system_size = [max_x, max_y, max_z];
         // now each individual dimension can be defined:
         let dim1 = Array2::from_shape_vec(
             (2, 3),
@@ -107,7 +105,7 @@ impl Comparison for Comparer {
         let move_y = (size[1] / 2.0) / steps as f64;
         let move_z = (size[2] / 2.0) / steps as f64;
         let mut old_diff = f64::INFINITY;
-        let mut best_offset = [0.0, 0.0, 0.0];
+        let mut best_offset: [f64; 3] = [0.0, 0.0, 0.0];
         for xoffset in (-steps / 2..steps / 2).map(|x| x as f64 * move_x) {
             for yoffset in (-steps / 2..steps / 2).map(|x| x as f64 * move_y) {
                 for zoffset in (-steps / 2..steps / 2).map(|x| x as f64 * move_z) {
@@ -137,7 +135,7 @@ impl Comparison for Comparer {
                         old_diff = diff;
                         best_offset = [xoffset, yoffset, zoffset]
                     }
-                    println!("{} {} {}", xoffset, yoffset, zoffset);
+                    println!("{} {} {}", best_offset[0], best_offset[1], best_offset[2]);
                     println!("{}", diff);
                 }
             }

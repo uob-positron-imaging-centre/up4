@@ -77,16 +77,23 @@ pub struct GlobalStats {
 
 impl GlobalStats {
     /// Returns the timestep at this time in the dataset
-    pub fn timestep_at_seconds(&self, seconds: f64) -> Result<usize, &'static str> {
+    pub fn timestep_at_seconds_closest(&self, seconds: f64) -> Result<usize, &'static str> {
         print_warning!("This function is not tested yet!");
         // finding index in ordered list of self.time_array
         // using the binary search algorithm
         let mut low = 0;
         let mut high = self.time_array.len() - 1;
-        let mut mid;
+
+        if self.time_array[high] < seconds {
+            return Err("Timestep is greater than the number of timesteps");
+        }
+        if self.time_array[low] > seconds {
+            return Err("Timestep is smaller than the number of timesteps");
+        }
+        let mut mid = (low + high) / 2;
         while low <= high {
             mid = (low + high) / 2;
-            if self.time_array[mid] == seconds {
+            if (self.time_array[mid] - seconds).abs() < 0.01 {
                 return Ok(mid);
             } else if self.time_array[mid] < seconds {
                 low = mid + 1;
@@ -95,18 +102,6 @@ impl GlobalStats {
             }
         }
 
-        // if binary search fails, get the closest timestep with a linear search
-        let mut timestep = 0;
-        for i in 0..self.time_array.len() {
-            if self.time_array[i] > seconds {
-                timestep = i;
-                break;
-            }
-        }
-
-        if timestep > self.ntimesteps {
-            return Err("Timestep is greater than the number of timesteps");
-        }
-        Ok(timestep as usize)
+        return Ok(mid);
     }
 }

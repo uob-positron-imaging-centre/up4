@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*-coding:utf-8 -*-
-# File    :   conf.py
-# Time    :   2022/01/06 00:13:48
-# Author  :   Dominik Werner, Daniel Weston
-# Version :   0.1.0
-# Contact :   d.wer2@gmx.de, danw2697@btinternet.com
-# Licence :   GNU v3.0
-# Desc    :   None
+# File     :   conf.py
+# Time     :   06/01/2022
+# Author   :   Dominik Werner, Daniel Weston
+# Version  :   0.1.0
+# Contact  :   dxw963@bham.ac.uk, dtw545@bham.ac.uk
+# Licence  :   GNU v3.0
 
 
 # Configuration file for the Sphinx documentation builder.
@@ -35,19 +34,16 @@
 import os
 import sys
 _HERE = os.path.dirname(__file__)
-_ROOT_DIR = os.path.abspath(os.path.join(_HERE, '..'))
-_PACKAGE_DIR = os.path.abspath(os.path.join(_HERE, '../up4'))
-_SUBPACKAGE_DIR = os.path.abspath(os.path.join(_HERE, '../up4/plotting'))
-
+_ROOT_DIR = os.path.abspath(os.path.join(_HERE, '../..'))
+_PACKAGE_DIR = os.path.abspath(os.path.join(_HERE, 'up4'))
+_SUBPACKAGE_DIR = os.path.abspath(os.path.join(_HERE, 'up4/plotting'))
+print(_HERE)
+print(_ROOT_DIR)
 sys.path.insert(0, _ROOT_DIR)
 sys.path.insert(0, _PACKAGE_DIR)
 sys.path.insert(0, _SUBPACKAGE_DIR)
 
 import up4
-
-sys.path.insert(0, os.path.abspath("../up4"))
-os.environ["MPLBACKEND"] = "Agg"  # avoid tkinter import errors on rtfd.io
-
 
 # -- Project information -----------------------------------------------------
 
@@ -57,7 +53,7 @@ copyright = "2022, Dominik Werner and Daniel Weston"
 # The full version, including alpha/beta/rc tags
 # Load the package's __version__.py module as a dictionary.
 about = {}
-with open("../up4/__version__.py") as f:
+with open("../../up4/__version__.py") as f:
     exec(f.read(), about)
 
 release = about["__version__"]
@@ -106,7 +102,7 @@ numpydoc_xref_param_type = True
 numpydoc_xref_ignore = {"optional", "type_without_description", "BadException"}
 
 # Run docstring validation as part of build process
-numpydoc_validation_checks = {"all", "GL01", "SA04", "RT03"}
+numpydoc_validation_checks = {"all", "SS06", "PR01", "GL01", "SA01", "EX01", "YD01", "ES01", "GL08", "SS01", "RT01", "GL02", "GL03", "RT02", "RT03", "PR09", "SS05"}
 
 autodoc_default_options = {
     "show-inheritance": False,
@@ -172,7 +168,7 @@ html_theme_options = {
     # Show previous and next buttons on each page
     # "show_prev_next": False,
     # Show the navbar and search at the top
-    "navbar_end": ["search-field.html", "navbar-icon-links.html"],
+    "navbar_end": ["search-field.html", "navbar-icon-links.html", "theme-switcher"],
     # Show `edit this page` button
     "use_edit_page_button": True,
     # Links to external sources
@@ -194,6 +190,7 @@ html_context = {
     "github_user": "uob-positron-imaging-centre",
     "github_repo": "up4",
     "github_version": "uPPPP",
+    "default_mode" : "auto"
 }
 
 html_sidebars = {

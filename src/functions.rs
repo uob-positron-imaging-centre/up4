@@ -2,8 +2,9 @@ pub mod conditional;
 pub mod extractions;
 pub mod mixing;
 use crate::datamanager::DataManager;
+use indicatif::{ProgressBar, ProgressStyle};
 //use crate::utilities::print_debug;
-use crate::{check_signals, print_debug, print_warning};
+use crate::{check_signals, print_debug, print_warning, setup_bar};
 extern crate ndarray;
 //extern crate ndarray_linalg;
 extern crate numpy;
@@ -389,6 +390,8 @@ pub trait Granular: DataManager {
     /// up4.Grid
     ///   Grid class containing the dispersion field.
     ///
+    /// float
+    ///   The dispersion of the particles in the system.
     ///
     fn dispersion(
         &mut self,
@@ -410,6 +413,8 @@ pub trait Granular: DataManager {
         let mut num_counts = grid.get_data().clone();
         let mut dispersion_grid = grid.new_zeros();
         print_debug!("Dispersion: Initiation over, entering time loop");
+
+        let mut next_timestep = 0;
         for timestep in 0..timesteps - 1 {
             let timestep_data = self.get_timestep(timestep).clone();
             let current_time = *timestep_data.time();
@@ -427,23 +432,28 @@ pub trait Granular: DataManager {
             let density = timestep_data.density();
             let particles = positions.len();
             print_debug!("Dispersion: looping over particles form 0 to {}", particles);
-            let next_timestep =
-                global_stats.timestep_at_seconds(current_time + time_for_dispersion);
-            let next_timestep = match next_timestep {
+            next_timestep = match global_stats
+                .timestep_at_seconds_closest(current_time + time_for_dispersion)
+            {
                 Ok(x) => x,
-                Err(_) => {
-                    print_debug!(
-                        "Dispersion: No next timestep found for time {}",
-                        current_time + time_for_dispersion
+                Err(s) => {
+                    print_warning!(
+                        "Dispersion: No timestep found for time {}, \n error: {}",
+                        current_time + time_for_dispersion,
+                        s
                     );
                     continue;
                 }
             };
+
+            //   global_stats.timestep_at_seconds(current_time + time_for_dispersion);
+
             print_debug!("Next timestep is {}", next_timestep);
             let timestep_future = self.get_timestep_buffer(next_timestep, 0);
             print_debug!("extracting position");
             let position_future = timestep_future.position();
             print_debug!("Starting particle loop");
+
             for particle in 0..particles {
                 if !selector.is_valid(
                     rad_array[particle],
@@ -469,28 +479,31 @@ pub trait Granular: DataManager {
                 sum_z[cell_id] += position_future_particle[2];
                 num_counts[cell_id] += 1.0;
             }
-            print_debug!("Dispersion: looping over all cells");
-            let cells = grid.get_cells();
+            check_signals!();
+
             // for loop over all 3 dimensions to get to each cell
-            for x in 0..cells[0] {
-                for y in 0..cells[1] {
-                    for z in 0..cells[2] {
-                        let n = num_counts[[x, y, z]];
-                        print_debug!("Dispersion: cell {:?} has {} particles", [x, y, z], n);
-                        if n > 1.0 {
-                            let dispersion_x = squared_sum_x[[x, y, z]] / n
-                                - sum_x[[x, y, z]] * sum_x[[x, y, z]] / n / n;
-                            let dispersion_y = squared_sum_y[[x, y, z]] / n
-                                - sum_y[[x, y, z]] * sum_y[[x, y, z]] / n / n;
-                            let dispersion_z = squared_sum_z[[x, y, z]] / n
-                                - sum_z[[x, y, z]] * sum_z[[x, y, z]] / n / n;
-                            dispersion_grid.add_to_cell(
-                                [x, y, z],
-                                (dispersion_x + dispersion_y + dispersion_z) * n / (n - 1.0),
-                            );
-                        }
+        }
+        print_debug!("Dispersion: looping over all cells");
+        let cells = grid.get_cells();
+        for x in 0..cells[0] {
+            for y in 0..cells[1] {
+                for z in 0..cells[2] {
+                    let n = num_counts[[x, y, z]];
+                    print_debug!("Dispersion: cell {:?} has {} particles", [x, y, z], n);
+                    if n > 1.0 {
+                        let dispersion_x = squared_sum_x[[x, y, z]] / n
+                            - sum_x[[x, y, z]] * sum_x[[x, y, z]] / n / n;
+                        let dispersion_y = squared_sum_y[[x, y, z]] / n
+                            - sum_y[[x, y, z]] * sum_y[[x, y, z]] / n / n;
+                        let dispersion_z = squared_sum_z[[x, y, z]] / n
+                            - sum_z[[x, y, z]] * sum_z[[x, y, z]] / n / n;
+                        dispersion_grid.add_to_cell(
+                            [x, y, z],
+                            (dispersion_x + dispersion_y + dispersion_z) * n / (n - 1.0),
+                        );
                     }
                 }
+                check_signals!();
             }
         }
 

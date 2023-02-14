@@ -401,7 +401,6 @@ pub fn csv_converter(
         .unwrap();
     #[cfg(feature = "blosc")]
     let threads = blosc_get_nthreads();
-    let threads = 8;
     #[cfg(feature = "blosc")]
     println!(
         "Using {} threads for blosc compression. (Not working currently",

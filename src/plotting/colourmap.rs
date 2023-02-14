@@ -70,6 +70,7 @@ struct Hsv{
 
 // return the colour that the normalised value is located at along
 // the provided colourmap
+#[allow(unused_variables)]
 pub fn interpolate_cmap(cmap: ColorScalePalette, cmap_loc: f64) //-> String 
 {
     let cmap_strings = ColorScalePaletteRawValues::get_values(cmap);

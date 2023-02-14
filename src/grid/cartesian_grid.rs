@@ -448,6 +448,7 @@ impl GridFunctions3D for CartesianGrid3D {
                     let mut counter_sum: f64 = 0.;
                     // now check every surrounding index, only one cell away from idx
                     // 26 idx must be checked
+                    // yes.. i know what you are thinking
                     let indexes = [
                         (idx.0 - 1, idx.1 - 1, idx.2 - 1),
                         (idx.0 - 1, idx.1 - 1, idx.2),
@@ -482,6 +483,11 @@ impl GridFunctions3D for CartesianGrid3D {
                             && index.1 < self.data.shape()[1]
                             && index.2 < self.data.shape()[2]
                         {
+                            if self.data[[index.0 as usize, index.1 as usize, index.2 as usize]]
+                                > threshold
+                            {
+                                continue;
+                            }
                             sum +=
                                 self.data[[index.0 as usize, index.1 as usize, index.2 as usize]];
                             weight_sum +=
@@ -499,7 +505,14 @@ impl GridFunctions3D for CartesianGrid3D {
             self.data = result;
             self.weight = weight;
         } else {
-            panic!("Cartesian Grid: Mode {:?} not supported", mode);
+            panic!(
+                "Cartesian Grid: Mode {:?} not supported. Supported modes are:\n \
+            0: set outliers to zero \n\
+            1: set outliers to threshold \n\
+            2: set outlier to mean of surrounding all cells
+            ",
+                mode
+            );
         }
     }
 }

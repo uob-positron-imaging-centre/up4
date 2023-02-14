@@ -33,7 +33,7 @@ impl CylindricalGrid3D {
             Dim::ThreeD(x) => x,
             _ => panic!("Grid3D got limits for other then three dimensions."),
         };
-        // the distance beween two angles is constant
+        // the distance beween two angles is constant therefore the cell size in omega dimension is
         let ocellsize = (2.0 * 3.14159) / cells[1] as f64;
         // height distance is also easy to calculate
         let zcellsize = (lim[2][1] - lim[2][0]) / cells[2] as f64;
@@ -67,7 +67,11 @@ impl CylindricalGrid3D {
             } else {
                 (lim[1][0] - center[1]).abs()
             };
-            (x.powf(2.) + y.powf(2.)).sqrt()
+            if x > y {
+                x
+            } else {
+                y
+            }
         };
 
         let mut inner_radius = 0.0;
@@ -75,10 +79,17 @@ impl CylindricalGrid3D {
             if mode == "volume" {
                 // radial positions should be in a distance so that all cells have the same volume
                 // volume of a cell is pi*h*(r_o**2-r_i**2)*alpha/360
-                let new = (outer_radius * outer_radius / cells[0] as f64
-                    + inner_radius * inner_radius)
+                // new is the next outer radius calculated by
+                // new = (V +r_before**2).sqrt()
+                // V is the volume of a cell which is siply the volume defided by the num of cells
+
+                let new = (
+                    outer_radius * outer_radius / cells[0] as f64 // volume
+                    + inner_radius * inner_radius
+                    // radius of cell before
+                )
                     .sqrt();
-                rpositions[cellidx as usize] = [inner_radius, new];
+                rpositions[cellidx as usize] = [inner_radius, new]; // inside, outside
                 inner_radius = new;
             }
         }

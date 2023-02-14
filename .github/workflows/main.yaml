@@ -45,7 +45,7 @@ jobs:
           activate-environment: testenv
       - name: Install mamba
         run:
-        conda install -y -c ${{matrix.channel}} mamba
+          conda install -y -c ${{matrix.channel}} mamba
       - name: Install HDF5 (${{matrix.version}}${{matrix.mpi && '-' || ''}}${{matrix.mpi}})
         run: |
           [ "${{matrix.mpi}}" != "" ] && MPICC_PKG=${{matrix.mpi}}-mpicc

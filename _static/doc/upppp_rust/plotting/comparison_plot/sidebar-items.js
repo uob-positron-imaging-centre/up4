@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["ComparisonPlotter","Comparison data handling struct."]]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["ScalarPlotter","Scalar data handling struct."]]};

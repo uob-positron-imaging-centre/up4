@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["PyGrid","A class containing all information for a 3D grid wrapping your system"],["PyVecGrid","A 3D Grid containing Vector Data This grid is generated in the vectorfield function and contains the arrow directions and size corresponding to the magnitude of the velocity. It has no constructor in python."]]};

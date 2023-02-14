@@ -11,7 +11,7 @@
   
   
   <script data-cfasync="false">
-    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "auto";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
   </script>
   
@@ -52,7 +52,7 @@
   </head>
   
   
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="auto">
 
   
   
@@ -187,6 +187,14 @@
       </ul>
       </div>
       
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
     </div>
   </div>
 
@@ -291,6 +299,14 @@
       </ul>
       </div>
       
+      <div class="navbar-end-item">
+        <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+</button>
+      </div>
+      
     </div>
     
   </div>
@@ -384,7 +400,7 @@ that are then parsed by up4.VectorPlotter.plot to return a plotly.graph_objects.
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#up4.plotting.VectorPlotter.unit_vector_plot" title="up4.plotting.VectorPlotter.unit_vector_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unit_vector_plot</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#up4.plotting.VectorPlotter.unit_vector_plot" title="up4.plotting.VectorPlotter.unit_vector_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">unit_vector_plot</span></code></a>(axis, index)</p></td>
 <td><p>Create unit vector plot JSON string.</p></td>
 </tr>
 </tbody>
@@ -438,7 +454,7 @@ that are then parsed by up4.VectorPlotter.plot to return a plotly.graph_objects.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.plotting.VectorPlotter.unit_vector_plot">
-<span class="sig-name descname"><span class="pre">unit_vector_plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#up4.plotting.VectorPlotter.unit_vector_plot" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">unit_vector_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.plotting.VectorPlotter.unit_vector_plot" title="Permalink to this definition">#</a></dt>
 <dd><p>Create unit vector plot JSON string. The unit vector plot is perpendicular to the provided axis and located at the index value.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -454,7 +470,7 @@ that are then parsed by up4.VectorPlotter.plot to return a plotly.graph_objects.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.plotting.VectorPlotter.unit_vector_slice_plot">
-<span class="sig-name descname"><span class="pre">unit_vector_slice_plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#up4.plotting.VectorPlotter.unit_vector_slice_plot" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">unit_vector_slice_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.plotting.VectorPlotter.unit_vector_slice_plot" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -472,7 +488,7 @@ that are then parsed by up4.ScalarPlotter.plot to return a plotly.graph_objects.
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#up4.plotting.ScalarPlotter.scalar_map_plot" title="up4.plotting.ScalarPlotter.scalar_map_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scalar_map_plot</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#up4.plotting.ScalarPlotter.scalar_map_plot" title="up4.plotting.ScalarPlotter.scalar_map_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scalar_map_plot</span></code></a>(axis, index)</p></td>
 <td><p>Create heatmap plot JSON string.</p></td>
 </tr>
 </tbody>
@@ -521,7 +537,7 @@ that are then parsed by up4.ScalarPlotter.plot to return a plotly.graph_objects.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.plotting.ScalarPlotter.scalar_map_plot">
-<span class="sig-name descname"><span class="pre">scalar_map_plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#up4.plotting.ScalarPlotter.scalar_map_plot" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">scalar_map_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.plotting.ScalarPlotter.scalar_map_plot" title="Permalink to this definition">#</a></dt>
 <dd><p>Create heatmap plot JSON string. The heatmap plot is perpendicular to the provided axis and located at the index value.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -555,7 +571,7 @@ that are then parsed by up4.ComparisonPlotter.plot to return a plotly.graph_obje
 <p class="rubric">Methods</p>
 <table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#up4.plotting.ComparisonPlotter.parity_plot" title="up4.plotting.ComparisonPlotter.parity_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parity_plot</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#up4.plotting.ComparisonPlotter.parity_plot" title="up4.plotting.ComparisonPlotter.parity_plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parity_plot</span></code></a>()</p></td>
 <td><p>Create parity plot JSON string.</p></td>
 </tr>
 </tbody>

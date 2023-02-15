@@ -397,6 +397,30 @@ difference to how you use this library, that choice is down to you!</p>
 <tr class="row-even"><td><p><strong>dispersion:</strong></p></td>
 <td><p>Return the dispersion of all valid particles in the system for a given time</p></td>
 </tr>
+<tr class="row-odd"><td><p><strong>histogram:</strong></p></td>
+<td><p>Return the histogram of all valid particles in the system for a given time</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>granular_temperature:</strong></p></td>
+<td><p>Return the granular temperature of all valid particles in the system for a given time</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>lacey_mixing_index:</strong></p></td>
+<td><p>Return the lacey mixing index for the whole system over a given time</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>circulation_time:</strong></p></td>
+<td><p>Return the circulation time for the whole system, returns all times as one large array</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>concentration_field:</strong></p></td>
+<td><p>Return the concentration field for the whole system</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>homogenity_index:</strong></p></td>
+<td><p>Return the homogenity index for the whole system, defiuned by two particle species</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>msd_field:</strong></p></td>
+<td><p>Return the mean square displacement field for the whole system</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>msd:</strong></p></td>
+<td><p>Return the mean square displacement for the whole system over time</p></td>
+</tr>
 </tbody>
 </table>
 <dl class="py method">
@@ -677,6 +701,54 @@ The array contains the following values at positions:
 * <code class="docutils literal notranslate"><span class="pre">0</span></code>: Minimum x coordinate.
 * <code class="docutils literal notranslate"><span class="pre">1</span></code>: Minimum y coordinate.
 * <code class="docutils literal notranslate"><span class="pre">2</span></code>: Minimum z coordinate.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="up4.Data.msd">
+<span class="sig-name descname"><span class="pre">msd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.msd" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculate the mean squared displacement of a particle in a system.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>grid</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PyGrid</span></code></span></dt><dd><p>The grid that defines the region of the system.</p>
+</dd>
+<dt><strong>min_time</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>The minimum time to start calculating the MSD.</p>
+</dd>
+<dt><strong>max_time</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>The maximum time to stop calculating the MSD.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>msd</strong><span class="classifier"><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></dt><dd><p>The mean squared displacement of the particle.</p>
+</dd>
+<dt><strong>time</strong><span class="classifier"><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></dt><dd><p>The time at which the MSD was calculated.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="up4.Data.msd_field">
+<span class="sig-name descname"><span class="pre">msd_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.msd_field" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculate the mean squared displacement field of the system.
+The mean squared displacement field is calculated by calculating the mean squared displacement of a particle in a region of the system.
+Each cell element represents the mean squared displacement of all particles in that cell.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>grid</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PyGrid</span></code></span></dt><dd><p>The grid that defines the region of the system.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>msd_field</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PyGrid</span></code></span></dt><dd><p>The mean squared displacement field of the system.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1479,6 +1551,30 @@ difference to how you use this library, that choice is down to you!</p>
 <tr class="row-even"><td><p><strong>dispersion:</strong></p></td>
 <td><p>Return the dispersion of all valid particles in the system for a given time</p></td>
 </tr>
+<tr class="row-odd"><td><p><strong>histogram:</strong></p></td>
+<td><p>Return the histogram of all valid particles in the system for a given time</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>granular_temperature:</strong></p></td>
+<td><p>Return the granular temperature of all valid particles in the system for a given time</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>lacey_mixing_index:</strong></p></td>
+<td><p>Return the lacey mixing index for the whole system over a given time</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>circulation_time:</strong></p></td>
+<td><p>Return the circulation time for the whole system, returns all times as one large array</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>concentration_field:</strong></p></td>
+<td><p>Return the concentration field for the whole system</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>homogenity_index:</strong></p></td>
+<td><p>Return the homogenity index for the whole system, defiuned by two particle species</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>msd_field:</strong></p></td>
+<td><p>Return the mean square displacement field for the whole system</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>msd:</strong></p></td>
+<td><p>Return the mean square displacement for the whole system over time</p></td>
+</tr>
 </tbody>
 </table>
 <dl class="py method">
@@ -1763,13 +1859,61 @@ The array contains the following values at positions:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="id15">
-<span class="sig-name descname"><span class="pre">nparticles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id15" title="Permalink to this definition">#</a></dt>
-<dd><p>Number of particles in the system.</p>
+<span class="sig-name descname"><span class="pre">msd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id15" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculate the mean squared displacement of a particle in a system.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>grid</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PyGrid</span></code></span></dt><dd><p>The grid that defines the region of the system.</p>
+</dd>
+<dt><strong>min_time</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>The minimum time to start calculating the MSD.</p>
+</dd>
+<dt><strong>max_time</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>The maximum time to stop calculating the MSD.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>msd</strong><span class="classifier"><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></dt><dd><p>The mean squared displacement of the particle.</p>
+</dd>
+<dt><strong>time</strong><span class="classifier"><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></dt><dd><p>The time at which the MSD was calculated.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="id16">
-<span class="sig-name descname"><span class="pre">numberfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id16" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">msd_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id16" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculate the mean squared displacement field of the system.
+The mean squared displacement field is calculated by calculating the mean squared displacement of a particle in a region of the system.
+Each cell element represents the mean squared displacement of all particles in that cell.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>grid</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PyGrid</span></code></span></dt><dd><p>The grid that defines the region of the system.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>msd_field</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PyGrid</span></code></span></dt><dd><p>The mean squared displacement field of the system.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id17">
+<span class="sig-name descname"><span class="pre">nparticles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id17" title="Permalink to this definition">#</a></dt>
+<dd><p>Number of particles in the system.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id18">
+<span class="sig-name descname"><span class="pre">numberfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id18" title="Permalink to this definition">#</a></dt>
 <dd><p>Return the number density field.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1788,8 +1932,8 @@ The array contains the following values at positions:
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id17">
-<span class="sig-name descname"><span class="pre">occupancyfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_vel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id17" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id19">
+<span class="sig-name descname"><span class="pre">occupancyfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_vel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id19" title="Permalink to this definition">#</a></dt>
 <dd><p>Return the occupancy field.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1810,8 +1954,8 @@ The array contains the following values at positions:
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id18">
-<span class="sig-name descname"><span class="pre">set_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id18" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id20">
+<span class="sig-name descname"><span class="pre">set_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id20" title="Permalink to this definition">#</a></dt>
 <dd><p>Select the dataset between two different times.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1826,8 +1970,8 @@ The array contains the following values at positions:
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id19">
-<span class="sig-name descname"><span class="pre">stats</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id19" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id21">
+<span class="sig-name descname"><span class="pre">stats</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id21" title="Permalink to this definition">#</a></dt>
 <dd><p>Calculate statistics of the dataset and print to terminal. Currently these are:
 * System dimensions.
 * Maximum time.
@@ -1837,8 +1981,8 @@ The array contains the following values at positions:
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id20">
-<span class="sig-name descname"><span class="pre">time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id20" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id22">
+<span class="sig-name descname"><span class="pre">time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id22" title="Permalink to this definition">#</a></dt>
 <dd><p>Return the time array of the dataset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1855,8 +1999,8 @@ The array contains the following values at positions:
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id21">
-<span class="sig-name descname"><span class="pre">vectorfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id21" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id23">
+<span class="sig-name descname"><span class="pre">vectorfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id23" title="Permalink to this definition">#</a></dt>
 <dd><p>Return velocity data as a vector field.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1875,8 +2019,8 @@ The array contains the following values at positions:
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="id22">
-<span class="sig-name descname"><span class="pre">velocityfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id22" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="id24">
+<span class="sig-name descname"><span class="pre">velocityfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id24" title="Permalink to this definition">#</a></dt>
 <dd><p>Return the velocity data as a velocity field of their norms.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2067,6 +2211,24 @@ The array contains the following values at positions:
      <code class="docutils literal notranslate">
       <span class="pre">
        Data.min_position()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#up4.Data.msd">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       Data.msd()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#up4.Data.msd_field">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       Data.msd_field()
       </span>
      </code>
     </a>
@@ -2513,7 +2675,7 @@ The array contains the following values at positions:
     <a class="reference internal nav-link" href="#id15">
      <code class="docutils literal notranslate">
       <span class="pre">
-       Data.nparticles()
+       Data.msd()
       </span>
      </code>
     </a>
@@ -2522,7 +2684,7 @@ The array contains the following values at positions:
     <a class="reference internal nav-link" href="#id16">
      <code class="docutils literal notranslate">
       <span class="pre">
-       Data.numberfield()
+       Data.msd_field()
       </span>
      </code>
     </a>
@@ -2531,7 +2693,7 @@ The array contains the following values at positions:
     <a class="reference internal nav-link" href="#id17">
      <code class="docutils literal notranslate">
       <span class="pre">
-       Data.occupancyfield()
+       Data.nparticles()
       </span>
      </code>
     </a>
@@ -2540,7 +2702,7 @@ The array contains the following values at positions:
     <a class="reference internal nav-link" href="#id18">
      <code class="docutils literal notranslate">
       <span class="pre">
-       Data.set_time()
+       Data.numberfield()
       </span>
      </code>
     </a>
@@ -2549,7 +2711,7 @@ The array contains the following values at positions:
     <a class="reference internal nav-link" href="#id19">
      <code class="docutils literal notranslate">
       <span class="pre">
-       Data.stats()
+       Data.occupancyfield()
       </span>
      </code>
     </a>
@@ -2558,7 +2720,7 @@ The array contains the following values at positions:
     <a class="reference internal nav-link" href="#id20">
      <code class="docutils literal notranslate">
       <span class="pre">
-       Data.time()
+       Data.set_time()
       </span>
      </code>
     </a>
@@ -2567,13 +2729,31 @@ The array contains the following values at positions:
     <a class="reference internal nav-link" href="#id21">
      <code class="docutils literal notranslate">
       <span class="pre">
-       Data.vectorfield()
+       Data.stats()
       </span>
      </code>
     </a>
    </li>
    <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#id22">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       Data.time()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id23">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       Data.vectorfield()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#id24">
      <code class="docutils literal notranslate">
       <span class="pre">
        Data.velocityfield()

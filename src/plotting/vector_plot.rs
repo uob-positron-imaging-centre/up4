@@ -137,11 +137,11 @@ impl VectorPlotter {
         // start with vectors with a unit norm
         self.normalise_vectors();
         // TODO make this cleaner
-        if (axis == 0) { // along yz plane
+        if axis == 0 { // along yz plane
             self.vdata *= 0.5*dx;
             self.wdata *= 0.5*dy;
         }
-        else if (axis == 1) { // along xz plane
+        else if axis == 1 { // along xz plane
             self.udata *= 0.5*dx;
             self.wdata *= 0.5*dy;
             
@@ -432,6 +432,7 @@ impl VectorPlotter {
     }
 
     // TODO create
+    #[allow(unused_variables)]
     pub fn quiver_slices(&self, slice_dims: Vec<usize>, dim_indices: Vec<Vec<usize>>,  traces: Vec<Box<Scatter<f64, f64>>>, layout: Layout, square: bool, axes: Vec<Option<plotly::layout::Axis>>) {
         // ensure that each requested axis has at least one entry
         if slice_dims.len() != dim_indices.len() {
@@ -507,6 +508,7 @@ impl VectorPlotter {
     // range is [start, stop, step]
     // use https://plotly.com/python/v3/3d-filled-line-plots/ to fill in the arrows
     // regardless of selected axis, we use xaxis as "x" and zaxis as "y", stepping along yaxis
+    #[allow(unused_variables)]
     pub fn unit_vector_slice_traces(
         &mut self,
         range: [usize; 3],

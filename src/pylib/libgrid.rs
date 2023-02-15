@@ -157,7 +157,7 @@ impl PyGrid {
     /// -------
     /// grid : Grid
     ///     A up4.Grid object with the same dimensions dimensions defined by user
-    #[args(mode = "\"volume\"")]
+    #[pyo3(signature = (cells, limit, mode = "volume"))]
     #[staticmethod]
     fn cylindrical3d(cells: Vec<usize>, limit: Vec<f64>, mode: &str) -> Self {
         if cells.len() != 3 {
@@ -197,7 +197,7 @@ impl PyGrid {
     /// -------
     /// grid : Grid
     ///     A up4.Grid object with the same dimensions as the input data
-    #[args(mode = "\"volume\"")]
+    #[pyo3(signature = (pydata, cells, mode = "volume"))]
     #[staticmethod]
     fn cylindrical3d_from_data(pydata: &PyData, cells: Vec<usize>, mode: &str) -> Self {
         let stats = pydata.data.global_stats();
@@ -325,7 +325,7 @@ impl PyGrid {
     ///     The axis to slice the grid on
     /// index : int
     ///     The index of the slice
-    #[args(axis = "0")]
+    #[pyo3(signature = (axis, index))]
     fn slice<'py>(&self, _py: Python<'py>, axis: usize, index: usize) -> &'py PyArray2<f64> {
         self.grid
             .slice_idx(axis, index)
@@ -340,7 +340,7 @@ impl PyGrid {
     ///     The axis to slice the grid on
     /// position : f64
     ///     The position of the slice
-    #[args(axis = "0")]
+    #[pyo3(signature = (axis, position))]
     fn slice_pos<'py>(&self, _py: Python<'py>, axis: usize, position: f64) -> &'py PyArray2<f64> {
         self.grid.slice(axis, position).to_owned().into_pyarray(_py)
     }
@@ -457,10 +457,7 @@ impl PyGrid {
     fn remove_outliers(&mut self, mode: usize, threshold: f64) {
         self.grid.outlier_removal(threshold, mode);
     }
-}
 
-#[pyproto]
-impl pyo3::PyObjectProtocol for PyGrid {
     fn __str__(&self) -> PyResult<String> {
         Ok(format!(
             "Grid3D: \n\tCells: {:?} \n\txlim: {:?} \
@@ -498,6 +495,7 @@ impl pyo3::PyObjectProtocol for PyGrid {
         ))
     }
 }
+
 
 /// A 3D Grid containing Vector Data
 /// This grid is generated in the vectorfield function and contains the arrow
@@ -506,46 +504,6 @@ impl pyo3::PyObjectProtocol for PyGrid {
 #[pyclass(name = "VectorGrid")]
 pub struct PyVecGrid {
     pub grid: vector_grid::VectorGrid,
-}
-
-#[pyproto]
-impl pyo3::PyObjectProtocol for PyVecGrid {
-    fn __str__(&self) -> PyResult<String> {
-        Ok(format!(
-            "3D Vector Grid: \n\tCells: {:?} \n\txlim: {:?} \
-            \n\tylim: {:?} \n\tzlim: {:?}\n\tData information:\n\t\tMean: {:?}\
-            \n\t\tStd: {:?}\n\t\tMin: {:?}\n\t\tMax: {:?}",
-            self.grid.get_cells(),
-            self.grid.get_limits()[0],
-            self.grid.get_limits()[1],
-            self.grid.get_limits()[2],
-            self.grid
-                .get_data()
-                .mean()
-                .expect("Unable to calculate mean of data"),
-            self.grid.get_data().std(1.),
-            self.grid.get_data().min_skipnan(),
-            self.grid.get_data().max_skipnan()
-        ))
-    }
-    fn __repr__(&self) -> PyResult<String> {
-        Ok(format!(
-            "3D Vector Grid: \n\tCells: {:?} \n\txlim: {:?} \
-            \n\tylim: {:?} \n\tzlim: {:?}\n\tData information:\n\t\tMean: {:?}\
-            \n\t\tStd: {:?}\n\t\tMin: {:?}\n\t\tMax: {:?}",
-            self.grid.get_cells(),
-            self.grid.get_limits()[0],
-            self.grid.get_limits()[1],
-            self.grid.get_limits()[2],
-            self.grid
-                .get_data()
-                .mean()
-                .expect("Unable to calculate mean of data"),
-            self.grid.get_data().std(1.),
-            self.grid.get_data().min_skipnan(),
-            self.grid.get_data().max_skipnan()
-        ))
-    }
 }
 
 #[pymethods]
@@ -646,5 +604,42 @@ impl PyVecGrid {
                 .to_owned()
                 .into_pyarray(_py),
         )
+    }
+
+    fn __str__(&self) -> PyResult<String> {
+        Ok(format!(
+            "3D Vector Grid: \n\tCells: {:?} \n\txlim: {:?} \
+            \n\tylim: {:?} \n\tzlim: {:?}\n\tData information:\n\t\tMean: {:?}\
+            \n\t\tStd: {:?}\n\t\tMin: {:?}\n\t\tMax: {:?}",
+            self.grid.get_cells(),
+            self.grid.get_limits()[0],
+            self.grid.get_limits()[1],
+            self.grid.get_limits()[2],
+            self.grid
+                .get_data()
+                .mean()
+                .expect("Unable to calculate mean of data"),
+            self.grid.get_data().std(1.),
+            self.grid.get_data().min_skipnan(),
+            self.grid.get_data().max_skipnan()
+        ))
+    }
+    fn __repr__(&self) -> PyResult<String> {
+        Ok(format!(
+            "3D Vector Grid: \n\tCells: {:?} \n\txlim: {:?} \
+            \n\tylim: {:?} \n\tzlim: {:?}\n\tData information:\n\t\tMean: {:?}\
+            \n\t\tStd: {:?}\n\t\tMin: {:?}\n\t\tMax: {:?}",
+            self.grid.get_cells(),
+            self.grid.get_limits()[0],
+            self.grid.get_limits()[1],
+            self.grid.get_limits()[2],
+            self.grid
+                .get_data()
+                .mean()
+                .expect("Unable to calculate mean of data"),
+            self.grid.get_data().std(1.),
+            self.grid.get_data().min_skipnan(),
+            self.grid.get_data().max_skipnan()
+        ))
     }
 }

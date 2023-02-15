@@ -397,6 +397,30 @@ difference to how you use this library, that choice is down to you!</p>
 <tr class="row-even"><td><p><strong>dispersion:</strong></p></td>
 <td><p>Return the dispersion of all valid particles in the system for a given time</p></td>
 </tr>
+<tr class="row-odd"><td><p><strong>histogram:</strong></p></td>
+<td><p>Return the histogram of all valid particles in the system for a given time</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>granular_temperature:</strong></p></td>
+<td><p>Return the granular temperature of all valid particles in the system for a given time</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>lacey_mixing_index:</strong></p></td>
+<td><p>Return the lacey mixing index for the whole system over a given time</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>circulation_time:</strong></p></td>
+<td><p>Return the circulation time for the whole system, returns all times as one large array</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>concentration_field:</strong></p></td>
+<td><p>Return the concentration field for the whole system</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>homogenity_index:</strong></p></td>
+<td><p>Return the homogenity index for the whole system, defiuned by two particle species</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>msd_field:</strong></p></td>
+<td><p>Return the mean square displacement field for the whole system</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>msd:</strong></p></td>
+<td><p>Return the mean square displacement for the whole system over time</p></td>
+</tr>
 </tbody>
 </table>
 <dl class="py method">
@@ -677,6 +701,54 @@ The array contains the following values at positions:
 * <code class="docutils literal notranslate"><span class="pre">0</span></code>: Minimum x coordinate.
 * <code class="docutils literal notranslate"><span class="pre">1</span></code>: Minimum y coordinate.
 * <code class="docutils literal notranslate"><span class="pre">2</span></code>: Minimum z coordinate.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="up4.Data.msd">
+<span class="sig-name descname"><span class="pre">msd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.msd" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculate the mean squared displacement of a particle in a system.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>grid</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PyGrid</span></code></span></dt><dd><p>The grid that defines the region of the system.</p>
+</dd>
+<dt><strong>min_time</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>The minimum time to start calculating the MSD.</p>
+</dd>
+<dt><strong>max_time</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>The maximum time to stop calculating the MSD.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>msd</strong><span class="classifier"><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></dt><dd><p>The mean squared displacement of the particle.</p>
+</dd>
+<dt><strong>time</strong><span class="classifier"><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.25.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></dt><dd><p>The time at which the MSD was calculated.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="up4.Data.msd_field">
+<span class="sig-name descname"><span class="pre">msd_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.msd_field" title="Permalink to this definition">#</a></dt>
+<dd><p>Calculate the mean squared displacement field of the system.
+The mean squared displacement field is calculated by calculating the mean squared displacement of a particle in a region of the system.
+Each cell element represents the mean squared displacement of all particles in that cell.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>grid</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PyGrid</span></code></span></dt><dd><p>The grid that defines the region of the system.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>msd_field</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PyGrid</span></code></span></dt><dd><p>The mean squared displacement field of the system.</p>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -1861,6 +1933,24 @@ Default: “r&quot;(\d+).vtk&quot;”</p>
      <code class="docutils literal notranslate">
       <span class="pre">
        Data.min_position()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#up4.Data.msd">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       Data.msd()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#up4.Data.msd_field">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       Data.msd_field()
       </span>
      </code>
     </a>

@@ -164,6 +164,13 @@ impl std::fmt::Display for CylindricalGrid3D {
         )
     }
 }
+
+impl std::ops::Index<CellId> for CylindricalGrid3D {
+    type Output = f64;
+    fn index(&self, index: CellId) -> &Self::Output {
+        &self.data[index]
+    }
+}
 impl GridFunctions3D for CylindricalGrid3D {
     fn is_inside(&self, pos: Position) -> bool {
         let pos = self.to_cylindrical(pos);

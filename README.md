@@ -2,7 +2,7 @@
 
 ![example workflow](https://github.com/uob-positron-imaging-centre/up4/actions/workflows/main.yaml/badge.svg)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-![docs](https://github.com/uob-positron-imaging-centre/up4/actions/workflows/pages.yaml/badge.svg)
+[![docs](https://img.shields.io/badge/docs-dev-blue)](https://uob-positron-imaging-centre.github.io/up4/)
 
 ## A fast *and* flexible analysis toolset for particle data of all kinds
 
@@ -121,7 +121,15 @@ If you use this library in your research, you are kindly asked to cite:
 
 ## Licensing
 
-## TODO add licence details
+The `up4` package is `GPL v3.0
+<https://choosealicense.com/licenses/gpl-3.0/>`_ licensed. In non-lawyer terms, the key points of this license are:
+
+- You can view, use, copy and modify this code **_freely_**.
+- Your modifications must _also_ be licensed with GPL v3.0 or later.
+- If you share your modifications with someone, you have to include the source code as well.
+
+Essentially, do whatever you want with the code, but don't try selling it saying it's yours :). GPL v3.0 is indeed a very strong *copyleft* license; it was deliberately chosen to maintain the openness and transparency of great software and progress. This also ties into the very reason for `up4`'s conception - to transparently process and compare Lagrangian data, regardless of source. Further, open collaboration is frankly way more efficient than closed, for-profit competition.
+
 PoincarePlotter
 ### Project to-do list
 

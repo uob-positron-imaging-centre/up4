@@ -43,10 +43,13 @@ jobs:
           python-version: "${{ matrix.python-version }}"
           channels: "conda-forge,anaconda"
           activate-environment: testenv
+      - name: Install mamba
+        run:
+          conda install -y -c ${{matrix.channel}} mamba
       - name: Install HDF5 (${{matrix.version}}${{matrix.mpi && '-' || ''}}${{matrix.mpi}})
         run: |
           [ "${{matrix.mpi}}" != "" ] && MPICC_PKG=${{matrix.mpi}}-mpicc
-          conda install -y -c ${{matrix.channel}} 'hdf5=${{matrix.version}}=*${{matrix.mpi}}*' $MPICC_PKG
+          mamba install -y -c ${{matrix.channel}} 'hdf5=${{matrix.version}}=*${{matrix.mpi}}*' $MPICC_PKG
       - name: Build Rust version
         run: |
           export HDF5_DIR="$CONDA_PREFIX"
@@ -63,7 +66,7 @@ jobs:
           python -m site
           python -m pip install --upgrade pip setuptools
           [ "${{runner.os}}" != "Windows" ] && export RUSTFLAGS="-C link-args=-Wl,-rpath,$CONDA_PREFIX/lib"
-          python3 -m pip install -r requirements_test.txt
+          mamba install --file requirements_test.txt
       - name: Install up4 on python
         run: |
           export HDF5_DIR="$CONDA_PREFIX"
@@ -79,11 +82,11 @@ jobs:
 
       - name: Setup Sphinx
         run: |
-          conda install -y -c ${{matrix.channel}} --file docs/requirements.txt
+          mamba install -y -c ${{matrix.channel}} --file docs/source/requirements.txt
       - name: Generate Rust docs
         run: |
           export HDF5_DIR="$CONDA_PREFIX"
-          cargo doc --no-deps --target-dir docs/_static/
+          cargo doc --no-deps --target-dir docs/source/_static/
       - name: Build HTML
         run: |
           pwd

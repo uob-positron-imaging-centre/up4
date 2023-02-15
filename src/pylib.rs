@@ -12,9 +12,8 @@ pub mod libcomp;
 pub mod libconv;
 pub mod libgrid;
 pub mod libplot;
-use crate::comparison::Comparison;
 use crate::datamanager::{Manager, PData, TData};
-use libcomp::*;
+
 use libconv::*;
 use libgrid::*;
 use libplot::*;
@@ -349,7 +348,7 @@ impl PyData {
     /// -------
     /// up4.Grid
     ///     Grid class containing the number field
-    #[args(min_vel = "0.0")]
+    #[pyo3(signature=(grid, min_vel = 0.0))]
     fn occupancyfield<'py>(&mut self, _py: Python<'py>, grid: &PyGrid, min_vel: f64) -> PyGrid {
         print_debug!("Starting Vectorfield function");
         let selector: &ParticleSelector =
@@ -445,7 +444,7 @@ impl PyData {
     /// bin_edges : numpy.ndarray
     ///     The bin edges.
     ///
-    #[args(property = "\"velocity\"", bins = "100", limit = "0.0")]
+    #[pyo3(signature = (grid, property = "velocity", bins = 100, limit = 0.0))]
     fn histogram<'py>(
         &mut self,
         _py: Python<'py>,
@@ -512,7 +511,7 @@ impl PyData {
     ///
     /// mixing_index : numpy.ndarray
     ///   The mixing index.
-    #[args(type_a = "0", type_b = "1", threshold = "10")]
+    #[pyo3(signature = (grid, type_a = 0, type_b = 1, threshold = 10))]
     fn lacey_mixing_index<'py>(
         &mut self,
         _py: Python<'py>,
@@ -549,7 +548,7 @@ impl PyData {
     /// -------
     /// circulation_time : list
     ///     The circulation time of the particle.
-    #[args(axis = "0")]
+    #[pyo3(signature = (position, axis = 0))]
     fn circulation_time<'py>(&mut self, _py: Python<'py>, position: f64, axis: usize) -> Vec<f64> {
         print_debug!("Starting Circulation Time function");
         let selector: &ParticleSelector =
@@ -581,7 +580,7 @@ impl PyData {
     /// -------
     /// concentration_field : PyGrid
     ///   The concentration field of the system.
-    #[args(type_a = "1", type_b = "2")]
+    #[pyo3(signature = (grid, type_a = 1, type_b = 2))]
     fn concentration_field<'py>(
         &mut self,
         _py: Python<'py>,
@@ -609,7 +608,7 @@ impl PyData {
     ///
     /// grid : PyGrid
     ///   The grid that defines the region of the system.
-    #[args(min_vel = "0.0")]
+    #[pyo3(signature = (grid, min_vel = 0.0))]
     fn homogenity_index<'py>(&mut self, _py: Python<'py>, grid: &PyGrid, min_vel: f64) -> f64 {
         print_debug!("Starting Homogenity Index function");
         let selector: &ParticleSelector =
@@ -620,10 +619,6 @@ impl PyData {
         self.data
             .homogenity_index(grid.grid.clone(), selector, min_vel)
     }
-}
-
-#[pyproto]
-impl pyo3::PyObjectProtocol for PyData {
     fn __str__(&self) -> PyResult<String> {
         Ok(self.data.info().expect("Could not get info"))
     }

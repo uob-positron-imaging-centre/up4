@@ -97,6 +97,13 @@ impl std::fmt::Display for CartesianGrid3D {
         )
     }
 }
+
+impl std::ops::Index<CellId> for CartesianGrid3D {
+    type Output = f64;
+    fn index(&self, index: CellId) -> &Self::Output {
+        &self.data[index]
+    }
+}
 impl GridFunctions3D for CartesianGrid3D {
     fn is_inside(&self, pos: Position) -> bool {
         print_debug!("Grid3D: Checking if {:?} is in grid", pos);

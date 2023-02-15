@@ -54,6 +54,30 @@ use libplot::*;
 ///
 /// dispersion:
 ///    Return the dispersion of all valid particles in the system for a given time
+///
+/// histogram:
+///    Return the histogram of all valid particles in the system for a given time
+///
+/// granular_temperature:
+///    Return the granular temperature of all valid particles in the system for a given time
+///
+/// lacey_mixing_index:
+///    Return the lacey mixing index for the whole system over a given time
+///
+/// circulation_time:
+///    Return the circulation time for the whole system, returns all times as one large array
+///
+/// concentration_field:
+///    Return the concentration field for the whole system
+///
+/// homogenity_index:
+///   Return the homogenity index for the whole system, defiuned by two particle species
+///
+/// msd_field:
+///     Return the mean square displacement field for the whole system
+///
+/// msd:
+///    Return the mean square displacement for the whole system over time
 #[pyclass(name = "Data")]
 struct PyData {
     data: Box<dyn Manager + Send>,
@@ -619,6 +643,75 @@ impl PyData {
         self.data
             .homogenity_index(grid.grid.clone(), selector, min_vel)
     }
+
+    /// Calculate the mean squared displacement field of the system.
+    /// The mean squared displacement field is calculated by calculating the mean squared displacement of a particle in a region of the system.
+    /// Each cell element represents the mean squared displacement of all particles in that cell.
+    ///
+    /// Parameters
+    /// ----------
+    /// grid : PyGrid
+    ///   The grid that defines the region of the system.
+    ///
+    /// Returns
+    /// -------
+    /// msd_field : PyGrid
+    ///  The mean squared displacement field of the system.
+    #[pyo3(signature = (grid,time))]
+    fn msd_field<'py>(&mut self, _py: Python<'py>, grid: &PyGrid, time: f64) -> PyGrid {
+        print_debug!("Starting MSD Field function");
+        let selector: &ParticleSelector =
+            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
+                Some(b) => b,
+                None => panic!("Can not convert PyGrid to Grid1D as "),
+            };
+        let grid = self.data.msd_field(grid.grid.clone(), selector, time);
+
+        PyGrid { grid: grid }
+    }
+
+    /// Calculate the mean squared displacement of a particle in a system.
+    ///
+    /// Parameters
+    /// ----------
+    /// grid : PyGrid
+    ///   The grid that defines the region of the system.
+    ///
+    /// min_time : float
+    ///   The minimum time to start calculating the MSD.
+    ///
+    /// max_time : float
+    ///   The maximum time to stop calculating the MSD.
+    ///
+    /// Returns
+    /// -------
+    /// msd : ndarray
+    ///   The mean squared displacement of the particle.
+    ///
+    /// time : ndarray
+    ///   The time at which the MSD was calculated.
+    #[pyo3(signature = (grid, min_time = 0.0, max_time = 0.0, steps = 100))]
+    fn msd<'py>(
+        &mut self,
+        _py: Python<'py>,
+        grid: &PyGrid,
+        min_time: f64,
+        max_time: f64,
+        steps: usize,
+    ) -> (&'py numpy::PyArray1<f64>, &'py numpy::PyArray1<f64>) {
+        print_debug!("Starting MSD function");
+        let selector: &ParticleSelector =
+            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
+                Some(b) => b,
+                None => panic!("Can not convert PyGrid to Grid1D as "),
+            };
+        let (msd, time) = self
+            .data
+            .msd(grid.grid.clone(), selector, min_time, max_time, steps);
+
+        (msd.into_pyarray(_py), time.into_pyarray(_py))
+    }
+
     fn __str__(&self) -> PyResult<String> {
         Ok(self.data.info().expect("Could not get info"))
     }

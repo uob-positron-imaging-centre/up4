@@ -7,7 +7,12 @@ pub trait Conditional: DataManager {
         boundary_position: f64,
     ) -> Vec<f64> {
         //read the number of timesteps inside this hdf5file
+
         let global_stats = self.global_stats();
+        let dim = global_stats.dimensions();
+        if boundary_position > dim[[1, axis]] || boundary_position < dim[[0, axis]] {
+            panic!("Boundary position is outside of the system");
+        }
         let particle_number = global_stats.nparticles();
         let timesteps: &usize = global_stats.timesteps();
         print_debug!("velocityfield: Initiation over, entering time loop");

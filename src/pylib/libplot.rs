@@ -5,11 +5,55 @@ use crate::{
     libgrid::{PyGrid, PyVecGrid},
     scalar_plot::ScalarPlotter,
     vector_plot::VectorPlotter,
+    GridFunctions3D, plotting_2d::QuiverPlot,
+    VectorGrid, plotting::plot
 };
 use itertools::izip;
 use plotly::heat_map::Smoothing;
 use plotly::{layout::Axis, Layout, Plot, Trace};
 use pyo3::prelude::*;
+
+#[pyclass(name = "Plotter2D")]
+pub struct PyPlotter2D {
+    plotting_string: String,
+    grid: Box<dyn GridFunctions3D>,
+}
+
+#[pymethods]
+impl PyPlotter2D {
+
+    #[staticmethod]
+    fn _from_vector_grid(vector_grid: &PyVecGrid) -> PyPlotter2D {
+        let grid: Box<VectorGrid> = Box::new(vector_grid.grid.to_owned());
+        let plotting_string = String::new();
+
+        PyPlotter2D { plotting_string, grid }
+    }
+
+    fn _quiver_plot(&mut self, axis: usize) {
+        let vector_grid = self.grid.as_any()
+        .downcast_ref::<VectorGrid>()
+        .unwrap().clone();
+        let quiver_plotter = QuiverPlot::new(vector_grid, axis);
+        let dx = quiver_plotter.x()[1] - quiver_plotter.x()[0];
+        let dy = quiver_plotter.y()[1] - quiver_plotter.y()[0];
+        let len = quiver_plotter.x().len();
+        let mut traces: Vec<Box<dyn Trace>> = Vec::with_capacity(len);
+        let quiver_traces = quiver_plotter.bound_half_node(dx, dy).create_quiver_traces();
+        for trace in quiver_traces {
+            traces.push(trace)
+        }
+        let layout: Layout = Layout::new();
+        let plot: Plot = plot(traces, layout);
+        let plotting_string = plot.to_json();
+        self.plotting_string = plotting_string;
+    }
+
+    #[getter]
+    fn get_plotting_string(&self) -> PyResult<String> {
+        Ok(self.plotting_string.to_owned())
+    }
+}
 
 /// Class that handles plotting of vector data. This class produces 2D and 3D plots of vector data.
 /// To enable transfer of plotting from Rust to Python, the Rust backend serialises plots into JSON strings

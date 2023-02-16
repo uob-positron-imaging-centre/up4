@@ -496,6 +496,7 @@ impl PyGrid {
     }
 }
 
+
 /// A 3D Grid containing Vector Data
 /// This grid is generated in the vectorfield function and contains the arrow
 /// directions and size corresponding to the magnitude of the velocity.

@@ -23,7 +23,8 @@ use std::f64::consts::PI;
 
 // TODO consider removing all the unnecessary versions of "get_this_plane" by having an option for a 2D vec struct
 
-/// Vector data handling struct. The `true_norm` field contains the original vector norms, and is used for shading.
+
+/// Vector data handling struct. The `true_norm` field contains the original vector norms, and is used for shading. 
 /// Norms used for drawing arrows are not necessarily the same as they may be scaled for display reasons.
 #[derive(Getters, Clone)]
 pub struct VectorPlotter {
@@ -136,18 +137,18 @@ impl VectorPlotter {
         // start with vectors with a unit norm
         self.normalise_vectors();
         // TODO make this cleaner
-        if axis == 0 {
-            // along yz plane
-            self.vdata *= 0.5 * dx;
-            self.wdata *= 0.5 * dy;
-        } else if axis == 1 {
-            // along xz plane
-            self.udata *= 0.5 * dx;
-            self.wdata *= 0.5 * dy;
-        } else {
-            // along xy plane
-            self.udata *= 0.5 * dx;
-            self.vdata *= 0.5 * dy;
+        if axis == 0 { // along yz plane
+            self.vdata *= 0.5*dx;
+            self.wdata *= 0.5*dy;
+        }
+        else if axis == 1 { // along xz plane
+            self.udata *= 0.5*dx;
+            self.wdata *= 0.5*dy;
+            
+        }
+        else { // along xy plane
+            self.udata *= 0.5*dx;
+            self.vdata *= 0.5*dy;
         }
         //let scale_factor: f64 = 0.5 * dx / self.true_norm.max_skipnan();
         //self.scale_global(scale_factor);
@@ -432,15 +433,7 @@ impl VectorPlotter {
 
     // TODO create
     #[allow(unused_variables)]
-    pub fn quiver_slices(
-        &self,
-        slice_dims: Vec<usize>,
-        dim_indices: Vec<Vec<usize>>,
-        traces: Vec<Box<Scatter<f64, f64>>>,
-        layout: Layout,
-        square: bool,
-        axes: Vec<Option<plotly::layout::Axis>>,
-    ) {
+    pub fn quiver_slices(&self, slice_dims: Vec<usize>, dim_indices: Vec<Vec<usize>>,  traces: Vec<Box<Scatter<f64, f64>>>, layout: Layout, square: bool, axes: Vec<Option<plotly::layout::Axis>>) {
         // ensure that each requested axis has at least one entry
         if slice_dims.len() != dim_indices.len() {
             panic!("For each axis, a list of indices must be provided!");
@@ -450,25 +443,17 @@ impl VectorPlotter {
             for index in &dim_indices[i] {
                 let (barb_x, barb_y) = self.create_quiver_barbs(axis, *index);
                 let (arrow_x, arrow_y) = self.create_quiver_arrows(axis, *index);
-                for (i, (x_line, y_line, x_head, y_head)) in
-                    izip!(barb_x, barb_y, arrow_x, arrow_y).enumerate()
-                {
+                for (i, (x_line, y_line, x_head, y_head)) in izip!(barb_x, barb_y, arrow_x, arrow_y).enumerate() {
                     let x: Vec<f64> = vec![x_line.0, x_line.1, x_head.0, x_head.1, x_head.2];
                     let y: Vec<f64> = vec![y_line.0, y_line.1, y_head.0, y_head.1, y_head.2];
-                    let trace = self.sliced_arrows(axis, *index, x, y);
+                    let trace = self.sliced_arrows(axis, *index, x, y);                   
                     traces.push(trace);
                 }
             }
         }
     }
     // return the necessary "other axis" points for fake 3D plots
-    fn sliced_arrows(
-        &self,
-        axis: usize,
-        index: usize,
-        x: Vec<f64>,
-        y: Vec<f64>,
-    ) -> Box<Scatter3D<f64, f64, f64>> {
+    fn sliced_arrows(&self, axis: usize, index: usize, x: Vec<f64>, y: Vec<f64>) -> Box<Scatter3D<f64, f64, f64>> {
         let mut z: Array1<f64> = Array1::zeros(5);
         match axis {
             // slicing along x axis
@@ -511,6 +496,7 @@ impl VectorPlotter {
                 panic!("Accepted axis values are 0, 1 or 2 only!")
             }
         }
+        
     }
 
     // TODO create

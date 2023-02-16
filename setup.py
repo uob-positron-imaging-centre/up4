@@ -56,9 +56,7 @@ setup(
     description="analysing toolset for particle data",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages = find_packages(
-        exclude = ["tests", "*.tests", "*.tests.*", "tests.*"]
-    ),
+    packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
     package_data={"up4": ["py.typed"]},
     rust_extensions=[
         RustExtension("upppp_rust", features=features, binding=Binding.PyO3)

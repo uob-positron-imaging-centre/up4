@@ -33,10 +33,11 @@
 
 import os
 import sys
+
 _HERE = os.path.dirname(__file__)
-_ROOT_DIR = os.path.abspath(os.path.join(_HERE, '../..'))
-_PACKAGE_DIR = os.path.abspath(os.path.join(_HERE, 'up4'))
-_SUBPACKAGE_DIR = os.path.abspath(os.path.join(_HERE, 'up4/plotting'))
+_ROOT_DIR = os.path.abspath(os.path.join(_HERE, "../.."))
+_PACKAGE_DIR = os.path.abspath(os.path.join(_HERE, "up4"))
+_SUBPACKAGE_DIR = os.path.abspath(os.path.join(_HERE, "up4/plotting"))
 print(_HERE)
 print(_ROOT_DIR)
 sys.path.insert(0, _ROOT_DIR)
@@ -102,7 +103,25 @@ numpydoc_xref_param_type = True
 numpydoc_xref_ignore = {"optional", "type_without_description", "BadException"}
 
 # Run docstring validation as part of build process
-numpydoc_validation_checks = {"all", "SS06", "PR01", "GL01", "SA01", "EX01", "YD01", "ES01", "GL08", "SS01", "RT01", "GL02", "GL03", "RT02", "RT03", "PR09", "SS05"}
+numpydoc_validation_checks = {
+    "all",
+    "SS06",
+    "PR01",
+    "GL01",
+    "SA01",
+    "EX01",
+    "YD01",
+    "ES01",
+    "GL08",
+    "SS01",
+    "RT01",
+    "GL02",
+    "GL03",
+    "RT02",
+    "RT03",
+    "PR09",
+    "SS05",
+}
 
 autodoc_default_options = {
     "show-inheritance": False,
@@ -190,7 +209,7 @@ html_context = {
     "github_user": "uob-positron-imaging-centre",
     "github_repo": "up4",
     "github_version": "uPPPP",
-    "default_mode" : "auto"
+    "default_mode": "auto",
 }
 
 html_sidebars = {
@@ -204,7 +223,7 @@ html_last_updated_fmt = "%b %d, %Y"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied

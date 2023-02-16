@@ -6,7 +6,7 @@ use ndarray::{Array1, Array2, Zip};
 use ndarray_stats::QuantileExt;
 use plotly::{
     common::{ColorBar, ColorScale, ColorScalePalette, Fill, Line, Marker, Mode},
-    Scatter,
+    Scatter, Plot, Trace, Layout,
 };
 use std::f64::consts::PI;
 
@@ -263,6 +263,8 @@ impl QuiverPlot {
         self.u /= &self.norm;
         self.v /= &self.norm;
     }
+
+
 }
 
 // TODO make sure that the arrow centres are in the centre of the cell

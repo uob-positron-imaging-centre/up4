@@ -2,6 +2,7 @@
 
 use crate::GridFunctions3D;
 use ndarray::{Array1, Array2, Array3};
+use plotly::{Layout, Plot, Trace};
 
 pub mod colourmap;
 pub mod comparison_plot;
@@ -9,6 +10,18 @@ pub mod plotting_2d;
 pub mod scalar_plot;
 pub mod vector_plot;
 
+/// Take traces and plot them
+pub fn plot(traces: Vec<Box<dyn Trace>>, layout: Layout) -> Plot {
+    let mut plot: Plot = Plot::new();
+    //use local render version
+    plot.use_local_plotly();
+    for trace in traces {
+        plot.add_trace(trace);
+    }
+    plot.set_layout(layout);
+    
+    plot
+}
 /// Return plane positions perpendicular to the provided axis.
 pub fn axis_selector(grid: Box<dyn GridFunctions3D>, axis: usize) -> (Array1<f64>, Array1<f64>) {
     match axis {

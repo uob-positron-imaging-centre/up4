@@ -50,6 +50,8 @@ fn unit_vector_2d() {
                 ygrid.insert([posx[i], posy[j], posz[0]], yvalue);
                 zgrid.insert([posx[i], posy[j], posz[0]], 0.);
             }
+            
+            
         }
     }
     println!("{:?}", ygrid);

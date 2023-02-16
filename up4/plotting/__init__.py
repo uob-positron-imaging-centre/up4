@@ -28,7 +28,8 @@ def create_plot(self) -> plotly.graph_objects.Figure:
 
 def save_fig(self, fig: plotly.graph_objects.Figure, filename: str, dpi: int) -> None:
     """
-    Save Plotly figure with specified dpi. Currently, this method assumes A4 format with 20mm borders.
+    Save Plotly figure with specified dpi. Currently, this method assumes A4 format
+    with 20mm borders.
 
     Parameters
     ----------

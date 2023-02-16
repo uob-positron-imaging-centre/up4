@@ -57,9 +57,7 @@ impl PyVectorPlotter {
     ///     Index along supplied `axis` to select data from.
     fn unit_vector_plot(&mut self, axis: usize, index: usize) {
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
-        let arrows = self
-            .plotting_data
-            .create_unit_vector_traces(axis, index);
+        let arrows = self.plotting_data.create_unit_vector_traces(axis, index);
         let layout: Layout = Layout::new();
         let square: bool = false;
         let smoothing = Some(Smoothing::False);

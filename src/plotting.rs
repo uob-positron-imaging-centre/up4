@@ -3,10 +3,11 @@
 use crate::GridFunctions3D;
 use ndarray::{Array1, Array2, Array3};
 
+pub mod colourmap;
 pub mod comparison_plot;
+pub mod plotting_2d;
 pub mod scalar_plot;
 pub mod vector_plot;
-pub mod colourmap;
 
 /// Return plane positions perpendicular to the provided axis.
 pub fn axis_selector(grid: Box<dyn GridFunctions3D>, axis: usize) -> (Array1<f64>, Array1<f64>) {

@@ -12,5 +12,6 @@ from upppp_rust import Data, Converter
 from .grid import Grid
 
 from . import plotting
+from .plotting import save_fig
 
 __all__ = ["Data", "Converter", "Grid", "plotting"]

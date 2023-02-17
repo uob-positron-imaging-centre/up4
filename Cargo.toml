@@ -10,7 +10,7 @@ crate-type = ["cdylib","rlib"]
 
 [dependencies]
 numpy = "0.18"
-hdf5 = {version = "0.8.1", features = ["blosc"]}
+hdf5 = {version = "0.8.1"}#, features = ["blosc"]}
 ndarray = "0.15"
 ndarray-stats="0.5.0"
 derive-getters = "0.2.0"

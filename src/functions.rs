@@ -254,7 +254,7 @@ pub trait Granular: DataManager {
         let timesteps: &usize = global_stats.timesteps();
         let mut occupancy_grid = grid.new_zeros();
         let mut complete_time = 0.0;
-        self.setup_buffer(); //setup another buffer
+        self.setup_buffer(0); //setup another buffer
         for timestep in 0..timesteps - 3 {
             let timestep_data = self.get_timestep(timestep).clone();
             //BUG this is not working, try to acces a point in the buffer that doesnt excist
@@ -401,9 +401,9 @@ pub trait Granular: DataManager {
     ) -> (Box<dyn GridFunctions3D>, f64) {
         let global_stats = self.global_stats();
         let timesteps = global_stats.timesteps();
-        self.setup_buffer(); // add another buffer to the system
-                             // Allocate arrays needed for calculation
-                             // those arrays are needed for the calculation of the variance with a special algorithm
+        self.setup_buffer(0); // add another buffer to the system
+                              // Allocate arrays needed for calculation
+                              // those arrays are needed for the calculation of the variance with a special algorithm
         let mut squared_sum_x = grid.get_data().clone();
         let mut squared_sum_y = grid.get_data().clone();
         let mut squared_sum_z = grid.get_data().clone();

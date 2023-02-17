@@ -29,7 +29,7 @@ pub trait DataManager {
     fn get_timestep_unbuffered(&self, timestep: usize) -> Timestep;
 
     /// setup a new buffer
-    fn setup_buffer(&mut self);
+    fn setup_buffer(&mut self, external_buffer_id: usize);
 
     /// read from other buffer then the main one
     fn get_timestep_buffer(&mut self, timestep: usize, buffer: usize) -> &Timestep;

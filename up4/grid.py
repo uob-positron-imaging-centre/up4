@@ -27,6 +27,13 @@ def calc_num_cells(cell_size,data,limits,xlim,ylim,zlim):
             num_cells[i] = int((limits[2*i+1]-limits[2*i])/cell_size[i])
         return np.array(num_cells, dtype=np.int64)
 
+    elif xlim is not None and ylim is not None and zlim is not None:
+        num_cells = [(xlim[1]-xlim[0])/cell_size[0],
+        (ylim[1]-ylim[0])/cell_size[1],
+        (zlim[1]-zlim[0])/cell_size[2]]
+        return np.asarray(num_cells, dtype=np.int64)
+    else:
+        raise ValueError("You shouldn't be here. Please contact a dev.")
 
 class Grid(rustGrid):
     def __new__(

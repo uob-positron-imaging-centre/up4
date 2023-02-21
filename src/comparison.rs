@@ -184,13 +184,26 @@ fn make_grid(dim: &Array2<f64>, gridtype: &str, cells: [usize; 3]) -> Box<dyn Gr
 }
 
 impl Comparer {
-    fn velocityfield(&mut self) -> (Array1<f64>, Array1<f64>) {
-        let field1 = self
-            .data
-            .velocityfield(self.grid.clone(), &ParticleSelector::default());
-        let field2 = self
-            .data2
-            .velocityfield(self.grid2.clone(), &ParticleSelector::default());
+    fn velocityfield(
+        &mut self,
+        mode: &str,
+        min_velocity: f64,
+        max_velocity: f64,
+    ) -> (Array1<f64>, Array1<f64>) {
+        let field1 = self.data.velocityfield(
+            self.grid.clone(),
+            &ParticleSelector::default(),
+            mode,
+            min_velocity,
+            max_velocity,
+        );
+        let field2 = self.data2.velocityfield(
+            self.grid2.clone(),
+            &ParticleSelector::default(),
+            mode,
+            min_velocity,
+            max_velocity,
+        );
         (
             field1.get_data().iter().map(|x| *x).collect(),
             field2.get_data().iter().map(|x| *x).collect(),

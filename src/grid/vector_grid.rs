@@ -4,6 +4,8 @@ use crate::{grid, CylindricalGrid3D};
 use derive_getters::Getters;
 use ndarray::prelude::*;
 use std::any::Any;
+
+use anyhow::Result;
 #[derive(Getters, Clone)]
 pub struct VectorGrid {
     pub data: [Box<dyn grid::GridFunctions3D>; 3],
@@ -144,11 +146,15 @@ impl GridFunctions3D for VectorGrid {
     }
 
     // Return cell ID of Data/Particle
-    fn cell_id(&self, pos: Position) -> CellId {
+    fn cell_id(&self, pos: Position) -> Result<CellId> {
         self.data[0].cell_id(pos)
     }
 
-    fn cell_ids_in_trajectory(&self, pos1: Position, pos2: Position) -> (Vec<CellId>, Vec<f64>) {
+    fn cell_ids_in_trajectory(
+        &self,
+        pos1: Position,
+        pos2: Position,
+    ) -> Result<(Vec<CellId>, Vec<f64>)> {
         self.data[0].cell_ids_in_trajectory(pos1, pos2)
     }
     // Needed for python interface ( check that again, might be not needed)

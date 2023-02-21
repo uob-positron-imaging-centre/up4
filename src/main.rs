@@ -9,13 +9,11 @@ use grid::{CartesianGrid3D, CylindricalGrid3D};
 /// Module that implements the `ParticleSelector`, a struct deciding if a particle is valid or not
 pub mod particleselector;
 pub use particleselector::*;
-
 pub mod converter;
 pub use converter::*;
 
 pub mod functions;
 pub mod utilities;
-
 use datamanager::pdata::PData;
 use datamanager::tdata::TData;
 use datamanager::DataManager;
@@ -66,7 +64,7 @@ fn main() {
         ]),
     ));
     let selector = ParticleSelector::default();
-    let disp = pdata.velocityfield(grid.clone(), &selector);
+    let disp = pdata.velocityfield(grid.clone(), &selector, "x", 0.0, 10000.0);
     println!("Disp: {}", disp);
     let disp = pdata.numberfield(grid.clone(), &selector);
     println!("Disp: {}", disp);

@@ -96,7 +96,7 @@ class Grid(RustGrid):
 
         if not isinstance(grid_style, str) and grid_style is not None:
             raise TypeError("grid_style must be a string")
-        if not grid_style in ["cartesian", "cylindrical"]:
+        if grid_style not in ["cartesian", "cylindrical"]:
             raise ValueError("grid_style must be 'cartesian' or 'cylindrical'")
 
         if not isinstance(cell_size, (list, np.ndarray)) and cell_size is not None:
@@ -105,7 +105,8 @@ class Grid(RustGrid):
             cell_size = np.asarray(cell_size)
             if len(cell_size) != 3:
                 raise ValueError(
-                    "cell_size must have length 3 containing the size of a single cell in x,y,z direction. Units are in file units"
+                    "cell_size must have length 3 containing the size of a single cell"
+                    " in x,y,z direction. Units are in file units"
                 )
             num_cells = calc_num_cells(cell_size, data, limits, xlim, ylim, zlim)
             print(num_cells)
@@ -139,7 +140,7 @@ class Grid(RustGrid):
 
             # data is given and cell size is given
             elif data is not None and limits is not None:
-                # BUG limits can be negative. nobody say they cant. who wrote that shit?!
+                # BUG limits can be negative. nobody say they cant
                 if not any(i < 0 for i in limits):
                     return self.cartesian3d(np.asarray(num_cells), np.asarray(limits))
                 else:

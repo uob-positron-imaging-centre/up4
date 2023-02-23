@@ -9,7 +9,6 @@ use crate::{
     VectorGrid, plotting::plot
 };
 use itertools::izip;
-use ndarray_stats::QuantileExt;
 use plotly::heat_map::Smoothing;
 use plotly::{layout::Axis, Layout, Plot, Trace};
 use pyo3::{prelude::*, exceptions::PyValueError};

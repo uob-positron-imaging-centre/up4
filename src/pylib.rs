@@ -18,7 +18,9 @@ use libconv::*;
 use libgrid::*;
 use libplot::*;
 
-/// Class that holds the particle data for processing, if you have simulation data, you will *probably*
+/// Class that holds the particle data for processing.
+///
+/// If you have simulation data, you will *probably*
 /// want to use ``Data.from_pdata()`` to instantiate this class as this handles a large number of particles.
 /// For experimental data, ``Data.from_tdata()`` is recommended. However, as the choice ultimately makes no
 /// difference to how you use this library, that choice is down to you!
@@ -53,31 +55,32 @@ use libplot::*;
 ///     Return the mean velocity of all valid particles in the system.
 ///
 /// dispersion:
-///    Return the dispersion of all valid particles in the system for a given time
+///     Return the dispersion of all valid particles in the system for a given time
 ///
 /// histogram:
-///    Return the histogram of all valid particles in the system for a given time
+///     Return the histogram of all valid particles in the system for a given time
 ///
 /// granular_temperature:
-///    Return the granular temperature of all valid particles in the system for a given time
+///     Return the granular temperature of all valid particles in the system for a given time
 ///
 /// lacey_mixing_index:
-///    Return the lacey mixing index for the whole system over a given time
+///     Return the lacey mixing index for the whole system over a given time
 ///
 /// circulation_time:
-///    Return the circulation time for the whole system, returns all times as one large array
+///     Return the circulation time for the whole system, returns all times as one large array
 ///
 /// concentration_field:
-///    Return the concentration field for the whole system
+///     Return the concentration field for the whole system
 ///
 /// homogenity_index:
-///   Return the homogenity index for the whole system, defiuned by two particle species
+///     Return the homogenity index for the whole system, defiuned by two particle species
 ///
 /// msd_field:
 ///     Return the mean square displacement field for the whole system
 ///
 /// msd:
-///    Return the mean square displacement for the whole system over time
+///     Return the mean square displacement for the whole system over time
+///
 #[pyclass(name = "Data")]
 struct PyData {
     data: Box<dyn Manager + Send>,
@@ -86,7 +89,7 @@ struct PyData {
 
 #[pymethods]
 impl PyData {
-    /// Create new i0nstance of up4.Data class. Time or particle oriented formats are parsed automatically.
+    /// Create new instance of up4.Data class. Time or particle oriented formats are parsed automatically.
     ///
     /// Parameters
     /// ----------
@@ -250,11 +253,6 @@ impl PyData {
     }
 
     /// Return the time array of the dataset.
-    ///
-    /// Parameters
-    /// ----------
-    ///
-    /// None
     ///
     /// Returns
     /// -------
@@ -420,16 +418,17 @@ impl PyData {
     } //End mean_velocity
 
     /// Return the dispersion of the particles in the system.
-    /// See Martin, T. W., J. P. K. Seville, and D. J. Parker. "A general method for quantifying dispersion in multiscale systems using trajectory analysis."
+    /// 
+    /// See [1]_ for further details.
     ///
-    /// parameters
+    /// Parameters
     /// ----------
     /// grid : up4.Grid
     ///    Grid class containing the grid layout.
     /// time_for_dispersion : float
     ///   Time for which the dispersion is calculated.
     ///
-    /// returns
+    /// Returns
     /// -------
     /// up4.Grid
     ///   Grid class containing the dispersion field.
@@ -437,6 +436,9 @@ impl PyData {
     /// float
     ///   Mixing efficiency
     ///
+    /// References
+    /// ----------
+    /// .. [1] Martin, T. W., J. P. K. Seville, and D. J. Parker. "A general method for quantifying dispersion in multiscale systems using trajectory analysis."
     fn dispersion<'py>(
         &mut self,
         _py: Python<'py>,
@@ -457,6 +459,7 @@ impl PyData {
     }
 
     /// Calculate a histogram of a specific property in a region of the system.
+    /// 
     /// The histogram is calculated for all particles that are valid according to the particleselector.
     /// The histogram is calculated for the region defined by the grid.
     ///
@@ -467,12 +470,11 @@ impl PyData {
     ///     The grid that defines the region of the system.
     ///
     /// property : str
-    ///     The property that is used to calculate the histogram.
-    ///    The following properties are available:
+    ///     The property that is used to calculate the histogram, the following properties are available:
     ///     - 'velocity'
     ///
     /// bins : int
-    ///    The number of bins in the histogram.
+    ///     The number of bins in the histogram.
     ///
     /// Returns
     /// -------
@@ -639,7 +641,7 @@ impl PyData {
         PyGrid { grid: grid }
     }
 
-    /// Calculate the homogenity index
+    /// Calculate the homogenity index.
     ///
     /// Parameters
     /// ----------

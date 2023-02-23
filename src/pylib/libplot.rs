@@ -31,25 +31,49 @@ impl PyPlotter2D {
         PyPlotter2D { plotting_string, grid }
     }
 
-    #[pyo3(signature = (axis, scaling_mode = "none", scaling_args = vec![]))]
-    fn _quiver_plot(&mut self, axis: usize, scaling_mode: &str, scaling_args: Vec<f64>) -> PyResult<()> {
+    #[pyo3(signature = (axis, selection = "depth_average", index = None, scaling_mode = "none", scaling_args = None))]
+    fn _quiver_plot(&mut self, axis: usize, selection: &str, index: Option<usize>, scaling_mode: &str, scaling_args: Option<Vec<f64>>) -> PyResult<()> {
         let vector_grid = self.grid.as_any()
         .downcast_ref::<VectorGrid>()
         .unwrap().clone();
-        let quiver_plotter = QuiverPlot::new(vector_grid, axis);
+        let quiver_plotter = if selection == "depth_average" {
+            QuiverPlot::from_vector_grid_depth_averaged(vector_grid, axis)
+        } else if selection == "plane" {
+            if index.is_some() {
+                QuiverPlot::from_vector_grid_single_plane(vector_grid, axis, index.unwrap())
+            } 
+            else {
+                return Err(PyValueError::new_err("A valid index is required to select an individual plane."))
+            }
+        } else {
+            return Err(PyValueError::new_err("Valid selection modes are 'depth_average' and 'plane' only."))
+        };
         let len = quiver_plotter.x().len();
         let mut traces: Vec<Box<dyn Trace>> = Vec::with_capacity(len);
         let quiver_traces = if scaling_mode == "none" {
             quiver_plotter.create_quiver_traces()
         } else if scaling_mode == "min" {
-            quiver_plotter.bound_min(scaling_args[0]).create_quiver_traces()
-        } else if scaling_mode == "max" {
-            quiver_plotter.bound_max(scaling_args[0]).create_quiver_traces()
-        } else if scaling_mode == "minmax" {
-            if scaling_args.len() < 2 {
-                return Err(PyValueError::new_err("Min-max scaling requires 2 arguments."))
+            if scaling_args.is_some() {
+                quiver_plotter.bound_min(scaling_args.unwrap()[0]).create_quiver_traces()
+            } else {
+                return Err(PyValueError::new_err("A valid scaling argument is required."))
             }
-            quiver_plotter.bound_min_max(scaling_args[0], scaling_args[1]).create_quiver_traces()
+        } else if scaling_mode == "max" {
+            if scaling_args.is_some() {
+                quiver_plotter.bound_max(scaling_args.unwrap()[0]).create_quiver_traces()
+            } else {
+                return Err(PyValueError::new_err("A valid scaling argument is required."))
+            }
+        } else if scaling_mode == "minmax" {
+            if scaling_args.is_some() {
+                let scaling_vector = scaling_args.unwrap();
+                if scaling_vector.len() < 2 {
+                    return Err(PyValueError::new_err("Min-max scaling requires 2 arguments."))
+                }
+                quiver_plotter.bound_min_max(scaling_vector[0], scaling_vector[1]).create_quiver_traces()
+            } else {
+                return Err(PyValueError::new_err("A valid scaling argument is required."))
+            }
         } else if scaling_mode == "half_node" {
             let dx = quiver_plotter.x()[1] - quiver_plotter.x()[0];
             let dy = quiver_plotter.y()[1] - quiver_plotter.y()[0];
@@ -61,7 +85,6 @@ impl PyPlotter2D {
         } else {
             return Err(PyValueError::new_err("Invalid scaling mode provided, valid types are: 'none', 'min', 'max', 'minmax', 'half_node', 'full_node'."))
         };
-
         for trace in quiver_traces {
             traces.push(trace)
         }

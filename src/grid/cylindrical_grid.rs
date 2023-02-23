@@ -5,6 +5,8 @@ use derive_getters::Getters;
 use ndarray::{prelude::*, RemoveAxis};
 use ndarray_stats::QuantileExt;
 use std::any::Any;
+
+use anyhow::Result;
 // TODO
 // - Currently the cylinder is always vertical, but this should be configurable.
 #[derive(Getters, Clone, Default)]
@@ -181,7 +183,7 @@ impl GridFunctions3D for CylindricalGrid3D {
         in_rad && in_omega && in_height
     }
 
-    fn cell_id(&self, pos: Position) -> CellId {
+    fn cell_id(&self, pos: Position) -> Result<CellId> {
         print_debug!("Grid3D: Checking if {:?} is in grid", pos);
         let pos = &self.to_cylindrical(pos);
         let posr = pos[0];
@@ -211,10 +213,14 @@ impl GridFunctions3D for CylindricalGrid3D {
             .collect::<Array1<f64>>()
             .argmin()
             .unwrap_or_else(|_| panic!("Can not find min of {:?} in Gri3D", pos));
-        [cell_idr, cell_ido, cell_idz]
+        Ok([cell_idr, cell_ido, cell_idz])
     }
     #[allow(unused_variables)]
-    fn cell_ids_in_trajectory(&self, pos1: Position, pos2: Position) -> (Vec<CellId>, Vec<f64>) {
+    fn cell_ids_in_trajectory(
+        &self,
+        pos1: Position,
+        pos2: Position,
+    ) -> Result<(Vec<CellId>, Vec<f64>)> {
         unimplemented!("Not implemented for cylindrical grid")
     }
 
@@ -228,12 +234,18 @@ impl GridFunctions3D for CylindricalGrid3D {
     }
 
     fn get_value(&self, pos: Position) -> f64 {
-        let cell_id = self.cell_id(pos);
+        let cell_id = match self.cell_id(pos) {
+            Ok(cell_id) => cell_id,
+            Err(_) => return f64::NAN,
+        };
         self.data[(cell_id[0], cell_id[1], cell_id[2])]
     }
 
     fn add_value(&mut self, pos: Position, value: f64) {
-        let cell_id = self.cell_id(pos);
+        let cell_id = match self.cell_id(pos) {
+            Ok(cell_id) => cell_id,
+            Err(_) => return,
+        };
         self.data[(cell_id[0], cell_id[1], cell_id[2])] += value;
         self.weight[(cell_id[0], cell_id[1], cell_id[2])] += 1.;
     }
@@ -259,7 +271,10 @@ impl GridFunctions3D for CylindricalGrid3D {
     }
 
     fn insert(&mut self, pos: Position, value: f64) {
-        let cell_id = self.cell_id(pos);
+        let cell_id = match self.cell_id(pos) {
+            Ok(cell_id) => cell_id,
+            Err(_) => return,
+        };
         self.data[(cell_id[0], cell_id[1], cell_id[2])] = value;
     }
     fn new_zeros(&self) -> Box<dyn GridFunctions3D> {

@@ -494,6 +494,26 @@ impl PyGrid {
             self.grid.get_data().max_skipnan()
         ))
     }
+
+    /// Return the cell id of a given position
+    ///
+    /// Parameters
+    /// ----------
+    ///
+    /// x : float
+    ///     The x-position of the cell
+    /// y : float
+    ///     The y-position of the cell
+    /// z : float
+    ///     The z-position of the cell
+    ///
+    /// Returns
+    /// -------
+    /// cell_id : list
+    ///     The cell id of the given position
+    fn cell_id(&self, x: f64, y: f64, z: f64) -> [usize; 3] {
+        self.grid.cell_id([x, y, z]).unwrap()
+    }
 }
 
 /// A 3D Grid containing Vector Data

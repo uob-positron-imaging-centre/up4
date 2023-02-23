@@ -32,6 +32,7 @@ pub struct PData {
     rotation_is_set: bool,
     rotation: [f64; 3],
     rotation_center: [f64; 3],
+    external_buffer_names: Vec<usize>,
 }
 
 impl PData {
@@ -62,6 +63,7 @@ impl PData {
             rotation_is_set: false,
             rotation: [0.0, 0.0, 0.0],
             rotation_center: [0.0, 0.0, 0.0],
+            external_buffer_names: vec![],
         };
         print_debug!(
             "PData: Generation complete. First buffer update starting, buffer size: {}",
@@ -981,13 +983,26 @@ impl DataManager for PData {
     }
 
     /// setup a new buffer
-    fn setup_buffer(&mut self) {
-        self.extra_buffers
-            .push(vec![Timestep::default(); BUFFERSIZE]);
-        let buffer_id = self.extra_buffers.len() - 1;
-        let range = (0, BUFFERSIZE);
-        self.range_extra.push(range);
-        self.buffersize_extra.push(BUFFERSIZE);
+    fn setup_buffer(&mut self, external_buffer_id: usize) {
+        let range = (0usize, BUFFERSIZE);
+        let buffer_id;
+        if self.external_buffer_names.contains(&external_buffer_id) {
+            // buffer is already know and will be reset
+            buffer_id = self
+                .external_buffer_names
+                .iter()
+                .position(|x| x == &external_buffer_id)
+                .unwrap();
+            self.range_extra[buffer_id] = range
+        } else {
+            // new buffer. Allocate new memory and load the first bit of data
+            self.extra_buffers
+                .push(vec![Timestep::default(); BUFFERSIZE]);
+            buffer_id = self.extra_buffers.len() - 1;
+            self.range_extra.push(range);
+            self.buffersize_extra.push(BUFFERSIZE);
+            self.external_buffer_names.push(external_buffer_id)
+        }
         self.update_extra(range, buffer_id)
     }
 

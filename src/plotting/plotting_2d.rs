@@ -6,11 +6,11 @@ use ndarray::{Array1, Array2, Zip};
 use ndarray_stats::QuantileExt;
 use plotly::{
     common::{ColorBar, ColorScale, ColorScalePalette, Fill, Line, Marker, Mode},
-    Scatter, Plot, Trace, Layout,
+    Scatter,
 };
-use std::{f64::consts::PI, ops::Index};
+use std::{f64::consts::PI};
 
-use crate::{GridFunctions3D, VectorGrid, utilities::maths::meshgrid, Grid};
+use crate::{GridFunctions3D, VectorGrid, utilities::maths::meshgrid};
 
 /// Internal representation of arrow data
 struct Arrow {

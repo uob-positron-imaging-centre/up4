@@ -16,7 +16,7 @@ This tutorial will go through each element in CGAP and explain what it does and 
 
 
 Data analysis
-----------------
+-------------
 
 Data analysis is done by methods of the :code:`up4.Data` class. The most important methods are:
 
@@ -43,10 +43,10 @@ The velocity field in this example can also be calculated in cylindrical coordin
     grid_cyl = up4.Grid.cylindrical_from_data(data, cells =[20,20,20])
     velocity_field = data.velocityfield(grid_cyl)
 
-Plotting
---------
+Data Visualisation
+------------------
 
-Plotting is done by one of the classes in :code:`up4.plotting`. These are:
+Visualisation is done by one of the classes in :code:`up4.plotting`. These are:
 
 - :code:`up4.plotting.VectorPlotter`: Calculates the velocity vector field of the data
 - :code:`up4.plotting.ScalarPlotter`: Calculates the magnitude velocity field of the data

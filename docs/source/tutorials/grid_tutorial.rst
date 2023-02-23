@@ -1,7 +1,8 @@
 .. _grid_ref:
-******
-Grids
-******
+
+**************
+Grids Tutorial
+**************
 
 
 Grids are one of the main parts in `up4`. They determine where (spatially) and in which way we want to have a look at the data.

@@ -48,15 +48,14 @@ class P2D:
         self.plotter = Plotter2D._from_vector_grid(grid)
 
     def quiver_plot(
-        self, axis: int, scaling_mode=None, scaling_args=None
+        self,
+        axis: int,
+        selection=None,
+        index=None,
+        scaling_mode=None,
+        scaling_args=None,
     ) -> plotly.graph_objects.Figure:
-        if scaling_mode is not None:
-            if scaling_args is not None:
-                self.plotter._quiver_plot(axis, scaling_mode, scaling_args)
-            else:
-                self.plotter._quiver_plot(axis, scaling_mode)
-        else:
-            self.plotter._quiver_plot(axis)
+        self.plotter._quiver_plot(axis, selection, index, scaling_mode, scaling_args)
         quiver_plot = self._create_plot()
 
         return quiver_plot

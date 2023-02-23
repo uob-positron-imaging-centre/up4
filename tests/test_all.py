@@ -188,18 +188,27 @@ class TestGrid:
         assert slice_xy_3.shape == (10, 9)
 
     def test_grid_generation(self, grid):
-        data = up4.Data.from_tdata(os.path.join(
-            location, "fixtures", "drum.hdf5"))
+        data = up4.Data.from_tdata(os.path.join(location, "fixtures", "drum.hdf5"))
         if grid.__name__.startswith("cartesian"):
             grid = up4.Grid(data, num_cells=[10, 9, 8])
             assert grid.shape() == [10, 9, 8]
-            grid = up4.Grid(data, num_cells=[10, 9, 8], xlim=[0, 1], ylim=[0, 1], zlim=[0, 1])
+            grid = up4.Grid(
+                data, num_cells=[10, 9, 8], xlim=[0, 1], ylim=[0, 1], zlim=[0, 1]
+            )
             assert grid.shape() == [10, 9, 8]
         else:
             grid = up4.Grid(data, num_cells=[10, 9, 8], grid_style="cylindrical")
             assert grid.shape() == [10, 9, 8]
-            grid = up4.Grid(data, num_cells=[10, 9, 8], xlim=[0, 1], ylim=[0, 1], zlim=[0, 1], grid_style="cylindrical")
+            grid = up4.Grid(
+                data,
+                num_cells=[10, 9, 8],
+                xlim=[0, 1],
+                ylim=[0, 1],
+                zlim=[0, 1],
+                grid_style="cylindrical",
+            )
             assert grid.shape() == [10, 9, 8]
+
 
 @pytest.mark.parametrize("data", ["exp2", "sim"], indirect=True)
 @pytest.mark.parametrize("grid", ["cylidrical", "cartesian"], indirect=True)

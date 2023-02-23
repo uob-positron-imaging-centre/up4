@@ -2,9 +2,8 @@ pub mod conditional;
 pub mod extractions;
 pub mod mixing;
 use crate::datamanager::DataManager;
-use indicatif::{ProgressBar, ProgressStyle};
 //use crate::utilities::print_debug;
-use crate::{check_signals, print_debug, print_warning, setup_bar};
+use crate::{check_signals, print_debug, print_warning};
 extern crate ndarray;
 //extern crate ndarray_linalg;
 extern crate numpy;
@@ -92,8 +91,43 @@ pub trait Granular: DataManager {
         &mut self,
         grid: Box<dyn GridFunctions3D>,
         selector: &ParticleSelector,
+        mode: &str,
+        min_vel: f64,
+        max_vel: f64,
     ) -> Box<dyn GridFunctions3D> {
         //read the number of timesteps inside this hdf5file
+        type FnPointer = fn(Array1<f64>) -> f64;
+        let velocity_calc: FnPointer;
+        if mode == "absolute" {
+            fn velocity_calculation(velocity: Array1<f64>) -> f64 {
+                let vx: f64 = velocity[0];
+                let vy: f64 = velocity[1];
+                let vz: f64 = velocity[2];
+                let abs_vel = (vx.powi(2) + vy.powi(2) + vz.powi(2)).sqrt();
+                abs_vel
+            }
+            velocity_calc = velocity_calculation;
+        } else if mode == "x" {
+            fn velocity_calculation(velocity: Array1<f64>) -> f64 {
+                velocity[2]
+            }
+            velocity_calc = velocity_calculation;
+        } else if mode == "y" {
+            fn velocity_calculation(velocity: Array1<f64>) -> f64 {
+                velocity[1]
+            }
+            velocity_calc = velocity_calculation;
+        } else if mode == "z" {
+            fn velocity_calculation(velocity: Array1<f64>) -> f64 {
+                velocity[2]
+            }
+            velocity_calc = velocity_calculation;
+        } else {
+            panic!(
+                "Mode {} is not valid. Valid modes are: \"absolute\", \"x\", \"y\", \"z\"",
+                mode
+            );
+        }
         let global_stats = self.global_stats();
         let timesteps: &usize = global_stats.timesteps();
         let mut velocity_grid = grid.new_zeros();
@@ -140,10 +174,7 @@ pub trait Granular: DataManager {
                 //reset the position. the lowest value should be at 0,0,0
 
                 //velocities
-                let vx: f64 = velocity[0];
-                let vy: f64 = velocity[1];
-                let vz: f64 = velocity[2];
-                let abs_vel = (vx.powi(2) + vy.powi(2) + vz.powi(2)).sqrt();
+                let abs_vel = velocity_calc(velocity);
 
                 if abs_vel.is_nan() {
                     print_debug!("Particle {} has no velocity", particle);
@@ -153,6 +184,10 @@ pub trait Granular: DataManager {
                 if !grid.is_inside(position) {
                     // the particle is out of the field of view
                     print_debug!("Particle {} is out of FoV", particle);
+                    continue;
+                }
+                if abs_vel < min_vel || abs_vel > max_vel {
+                    print_debug!("Particle {} is out of range", particle);
                     continue;
                 }
                 print_debug!("Particle {} is in the grid", particle);
@@ -254,7 +289,7 @@ pub trait Granular: DataManager {
         let timesteps: &usize = global_stats.timesteps();
         let mut occupancy_grid = grid.new_zeros();
         let mut complete_time = 0.0;
-        self.setup_buffer(); //setup another buffer
+        self.setup_buffer(0); //setup another buffer
         for timestep in 0..timesteps - 3 {
             let timestep_data = self.get_timestep(timestep).clone();
             //BUG this is not working, try to acces a point in the buffer that doesnt excist
@@ -393,6 +428,7 @@ pub trait Granular: DataManager {
     /// float
     ///   The dispersion of the particles in the system.
     ///
+    #[allow(unused)]
     fn dispersion(
         &mut self,
         grid: Box<dyn GridFunctions3D>,
@@ -401,9 +437,9 @@ pub trait Granular: DataManager {
     ) -> (Box<dyn GridFunctions3D>, f64) {
         let global_stats = self.global_stats();
         let timesteps = global_stats.timesteps();
-        self.setup_buffer(); // add another buffer to the system
-                             // Allocate arrays needed for calculation
-                             // those arrays are needed for the calculation of the variance with a special algorithm
+        self.setup_buffer(0); // add another buffer to the system
+                              // Allocate arrays needed for calculation
+                              // those arrays are needed for the calculation of the variance with a special algorithm
         let mut squared_sum_x = grid.get_data().clone();
         let mut squared_sum_y = grid.get_data().clone();
         let mut squared_sum_z = grid.get_data().clone();
@@ -414,7 +450,7 @@ pub trait Granular: DataManager {
         let mut dispersion_grid = grid.new_zeros();
         print_debug!("Dispersion: Initiation over, entering time loop");
 
-        let mut next_timestep = 0;
+        let mut next_timestep;
         for timestep in 0..timesteps - 1 {
             let timestep_data = self.get_timestep(timestep).clone();
             let current_time = *timestep_data.time();
@@ -469,7 +505,17 @@ pub trait Granular: DataManager {
                     print_debug!("Particle {} is out of FoV", particle);
                     continue;
                 }
-                let cell_id = grid.cell_id(positions[particle]);
+                let cell_id = match grid.cell_id(positions[particle]) {
+                    Ok(x) => x,
+                    Err(s) => {
+                        print_warning!(
+                            "Dispersion: Error getting cell id for particle {}, \n error: {}",
+                            particle,
+                            s
+                        );
+                        continue;
+                    }
+                };
                 let position_future_particle = position_future[particle];
                 squared_sum_x[cell_id] += position_future_particle[0] * position_future_particle[0];
                 squared_sum_y[cell_id] += position_future_particle[1] * position_future_particle[1];
@@ -746,7 +792,10 @@ pub trait Granular: DataManager {
                     grid.get_zpositions()
                 );
                 let velocity = velocities.slice(s![particle, ..]);
-                let cell_id = grid.cell_id(position);
+                let cell_id = match grid.cell_id(position) {
+                    Ok(cell_id) => cell_id,
+                    Err(_) => continue,
+                };
                 num_counts[cell_id] += 1.0;
                 sum_x[cell_id] += velocity[0];
                 sum_y[cell_id] += velocity[1];

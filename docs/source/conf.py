@@ -78,6 +78,7 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
     "sphinx_copybutton",
+    'sphinx.ext.autosectionlabel',
 ]
 # copy python snippets with no hassle
 copybutton_prompt_text = ">>> "

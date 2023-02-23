@@ -86,7 +86,7 @@ class Grid(rustGrid):
 
         if not isinstance(grid_style, str) and grid_style is not None:
             raise TypeError("grid_style must be a string")
-        if not grid_style in ["cartesian", "cylindrical"]:
+        if grid_style not in ["cartesian", "cylindrical"]:
             raise ValueError("grid_style must be 'cartesian' or 'cylindrical'")
 
         if not isinstance(cell_size, (list, np.ndarray)) and cell_size is not None:
@@ -95,7 +95,8 @@ class Grid(rustGrid):
             cell_size = np.asarray(cell_size)
             if len(cell_size) != 3:
                 raise ValueError(
-                    "cell_size must have length 3 containing the size of a single cell in x,y,z direction. Units are in file units"
+                    """cell_size must have length 3 containing the size of a single cell
+                     in x,y,z direction. Units are in file units"""
                 )
             num_cells = calc_num_cells(cell_size, data, limits, xlim, ylim, zlim)
             print(num_cells)

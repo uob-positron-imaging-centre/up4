@@ -14,4 +14,4 @@ from .grid import Grid
 from . import plotting
 from .plotting import save_fig
 
-__all__ = ["Data", "Converter", "Grid", "plotting"]
+__all__ = ["Data", "Converter", "Grid", "plotting", "save_fig"]

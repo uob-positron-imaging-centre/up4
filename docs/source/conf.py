@@ -44,8 +44,6 @@ sys.path.insert(0, _ROOT_DIR)
 sys.path.insert(0, _PACKAGE_DIR)
 sys.path.insert(0, _SUBPACKAGE_DIR)
 
-import up4
-
 # -- Project information -----------------------------------------------------
 
 project = "up4"

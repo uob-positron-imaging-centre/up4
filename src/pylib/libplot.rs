@@ -9,11 +9,12 @@ use crate::{
     VectorGrid, plotting::plot
 };
 use itertools::izip;
+use ndarray_stats::QuantileExt;
 use plotly::heat_map::Smoothing;
 use plotly::{layout::Axis, Layout, Plot, Trace};
-use pyo3::prelude::*;
+use pyo3::{prelude::*, exceptions::PyValueError};
 
-#[pyclass(name = "Plotter2D")]
+#[pyclass(name = "Plotter2D", subclass)]
 pub struct PyPlotter2D {
     plotting_string: String,
     grid: Box<dyn GridFunctions3D>,
@@ -30,16 +31,37 @@ impl PyPlotter2D {
         PyPlotter2D { plotting_string, grid }
     }
 
-    fn _quiver_plot(&mut self, axis: usize) {
+    #[pyo3(signature = (axis, scaling_mode = "none", scaling_args = vec![]))]
+    fn _quiver_plot(&mut self, axis: usize, scaling_mode: &str, scaling_args: Vec<f64>) -> PyResult<()> {
         let vector_grid = self.grid.as_any()
         .downcast_ref::<VectorGrid>()
         .unwrap().clone();
         let quiver_plotter = QuiverPlot::new(vector_grid, axis);
-        let dx = quiver_plotter.x()[1] - quiver_plotter.x()[0];
-        let dy = quiver_plotter.y()[1] - quiver_plotter.y()[0];
         let len = quiver_plotter.x().len();
         let mut traces: Vec<Box<dyn Trace>> = Vec::with_capacity(len);
-        let quiver_traces = quiver_plotter.bound_half_node(dx, dy).create_quiver_traces();
+        let quiver_traces = if scaling_mode == "none" {
+            quiver_plotter.create_quiver_traces()
+        } else if scaling_mode == "min" {
+            quiver_plotter.bound_min(scaling_args[0]).create_quiver_traces()
+        } else if scaling_mode == "max" {
+            quiver_plotter.bound_max(scaling_args[0]).create_quiver_traces()
+        } else if scaling_mode == "minmax" {
+            if scaling_args.len() < 2 {
+                return Err(PyValueError::new_err("Min-max scaling requires 2 arguments."))
+            }
+            quiver_plotter.bound_min_max(scaling_args[0], scaling_args[1]).create_quiver_traces()
+        } else if scaling_mode == "half_node" {
+            let dx = quiver_plotter.x()[1] - quiver_plotter.x()[0];
+            let dy = quiver_plotter.y()[1] - quiver_plotter.y()[0];
+            quiver_plotter.bound_half_node(dx, dy).create_quiver_traces()
+        } else if scaling_mode == "full_node" {
+            let dx = quiver_plotter.x()[1] - quiver_plotter.x()[0];
+            let dy = quiver_plotter.y()[1] - quiver_plotter.y()[0];
+            quiver_plotter.bound_full_node(dx, dy).create_quiver_traces()
+        } else {
+            return Err(PyValueError::new_err("Invalid scaling mode provided, valid types are: 'none', 'min', 'max', 'minmax', 'half_node', 'full_node'."))
+        };
+
         for trace in quiver_traces {
             traces.push(trace)
         }
@@ -47,6 +69,8 @@ impl PyPlotter2D {
         let plot: Plot = plot(traces, layout);
         let plotting_string = plot.to_json();
         self.plotting_string = plotting_string;
+
+        Ok(())
     }
 
     #[getter]

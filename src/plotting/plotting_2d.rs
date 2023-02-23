@@ -10,7 +10,7 @@ use plotly::{
 };
 use std::f64::consts::PI;
 
-use crate::{GridFunctions3D, VectorGrid};
+use crate::{GridFunctions3D, VectorGrid, utilities::maths::meshgrid};
 
 /// Internal representation of arrow data
 struct Arrow {
@@ -43,8 +43,10 @@ pub struct QuiverPlot {
     u: Array2<f64>,
     v: Array2<f64>,
     norm: Array2<f64>,
+    true_norm: Array2<f64>
 }
 
+// TODO have both a depth-average constructor and a per plane one
 impl QuiverPlot {
     pub fn new(grid: VectorGrid, axis: usize) -> QuiverPlot {
         // select yz (0), xz (1) or xy (2) plane
@@ -80,25 +82,28 @@ impl QuiverPlot {
         let v = grid.data[j].collapse(axis);
         let mut norm = Array2::zeros(u.dim());
         Zip::from(&mut norm).and(&u).and(&v).for_each(|n, &u, &v| {
-            *n += (u.powi(2) + v.powi(2)).powf(0.5);
+            *n = f64::hypot(u, v);
         });
+        let true_norm = norm.clone();
 
-        QuiverPlot { x, y, u, v, norm }
+        QuiverPlot { x, y, u, v, norm, true_norm }
     }
 
+    // BUG arrowheads are not drawn properly
     fn create_arrows(&self) -> Vec<Arrow> {
         // angle between arrows
         const ANGLE: f64 = PI / 9.0;
-        // default scale in plotly's quiver plot is 0.5
-        let scale_factor: f64 = 0.5;
-        let arrow_length = scale_factor * &self.norm;
+        // default scale in plotly's quiver plot is 0.3
+        const SCALE_FACTOR: f64 = 0.3;
+        let arrow_length = &self.norm * SCALE_FACTOR;
         let mut barb_angles = Array2::zeros(self.u.dim());
         Zip::from(&mut barb_angles)
-            .and(&self.u)
             .and(&self.v)
-            .for_each(|a, &u, &v| {
-                *a += f64::atan2(v, u);
+            .and(&self.u)
+            .for_each(|a, &v, &u| {
+                *a = f64::atan2(v, u);
             });
+        let (x, y) = meshgrid(self.x.to_owned(), self.y.to_owned());
         // find angles for either side of arrow
         let arrow_angle_1: Array2<f64> = &barb_angles + ANGLE;
         let arrow_angle_2: Array2<f64> = &barb_angles - ANGLE;
@@ -116,14 +121,16 @@ impl QuiverPlot {
         let seg_2_y: Array2<f64> = &arrow_length * &sin_angle_2;
 
         //set coordinates of the arrow
-        let point_1_x: Array2<f64> = &self.x + &self.u - &seg_1_x;
-        let point_1_y: Array2<f64> = &self.y + &self.v - &seg_1_y;
-        let point_2_x: Array2<f64> = &self.x + &self.u - &seg_2_x;
-        let point_2_y: Array2<f64> = &self.y + &self.v - &seg_2_y;
+        let point_1_x: Array2<f64> = &x + &self.u - seg_1_x;
+        let point_1_y: Array2<f64> = &y + &self.v - seg_1_y;
+        let point_2_x: Array2<f64> = &x + &self.u - seg_2_x;
+        let point_2_y: Array2<f64> = &y + &self.v - seg_2_y;
 
-        let arrows =
-            izip!(&self.x, &self.y, &self.u, &self.v, point_1_x, point_1_y, point_2_x, point_2_y)
-                .map(|(x, y, u, v, p1x, p1y, p2x, p2y)| {
+        let arrows: Vec<Arrow> =
+            izip!(&x, &y, &self.u, &self.v, 
+                    point_1_x, point_1_y, point_2_x, point_2_y)
+            .map(|(x, y, u, v, p1x, 
+                    p1y, p2x, p2y)| {
                     Arrow::new(*x, *y, *u, *v, p1x, p1y, p2x, p2y)
                 })
                 .collect();
@@ -183,6 +190,9 @@ impl QuiverPlot {
     pub fn scale_global(mut self, scale_factor: f64) -> Self {
         self.u *= scale_factor;
         self.v *= scale_factor;
+        Zip::from(&mut self.norm).and(&self.u).and(&self.v).for_each(|n, &u, &v| {
+            *n = f64::hypot(u, v);
+        });
 
         self
     }
@@ -190,6 +200,9 @@ impl QuiverPlot {
     pub fn scale_elementwise(mut self, scale_factor: Array2<f64>) -> Self {
         self.u *= &scale_factor;
         self.v *= &scale_factor;
+        Zip::from(&mut self.norm).and(&self.u).and(&self.v).for_each(|n, &u, &v| {
+            *n = f64::hypot(u, v);
+        });
 
         self
     }
@@ -199,7 +212,7 @@ impl QuiverPlot {
         Zip::from(&mut scale_factor)
             .and(&self.norm)
             .for_each(|sf, &n| {
-                *sf += if n < min { min / n } else { 1. };
+                *sf = if n < min { min / n } else { 1. };
             });
 
         self.scale_elementwise(scale_factor)
@@ -210,7 +223,7 @@ impl QuiverPlot {
         Zip::from(&mut scale_factor)
             .and(&self.norm)
             .for_each(|sf, &n| {
-                *sf += if n > max { max / n } else { 1. };
+                *sf = if n > max { max / n } else { 1. };
             });
 
         self.scale_elementwise(scale_factor)
@@ -221,7 +234,7 @@ impl QuiverPlot {
         Zip::from(&mut scale_factor)
             .and(&self.norm)
             .for_each(|sf, &n| {
-                *sf += if n > min {
+                *sf = if n > min {
                     max / n
                 } else if n < min {
                     min / n
@@ -238,6 +251,9 @@ impl QuiverPlot {
         self.normalise();
         self.u *= 0.5 * dx;
         self.v *= 0.5 * dy;
+        Zip::from(&mut self.norm).and(&self.u).and(&self.v).for_each(|n, &u, &v| {
+            *n = f64::hypot(u, v);
+        });
 
         self
     }
@@ -247,21 +263,24 @@ impl QuiverPlot {
         self.normalise();
         self.u *= dx;
         self.v *= dy;
+        Zip::from(&mut self.norm).and(&self.u).and(&self.v).for_each(|n, &u, &v| {
+            *n = f64::hypot(u, v);
+        });
 
         self
     }
 
     fn normalise_colour(&self) -> Array2<f64> {
-        let min = *self.norm.min_skipnan();
-        let max = *self.norm.max_skipnan();
-        let colours = (&self.norm - min) / (max - min);
+        let min = *self.true_norm.min_skipnan();
+        let max = *self.true_norm.max_skipnan();
+        let colours = (&self.true_norm - min) / (max - min);
 
         colours
     }
 
     fn normalise(&mut self) {
-        self.u /= &self.norm;
-        self.v /= &self.norm;
+        self.u /= &self.true_norm;
+        self.v /= &self.true_norm;
     }
 
 

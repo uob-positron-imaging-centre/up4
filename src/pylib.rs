@@ -729,9 +729,9 @@ fn upppp_rust(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<PyData>()?;
     m.add_class::<PyGrid>()?;
     m.add_class::<PyConverter>()?;
-    m.add_class::<PyVectorPlotter>()?;
-    m.add_class::<PyScalarPlotter>()?;
-    m.add_class::<PyComparisonPlotter>()?;
+    // m.add_class::<PyVectorPlotter>()?;
+    // m.add_class::<PyScalarPlotter>()?;
+    // m.add_class::<PyComparisonPlotter>()?;
     m.add_class::<PyPlotter2D>()?;
     Ok(())
 }

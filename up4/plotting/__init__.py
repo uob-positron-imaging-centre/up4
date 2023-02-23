@@ -12,10 +12,16 @@ import plotly
 from upppp_rust import Plotter2D
 
 
-def save_fig(self, fig: plotly.graph_objects.Figure, filename: str, dpi: int) -> None:
+def save_fig(
+    self,
+    fig: plotly.graph_objects.Figure,
+    filename: str,
+    dpi: int,
+    border_width: int = 20,
+    paper_width: int = 210,
+) -> None:
     """
-    Save Plotly figure with specified dpi. Currently, this method assumes A4 format
-    with 20mm borders.
+    Save Plotly figure with specified dpi.
 
     Parameters
     ----------
@@ -25,19 +31,32 @@ def save_fig(self, fig: plotly.graph_objects.Figure, filename: str, dpi: int) ->
         Filename for saved figure.
     dpi : int
         DPI value for image.
+    border_width : int, optional
+        Width of margins of document (in mm), by default 20mm
+    paper_width : int, optional
+        Width of paper (in mm), by default 210mm (A4)
     """
     # plotly sets the width to 700 if not explicitly set
-    width = fig.layout.width if fig.layout.width is not None else 700
-    scale = (170 / 25.4) / (width / dpi)
+    pixel_width = fig.layout.width if fig.layout.width is not None else 700
+    actual_width = paper_width - (2 * border_width)
+    scale = (actual_width / 25.4) / (pixel_width / dpi)
     fig.write_image(filename, scale=scale)
 
 
-class P2D(Plotter2D):
+class P2D:
     def __init__(self, grid):
-        Plotter2D._from_vector_grid(grid)
+        self.plotter = Plotter2D._from_vector_grid(grid)
 
-    def quiver_plot(self, axis: int) -> plotly.graph_objects.Figure:
-        self._quiver_plot(axis)
+    def quiver_plot(
+        self, axis: int, scaling_mode=None, scaling_args=None
+    ) -> plotly.graph_objects.Figure:
+        if scaling_mode is not None:
+            if scaling_args is not None:
+                self.plotter._quiver_plot(axis, scaling_mode, scaling_args)
+            else:
+                self.plotter._quiver_plot(axis, scaling_mode)
+        else:
+            self.plotter._quiver_plot(axis)
         quiver_plot = self._create_plot()
 
         return quiver_plot
@@ -51,5 +70,5 @@ class P2D(Plotter2D):
         plotly.graph_objects.Figure
             Plotly figure object.
         """
-        fig = from_json(self.plotting_string)
+        fig = from_json(self.plotter.plotting_string)
         return fig

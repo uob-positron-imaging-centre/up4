@@ -38,7 +38,7 @@ use pyo3::prelude::*;
 ///     Return the grid as a numpy array
 ///
 ///
-#[pyclass(name = "Grid", subclass)]
+#[pyclass(name = "RustGrid", subclass)]
 pub struct PyGrid {
     pub grid: Box<dyn grid::GridFunctions3D>,
 }

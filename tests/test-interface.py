@@ -21,5 +21,8 @@ vec_field = data.vectorfield(grid_car)
 
 plotter = up4.plotting.P2D(vec_field)
 
-fig = plotter.quiver_plot(1, scaling_mode="half_node")
+fig = plotter.quiver_plot(1, selection="depth_average", scaling_mode="full_node")
+fig.show()
+
+fig = plotter.quiver_plot(1, selection="plane", index=1, scaling_mode="full_node")
 fig.show()

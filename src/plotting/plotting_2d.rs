@@ -8,9 +8,9 @@ use plotly::{
     common::{ColorBar, ColorScale, ColorScalePalette, Fill, Line, Marker, Mode},
     Scatter, Plot, Trace, Layout,
 };
-use std::f64::consts::PI;
+use std::{f64::consts::PI, ops::Index};
 
-use crate::{GridFunctions3D, VectorGrid, utilities::maths::meshgrid};
+use crate::{GridFunctions3D, VectorGrid, utilities::maths::meshgrid, Grid};
 
 /// Internal representation of arrow data
 struct Arrow {
@@ -48,7 +48,7 @@ pub struct QuiverPlot {
 
 // TODO have both a depth-average constructor and a per plane one
 impl QuiverPlot {
-    pub fn new(grid: VectorGrid, axis: usize) -> QuiverPlot {
+    pub fn from_vector_grid_depth_averaged(grid: VectorGrid, axis: usize) -> QuiverPlot {
         // select yz (0), xz (1) or xy (2) plane
         let x = if axis == 0 {
             grid.get_ypositions().to_owned()
@@ -89,7 +89,49 @@ impl QuiverPlot {
         QuiverPlot { x, y, u, v, norm, true_norm }
     }
 
-    // BUG arrowheads are not drawn properly
+    pub fn from_vector_grid_single_plane(grid: VectorGrid, axis: usize, index: usize) -> QuiverPlot {
+        // select yz (0), xz (1) or xy (2) plane
+        let x = if axis == 0 {
+            grid.get_ypositions().to_owned()
+        } else if axis == 1 {
+            grid.get_xpositions().to_owned()
+        } else {
+            grid.get_xpositions().to_owned()
+        };
+        let y = if axis == 0 {
+            grid.get_zpositions().to_owned()
+        } else if axis == 1 {
+            grid.get_zpositions().to_owned()
+        } else {
+            grid.get_ypositions().to_owned()
+        };
+        let i = if axis == 0 {
+            1
+        } else if axis == 1 {
+            0
+        } else {
+            0
+        };
+        let j = if axis == 0 {
+            2
+        } else if axis == 1 {
+            2
+        } else {
+            1
+        };
+        let u = grid.data[i].get_data().to_owned().index_axis_move(ndarray::Axis(axis), index);
+        let v = grid.data[j].get_data().to_owned().index_axis_move(ndarray::Axis(axis), index);
+        let mut norm = Array2::zeros(u.dim());
+        Zip::from(&mut norm).and(&u).and(&v).for_each(|n, &u, &v| {
+            *n = f64::hypot(u, v);
+        });
+        let true_norm = norm.clone();
+
+        QuiverPlot { x, y, u, v, norm, true_norm }
+    }
+
+    // BUG arrowheads are not drawn properly in method from plotly.py
+    // need to reconsider how the arrows are drawn to do this properly
     fn create_arrows(&self) -> Vec<Arrow> {
         // angle between arrows
         const ANGLE: f64 = PI / 9.0;
@@ -247,10 +289,9 @@ impl QuiverPlot {
     }
 
     pub fn bound_half_node(mut self, dx: f64, dy: f64) -> Self {
-        // normalise vectors first
-        self.normalise();
-        self.u *= 0.5 * dx;
-        self.v *= 0.5 * dy;
+        let largest_norm = *self.norm().max_skipnan();
+        self.u *= 0.5 * dx / largest_norm;
+        self.v *= 0.5 * dy / largest_norm;
         Zip::from(&mut self.norm).and(&self.u).and(&self.v).for_each(|n, &u, &v| {
             *n = f64::hypot(u, v);
         });
@@ -259,10 +300,9 @@ impl QuiverPlot {
     }
 
     pub fn bound_full_node(mut self, dx: f64, dy: f64) -> Self {
-        // normalise vectors first
-        self.normalise();
-        self.u *= dx;
-        self.v *= dy;
+        let largest_norm = *self.norm().max_skipnan();
+        self.u *= dx / largest_norm;
+        self.v *= dy / largest_norm;
         Zip::from(&mut self.norm).and(&self.u).and(&self.v).for_each(|n, &u, &v| {
             *n = f64::hypot(u, v);
         });
@@ -277,13 +317,6 @@ impl QuiverPlot {
 
         colours
     }
-
-    fn normalise(&mut self) {
-        self.u /= &self.true_norm;
-        self.v /= &self.true_norm;
-    }
-
-
 }
 
 // TODO make sure that the arrow centres are in the centre of the cell

@@ -301,14 +301,28 @@ impl PyData {
     /// -------
     /// up4.Grid
     ///     Grid class containing the velocity field.
-    fn velocityfield<'py>(&mut self, _py: Python<'py>, grid: &PyGrid) -> PyGrid {
+    #[pyo3(signature = (grid, mode = "absolute", min_velocity = -1000000.0, max_velocity = 1000000.0))]
+    fn velocityfield<'py>(
+        &mut self,
+        _py: Python<'py>,
+        grid: &PyGrid,
+        mode: &str,
+        min_velocity: f64,
+        max_velocity: f64,
+    ) -> PyGrid {
         print_debug!("Starting Vectorfield function");
         let selector: &ParticleSelector =
             match self.selector.as_any().downcast_ref::<ParticleSelector>() {
                 Some(b) => b,
                 None => panic!("Can not convert PyGrid to Grid1D as "),
             };
-        let grid = self.data.velocityfield(grid.grid.clone(), selector);
+        let grid = self.data.velocityfield(
+            grid.grid.clone(),
+            selector,
+            mode,
+            min_velocity,
+            max_velocity,
+        );
 
         PyGrid { grid: grid }
     }

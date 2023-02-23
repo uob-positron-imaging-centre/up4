@@ -10,6 +10,7 @@ use derive_getters::Getters;
 use dyn_clone::{clone_trait_object, DynClone};
 use ndarray::prelude::*;
 use num_traits;
+
 use std::any::Any;
 pub mod cartesian_grid;
 pub use cartesian_grid::CartesianGrid3D;
@@ -18,6 +19,7 @@ pub use cylindrical_grid::CylindricalGrid3D;
 pub mod vector_grid;
 pub use vector_grid::VectorGrid;
 
+use anyhow::Result;
 //mod grid2dpolar;
 //pub use grid2dpolar::Grid2DPolar;
 /// Provides a generic way to send ranges to nD-Grid struct.
@@ -65,9 +67,13 @@ pub trait GridFunctions3D: DynClone + std::fmt::Display + std::fmt::Debug + Send
     fn is_inside(&self, pos: Position) -> bool;
 
     // Return cell ID of Data/Particle
-    fn cell_id(&self, pos: Position) -> CellId;
+    fn cell_id(&self, pos: Position) -> Result<CellId>;
 
-    fn cell_ids_in_trajectory(&self, pos1: Position, pos2: Position) -> (Vec<CellId>, Vec<f64>);
+    fn cell_ids_in_trajectory(
+        &self,
+        pos1: Position,
+        pos2: Position,
+    ) -> Result<(Vec<CellId>, Vec<f64>)>;
 
     // add a number to a cell given its cel id
     fn add_to_cell(&mut self, cell_id: CellId, value: f64);

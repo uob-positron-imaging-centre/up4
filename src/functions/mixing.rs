@@ -205,9 +205,9 @@ pub trait Mixing: DataManager {
     ) -> Box<dyn GridFunctions3D> {
         let global_stats = self.global_stats();
         let timesteps = global_stats.timesteps();
-        self.setup_buffer(); // add another buffer to the system
-                             // Allocate arrays needed for calculation
-                             // those arrays are needed for the calculation of the variance with a special algorithm
+        self.setup_buffer(0); // add another buffer to the system
+                              // Allocate arrays needed for calculation
+                              // those arrays are needed for the calculation of the variance with a special algorithm
         let mut distance = grid.new_zeros();
         print_debug!("Dispersion: Initiation over, entering time loop");
 

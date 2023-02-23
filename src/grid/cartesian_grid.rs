@@ -1,12 +1,13 @@
 extern crate ndarray;
 use super::{CellId, Dim, GridFunctions3D, Position, ThreeD};
-use crate::print_debug;
+use crate::{print_debug, print_warning};
 use derive_getters::Getters;
 use itertools::Itertools;
 use ndarray::{prelude::*, RemoveAxis};
 use ndarray_stats::QuantileExt;
 use std::any::Any;
 
+use anyhow::{anyhow, Result};
 #[derive(Getters, Clone)]
 pub struct CartesianGrid3D {
     cells: CellId,
@@ -117,29 +118,39 @@ impl GridFunctions3D for CartesianGrid3D {
             .all(|value| value)
     }
 
-    fn cell_id(&self, pos: Position) -> CellId {
-        // BUG: This only works well if the point is within the cell which might not be true! Can be made better
-
-        let cell_idx = ((pos[0] - self.limits[0][0]) / (self.limits[0][1] - self.limits[0][0])
-            * (self.cells[0] - 1) as f64) as usize;
-        let cell_idy = ((pos[1] - self.limits[1][0]) / (self.limits[1][1] - self.limits[1][0])
-            * (self.cells[1] - 1) as f64) as usize;
-        let cell_idz = ((pos[2] - self.limits[2][0]) / (self.limits[2][1] - self.limits[2][0])
-            * (self.cells[2] - 1) as f64) as usize;
-        if cell_idx >= self.cells[0] || cell_idy >= self.cells[1] || cell_idz >= self.cells[2] {
-            panic!(
-                "Grid3D: Cell id out of bounds: {:?} {:?} {:?} {:?} {:?} {:?}",
-                cell_idx, cell_idy, cell_idz, pos, self.limits, self.cells
-            );
+    fn cell_id(&self, pos: Position) -> Result<CellId> {
+        print_debug!(
+            "pos: {:?}, limits: {:?}, cells: {:?}",
+            pos,
+            self.limits,
+            self.cells
+        );
+        // check if point is inside grid
+        if !self.is_inside(pos) {
+            return Err(anyhow!(
+                "Position {:?} is outside of grid limits {:?}",
+                pos,
+                self.limits
+            ));
         }
+        let cell_idx = ((pos[0] - self.limits[0][0]) / (self.limits[0][1] - self.limits[0][0])
+            * (self.cells[0]) as f64) as usize;
+        let cell_idy = ((pos[1] - self.limits[1][0]) / (self.limits[1][1] - self.limits[1][0])
+            * (self.cells[1]) as f64) as usize;
+        let cell_idz = ((pos[2] - self.limits[2][0]) / (self.limits[2][1] - self.limits[2][0])
+            * (self.cells[2]) as f64) as usize;
 
-        [cell_idx, cell_idy, cell_idz]
+        Ok([cell_idx, cell_idy, cell_idz])
     }
     #[allow(dead_code, unused_variables, unreachable_code)]
-    fn cell_ids_in_trajectory(&self, pos1: Position, pos2: Position) -> (Vec<CellId>, Vec<f64>) {
-        // Todo finish that algorithm!!
-        let (init_cell, end_cell) = (self.cell_id(pos1), self.cell_id(pos2));
-        return (vec![init_cell, end_cell], vec![0.5, 0.5]);
+    fn cell_ids_in_trajectory(
+        &self,
+        pos1: Position,
+        pos2: Position,
+    ) -> Result<(Vec<CellId>, Vec<f64>)> {
+        // TODO finish that algorithm!!
+        let (init_cell, end_cell) = (self.cell_id(pos1)?, self.cell_id(pos2)?);
+        return Ok((vec![init_cell, end_cell], vec![0.5, 0.5]));
 
         unimplemented!("Not implemented for 3D grid yet.");
         // This code was written on a friday evening. so please look over it
@@ -147,9 +158,9 @@ impl GridFunctions3D for CartesianGrid3D {
         let cell_ids: Vec<[f64; 3]> = Vec::new();
         let weights: Vec<f64> = Vec::new();
 
-        let (init_cell, end_cell) = (self.cell_id(pos1), self.cell_id(pos2));
+        let (init_cell, end_cell) = (self.cell_id(pos1).unwrap(), self.cell_id(pos2).unwrap());
         if init_cell == end_cell {
-            return (vec![init_cell], vec![1.]);
+            return Ok((vec![init_cell], vec![1.]));
         }
         let mut vec_distances = Vec::new();
         let mut vec_cell_ids = Vec::new();
@@ -219,14 +230,20 @@ impl GridFunctions3D for CartesianGrid3D {
         let size_z = (self.limits[2][1] - self.limits[2][0]) / self.cells[2] as f64;
         cell_ids.push(init_cell);
         for distance in distances {
-            let cell_id = self.cell_id([
+            let cell_id = match self.cell_id([
                 pos1[0] + (distance + size_x / 2.) * dx,
                 pos1[1] + (distance + size_y / 2.) * dy,
                 pos1[2] + (distance + size_z / 2.) * dz,
-            ]);
+            ]) {
+                Ok(cell_id) => cell_id,
+                Err(_) => {
+                    println!("Error in cell_id calculation");
+                    continue;
+                }
+            };
             cell_ids.push(cell_id);
         }
-        (cell_ids, weights)
+        Ok((cell_ids, weights))
     }
 
     fn as_any(&self) -> &dyn Any {
@@ -238,12 +255,18 @@ impl GridFunctions3D for CartesianGrid3D {
         self.weight[(cell_id[0], cell_id[1], cell_id[2])] += 1.;
     }
     fn get_value(&self, pos: Position) -> f64 {
-        let cell_id = self.cell_id(pos);
+        let cell_id = match self.cell_id(pos) {
+            Ok(cell_id) => cell_id,
+            Err(_) => return f64::NAN,
+        };
         self.data[(cell_id[0], cell_id[1], cell_id[2])]
     }
 
     fn add_value(&mut self, pos: Position, value: f64) {
-        let cell_id = self.cell_id(pos);
+        let cell_id = match self.cell_id(pos) {
+            Ok(cell_id) => cell_id,
+            Err(_) => return,
+        };
         self.data[(cell_id[0], cell_id[1], cell_id[2])] += value;
         self.weight[(cell_id[0], cell_id[1], cell_id[2])] += 1.;
     }
@@ -252,7 +275,13 @@ impl GridFunctions3D for CartesianGrid3D {
     // distance that is in each cell
     fn add_trajectory_value(&mut self, pos1: Position, pos2: Position, value: f64) {
         // find all cells the particle has been in and their fraction of the whole distance
-        let (cell_ids, fractions) = self.cell_ids_in_trajectory(pos1, pos2);
+        let (cell_ids, fractions) = match self.cell_ids_in_trajectory(pos1, pos2) {
+            Ok((cell_ids, fractions)) => (cell_ids, fractions),
+            Err(_) => {
+                print_warning!("Error in cell_ids_in_trajectory calculation, cell id not found");
+                return;
+            }
+        };
         // add the value to the cells
         for (cell_id, fraction) in cell_ids.iter().zip(fractions.iter()) {
             self.data[(cell_id[0], cell_id[1], cell_id[2])] += value * fraction;
@@ -273,7 +302,10 @@ impl GridFunctions3D for CartesianGrid3D {
     }
 
     fn insert(&mut self, pos: Position, value: f64) {
-        let cell_id = self.cell_id(pos);
+        let cell_id = match self.cell_id(pos) {
+            Ok(cell_id) => cell_id,
+            Err(_) => return,
+        };
         self.data[(cell_id[0], cell_id[1], cell_id[2])] = value;
     }
     fn new_zeros(&self) -> Box<dyn GridFunctions3D> {

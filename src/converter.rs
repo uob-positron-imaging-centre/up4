@@ -52,7 +52,7 @@ pub fn vtk(
     outname: &str,
     filter: &str, // example r"vtk_(\d+).vtk"
 ) {
-    if filenames.len() == 0 {
+    if filenames.is_empty() {
         panic!("No files to convert");
     }
     let re = Regex::new(filter).expect("Unable to create Regex filter.");
@@ -93,25 +93,19 @@ pub fn vtk(
         print_debug!("Creating a new group \"timestep {}\"", step);
         let group = hdf5file
             .create_group(&format!("timestep {}", step))
-            .expect(&format!("Can not create group timestep {}", step));
+            .unwrap_or_else(|_| panic!("Can not create group timestep {}", step));
         // Extracting data from filename
         let current_step: i64 = re
             .captures(filename)
-            .expect(&format!(
-                "Unable to match filename {} with filter {}",
-                filename, filter
-            ))
+            .unwrap_or_else(|| panic!("Unable to match filename {} with filter {}",
+                filename, filter))
             .get(1)
-            .expect(&format!(
-                "Unable collect mfirst match  of filename {} with filter {}",
-                filename, filter
-            ))
+            .unwrap_or_else(|| panic!("Unable collect mfirst match  of filename {} with filter {}",
+                filename, filter))
             .as_str()
             .parse::<i64>()
-            .expect(&format!(
-                "Unable to parse string to i64 from match filename {} with filter {}",
-                filename, filter
-            ));
+            .unwrap_or_else(|_| panic!("Unable to parse string to i64 from match filename {} with filter {}",
+                filename, filter));
         let current_time = current_step as f64 * timestep;
         if step == 0 {
             time[0] = current_time;
@@ -134,7 +128,7 @@ pub fn vtk(
         print_debug!("  Made sortlist");
         let particle_id = sort_by_array(particle_id, &sort_list);
         print_debug!("  Sorted");
-        let max_particle = particle_id.iter().max().unwrap().clone();
+        let max_particle = *particle_id.iter().max().unwrap();
         print_debug!("  Made sortlist");
         if max_particle > nparticles {
             nparticles = max_particle
@@ -144,10 +138,8 @@ pub fn vtk(
         builder
             .with_data(&particle_id)
             .create("id")
-            .expect(&format!(
-                "Unable to create dataset \"id\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"id\" in file {}",
+                filename));
         print_debug!("  Creating radius dataset");
         let particle_radius =
             sort_by_array(vtktools::get_field::<f64>(filename, "radius"), &sort_list);
@@ -155,30 +147,24 @@ pub fn vtk(
         builder
             .with_data(&particle_radius)
             .create("radius")
-            .expect(&format!(
-                "Unable to create dataset \"radius\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"radius\" in file {}",
+                filename));
         print_debug!("  Creating ppclouds dataset");
         let ppclouds = ndarray::Array1::<u64>::ones(particle_radius.len());
         let builder = make_dataset_builder!(group);
         builder
             .with_data(&ppclouds)
             .create("ppcloud")
-            .expect(&format!(
-                "Unable to create dataset \"radius\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"radius\" in file {}",
+                filename));
         print_debug!("  Creating type dataset");
         let particle_type = sort_by_array(vtktools::get_field::<i64>(filename, "type"), &sort_list);
         let builder = make_dataset_builder!(group);
         builder
             .with_data(&particle_type)
             .create("particletype")
-            .expect(&format!(
-                "Unable to create dataset \"particletype\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"particletype\" in file {}",
+                filename));
         print_debug!("  Creating velocity dataset");
         let particle_velocity =
             sort_by_array(vtktools::get_field::<f64>(filename, "v"), &sort_list);
@@ -208,10 +194,8 @@ pub fn vtk(
         builder
             .with_data(&particle_velocity)
             .create("velocity")
-            .expect(&format!(
-                "Unable to create dataset \"velocity\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"velocity\" in file {}",
+                filename));
         print_debug!("  Creating position dataset");
         let particle_positions =
             sort_by_array(vtktools::get_positions::<f64>(filename), &sort_list);
@@ -233,10 +217,8 @@ pub fn vtk(
         builder
             .with_data(&particle_positions)
             .create("position")
-            .expect(&format!(
-                "Unable to create dataset \"position\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"position\" in file {}",
+                filename));
         step += 1;
         mean_counter += particle_id.len();
         sample_rate = current_time - old_time;
@@ -343,13 +325,11 @@ pub fn vtk_from_folder(
     }
 
     let filenames = std::fs::read_dir(system_foldername)
-        .expect(&format!("Unable to read directory {}", system_foldername))
+        .unwrap_or_else(|_| panic!("Unable to read directory {}", system_foldername))
         .map(|res| res.map(|e| e.path()))
         .collect::<Result<Vec<_>, std::io::Error>>()
-        .expect(&format!(
-            "Unable to convert files in directory {}",
-            system_foldername
-        ));
+        .unwrap_or_else(|_| panic!("Unable to convert files in directory {}",
+            system_foldername));
     let mut out_vec: Vec<&str> = Vec::new();
     for filename_ in filenames.iter() {
         let filename = filename_.to_str().unwrap();
@@ -365,7 +345,7 @@ pub fn vtk_from_folder(
     // sort the filenames
     out_vec.sort_unstable_by(|a, b| natord::compare(a, b));
 
-    if out_vec.len() == 0 {
+    if out_vec.is_empty() {
         panic!("No files to convert");
     }
 
@@ -424,7 +404,7 @@ pub fn csv_converter(
             .deserialize_array2_dynamic()
             .expect("Unable to extract CSV data to ndarray! \nYour delimiter might be wrong.\n");
         // slice the read array to only get the colums requested
-        if columns.len() > 0 {
+        if !columns.is_empty() {
             let mut temp_data = ndarray::Array2::<f64>::from_elem((data.shape()[0], 7), f64::NAN);
             for (i, column) in columns.iter().enumerate() {
                 temp_data
@@ -445,7 +425,7 @@ pub fn csv_converter(
             data = convertertools::sort_by_column(new_data, 0);
         }
         if interpolate {
-            let mut t = data.slice_mut(ndarray::s![.., 0 as usize]);
+            let mut t = data.slice_mut(ndarray::s![.., 0_usize]);
             //set first timestep to 0 by substracting the first timestep from all timesteps
             t -= t[0];
             let max_t = t[t.len() - 1];
@@ -487,10 +467,10 @@ pub fn csv_converter(
     print_debug!("Constructing data arrays for attributes!");
     let mut dimensions: ndarray::Array2<f64> = ndarray::Array2::<f64>::zeros((2, 3)); // [min:[x,y,z],max:[x,y,z]]
     dimensions
-        .slice_mut(ndarray::s![0 as usize, ..])
+        .slice_mut(ndarray::s![0_usize, ..])
         .fill(f64::MAX);
     dimensions
-        .slice_mut(ndarray::s![1 as usize, ..])
+        .slice_mut(ndarray::s![1_usize, ..])
         .fill(f64::MIN);
     // arrays that will be saved:
     let mut time_array = ndarray::Array1::<f64>::zeros(data_length);
@@ -507,10 +487,10 @@ pub fn csv_converter(
     //velocity: [x:[min, mean, max],y:[min,mean,max],z:[min,mean,max]]
     let mut velocity: ndarray::Array2<f64> = ndarray::Array2::<f64>::zeros((3, 3));
     velocity
-        .slice_mut(ndarray::s![.., 0 as usize])
+        .slice_mut(ndarray::s![.., 0_usize])
         .fill(f64::MAX);
     velocity
-        .slice_mut(ndarray::s![.., 2 as usize])
+        .slice_mut(ndarray::s![.., 2_usize])
         .fill(f64::MIN);
     // vel mag = [min,mean,max]
     let mut velocity_mag: ndarray::Array1<f64> = ndarray::Array1::<f64>::zeros(3);
@@ -524,7 +504,7 @@ pub fn csv_converter(
     print_debug!("Creating a new group \"particle {}\"", step);
     let group = hdf5file
         .create_group(&format!("particle {}", step))
-        .expect(&format!("Can not create group particle {}", step));
+        .unwrap_or_else(|_| panic!("Can not create group particle {}", step));
 
     if data[[0, 6]].is_nan() {
         panic!("Velocity information required")
@@ -622,51 +602,39 @@ pub fn csv_converter(
     builder
         .with_data(&particle_id_array)
         .create("id")
-        .expect(&format!(
-            "Unable to create dataset \"id\" in file {}",
-            filename
-        ));
+        .unwrap_or_else(|_| panic!("Unable to create dataset \"id\" in file {}",
+            filename));
     let builder = make_dataset_builder!(group);
     builder
         .with_data(&particle_radius_array)
         .create("radius")
-        .expect(&format!(
-            "Unable to create dataset \"radius\" in file {}",
-            filename
-        ));
+        .unwrap_or_else(|_| panic!("Unable to create dataset \"radius\" in file {}",
+            filename));
     let builder = make_dataset_builder!(group);
     builder
         .with_data(&ppclouds_array)
         .create("ppcloud")
-        .expect(&format!(
-            "Unable to create dataset \"radius\" in file {}",
-            filename
-        ));
+        .unwrap_or_else(|_| panic!("Unable to create dataset \"radius\" in file {}",
+            filename));
     let builder = make_dataset_builder!(group);
     builder
         .with_data(&particle_type_array)
         .create("particletype")
-        .expect(&format!(
-            "Unable to create dataset \"particletype\" in file {}",
-            filename
-        ));
+        .unwrap_or_else(|_| panic!("Unable to create dataset \"particletype\" in file {}",
+            filename));
 
     let builder = make_dataset_builder!(group);
     builder
         .with_data(&vel_array)
         .create("velocity")
-        .expect(&format!(
-            "Unable to create dataset \"velocity\" in file {}",
-            filename
-        ));
+        .unwrap_or_else(|_| panic!("Unable to create dataset \"velocity\" in file {}",
+            filename));
     let builder = make_dataset_builder!(group);
     builder
         .with_data(&pos_array)
         .create("position")
-        .expect(&format!(
-            "Unable to create dataset \"position\" in file {}",
-            filename
-        ));
+        .unwrap_or_else(|_| panic!("Unable to create dataset \"position\" in file {}",
+            filename));
     velocity_mag[1] /= mean_counter as f64;
     velocity[[0, 1]] /= mean_counter as f64;
     velocity[[1, 1]] /= mean_counter as f64;

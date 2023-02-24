@@ -35,13 +35,13 @@ impl CartesianGrid3D {
         let mut ypositions = Array::from_elem(cells[1], 0.);
         let mut zpositions = Array::from_elem(cells[2], 0.);
         for cellidx in 0..cells[0] {
-            xpositions[cellidx as usize] = cellidx as f64 * xcellsize + xcellsize / 2.0 + lim[0][0];
+            xpositions[cellidx] = cellidx as f64 * xcellsize + xcellsize / 2.0 + lim[0][0];
         }
         for cellidy in 0..cells[1] {
-            ypositions[cellidy as usize] = cellidy as f64 * ycellsize + ycellsize / 2.0 + lim[1][0];
+            ypositions[cellidy] = cellidy as f64 * ycellsize + ycellsize / 2.0 + lim[1][0];
         }
         for cellidz in 0..cells[2] {
-            zpositions[cellidz as usize] = cellidz as f64 * zcellsize + zcellsize / 2.0 + lim[2][0];
+            zpositions[cellidz] = cellidz as f64 * zcellsize + zcellsize / 2.0 + lim[2][0];
         }
         CartesianGrid3D {
             cells,
@@ -350,9 +350,7 @@ impl GridFunctions3D for CartesianGrid3D {
         let mut axis2 = axis2;
         if axis1 > axis2 {
             // swap axis1 and axis2
-            let temp = axis1;
-            axis1 = axis2;
-            axis2 = temp;
+            std::mem::swap(&mut axis1, &mut axis2);
         }
         let axis1 = Axis(axis1);
         let axis2 = Axis(axis2 - 1); // we removed axis1 so axis2 is now one smaller
@@ -384,9 +382,7 @@ impl GridFunctions3D for CartesianGrid3D {
         let mut axis2 = axis2;
         if axis1 > axis2 {
             // swap axis1 and axis2
-            let temp = axis1;
-            axis1 = axis2;
-            axis2 = temp;
+            std::mem::swap(&mut axis1, &mut axis2);
         }
         let axis1 = Axis(axis1);
         let axis2 = Axis(axis2 - 1);
@@ -522,15 +518,15 @@ impl GridFunctions3D for CartesianGrid3D {
                             && index.1 < self.data.shape()[1]
                             && index.2 < self.data.shape()[2]
                         {
-                            if self.data[[index.0 as usize, index.1 as usize, index.2 as usize]]
+                            if self.data[[index.0, index.1, index.2]]
                                 > threshold
                             {
                                 continue;
                             }
                             sum +=
-                                self.data[[index.0 as usize, index.1 as usize, index.2 as usize]];
+                                self.data[[index.0, index.1, index.2]];
                             weight_sum +=
-                                self.weight[[index.0 as usize, index.1 as usize, index.2 as usize]];
+                                self.weight[[index.0, index.1, index.2]];
                             counter_sum += 1.0;
                         }
                     }

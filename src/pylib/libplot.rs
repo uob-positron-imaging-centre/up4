@@ -160,10 +160,10 @@ impl PyVectorPlotter {
     #[new]
     fn constructor(vector_grid: &PyVecGrid) -> PyVectorPlotter {
         let plotter: VectorPlotter = VectorPlotter::new(vector_grid.grid.to_owned());
-        return PyVectorPlotter {
+        PyVectorPlotter {
             plotting_string: String::new(),
             plotting_data: plotter,
-        };
+        }
     }
 
     #[getter]
@@ -250,10 +250,10 @@ impl PyScalarPlotter {
     #[new]
     fn constructor(scalar_grid: &PyGrid) -> PyScalarPlotter {
         let plotter: ScalarPlotter = ScalarPlotter::new(scalar_grid.grid.to_owned());
-        return PyScalarPlotter {
+        PyScalarPlotter {
             plotting_string: String::new(),
             plotting_data: plotter,
-        };
+        }
     }
 
     #[getter]
@@ -313,10 +313,10 @@ impl PyComparisonPlotter {
             reference_grid.grid.to_owned(),
             comparison_grid.grid.to_owned(),
         );
-        return PyComparisonPlotter {
+        PyComparisonPlotter {
             plotting_string: String::new(),
             plotting_data: plotter,
-        };
+        }
     }
 
     #[getter]

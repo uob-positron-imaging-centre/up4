@@ -46,11 +46,11 @@ impl CylindricalGrid3D {
 
         // positions contain the boundary of the cell
         for cellidy in 0..cells[1] {
-            opositions[cellidy as usize] = -3.14159 + cellidy as f64 * ocellsize + ocellsize;
+            opositions[cellidy] = -3.14159 + cellidy as f64 * ocellsize + ocellsize;
         }
 
         for cellidz in 0..cells[2] {
-            zpositions[cellidz as usize] = cellidz as f64 * zcellsize + zcellsize + lim[2][0];
+            zpositions[cellidz] = cellidz as f64 * zcellsize + zcellsize + lim[2][0];
         }
         // center in cartesian coords!!!
         let center = [
@@ -91,7 +91,7 @@ impl CylindricalGrid3D {
                     // radius of cell before
                 )
                     .sqrt();
-                rpositions[cellidx as usize] = [inner_radius, new]; // inside, outside
+                rpositions[cellidx] = [inner_radius, new]; // inside, outside
                 inner_radius = new;
             }
         }
@@ -320,9 +320,7 @@ impl GridFunctions3D for CylindricalGrid3D {
         let mut axis2 = axis2;
         if axis1 > axis2 {
             // swap axis1 and axis2
-            let temp = axis1;
-            axis1 = axis2;
-            axis2 = temp;
+            std::mem::swap(&mut axis1, &mut axis2);
         }
         let axis1 = Axis(axis1);
         let axis2 = Axis(axis2 - 1); // we removed axis1 so axis2 is now one smaller
@@ -354,9 +352,7 @@ impl GridFunctions3D for CylindricalGrid3D {
         let mut axis2 = axis2;
         if axis1 > axis2 {
             // swap axis1 and axis2
-            let temp = axis1;
-            axis1 = axis2;
-            axis2 = temp;
+            std::mem::swap(&mut axis1, &mut axis2);
         }
         let axis1 = Axis(axis1);
         let axis2 = Axis(axis2 - 1);
@@ -496,9 +492,9 @@ impl GridFunctions3D for CylindricalGrid3D {
                             && index.2 < self.data.shape()[2]
                         {
                             sum +=
-                                self.data[[index.0 as usize, index.1 as usize, index.2 as usize]];
+                                self.data[[index.0, index.1, index.2]];
                             weight_sum +=
-                                self.weight[[index.0 as usize, index.1 as usize, index.2 as usize]];
+                                self.weight[[index.0, index.1, index.2]];
                             counter_sum += 1.0;
                         }
                     }

@@ -102,21 +102,15 @@ impl PyData {
     ///     Data class.
     #[new]
     fn constructor(filename: &str) -> Self {
-        let file = hdf5::File::open(filename).expect(&format!(
-            "Unable to open file {}. Check if file exists.",
-            filename
-        ));
+        let file = hdf5::File::open(filename).unwrap_or_else(|_| panic!("Unable to open file {}. Check if file exists.",
+            filename));
         let hdf5type: i32 = file
             .attr("hdf5_up4_type")
-            .expect(&format!(
-                "Can not find attribute \"hdf5_up4_type\" in file {}",
-                filename
-            ))
+            .unwrap_or_else(|_| panic!("Can not find attribute \"hdf5_up4_type\" in file {}",
+                filename))
             .read_scalar()
-            .expect(&format!(
-                "Can not read scalar from attribute \"hdf5_up4_type\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| panic!("Can not read scalar from attribute \"hdf5_up4_type\" in file {}",
+                filename));
         file.close().expect("Unable to close file");
         let data;
         if hdf5type == 0x1_i32 {
@@ -322,7 +316,7 @@ impl PyData {
             max_velocity,
         );
 
-        PyGrid { grid: grid }
+        PyGrid { grid }
     }
 
     /// Return particle information over specified duration.
@@ -367,7 +361,7 @@ impl PyData {
             };
         let grid = self.data.numberfield(grid.grid.clone(), selector);
 
-        PyGrid { grid: grid }
+        PyGrid { grid }
     }
 
     /// Return the occupancy field.
@@ -396,7 +390,7 @@ impl PyData {
             .data
             .occupancyfield(grid.grid.clone(), selector, min_vel);
 
-        PyGrid { grid: grid }
+        PyGrid { grid }
     }
 
     /// Return the mean velocity of all valid particles in the system.
@@ -412,9 +406,9 @@ impl PyData {
                 Some(b) => b,
                 None => panic!("Can not convert PyGrid to Grid1D as "),
             };
-        let mean_velocity = self.data.mean_velocity(selector);
+        
         // return
-        mean_velocity
+        self.data.mean_velocity(selector)
     } //End mean_velocity
 
     /// Return the dispersion of the particles in the system.
@@ -455,7 +449,7 @@ impl PyData {
             self.data
                 .dispersion(grid.grid.clone(), selector, time_for_dispersion);
 
-        (PyGrid { grid: grid }, mixing_efficiency)
+        (PyGrid { grid }, mixing_efficiency)
     }
 
     /// Calculate a histogram of a specific property in a region of the system.
@@ -528,7 +522,7 @@ impl PyData {
             .data
             .granular_temperature_field(grid.grid.clone(), selector);
 
-        PyGrid { grid: grid }
+        PyGrid { grid }
     }
 
     /// Calculate the Lacey mixing index for two particle types in a region of the system for a time period.
@@ -596,9 +590,9 @@ impl PyData {
                 Some(b) => b,
                 None => panic!("Can not convert PyGrid to Grid1D as "),
             };
-        let circulation_time = self.data.circulation_time(selector, axis, position);
+        
 
-        circulation_time
+        self.data.circulation_time(selector, axis, position)
     }
 
     /// Calculate the concentration field of the system
@@ -638,7 +632,7 @@ impl PyData {
             .data
             .concentration_field(grid.grid.clone(), selector, type_a, type_b);
 
-        PyGrid { grid: grid }
+        PyGrid { grid }
     }
 
     /// Calculate the homogenity index.
@@ -683,7 +677,7 @@ impl PyData {
             };
         let grid = self.data.msd_field(grid.grid.clone(), selector, time);
 
-        PyGrid { grid: grid }
+        PyGrid { grid }
     }
 
     /// Calculate the mean squared displacement of a particle in a system.

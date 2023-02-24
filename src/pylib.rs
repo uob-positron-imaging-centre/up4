@@ -418,7 +418,7 @@ impl PyData {
     } //End mean_velocity
 
     /// Return the dispersion of the particles in the system.
-    /// 
+    ///
     /// See [1]_ for further details.
     ///
     /// Parameters
@@ -459,7 +459,7 @@ impl PyData {
     }
 
     /// Calculate a histogram of a specific property in a region of the system.
-    /// 
+    ///
     /// The histogram is calculated for all particles that are valid according to the particleselector.
     /// The histogram is calculated for the region defined by the grid.
     ///

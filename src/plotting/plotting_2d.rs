@@ -8,9 +8,9 @@ use plotly::{
     common::{ColorBar, ColorScale, ColorScalePalette, Fill, Line, Marker, Mode},
     Scatter,
 };
-use std::{f64::consts::PI};
+use std::f64::consts::PI;
 
-use crate::{GridFunctions3D, VectorGrid, utilities::maths::meshgrid};
+use crate::{utilities::maths::meshgrid, GridFunctions3D, VectorGrid};
 
 /// Internal representation of arrow data
 struct Arrow {
@@ -43,7 +43,7 @@ pub struct QuiverPlot {
     u: Array2<f64>,
     v: Array2<f64>,
     norm: Array2<f64>,
-    true_norm: Array2<f64>
+    true_norm: Array2<f64>,
 }
 
 // TODO have both a depth-average constructor and a per plane one
@@ -86,10 +86,21 @@ impl QuiverPlot {
         });
         let true_norm = norm.clone();
 
-        QuiverPlot { x, y, u, v, norm, true_norm }
+        QuiverPlot {
+            x,
+            y,
+            u,
+            v,
+            norm,
+            true_norm,
+        }
     }
 
-    pub fn from_vector_grid_single_plane(grid: VectorGrid, axis: usize, index: usize) -> QuiverPlot {
+    pub fn from_vector_grid_single_plane(
+        grid: VectorGrid,
+        axis: usize,
+        index: usize,
+    ) -> QuiverPlot {
         // select yz (0), xz (1) or xy (2) plane
         let x = if axis == 0 {
             grid.get_ypositions().to_owned()
@@ -119,15 +130,28 @@ impl QuiverPlot {
         } else {
             1
         };
-        let u = grid.data[i].get_data().to_owned().index_axis_move(ndarray::Axis(axis), index);
-        let v = grid.data[j].get_data().to_owned().index_axis_move(ndarray::Axis(axis), index);
+        let u = grid.data[i]
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
+        let v = grid.data[j]
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
         let mut norm = Array2::zeros(u.dim());
         Zip::from(&mut norm).and(&u).and(&v).for_each(|n, &u, &v| {
             *n = f64::hypot(u, v);
         });
         let true_norm = norm.clone();
 
-        QuiverPlot { x, y, u, v, norm, true_norm }
+        QuiverPlot {
+            x,
+            y,
+            u,
+            v,
+            norm,
+            true_norm,
+        }
     }
 
     // BUG arrowheads are not drawn properly in method from plotly.py
@@ -169,10 +193,8 @@ impl QuiverPlot {
         let point_2_y: Array2<f64> = &y + &self.v - seg_2_y;
 
         let arrows: Vec<Arrow> =
-            izip!(&x, &y, &self.u, &self.v, 
-                    point_1_x, point_1_y, point_2_x, point_2_y)
-            .map(|(x, y, u, v, p1x, 
-                    p1y, p2x, p2y)| {
+            izip!(&x, &y, &self.u, &self.v, point_1_x, point_1_y, point_2_x, point_2_y)
+                .map(|(x, y, u, v, p1x, p1y, p2x, p2y)| {
                     Arrow::new(*x, *y, *u, *v, p1x, p1y, p2x, p2y)
                 })
                 .collect();
@@ -232,9 +254,12 @@ impl QuiverPlot {
     pub fn scale_global(mut self, scale_factor: f64) -> Self {
         self.u *= scale_factor;
         self.v *= scale_factor;
-        Zip::from(&mut self.norm).and(&self.u).and(&self.v).for_each(|n, &u, &v| {
-            *n = f64::hypot(u, v);
-        });
+        Zip::from(&mut self.norm)
+            .and(&self.u)
+            .and(&self.v)
+            .for_each(|n, &u, &v| {
+                *n = f64::hypot(u, v);
+            });
 
         self
     }
@@ -242,9 +267,12 @@ impl QuiverPlot {
     pub fn scale_elementwise(mut self, scale_factor: Array2<f64>) -> Self {
         self.u *= &scale_factor;
         self.v *= &scale_factor;
-        Zip::from(&mut self.norm).and(&self.u).and(&self.v).for_each(|n, &u, &v| {
-            *n = f64::hypot(u, v);
-        });
+        Zip::from(&mut self.norm)
+            .and(&self.u)
+            .and(&self.v)
+            .for_each(|n, &u, &v| {
+                *n = f64::hypot(u, v);
+            });
 
         self
     }
@@ -292,9 +320,12 @@ impl QuiverPlot {
         let largest_norm = *self.norm().max_skipnan();
         self.u *= 0.5 * dx / largest_norm;
         self.v *= 0.5 * dy / largest_norm;
-        Zip::from(&mut self.norm).and(&self.u).and(&self.v).for_each(|n, &u, &v| {
-            *n = f64::hypot(u, v);
-        });
+        Zip::from(&mut self.norm)
+            .and(&self.u)
+            .and(&self.v)
+            .for_each(|n, &u, &v| {
+                *n = f64::hypot(u, v);
+            });
 
         self
     }
@@ -303,9 +334,12 @@ impl QuiverPlot {
         let largest_norm = *self.norm().max_skipnan();
         self.u *= dx / largest_norm;
         self.v *= dy / largest_norm;
-        Zip::from(&mut self.norm).and(&self.u).and(&self.v).for_each(|n, &u, &v| {
-            *n = f64::hypot(u, v);
-        });
+        Zip::from(&mut self.norm)
+            .and(&self.u)
+            .and(&self.v)
+            .for_each(|n, &u, &v| {
+                *n = f64::hypot(u, v);
+            });
 
         self
     }

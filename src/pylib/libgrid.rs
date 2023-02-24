@@ -149,7 +149,7 @@ impl PyGrid {
     ///     A list containing the limits of the grid in each direction. Must be of length 6
     ///     The order is [rmin, rmax, zmin, zmax, phimin, phimax]
     /// mode : str, optional
-    ///     The mode of the grid. Can be "volume". Other methods are not implemented yet, by default 
+    ///     The mode of the grid. Can be "volume". Other methods are not implemented yet, by default
     ///     "volume"
     ///
     /// Returns
@@ -332,7 +332,7 @@ impl PyGrid {
     }
 
     /// Collapse the grid along an axis.
-    /// 
+    ///
     /// This is basically cell based depth averaging
     ///
     /// Parameters

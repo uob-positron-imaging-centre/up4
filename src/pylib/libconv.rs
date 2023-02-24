@@ -35,7 +35,7 @@ impl PyConverter {
     ///
     /// filter : str, optional
     ///     Regex Filter to apply to the data in order to extract the time for each file, by default r"(\d+).vtk"
-    /// 
+    ///
     #[pyo3(signature = (filenames, timestep, outname, filter = "(\\d+).vtk"))]
     #[staticmethod]
     fn vtk(
@@ -91,7 +91,7 @@ impl PyConverter {
     ///
     /// columns : List(int), optional
     ///     List of columns to convert containing t,x,y,z,(optional vx,vy,vz), by default [0,1,2,3]
-    /// 
+    ///
     /// delimiter : str, optional
     ///     Pattern for separating numbers in a csv file, by default ','
     ///
@@ -106,7 +106,7 @@ impl PyConverter {
     ///
     /// interpolate : bool, optional
     ///     If true the particle positions will be interpolated in order to have a constant timestep, by default False
-    /// 
+    ///
     /// radius : float, optional
     ///     Particle radius, by default 0.0
     ///
@@ -161,17 +161,17 @@ impl PyConverter {
     }
 
     /// Convert CSV file containing multiple particles into a HDF5 file.
-    /// 
+    ///
     /// There can be different ways how this is achieved, therefore the function
     /// takes an argument called `method` which can be one of the following:
     ///     
     /// - `chain`:   The particles are chained in the file, i.e. the first particle
-    ///     is followed by the second, the second by the third, etc. 
+    ///     is followed by the second, the second by the third, etc.
     ///     all particles are stored in one file
     /// - `id_line`: This algorithm sorts the particles by their id column and
     ///     their time column. The `columns` argument must contain the
     ///     id column as the first element.
-    /// 
+    ///
     /// no other method is implemented yet. If you want to use another method, please
     /// contact the developers.
     ///
@@ -203,7 +203,7 @@ impl PyConverter {
     ///
     /// method : str, optional
     ///     Method to use to convert the CSV file. Can be one of the following:
-    /// 
+    ///
     ///         -  `chain`:   The particles are chained in the file, i.e. the first particle
     ///            is followed by the second, the second by the third, etc.
     ///            all particles are stored in one file
@@ -259,17 +259,17 @@ impl PyConverter {
     }
 
     /// Convert CSV file containing multiple particles into a HDF5 file.
-    /// 
+    ///
     /// There can be different ways how this is achieved, therefore the function
     /// takes an argument called `method` which can be one of the following:
-    /// 
+    ///
     ///     - `chain`:   The particles are chained in the file, i.e. the first particle
     ///         is followed by the second, the second by the third, etc.
     ///         all particles are stored in one file.
     ///     - `id_line`: This algorithm sorts the particles by their id column and
     ///         their time column. The `columns` argument must contain the
     ///         id column as the first element.
-    /// 
+    ///
     /// no other method is implemented yet. If you want to use another method, please
     /// contact the developers.
     ///

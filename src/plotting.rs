@@ -19,7 +19,7 @@ pub fn plot(traces: Vec<Box<dyn Trace>>, layout: Layout) -> Plot {
         plot.add_trace(trace);
     }
     plot.set_layout(layout);
-    
+
     plot
 }
 /// Return plane positions perpendicular to the provided axis.

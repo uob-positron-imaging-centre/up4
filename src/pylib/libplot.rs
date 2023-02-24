@@ -3,15 +3,16 @@
 use crate::{
     comparison_plot::ComparisonPlotter,
     libgrid::{PyGrid, PyVecGrid},
+    plotting::plot,
+    plotting_2d::QuiverPlot,
     scalar_plot::ScalarPlotter,
     vector_plot::VectorPlotter,
-    GridFunctions3D, plotting_2d::QuiverPlot,
-    VectorGrid, plotting::plot
+    GridFunctions3D, VectorGrid,
 };
 use itertools::izip;
 use plotly::heat_map::Smoothing;
 use plotly::{layout::Axis, Layout, Plot, Trace};
-use pyo3::{prelude::*, exceptions::PyValueError};
+use pyo3::{exceptions::PyValueError, prelude::*};
 
 #[pyclass(name = "Plotter2D", subclass)]
 pub struct PyPlotter2D {
@@ -21,31 +22,46 @@ pub struct PyPlotter2D {
 
 #[pymethods]
 impl PyPlotter2D {
-
     #[staticmethod]
     fn _from_vector_grid(vector_grid: &PyVecGrid) -> PyPlotter2D {
         let grid: Box<VectorGrid> = Box::new(vector_grid.grid.to_owned());
         let plotting_string = String::new();
 
-        PyPlotter2D { plotting_string, grid }
+        PyPlotter2D {
+            plotting_string,
+            grid,
+        }
     }
 
     #[pyo3(signature = (axis, selection = "depth_average", index = None, scaling_mode = "none", scaling_args = None))]
-    fn _quiver_plot(&mut self, axis: usize, selection: &str, index: Option<usize>, scaling_mode: &str, scaling_args: Option<Vec<f64>>) -> PyResult<()> {
-        let vector_grid = self.grid.as_any()
-        .downcast_ref::<VectorGrid>()
-        .unwrap().clone();
+    fn _quiver_plot(
+        &mut self,
+        axis: usize,
+        selection: &str,
+        index: Option<usize>,
+        scaling_mode: &str,
+        scaling_args: Option<Vec<f64>>,
+    ) -> PyResult<()> {
+        let vector_grid = self
+            .grid
+            .as_any()
+            .downcast_ref::<VectorGrid>()
+            .unwrap()
+            .clone();
         let quiver_plotter = if selection == "depth_average" {
             QuiverPlot::from_vector_grid_depth_averaged(vector_grid, axis)
         } else if selection == "plane" {
             if index.is_some() {
                 QuiverPlot::from_vector_grid_single_plane(vector_grid, axis, index.unwrap())
-            } 
-            else {
-                return Err(PyValueError::new_err("A valid index is required to select an individual plane."))
+            } else {
+                return Err(PyValueError::new_err(
+                    "A valid index is required to select an individual plane.",
+                ));
             }
         } else {
-            return Err(PyValueError::new_err("Valid selection modes are 'depth_average' and 'plane' only."))
+            return Err(PyValueError::new_err(
+                "Valid selection modes are 'depth_average' and 'plane' only.",
+            ));
         };
         let len = quiver_plotter.x().len();
         let mut traces: Vec<Box<dyn Trace>> = Vec::with_capacity(len);
@@ -53,36 +69,54 @@ impl PyPlotter2D {
             quiver_plotter.create_quiver_traces()
         } else if scaling_mode == "min" {
             if scaling_args.is_some() {
-                quiver_plotter.bound_min(scaling_args.unwrap()[0]).create_quiver_traces()
+                quiver_plotter
+                    .bound_min(scaling_args.unwrap()[0])
+                    .create_quiver_traces()
             } else {
-                return Err(PyValueError::new_err("A valid scaling argument is required."))
+                return Err(PyValueError::new_err(
+                    "A valid scaling argument is required.",
+                ));
             }
         } else if scaling_mode == "max" {
             if scaling_args.is_some() {
-                quiver_plotter.bound_max(scaling_args.unwrap()[0]).create_quiver_traces()
+                quiver_plotter
+                    .bound_max(scaling_args.unwrap()[0])
+                    .create_quiver_traces()
             } else {
-                return Err(PyValueError::new_err("A valid scaling argument is required."))
+                return Err(PyValueError::new_err(
+                    "A valid scaling argument is required.",
+                ));
             }
         } else if scaling_mode == "minmax" {
             if scaling_args.is_some() {
                 let scaling_vector = scaling_args.unwrap();
                 if scaling_vector.len() < 2 {
-                    return Err(PyValueError::new_err("Min-max scaling requires 2 arguments."))
+                    return Err(PyValueError::new_err(
+                        "Min-max scaling requires 2 arguments.",
+                    ));
                 }
-                quiver_plotter.bound_min_max(scaling_vector[0], scaling_vector[1]).create_quiver_traces()
+                quiver_plotter
+                    .bound_min_max(scaling_vector[0], scaling_vector[1])
+                    .create_quiver_traces()
             } else {
-                return Err(PyValueError::new_err("A valid scaling argument is required."))
+                return Err(PyValueError::new_err(
+                    "A valid scaling argument is required.",
+                ));
             }
         } else if scaling_mode == "half_node" {
             let dx = quiver_plotter.x()[1] - quiver_plotter.x()[0];
             let dy = quiver_plotter.y()[1] - quiver_plotter.y()[0];
-            quiver_plotter.bound_half_node(dx, dy).create_quiver_traces()
+            quiver_plotter
+                .bound_half_node(dx, dy)
+                .create_quiver_traces()
         } else if scaling_mode == "full_node" {
             let dx = quiver_plotter.x()[1] - quiver_plotter.x()[0];
             let dy = quiver_plotter.y()[1] - quiver_plotter.y()[0];
-            quiver_plotter.bound_full_node(dx, dy).create_quiver_traces()
+            quiver_plotter
+                .bound_full_node(dx, dy)
+                .create_quiver_traces()
         } else {
-            return Err(PyValueError::new_err("Invalid scaling mode provided, valid types are: 'none', 'min', 'max', 'minmax', 'half_node', 'full_node'."))
+            return Err(PyValueError::new_err("Invalid scaling mode provided, valid types are: 'none', 'min', 'max', 'minmax', 'half_node', 'full_node'."));
         };
         for trace in quiver_traces {
             traces.push(trace)

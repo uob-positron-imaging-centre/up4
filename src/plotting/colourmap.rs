@@ -14,7 +14,7 @@ impl Rgb {
     fn from_rgb_string(rgb_string: String) -> Rgb {
         // cut rgb( and ) from the string
         let tuple = &rgb_string[4..rgb_string.len() - 1];
-        let rgb_strings: Vec<&str> = tuple.split(",").collect();
+        let rgb_strings: Vec<&str> = tuple.split(',').collect();
         let rgb_vec = vec![
             rgb_strings[0].parse::<u8>().unwrap(),
             rgb_strings[1].parse::<u8>().unwrap(),

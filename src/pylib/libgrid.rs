@@ -116,10 +116,10 @@ impl PyGrid {
                 [limit[4], limit[5]],
             ]),
         ));
-        let grid = PyGrid {
-            grid: grid, //Box::new(grid),
-        };
-        grid
+        
+        PyGrid {
+            grid, //Box::new(grid),
+        }
     }
 
     /// Return the positions of all cells in the grid.
@@ -174,10 +174,10 @@ impl PyGrid {
             ]),
             mode,
         ));
-        let grid = PyGrid {
-            grid: grid, //Box::new(grid),
-        };
-        grid
+        
+        PyGrid {
+            grid, //Box::new(grid),
+        }
     }
 
     /// Create a 3D cylindrical grid with limits and spacing from a PyData object.

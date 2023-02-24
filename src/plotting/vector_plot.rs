@@ -49,15 +49,15 @@ impl VectorPlotter {
             .map(|x| (x.0.powi(2) + x.1.powi(2) + x.2.powi(2)).powf(0.5))
             .collect::<Vec<f64>>();
         let true_norm: Array3<f64> = Array3::from_shape_vec(udata.raw_dim(), norm).unwrap();
-        return VectorPlotter {
-            xdata: xdata,
-            ydata: ydata,
-            zdata: zdata,
-            udata: udata,
-            vdata: vdata,
-            wdata: wdata,
-            true_norm: true_norm,
-        };
+        VectorPlotter {
+            xdata,
+            ydata,
+            zdata,
+            udata,
+            vdata,
+            wdata,
+            true_norm,
+        }
     }
 
     /// Scale all vector elements by a singular scale factor.
@@ -167,7 +167,7 @@ impl VectorPlotter {
                 let min: f64 = *self.true_norm.min_skipnan();
                 let max: f64 = *self.true_norm.max_skipnan();
                 let colour_vector: Array3<f64> = (&self.true_norm - min) / (max - min);
-                return (colour_vector, min, max);
+                (colour_vector, min, max)
             }
 
             Some((min, max)) => {
@@ -175,7 +175,7 @@ impl VectorPlotter {
                 let min = min;
                 let max = max;
                 let colour_vector = (&self.true_norm - min) / (max - min);
-                return (colour_vector, min, max);
+                (colour_vector, min, max)
             }
         }
     }
@@ -226,7 +226,7 @@ impl VectorPlotter {
             )
             .show_legend(false);
         traces.push(invisible_marker);
-        return traces;
+        traces
     }
 
     // TODO choose dims to select min and max from
@@ -246,7 +246,7 @@ impl VectorPlotter {
         let yaxis: plotly::layout::Axis = axes_iter.next().unwrap();
         let x_auto: Layout = axis_range_x(layout, xaxis, xmin, xmax);
         let xy_auto: Layout = axis_range_y(x_auto, yaxis, ymin, ymax);
-        return xy_auto;
+        xy_auto
     }
 
     /// Create the arrow shafts.
@@ -263,7 +263,7 @@ impl VectorPlotter {
             barb_x.push(tupx);
             barb_y.push(tupy);
         }
-        return (barb_x, barb_y);
+        (barb_x, barb_y)
     }
     /// Create the arrowheads.
     fn create_quiver_arrows(
@@ -327,7 +327,7 @@ impl VectorPlotter {
             let tup: (f64, f64, f64) = (start, mid, end);
             arrow_y.push(tup);
         }
-        return (arrow_x, arrow_y);
+        (arrow_x, arrow_y)
     }
 
     // TODO figure out a zero(ish) vector handling strategy
@@ -355,7 +355,7 @@ impl VectorPlotter {
                 .line(Line::new().color(NamedColor::Black));
             traces.push(trace);
         }
-        return traces;
+        traces
     }
 
     /// Create the background for the unit vector plot, coloured by norm values.
@@ -412,7 +412,7 @@ impl VectorPlotter {
                 ]));
             return (heatmap, layout);
         }
-        return (heatmap, layout);
+        (heatmap, layout)
     }
 
     /// Take traces and plot them
@@ -427,7 +427,7 @@ impl VectorPlotter {
         if show {
             plot.show();
         }
-        return plot;
+        plot
     }
 
     // TODO create
@@ -475,37 +475,37 @@ impl VectorPlotter {
             0 => {
                 z.fill(self.xdata()[index]);
                 let z = z.into_raw_vec();
-                let trace = Scatter3D::new(z, x, y)
+                
+                Scatter3D::new(z, x, y)
                     .mode(Mode::Lines)
                     .show_legend(false)
                     //.fill_color(NamedColor::Black)
                     .show_legend(false)
-                    .line(Line::new());
-                return trace;
+                    .line(Line::new())
             }
             // slicing along y axis
             1 => {
                 z.fill(self.ydata()[index]);
                 let z = z.into_raw_vec();
-                let trace = Scatter3D::new(x, z, y)
+                
+                Scatter3D::new(x, z, y)
                     .mode(Mode::Lines)
                     .show_legend(false)
                     //.fill_color(NamedColor::Black)
                     .show_legend(false)
-                    .line(Line::new());
-                return trace;
+                    .line(Line::new())
             }
             // slicing along z axis
             2 => {
                 z.fill(self.zdata()[index]);
                 let z = z.into_raw_vec();
-                let trace = Scatter3D::new(x, y, z)
+                
+                Scatter3D::new(x, y, z)
                     .mode(Mode::Lines)
                     .show_legend(false)
                     //.fill_color(NamedColor::Black)
                     .show_legend(false)
-                    .line(Line::new());
-                return trace;
+                    .line(Line::new())
             }
             _ => {
                 panic!("Accepted axis values are 0, 1 or 2 only!")
@@ -551,7 +551,7 @@ impl VectorPlotter {
                 traces.push(trace);
             }
         }
-        return traces;
+        traces
     }
 
     // FIXME doc
@@ -580,7 +580,7 @@ impl VectorPlotter {
             let heatmap: Box<Surface<f64, f64, f64>> = Surface::new(zpl).x(xpl).y(ypl);
             traces.push(heatmap);
         }
-        return traces;
+        traces
     }
 
     fn create_cone_traces(
@@ -604,7 +604,7 @@ impl VectorPlotter {
             .anchor(Anchor::Tip)
             .show_legend(false);
         let cone_trace = vec![trace];
-        return cone_trace;
+        cone_trace
     }
 
     //FIXME doc
@@ -619,7 +619,7 @@ impl VectorPlotter {
                 let ycomponent = self.zdata.to_owned();
                 let xdata = self.vdata.to_owned();
                 let ydata = self.wdata.to_owned();
-                return (xcomponent, ycomponent, xdata, ydata);
+                (xcomponent, ycomponent, xdata, ydata)
             }
             // xz view
             1 => {
@@ -627,7 +627,7 @@ impl VectorPlotter {
                 let ycomponent = self.zdata.to_owned();
                 let xdata = self.udata.to_owned();
                 let ydata = self.wdata.to_owned();
-                return (xcomponent, ycomponent, xdata, ydata);
+                (xcomponent, ycomponent, xdata, ydata)
             }
             // xy view
             2 => {
@@ -635,11 +635,11 @@ impl VectorPlotter {
                 let ycomponent = self.ydata.to_owned();
                 let xdata = self.udata.to_owned();
                 let ydata = self.vdata.to_owned();
-                return (xcomponent, ycomponent, xdata, ydata);
+                (xcomponent, ycomponent, xdata, ydata)
             }
             // panic
             _ => panic!("axis value must be either 0, 1 or 2!"),
-        };
+        }
     }
     //FIXME doc
     fn axis_selector(&self, axis: usize) -> (Array1<f64>, Array1<f64>) {
@@ -648,34 +648,34 @@ impl VectorPlotter {
             0 => {
                 let xcomponent = self.ydata.to_owned();
                 let ycomponent = self.zdata.to_owned();
-                return (xcomponent, ycomponent);
+                (xcomponent, ycomponent)
             }
             // xz view
             1 => {
                 let xcomponent = self.xdata.to_owned();
                 let ycomponent = self.zdata.to_owned();
-                return (xcomponent, ycomponent);
+                (xcomponent, ycomponent)
             }
             // xy view
             2 => {
                 let xcomponent = self.xdata.to_owned();
                 let ycomponent = self.ydata.to_owned();
-                return (xcomponent, ycomponent);
+                (xcomponent, ycomponent)
             }
             // panic
             _ => panic!("axis value must be either 0, 1 or 2!"),
-        };
+        }
     }
 }
 
 /// Manually set x axis range
 pub fn axis_range_x(layout: Layout, xaxis: plotly::layout::Axis, xmin: f64, xmax: f64) -> Layout {
     let new_layout: Layout = layout.x_axis(xaxis.range(vec![xmin, xmax]));
-    return new_layout;
+    new_layout
 }
 
 /// Manually set y axis range
 pub fn axis_range_y(layout: Layout, yaxis: plotly::layout::Axis, ymin: f64, ymax: f64) -> Layout {
     let new_layout: Layout = layout.y_axis(yaxis.range(vec![ymin, ymax]));
-    return new_layout;
+    new_layout
 }

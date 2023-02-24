@@ -29,23 +29,23 @@ pub fn axis_selector(grid: Box<dyn GridFunctions3D>, axis: usize) -> (Array1<f64
         0 => {
             let xaxis = grid.get_ypositions().to_owned();
             let yaxis = grid.get_zpositions().to_owned();
-            return (xaxis, yaxis);
+            (xaxis, yaxis)
         }
         // xz view
         1 => {
             let xaxis = grid.get_xpositions().to_owned();
             let yaxis = grid.get_zpositions().to_owned();
-            return (xaxis, yaxis);
+            (xaxis, yaxis)
         }
         // xy view
         2 => {
             let xaxis = grid.get_xpositions().to_owned();
             let yaxis = grid.get_ypositions().to_owned();
-            return (xaxis, yaxis);
+            (xaxis, yaxis)
         }
         // panic
         _ => panic!("axis value must be either 0, 1 or 2!"),
-    };
+    }
 }
 
 /// Return data in plane perpendicular to provided axis, at the provided index.
@@ -54,13 +54,13 @@ pub fn data_selector(grid: Box<dyn GridFunctions3D>, axis: usize, index: usize) 
         .get_data()
         .index_axis(ndarray::Axis(axis), index)
         .into_owned();
-    return selected_data;
+    selected_data
 }
 
 /// Return data in plane perpendicular to provided axis, at the provided index.
 pub fn component_data_selector(data: Array3<f64>, axis: usize, index: usize) -> Array2<f64> {
     let selected_data: Array2<f64> = data.index_axis(ndarray::Axis(axis), index).into_owned();
-    return selected_data;
+    selected_data
 }
 
 /*

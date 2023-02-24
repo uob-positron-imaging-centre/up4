@@ -68,7 +68,7 @@ fn main() {
     println!("Disp: {}", disp);
     let disp = pdata.numberfield(grid.clone(), &selector);
     println!("Disp: {}", disp);
-    let disp = pdata.vectorfield(grid.clone(), &selector);
+    let disp = pdata.vectorfield(grid, &selector);
     println!("Disp: {}", disp);
 
     println!("time needed: {} milliseconds", now.elapsed().as_millis());

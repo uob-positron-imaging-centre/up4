@@ -347,9 +347,9 @@ impl QuiverPlot {
     fn normalise_colour(&self) -> Array2<f64> {
         let min = *self.true_norm.min_skipnan();
         let max = *self.true_norm.max_skipnan();
-        let colours = (&self.true_norm - min) / (max - min);
+        
 
-        colours
+        (&self.true_norm - min) / (max - min)
     }
 }
 

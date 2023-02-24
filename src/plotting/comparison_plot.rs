@@ -24,10 +24,10 @@ impl ComparisonPlotter {
         if reference_data.get_data().len() != comparison_data.get_data().len() {
             panic!("Provided reference and comparison grids are unequal shapes!")
         }
-        return ComparisonPlotter {
-            reference_data: reference_data,
-            comparison_data: comparison_data,
-        };
+        ComparisonPlotter {
+            reference_data,
+            comparison_data,
+        }
     }
 
     /// Return traces corresponding to the parity line, and the data itself.
@@ -77,7 +77,7 @@ impl ComparisonPlotter {
         .marker(Marker::new().symbol(MarkerSymbol::Cross))
         .show_legend(false);
         let traces = vec![parity_line, parity_scatter];
-        return traces;
+        traces
     }
 
     /// Return heatmap trace coloured by the signed difference between reference and comparison data. This data
@@ -101,7 +101,7 @@ impl ComparisonPlotter {
             flatten_2d(&delta).to_vec(),
         );
         let traces = vec![heatmap];
-        return traces;
+        traces
     }
 
     // TODO create
@@ -142,6 +142,6 @@ impl ComparisonPlotter {
         if show {
             plot.show();
         }
-        return plot;
+        plot
     }
 }

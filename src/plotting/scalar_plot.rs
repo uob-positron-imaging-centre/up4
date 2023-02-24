@@ -21,23 +21,23 @@ impl ScalarPlotter {
             0 => {
                 let xcomponent = self.ydata.to_owned();
                 let ycomponent = self.zdata.to_owned();
-                return (xcomponent, ycomponent);
+                (xcomponent, ycomponent)
             }
             // xz view
             1 => {
                 let xcomponent = self.xdata.to_owned();
                 let ycomponent = self.zdata.to_owned();
-                return (xcomponent, ycomponent);
+                (xcomponent, ycomponent)
             }
             // xy view
             2 => {
                 let xcomponent = self.xdata.to_owned();
                 let ycomponent = self.ydata.to_owned();
-                return (xcomponent, ycomponent);
+                (xcomponent, ycomponent)
             }
             // panic
             _ => panic!("axis value must be either 0, 1 or 2!"),
-        };
+        }
     }
 
     /// Constructor
@@ -46,12 +46,12 @@ impl ScalarPlotter {
         let ydata: Array1<f64> = grid.get_ypositions().to_owned();
         let zdata: Array1<f64> = grid.get_zpositions().to_owned();
         let scalar_data: Array3<f64> = grid.get_data().to_owned();
-        return ScalarPlotter {
-            xdata: xdata,
-            ydata: ydata,
-            zdata: zdata,
-            scalar_data: scalar_data,
-        };
+        ScalarPlotter {
+            xdata,
+            ydata,
+            zdata,
+            scalar_data,
+        }
     }
     // TODO contour wrapping
     //pub fn scalar_contour_plot(&self, axis: usize, index: usize)  {
@@ -70,7 +70,7 @@ impl ScalarPlotter {
         if show {
             plot.show();
         }
-        return plot;
+        plot
     }
 
     /// Return heatmap trace of scalar data, perpendicular to provided axis, at the index specified.
@@ -84,7 +84,7 @@ impl ScalarPlotter {
             plot_data.into_raw_vec(),
         );
         let trace = vec![heatmap];
-        return trace;
+        trace
     }
 }
 

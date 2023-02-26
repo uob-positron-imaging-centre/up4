@@ -638,12 +638,11 @@ pub trait Granular: DataManager {
         if property == "velocity" {
             let velocity_mag = global_stats.velocity_mag();
             let min = velocity_mag[0];
-            let max;
-            if max_limit == 0.0 {
-                max = velocity_mag[2];
+            let max = if max_limit == 0.0 {
+                velocity_mag[2]
             } else {
-                max = max_limit;
-            }
+                max_limit
+            };
             let bin_width = (max - min) / (bins as f64);
             for i in 0..bins {
                 bin_edges[i] = min + i as f64 * bin_width;
@@ -837,7 +836,7 @@ pub trait Granular: DataManager {
             if value.is_nan() {
                 continue;
             }
-            ih += (value - &mean) * (value - &mean);
+            ih += (value - mean) * (value - mean);
         }
         ih /= field.len() as f64;
         ih.sqrt()

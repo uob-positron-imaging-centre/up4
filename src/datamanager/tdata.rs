@@ -769,7 +769,7 @@ impl DataManager for TData {
                 (timestep, timestep + self.buffersize_extra[buffer_id]),
                 buffer_id,
             );
-        } else if &self.range_extra[buffer_id].1 == &self.global_stats_.ntimesteps
+        } else if self.range_extra[buffer_id].1 == self.global_stats_.ntimesteps
             && timestep < self.range_extra[buffer_id].0
         {
             self.update_extra((0, BUFFERSIZE), buffer_id);

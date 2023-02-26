@@ -67,14 +67,14 @@ pub fn find_type(file: &hdf5::File)-> String{
 
 */
 
-fn rotate_position(position: Position, angle: [f64; 3], anchor: [f64; 3]) -> Position {
+fn rotate_position(position: Position, angles: [f64; 3], anchor: [f64; 3]) -> Position {
     let mut new_position = [
         position[0] - anchor[0],
         position[1] - anchor[1],
         position[2] - anchor[2],
     ];
-    for axis in 0..3 {
-        let (sin, cos) = angle[axis].sin_cos();
+    for (axis, angle) in angles.iter().enumerate() {
+        let (sin, cos) = angle.sin_cos();
         let (x, y, z) = (new_position[0], new_position[1], new_position[2]);
         match axis {
             0 => {
@@ -99,10 +99,10 @@ fn rotate_position(position: Position, angle: [f64; 3], anchor: [f64; 3]) -> Pos
     ]
 }
 
-fn rotate_velocity(velocity: [f64; 3], angle: [f64; 3]) -> [f64; 3] {
+fn rotate_velocity(velocity: [f64; 3], angles: [f64; 3]) -> [f64; 3] {
     let mut new_velocity = [velocity[0], velocity[1], velocity[2]];
-    for axis in 0..3 {
-        let (sin, cos) = angle[axis].sin_cos();
+    for (axis, angle) in angles.iter().enumerate() {
+        let (sin, cos) = angle.sin_cos();
         let (x, y, z) = (new_velocity[0], new_velocity[1], new_velocity[2]);
         match axis {
             0 => {

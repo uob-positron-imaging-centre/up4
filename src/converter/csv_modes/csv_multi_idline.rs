@@ -16,6 +16,8 @@ use crate::converter::convertertools;
 // Maximum amount of failiures in a row available for a process
 const MAX_FAILS: i64 = 500;
 
+// 
+#[allow(clippy::too_many_arguments)]
 pub fn csv_multi_idline(
     filename: &str,
     outname: &str,
@@ -78,9 +80,9 @@ pub fn csv_multi_idline(
         let mut particle_data: Vec<ndarray::Array2<f64>> = Vec::new();
 
         // here, data is a vec of all particles, each particle is an array of [t, id, x, y, z, vx, vy, vz]
-        for idx in 0..data.len() {
-            let particle_id = data[idx].slice(ndarray::s![.., 1]).to_vec();
-            let mut temp_data = data[idx].clone();
+        for arr in data {
+            let particle_id = arr.slice(ndarray::s![.., 1]).to_vec();
+            let mut temp_data = arr.clone();
             // sort by time
             temp_data = sort_by_column(temp_data, 0);
             // remove id column because it was not implemented

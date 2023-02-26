@@ -16,7 +16,9 @@ use crate::converter::convertertools;
 // Maximum amount of failiures in a row available for a process
 const MAX_FAILS: i64 = 500;
 
-pub fn csv_multi_file_time_sep(
+// number of arguments is necessary to properly read csv files.
+#[allow(clippy::too_many_arguments)]
+pub fn csv_multi_file_time_step(
     filenames: Vec<&str>,
     outname: &str,
     columns: Vec<i64>,
@@ -45,7 +47,6 @@ pub fn csv_multi_file_time_sep(
         .write_scalar(&0x1_i32)
         .unwrap();
 
-    let mut step = 0;
     let bar = setup_bar!("Vtk Read Data", filenames.len() as u64);
     // Attributes
     print_debug!("Constructing data arrays for attributes!");
@@ -192,7 +193,6 @@ pub fn csv_multi_file_time_sep(
             .create("position")
             .unwrap_or_else(|_| panic!("Unable to create dataset \"position\" in file {}",
                 filename));
-        step += 1;
         mean_counter += particle_id.len();
         sample_rate = current_time - old_time;
         old_time = current_time;

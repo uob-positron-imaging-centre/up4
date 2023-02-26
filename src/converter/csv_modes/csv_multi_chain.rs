@@ -15,6 +15,7 @@ use crate::converter::convertertools;
 // Maximum amount of failiures in a row available for a process
 const MAX_FAILS: i64 = 500;
 
+#[allow(clippy::too_many_arguments)]
 pub fn csv_multi_chain(
     filename: &str,
     outname: &str,

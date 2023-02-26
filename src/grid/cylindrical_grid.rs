@@ -35,8 +35,9 @@ impl CylindricalGrid3D {
             Dim::ThreeD(x) => x,
             _ => panic!("Grid3D got limits for other then three dimensions."),
         };
+        const PI: f64 = std::f64::consts::PI;
         // the distance beween two angles is constant therefore the cell size in omega dimension is
-        let ocellsize = (2.0 * 3.14159) / cells[1] as f64;
+        let ocellsize = (2.0 * PI) / cells[1] as f64;
         // height distance is also easy to calculate
         let zcellsize = (lim[2][1] - lim[2][0]) / cells[2] as f64;
         // The radial positions depend on the mode
@@ -46,7 +47,7 @@ impl CylindricalGrid3D {
 
         // positions contain the boundary of the cell
         for cellidy in 0..cells[1] {
-            opositions[cellidy] = -3.14159 + cellidy as f64 * ocellsize + ocellsize;
+            opositions[cellidy] = -PI + cellidy as f64 * ocellsize + ocellsize;
         }
 
         for cellidz in 0..cells[2] {
@@ -98,7 +99,7 @@ impl CylindricalGrid3D {
 
         let lim = [
             [0.0, outer_radius],    // radius
-            [-3.14159, 3.14159],    // omega
+            [-PI, PI],    // omega
             [lim[2][0], lim[2][1]], // height4
         ];
         let rmeanpositions = rpositions

@@ -35,7 +35,7 @@ impl Rgb {
     }
     // taken from Agoston's Computer Graphics and Geometric Modeling:
     // Implementation and Algorithms p. 303, with H -> [0, 360] and S,V -> [0, 1]
-    fn to_hsv(self) -> Hsv {
+    fn to_hsv(&self) -> Hsv {
         let max = self
             .as_array()
             .iter()

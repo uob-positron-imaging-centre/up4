@@ -735,7 +735,7 @@ impl DataManager for PData {
         );
         if timestep > self.range.1 - 1 {
             self.update((timestep, timestep + self.buffersize));
-        } else if &self.range.1 == &self.global_stats_.ntimesteps && timestep < self.range.0 {
+        } else if self.range.1 == self.global_stats_.ntimesteps && timestep < self.range.0 {
             self.update((0, BUFFERSIZE));
         }
         // If a timestep below the current range is requested, read in single timestep
@@ -884,7 +884,7 @@ impl DataManager for PData {
         );
         if timestep > self.range_extra[buffer_id].1 - 1 {
             self.update_extra((timestep, timestep + self.buffersize), buffer_id);
-        } else if &self.range_extra[buffer_id].1 == &self.global_stats_.ntimesteps
+        } else if self.range_extra[buffer_id].1 == self.global_stats_.ntimesteps
             && timestep < self.range_extra[buffer_id].0
         {
             self.update_extra((0, BUFFERSIZE), buffer_id);

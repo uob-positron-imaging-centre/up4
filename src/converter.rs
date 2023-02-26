@@ -8,7 +8,7 @@ use crate::{
     print_debug, print_warning, setup_bar,
 };
 use csv;
-pub use csv_modes::csv_multi_file_time_sep;
+pub use csv_modes::csv_multi_file_time_step;
 #[cfg(feature = "blosc")]
 use hdf5::filters::{blosc_get_nthreads, blosc_set_nthreads};
 use hdf5::File;
@@ -28,6 +28,7 @@ const BLOSC_SHUFFLE: bool = true;
 // Compression level for blosc filter
 const BLOSC_COMPRESSION: u8 = 9;
 // Chunk size for blosc filter
+
 /// Convert a vtk file into a HDF5 file
 ///
 ///
@@ -66,7 +67,6 @@ pub fn vtk(
         .write_scalar(&0x1_i32)
         .unwrap();
 
-    let mut step = 0;
     let bar = setup_bar!("Vtk Read Data", filenames.len() as u64);
     // Attributes
     print_debug!("Constructing data arrays for attributes!");
@@ -92,8 +92,8 @@ pub fn vtk(
     for (id, filename) in filenames.iter().enumerate() {
         print_debug!("Creating a new group \"timestep {}\"", step);
         let group = hdf5file
-            .create_group(&format!("timestep {}", step))
-            .unwrap_or_else(|_| panic!("Can not create group timestep {}", step));
+            .create_group(&format!("timestep {}", id))
+            .unwrap_or_else(|_| panic!("Can not create group timestep {}", id));
         // Extracting data from filename
         let current_step: i64 = re
             .captures(filename)
@@ -107,7 +107,7 @@ pub fn vtk(
             .unwrap_or_else(|_| panic!("Unable to parse string to i64 from match filename {} with filter {}",
                 filename, filter));
         let current_time = current_step as f64 * timestep;
-        if step == 0 {
+        if id == 0 {
             time[0] = current_time;
         }
         if current_time < time[1] {
@@ -219,7 +219,6 @@ pub fn vtk(
             .create("position")
             .unwrap_or_else(|_| panic!("Unable to create dataset \"position\" in file {}",
                 filename));
-        step += 1;
         mean_counter += particle_id.len();
         sample_rate = current_time - old_time;
         old_time = current_time;
@@ -353,6 +352,8 @@ pub fn vtk_from_folder(
 }
 
 /// Convert a single trajectory csv file to Hdf5
+// The number of arguments is necessary for proper csv reading.
+#[allow(clippy::too_many_arguments)]
 pub fn csv_converter(
     filename: &str,
     outname: &str,
@@ -699,7 +700,7 @@ pub fn csv_converter(
 //fn hdf5(
 
 /// Read in A CSV file containing multiple particles and convert it to HDF5
-#[allow(unreachable_code, unused_variables)]
+#[allow(unreachable_code, unused_variables, clippy::too_many_arguments)]
 pub fn csv_multi_converter(
     filename: &str,
     outname: &str,

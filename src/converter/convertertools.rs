@@ -265,9 +265,10 @@ where
         let two = data[[*b, column]];
         one.partial_cmp(&two).unwrap()
     });
-    for i in 0..indices.len() {
-        new_data.row_mut(i).assign(&data.row(indices[i]));
+    for (i, index) in indices.into_iter().enumerate() {
+        new_data.row_mut(i).assign(&data.row(index));
     }
+    
     new_data
 }
 

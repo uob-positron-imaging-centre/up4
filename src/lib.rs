@@ -31,6 +31,12 @@ pub use converter::*;
 pub mod comparison;
 pub mod datamanager;
 mod functions;
+
+// This module is essentially python written in Rust
+// thus, the "too many" arguments are actually the litany of
+// optionals permitted in Python, and 'py lifetimes need to be
+// sprinkled around in this module or Bad Things Will Happen (tm)
+#[allow(clippy::too_many_arguments, clippy::needless_lifetimes)]
 pub mod pylib;
 pub mod types;
 pub mod utilities;

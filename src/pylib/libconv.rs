@@ -334,7 +334,7 @@ impl PyConverter {
         //return Err(PyErr::new::<pyo3::exceptions::PyNotImplementedError, _>(
         //    "Multi CSV reader is not implemented yet. This feature comes in future!",
         //));
-        converter::csv_multi_file_time_sep(
+        converter::csv_multi_file_time_step(
             filenames,
             outname,
             columns,

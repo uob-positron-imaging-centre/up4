@@ -60,6 +60,21 @@ class P2D:
 
         return quiver_plot
 
+    def unit_vector_plot(
+        self,
+        axis: int,
+        selection=None,
+        index=None,
+        scaling_mode=None,
+        scaling_args=None,
+    ) -> plotly.graph_objects.Figure:
+        self.plotter._unit_vector_plot(
+            axis, selection, index, scaling_mode, scaling_args
+        )
+        unit_vector_plot = self._create_plot()
+
+        return unit_vector_plot
+
     def _create_plot(self) -> plotly.graph_objects.Figure:
         """
         Converts generated JSON string into Plotly figure.

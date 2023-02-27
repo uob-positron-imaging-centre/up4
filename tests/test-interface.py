@@ -27,19 +27,36 @@ fig.show()
 fig = plotter.quiver_plot(1, selection="plane", index=1, scaling_mode="full_node")
 fig.show()
 
+# TODO see what squaring the plot does to the arrows
 fig = plotter.unit_vector_plot(1, selection="depth_average")
+fig.update_yaxes(
+    scaleanchor="x",
+    scaleratio=1,
+)
 fig.show()
 
 fig = plotter.unit_vector_plot(1, selection="plane", index=1)
+fig.update_yaxes(
+    scaleanchor="x",
+    scaleratio=1,
+)
 fig.show()
 
 fig = plotter.scalar_map(
     1,
     selection="depth_average",
 )
+fig.update_yaxes(
+    scaleanchor="x",
+    scaleratio=1,
+)
 fig.show()
 
 fig = plotter.scalar_map(1, selection="plane", index=1)
+fig.update_yaxes(
+    scaleanchor="x",
+    scaleratio=1,
+)
 fig.show()
 
 fig = plotter.parity_plot(vec_field, 1)

@@ -49,9 +49,9 @@ fn main() {
 } */
 #[allow(dead_code, unused_imports, unused_variables, unreachable_code)]
 fn main() {
-    converter::vtk_from_folder("tests/fixtures/post", 1e-5, "test.hdf5", r"(\d+).vtk");
+    converter::vtu_from_folder("/home/dan/radioactive-mill/post", 1e-5, "lethe.hdf5", r"(\d+).pvtu");
     let now = Instant::now();
-    let mut pdata = PData::new("tests/fixtures/1p5u_HD1_glass.hdf5");
+    let mut pdata = TData::new("lethe.hdf5");
     let stats = pdata.global_stats();
     let dim = stats.dimensions();
     let grid = Box::new(CartesianGrid3D::new(

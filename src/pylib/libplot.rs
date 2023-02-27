@@ -335,6 +335,7 @@ impl PyPlotter2D {
         Ok(())
     }
 
+    // TODO see if i have to make a fn for both vector grid and grid
     #[pyo3(signature = (comparison_grid, grid_type, axis, selection = "depth_average", index = None))]
     fn _parity_plot(&mut self, comparison_grid: &PyGrid, grid_type: &str, axis: usize, selection: &str, index: Option<usize>,) -> PyResult<()> {
         let parity_plotter = if grid_type == "vector_grid" {

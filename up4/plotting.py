@@ -69,7 +69,7 @@ class Plotter2D:
     def unit_vector_plot(
         self,
         axis: int,
-        selection="average",
+        selection="depth_average",
         index=None,
         scaling_mode="none",
         scaling_args=None,
@@ -84,7 +84,7 @@ class Plotter2D:
     def scalar_map(
         self,
         axis: int,
-        selection=None,
+        selection="depth_average",
         index=None,
     ) -> plotly.graph_objects.Figure:
         self._plotter._scalar_map(self._grid_type, axis, selection, index)
@@ -95,7 +95,7 @@ class Plotter2D:
     def scalar_contour(
         self,
         axis: int,
-        selection=None,
+        selection="depth_average",
         index=None,
     ) -> plotly.graph_objects.Figure:
         self._plotter._scalar_contour(self._grid_type, axis, selection, index)
@@ -104,7 +104,7 @@ class Plotter2D:
         return scalar_contour_plot
 
     def parity_plot(
-        self, comparison_grid: Grid, axis: int, selection=None, index=None
+        self, comparison_grid: Grid, axis: int, selection="depth_average", index=None
     ) -> plotly.graph_objects.Figure:
         self._plotter._parity_plot(
             comparison_grid, self._grid_type, axis, selection, index
@@ -114,7 +114,7 @@ class Plotter2D:
         return parity_plot
 
     def parity_map(
-        self, comparison_grid: Grid, axis: int, selection=None, index=None
+        self, comparison_grid: Grid, axis: int, selection="depth_average", index=None
     ) -> plotly.graph_objects.Figure:
         self._plotter._parity_map(
             comparison_grid, self._grid_type, axis, selection, index
@@ -124,7 +124,7 @@ class Plotter2D:
         return parity_map
 
     def parity_contour(
-        self, comparison_grid: Grid, axis: int, selection=None, index=None
+        self, comparison_grid: Grid, axis: int, selection="depth_average", index=None
     ) -> plotly.graph_objects.Figure:
         self._plotter._parity_contour(
             comparison_grid, self._grid_type, axis, selection, index

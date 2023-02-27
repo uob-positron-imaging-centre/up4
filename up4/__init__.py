@@ -10,8 +10,7 @@
 
 from upppp_rust import Data, Converter
 from .grid import Grid
+from .plotting import save_fig, Plotter2D
 
-from . import plotting
-from .plotting import save_fig
 
-__all__ = ["Data", "Converter", "Grid", "plotting", "save_fig"]
+__all__ = ["Data", "Converter", "Grid", "Plotter2D", "save_fig"]

@@ -6,7 +6,7 @@ use ndarray::{Array1, Array2, Zip};
 use ndarray_stats::QuantileExt;
 use plotly::{
     common::{ColorBar, ColorScale, ColorScalePalette, Fill, Line, Marker, Mode, MarkerSymbol},
-    Scatter, HeatMap, heat_map::Smoothing, color::NamedColor, Contour
+    Scatter, HeatMap, heat_map::Smoothing, color::NamedColor, Contour, Trace
 };
 use std::f64::consts::PI;
 
@@ -352,7 +352,7 @@ pub struct UnitVectorPlot {
 }
 
 impl UnitVectorPlot {
-    pub fn from_vector_grid_depth_averaged(grid: VectorGrid, axis: usize) -> QuiverPlot {
+    pub fn from_vector_grid_depth_averaged(grid: VectorGrid, axis: usize) -> UnitVectorPlot {
         // select yz (0), xz (1) or xy (2) plane
         let x = if axis == 0 || axis == 1 {
             grid.get_ypositions().to_owned()
@@ -374,29 +374,33 @@ impl UnitVectorPlot {
         } else {
             1
         };
-        let u = grid.data[i].collapse(axis);
-        let v = grid.data[j].collapse(axis);
+        let mut u = grid.data[i].collapse(axis);
+        let mut v = grid.data[j].collapse(axis);
         let mut norm = Array2::zeros(u.dim());
         Zip::from(&mut norm).and(&u).and(&v).for_each(|n, &u, &v| {
             *n = f64::hypot(u, v);
         });
         let true_norm = norm.clone();
 
-        QuiverPlot {
+        u /= &norm;
+        v /= &norm;
+        let dx = x[1] - x[0];
+        let dy = y[1] - y[0];
+        UnitVectorPlot {
             x,
             y,
             u,
             v,
             norm,
             true_norm,
-        }
+        }.bound_half_node(dx, dy)
     }
 
     pub fn from_vector_grid_single_plane(
         grid: VectorGrid,
         axis: usize,
         index: usize,
-    ) -> QuiverPlot {
+    ) -> UnitVectorPlot {
         // select yz (0), xz (1) or xy (2) plane
         let x = if axis == 0 {
             grid.get_ypositions().to_owned()
@@ -436,7 +440,7 @@ impl UnitVectorPlot {
         v /= &norm;
         let dx = x[1] - x[0];
         let dy = y[1] - y[0];
-        QuiverPlot {
+        UnitVectorPlot {
             x,
             y,
             u,
@@ -502,9 +506,9 @@ impl UnitVectorPlot {
         arrows
     }
 
-    pub fn create_quiver_traces(&self) -> Vec<Box<Scatter<f64, f64>>> {
+    pub fn create_quiver_traces(&self) -> Vec<Box<dyn Trace>> {
         let arrows = self.create_arrows();
-        let mut traces = Vec::with_capacity(arrows.len() + 1);
+        let mut traces = Vec::<Box<dyn Trace>>::with_capacity(arrows.len() + 1);
         for arrow in arrows {
             let xs = vec![
                 arrow.base.0,
@@ -529,11 +533,12 @@ impl UnitVectorPlot {
                 .line(Line::new().color(NamedColor::Black));
             traces.push(trace);
         }
+        traces.push(self.create_unit_vector_background());
 
         traces
     }
 
-    pub fn create_unit_vector_background(&self) -> Box<HeatMap<f64, f64, f64>> {
+    fn create_unit_vector_background(&self) -> Box<HeatMap<f64, f64, f64>> {
         let (x, y) = meshgrid(self.x.to_owned(), self.y.to_owned());
         let heatmap = HeatMap::new(
             x.into_raw_vec(),

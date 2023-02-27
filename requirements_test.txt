@@ -6,3 +6,4 @@ h5py>=2.1.0
 vtk>=9.1.0
 natsort
 pytest
+pytest-html

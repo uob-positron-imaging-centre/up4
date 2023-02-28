@@ -197,6 +197,19 @@
 <a href="#197" id="197">197</a>
 <a href="#198" id="198">198</a>
 <a href="#199" id="199">199</a>
+<a href="#200" id="200">200</a>
+<a href="#201" id="201">201</a>
+<a href="#202" id="202">202</a>
+<a href="#203" id="203">203</a>
+<a href="#204" id="204">204</a>
+<a href="#205" id="205">205</a>
+<a href="#206" id="206">206</a>
+<a href="#207" id="207">207</a>
+<a href="#208" id="208">208</a>
+<a href="#209" id="209">209</a>
+<a href="#210" id="210">210</a>
+<a href="#211" id="211">211</a>
+<a href="#212" id="212">212</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::datamanager::Manager;
 <span class="kw">use </span><span class="kw">crate</span>::grid::{<span class="self">self</span>, <span class="kw-2">*</span>};
 <span class="kw">use </span><span class="kw">crate</span>::particleselector::ParticleSelector;
@@ -383,13 +396,26 @@
 }
 
 <span class="kw">impl </span>Comparer {
-    <span class="kw">fn </span>velocityfield(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; (Array1&lt;f64&gt;, Array1&lt;f64&gt;) {
-        <span class="kw">let </span>field1 = <span class="self">self
-            </span>.data
-            .velocityfield(<span class="self">self</span>.grid.clone(), <span class="kw-2">&amp;</span>ParticleSelector::default());
-        <span class="kw">let </span>field2 = <span class="self">self
-            </span>.data2
-            .velocityfield(<span class="self">self</span>.grid2.clone(), <span class="kw-2">&amp;</span>ParticleSelector::default());
+    <span class="kw">fn </span>velocityfield(
+        <span class="kw-2">&amp;mut </span><span class="self">self</span>,
+        mode: <span class="kw-2">&amp;</span>str,
+        min_velocity: f64,
+        max_velocity: f64,
+    ) -&gt; (Array1&lt;f64&gt;, Array1&lt;f64&gt;) {
+        <span class="kw">let </span>field1 = <span class="self">self</span>.data.velocityfield(
+            <span class="self">self</span>.grid.clone(),
+            <span class="kw-2">&amp;</span>ParticleSelector::default(),
+            mode,
+            min_velocity,
+            max_velocity,
+        );
+        <span class="kw">let </span>field2 = <span class="self">self</span>.data2.velocityfield(
+            <span class="self">self</span>.grid2.clone(),
+            <span class="kw-2">&amp;</span>ParticleSelector::default(),
+            mode,
+            min_velocity,
+            max_velocity,
+        );
         (
             field1.get_data().iter().map(|x| <span class="kw-2">*</span>x).collect(),
             field2.get_data().iter().map(|x| <span class="kw-2">*</span>x).collect(),

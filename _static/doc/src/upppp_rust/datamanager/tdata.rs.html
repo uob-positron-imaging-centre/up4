@@ -1024,6 +1024,22 @@
 <a href="#1024" id="1024">1024</a>
 <a href="#1025" id="1025">1025</a>
 <a href="#1026" id="1026">1026</a>
+<a href="#1027" id="1027">1027</a>
+<a href="#1028" id="1028">1028</a>
+<a href="#1029" id="1029">1029</a>
+<a href="#1030" id="1030">1030</a>
+<a href="#1031" id="1031">1031</a>
+<a href="#1032" id="1032">1032</a>
+<a href="#1033" id="1033">1033</a>
+<a href="#1034" id="1034">1034</a>
+<a href="#1035" id="1035">1035</a>
+<a href="#1036" id="1036">1036</a>
+<a href="#1037" id="1037">1037</a>
+<a href="#1038" id="1038">1038</a>
+<a href="#1039" id="1039">1039</a>
+<a href="#1040" id="1040">1040</a>
+<a href="#1041" id="1041">1041</a>
+<a href="#1042" id="1042">1042</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Timestep based HDF5 dataset manager
 //!
 //! Implementation of reading + buffering functions.
@@ -1056,6 +1072,7 @@
     rotation_is_set: bool,
     rotation: [f64; <span class="number">3</span>],
     rotation_center: [f64; <span class="number">3</span>],
+    external_buffer_names: Vec&lt;usize&gt;,
 }
 
 <span class="kw">impl </span>TData {
@@ -1084,6 +1101,8 @@
             rotation_is_set: <span class="bool-val">false</span>,
             rotation: [<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>],
             rotation_center: [<span class="number">0.0</span>, <span class="number">0.0</span>, <span class="number">0.0</span>],
+
+            external_buffer_names: <span class="macro">vec!</span>[],
         };
         <span class="macro">print_debug!</span>(
             <span class="string">&quot;TData: Generation complete. First buffer update starting, buffer size: {}&quot;</span>,
@@ -1920,13 +1939,26 @@
         <span class="self">self</span>.read_single(timestep)
     }
     <span class="doccomment">/// setup a new buffer
-    </span><span class="kw">fn </span>setup_buffer(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
-        <span class="self">self</span>.buffer_extra
-            .push(<span class="macro">vec!</span>[Timestep::default(); BUFFERSIZE]);
-        <span class="kw">let </span>buffer_id = <span class="self">self</span>.buffer_extra.len() - <span class="number">1</span>;
-        <span class="kw">let </span>range = (<span class="number">0</span>, BUFFERSIZE);
-        <span class="self">self</span>.range_extra.push(range);
-        <span class="self">self</span>.buffersize_extra.push(BUFFERSIZE);
+    </span><span class="kw">fn </span>setup_buffer(<span class="kw-2">&amp;mut </span><span class="self">self</span>, external_buffer_id: usize) {
+        <span class="kw">let </span>range = (<span class="number">0usize</span>, BUFFERSIZE);
+        <span class="kw">let </span>buffer_id;
+        <span class="kw">if </span><span class="self">self</span>.external_buffer_names.contains(<span class="kw-2">&amp;</span>external_buffer_id) {
+            <span class="comment">// buffer is already know and will be reset
+            </span>buffer_id = <span class="self">self
+                </span>.external_buffer_names
+                .iter()
+                .position(|x| x == <span class="kw-2">&amp;</span>external_buffer_id)
+                .unwrap();
+            <span class="self">self</span>.range_extra[buffer_id] = range
+        } <span class="kw">else </span>{
+            <span class="comment">// new buffer. Allocate new memory and load the first bit of data
+            </span><span class="self">self</span>.buffer_extra
+                .push(<span class="macro">vec!</span>[Timestep::default(); BUFFERSIZE]);
+            buffer_id = <span class="self">self</span>.buffer_extra.len() - <span class="number">1</span>;
+            <span class="self">self</span>.range_extra.push(range);
+            <span class="self">self</span>.buffersize_extra.push(BUFFERSIZE);
+            <span class="self">self</span>.external_buffer_names.push(external_buffer_id)
+        }
         <span class="self">self</span>.update_extra(range, buffer_id)
     }
 

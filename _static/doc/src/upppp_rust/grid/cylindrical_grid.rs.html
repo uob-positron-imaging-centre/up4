@@ -501,6 +501,21 @@
 <a href="#501" id="501">501</a>
 <a href="#502" id="502">502</a>
 <a href="#503" id="503">503</a>
+<a href="#504" id="504">504</a>
+<a href="#505" id="505">505</a>
+<a href="#506" id="506">506</a>
+<a href="#507" id="507">507</a>
+<a href="#508" id="508">508</a>
+<a href="#509" id="509">509</a>
+<a href="#510" id="510">510</a>
+<a href="#511" id="511">511</a>
+<a href="#512" id="512">512</a>
+<a href="#513" id="513">513</a>
+<a href="#514" id="514">514</a>
+<a href="#515" id="515">515</a>
+<a href="#516" id="516">516</a>
+<a href="#517" id="517">517</a>
+<a href="#518" id="518">518</a>
 </pre><pre class="rust"><code><span class="kw">extern crate </span>ndarray;
 <span class="kw">use super</span>::{CellId, Dim, GridFunctions3D, Position, ThreeD};
 <span class="kw">use crate</span>::{print_debug, print_warning};
@@ -508,6 +523,8 @@
 <span class="kw">use </span>ndarray::{prelude::<span class="kw-2">*</span>, RemoveAxis};
 <span class="kw">use </span>ndarray_stats::QuantileExt;
 <span class="kw">use </span>std::any::Any;
+
+<span class="kw">use </span>anyhow::Result;
 <span class="comment">// TODO
 // - Currently the cylinder is always vertical, but this should be configurable.
 </span><span class="attr">#[derive(Getters, Clone, Default)]
@@ -684,7 +701,7 @@
         in_rad &amp;&amp; in_omega &amp;&amp; in_height
     }
 
-    <span class="kw">fn </span>cell_id(<span class="kw-2">&amp;</span><span class="self">self</span>, pos: Position) -&gt; CellId {
+    <span class="kw">fn </span>cell_id(<span class="kw-2">&amp;</span><span class="self">self</span>, pos: Position) -&gt; <span class="prelude-ty">Result</span>&lt;CellId&gt; {
         <span class="macro">print_debug!</span>(<span class="string">&quot;Grid3D: Checking if {:?} is in grid&quot;</span>, pos);
         <span class="kw">let </span>pos = <span class="kw-2">&amp;</span><span class="self">self</span>.to_cylindrical(pos);
         <span class="kw">let </span>posr = pos[<span class="number">0</span>];
@@ -714,10 +731,14 @@
             .collect::&lt;Array1&lt;f64&gt;&gt;()
             .argmin()
             .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Can not find min of {:?} in Gri3D&quot;</span>, pos));
-        [cell_idr, cell_ido, cell_idz]
+        <span class="prelude-val">Ok</span>([cell_idr, cell_ido, cell_idz])
     }
     <span class="attr">#[allow(unused_variables)]
-    </span><span class="kw">fn </span>cell_ids_in_trajectory(<span class="kw-2">&amp;</span><span class="self">self</span>, pos1: Position, pos2: Position) -&gt; (Vec&lt;CellId&gt;, Vec&lt;f64&gt;) {
+    </span><span class="kw">fn </span>cell_ids_in_trajectory(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        pos1: Position,
+        pos2: Position,
+    ) -&gt; <span class="prelude-ty">Result</span>&lt;(Vec&lt;CellId&gt;, Vec&lt;f64&gt;)&gt; {
         <span class="macro">unimplemented!</span>(<span class="string">&quot;Not implemented for cylindrical grid&quot;</span>)
     }
 
@@ -731,12 +752,18 @@
     }
 
     <span class="kw">fn </span>get_value(<span class="kw-2">&amp;</span><span class="self">self</span>, pos: Position) -&gt; f64 {
-        <span class="kw">let </span>cell_id = <span class="self">self</span>.cell_id(pos);
+        <span class="kw">let </span>cell_id = <span class="kw">match </span><span class="self">self</span>.cell_id(pos) {
+            <span class="prelude-val">Ok</span>(cell_id) =&gt; cell_id,
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return </span>f64::NAN,
+        };
         <span class="self">self</span>.data[(cell_id[<span class="number">0</span>], cell_id[<span class="number">1</span>], cell_id[<span class="number">2</span>])]
     }
 
     <span class="kw">fn </span>add_value(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: Position, value: f64) {
-        <span class="kw">let </span>cell_id = <span class="self">self</span>.cell_id(pos);
+        <span class="kw">let </span>cell_id = <span class="kw">match </span><span class="self">self</span>.cell_id(pos) {
+            <span class="prelude-val">Ok</span>(cell_id) =&gt; cell_id,
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span>,
+        };
         <span class="self">self</span>.data[(cell_id[<span class="number">0</span>], cell_id[<span class="number">1</span>], cell_id[<span class="number">2</span>])] += value;
         <span class="self">self</span>.weight[(cell_id[<span class="number">0</span>], cell_id[<span class="number">1</span>], cell_id[<span class="number">2</span>])] += <span class="number">1.</span>;
     }
@@ -762,7 +789,10 @@
     }
 
     <span class="kw">fn </span>insert(<span class="kw-2">&amp;mut </span><span class="self">self</span>, pos: Position, value: f64) {
-        <span class="kw">let </span>cell_id = <span class="self">self</span>.cell_id(pos);
+        <span class="kw">let </span>cell_id = <span class="kw">match </span><span class="self">self</span>.cell_id(pos) {
+            <span class="prelude-val">Ok</span>(cell_id) =&gt; cell_id,
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span>,
+        };
         <span class="self">self</span>.data[(cell_id[<span class="number">0</span>], cell_id[<span class="number">1</span>], cell_id[<span class="number">2</span>])] = value;
     }
     <span class="kw">fn </span>new_zeros(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Box&lt;<span class="kw">dyn </span>GridFunctions3D&gt; {

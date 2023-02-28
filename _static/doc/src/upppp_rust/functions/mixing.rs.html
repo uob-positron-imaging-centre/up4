@@ -522,9 +522,9 @@
     ) -&gt; Box&lt;<span class="kw">dyn </span>GridFunctions3D&gt; {
         <span class="kw">let </span>global_stats = <span class="self">self</span>.global_stats();
         <span class="kw">let </span>timesteps = global_stats.timesteps();
-        <span class="self">self</span>.setup_buffer(); <span class="comment">// add another buffer to the system
-                             // Allocate arrays needed for calculation
-                             // those arrays are needed for the calculation of the variance with a special algorithm
+        <span class="self">self</span>.setup_buffer(<span class="number">0</span>); <span class="comment">// add another buffer to the system
+                              // Allocate arrays needed for calculation
+                              // those arrays are needed for the calculation of the variance with a special algorithm
         </span><span class="kw">let </span><span class="kw-2">mut </span>distance = grid.new_zeros();
         <span class="macro">print_debug!</span>(<span class="string">&quot;Dispersion: Initiation over, entering time loop&quot;</span>);
 

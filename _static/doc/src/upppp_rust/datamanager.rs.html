@@ -136,7 +136,7 @@
     </span><span class="kw">fn </span>get_timestep_unbuffered(<span class="kw-2">&amp;</span><span class="self">self</span>, timestep: usize) -&gt; Timestep;
 
     <span class="doccomment">/// setup a new buffer
-    </span><span class="kw">fn </span>setup_buffer(<span class="kw-2">&amp;mut </span><span class="self">self</span>);
+    </span><span class="kw">fn </span>setup_buffer(<span class="kw-2">&amp;mut </span><span class="self">self</span>, external_buffer_id: usize);
 
     <span class="doccomment">/// read from other buffer then the main one
     </span><span class="kw">fn </span>get_timestep_buffer(<span class="kw-2">&amp;mut </span><span class="self">self</span>, timestep: usize, buffer: usize) -&gt; <span class="kw-2">&amp;</span>Timestep;

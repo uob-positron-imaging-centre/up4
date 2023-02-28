@@ -866,7 +866,7 @@ Each cell element represents the mean squared displacement of all particles in t
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.velocityfield">
-<span class="sig-name descname"><span class="pre">velocityfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.velocityfield" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">velocityfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.velocityfield" title="Permalink to this definition">#</a></dt>
 <dd><p>Return the velocity data as a velocity field of their norms.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1181,6 +1181,30 @@ The order is [xmin, xmax, ymin, ymax, zmin, zmax]</p>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
 <dt><strong>grid</strong><span class="classifier"><a class="reference internal" href="grid.html#id0" title="up4.Grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Grid</span></code></a></span></dt><dd><p>A up4.Grid object with the same dimensions as the input data</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="up4.Grid.cell_id">
+<span class="sig-name descname"><span class="pre">cell_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Grid.cell_id" title="Permalink to this definition">#</a></dt>
+<dd><p>Return the cell id of a given position</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>x</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>The x-position of the cell</p>
+</dd>
+<dt><strong>y</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>The y-position of the cell</p>
+</dd>
+<dt><strong>z</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a></span></dt><dd><p>The z-position of the cell</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl>
+<dt><strong>cell_id</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.11)"><code class="docutils literal notranslate"><span class="pre">list</span></code></a></span></dt><dd><p>The cell id of the given position</p>
 </dd>
 </dl>
 </dd>
@@ -2020,7 +2044,7 @@ Each cell element represents the mean squared displacement of all particles in t
 
 <dl class="py method">
 <dt class="sig sig-object py" id="id24">
-<span class="sig-name descname"><span class="pre">velocityfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id24" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">velocityfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id24" title="Permalink to this definition">#</a></dt>
 <dd><p>Return the velocity data as a velocity field of their norms.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -2386,6 +2410,15 @@ Each cell element represents the mean squared displacement of all particles in t
      <code class="docutils literal notranslate">
       <span class="pre">
        Grid.cartesian3d_from_data()
+      </span>
+     </code>
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#up4.Grid.cell_id">
+     <code class="docutils literal notranslate">
+      <span class="pre">
+       Grid.cell_id()
       </span>
      </code>
     </a>

@@ -643,6 +643,25 @@
 <a href="#643" id="643">643</a>
 <a href="#644" id="644">644</a>
 <a href="#645" id="645">645</a>
+<a href="#646" id="646">646</a>
+<a href="#647" id="647">647</a>
+<a href="#648" id="648">648</a>
+<a href="#649" id="649">649</a>
+<a href="#650" id="650">650</a>
+<a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
+<a href="#656" id="656">656</a>
+<a href="#657" id="657">657</a>
+<a href="#658" id="658">658</a>
+<a href="#659" id="659">659</a>
+<a href="#660" id="660">660</a>
+<a href="#661" id="661">661</a>
+<a href="#662" id="662">662</a>
+<a href="#663" id="663">663</a>
+<a href="#664" id="664">664</a>
 </pre><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::PyData;
 <span class="kw">use </span><span class="kw">crate</span>::grid;
 <span class="kw">use </span><span class="kw">crate</span>::grid::<span class="kw-2">*</span>;
@@ -1139,8 +1158,27 @@
             <span class="self">self</span>.grid.get_data().max_skipnan()
         ))
     }
-}
 
+    <span class="doccomment">/// Return the cell id of a given position
+    ///
+    /// Parameters
+    /// ----------
+    ///
+    /// x : float
+    ///     The x-position of the cell
+    /// y : float
+    ///     The y-position of the cell
+    /// z : float
+    ///     The z-position of the cell
+    ///
+    /// Returns
+    /// -------
+    /// cell_id : list
+    ///     The cell id of the given position
+    </span><span class="kw">fn </span>cell_id(<span class="kw-2">&amp;</span><span class="self">self</span>, x: f64, y: f64, z: f64) -&gt; [usize; <span class="number">3</span>] {
+        <span class="self">self</span>.grid.cell_id([x, y, z]).unwrap()
+    }
+}
 
 <span class="doccomment">/// A 3D Grid containing Vector Data
 /// This grid is generated in the vectorfield function and contains the arrow

@@ -85,7 +85,7 @@ jobs:
 
       - name: Setup Sphinx
         run: |
-          mamba install -y -c ${{matrix.channel}} --file docs/source/requirements.txt
+          mamba install -y -c ${{matrix.channel}} --file docs/requirements.txt
       - name: Generate Rust docs
         run: |
           export HDF5_DIR="$CONDA_PREFIX"

@@ -3,7 +3,7 @@ repos:
     rev: v1.0
     hooks:
     -   id: fmt
-    -   id: cargo-clippy
+    -   id: clippy
 
 -   repo: https://github.com/psf/black
     rev: 23.1.0
@@ -11,7 +11,26 @@ repos:
     - id: black
       language_version: python
 
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v1.2.3
+-   repo: https://github.com/PyCQA/flake8
+    rev: 6.0.0
     hooks:
-    - id: flake8
+    -   id: flake8
+
+-   repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.33.0
+    hooks:
+    -   id: markdownlint
+
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+    -   id: check-executables-have-shebangs
+    -   id: check-merge-conflict
+    -   id: check-symlinks
+    -   id: check-yaml
+    -   id: check-json
+    -   id: check-vcs-permalinks
+    -   id: trailing-whitespace
+        exclude: ^test/
+    -   id: mixed-line-ending
+        exclude: ^test/

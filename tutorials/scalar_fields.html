@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Manual &#8212; up4 v0.1.0 Manual</title>
+    <title>Scalar Fields &#8212; up4 v0.1.0 Manual</title>
   
   
   
@@ -41,12 +41,12 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/clipboard.min.js"></script>
     <script src="../_static/copybutton.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'api/index';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/scalar_fields';</script>
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Converter" href="converter.html" />
-    <link rel="prev" title="Conditional" href="../tutorials/conditional_analysis.html" />
+    <link rel="next" title="Grids" href="grid_tutorial.html" />
+    <link rel="prev" title="Tutorials" href="index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
   </head>
@@ -126,15 +126,15 @@
                     </li>
                 
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../tutorials/index.html">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
                         Tutorials
                       </a>
                     </li>
                 
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="#">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api/index.html">
                         Manual
                       </a>
                     </li>
@@ -243,15 +243,15 @@
                     </li>
                 
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../tutorials/index.html">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
                         Tutorials
                       </a>
                     </li>
                 
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="#">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api/index.html">
                         Manual
                       </a>
                     </li>
@@ -318,11 +318,12 @@
     Section Navigation
   </p>
   <div class="bd-toc-item navbar-nav">
-    <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="converter.html">Converter</a></li>
-<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="grid.html">Grids</a></li>
-<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
+    <ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Scalar Fields</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grid_tutorial.html">Grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converting.html">Converting data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mixing.html">Mixing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="conditional_analysis.html">Conditional</a></li>
 </ul>
 
   </div>
@@ -354,43 +355,74 @@
             
             <article class="bd-article" role="main">
               
-  <section id="manual">
-<h1>Manual<a class="headerlink" href="#manual" title="Permalink to this heading">#</a></h1>
-<p>From here on out, UPPPP will be referred to its Python package name, <code class="docutils literal notranslate"><span class="pre">up4</span></code>, for brevity. All public <code class="docutils literal notranslate"><span class="pre">up4</span></code> members are documented here alongside some examples that can be copied and pasted. You can also use the <code class="xref py py-obj docutils literal notranslate"><span class="pre">Search</span></code> bar to directly find what you need.</p>
-<p>We really want to make this library simplify the analysis of particle data in a quick, reproducible, transparent and easy to use manner; if you feel that something can be improved/ added, or care to share examples/ showcases, <em>please</em> feel free to get in contact with any of us!</p>
-<p>These docs cover the Python API, but the Rust source code is located <a class="reference external" href="../_static/doc/upppp_rust/index.html">here</a>.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="converter.html">Converter</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="converter.html#up4.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="converter.html#up4.Converter"><code class="docutils literal notranslate"><span class="pre">Converter</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="converter.html#up4.Grid"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="converter.html#id0"><code class="docutils literal notranslate"><span class="pre">Converter</span></code></a></li>
+  <section id="scalar-fields">
+<span id="scalarfield"></span><h1>Scalar Fields<a class="headerlink" href="#scalar-fields" title="Permalink to this heading">#</a></h1>
+<p>Scalar fields are a powerful tool to represent the state of a system. <code class="docutils literal notranslate"><span class="pre">up4</span></code> provides
+you with basic tools to extract an visualize different quantities.</p>
+<p>Available are:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../api/grid.html#up4.Data.velocityfield" title="up4.Data.velocityfield"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up4.Data.velocityfield</span></code></a></p></li>
+<li><p><a class="reference internal" href="../api/grid.html#up4.Data.numberfield" title="up4.Data.numberfield"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up4.Data.numberfield</span></code></a></p></li>
+<li><p><a class="reference internal" href="../api/grid.html#up4.Data.occupancyfield" title="up4.Data.occupancyfield"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up4.Data.occupancyfield</span></code></a></p></li>
+<li><p><a class="reference internal" href="../api/grid.html#up4.Data.granular_temperature" title="up4.Data.granular_temperature"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up4.Data.granular_temperature</span></code></a></p></li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="data.html#up4.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="data.html#up4.Converter"><code class="docutils literal notranslate"><span class="pre">Converter</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="data.html#up4.Grid"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="data.html#id0"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="grid.html">Grids</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="grid.html#up4.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="grid.html#up4.Converter"><code class="docutils literal notranslate"><span class="pre">Converter</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="grid.html#up4.Grid"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="grid.html#id0"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="plotting.html#up4.plotting.create_plot"><code class="docutils literal notranslate"><span class="pre">create_plot()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="plotting.html#up4.plotting.save_fig"><code class="docutils literal notranslate"><span class="pre">save_fig()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="plotting.html#vector-plotting">Vector Plotting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plotting.html#scalar-plotting">Scalar Plotting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plotting.html#comparison-plotting">Comparison Plotting</a></li>
-</ul>
-</li>
-</ul>
+<p>To generate a 2D field one first needs to generate a 3D grid:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">up4</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="s2">&quot;test_filename.hdf5&quot;</span><span class="p">)</span>
+<span class="n">grid</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Grid</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">num_cells</span><span class="o">=</span><span class="p">[</span><span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>here, we first load the data using our  <a class="reference internal" href="../api/grid.html#up4.Data" title="up4.Data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up4.Data</span></code></a> class, then generate a 3-D
+grid using the  <a class="reference internal" href="../api/grid.html#id0" title="up4.Grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up4.Grid</span></code></a> class constructor. Read the <a class="reference internal" href="grid_tutorial.html#grid-ref"><span class="std std-ref">tutorial</span></a>
+for grids to see a deeper insight into the generating of grids.</p>
+<p>Afterwards generate a field containing the velocity data. The data contains
+the mean velocity of all  particle passes through that each cell.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">field</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">velocityfield</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Grid3D:</span>
+<span class="sd">    Cells: [50, 50, 50]</span>
+<span class="sd">    xlim: [174.02695648134886, 372.21089969650967]</span>
+<span class="sd">    ylim: [74.71161491723201, 203.37554460929758]</span>
+<span class="sd">    zlim: [52.291522049547666, 239.25612145076877]</span>
+<span class="sd">    Data information:</span>
+<span class="sd">            Mean: NaN</span>
+<span class="sd">            Std: NaN</span>
+<span class="sd">            Min: 0.0021862203945679478</span>
+<span class="sd">            Max: 0.40294214528818545</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p><a class="reference internal" href="../api/grid.html#id0" title="up4.Grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up4.Grid</span></code></a> also contains the weights of each cell. Meaning that it stores
+the number of particles that crossed the cell. These weights are accessible using
+the  <a class="reference internal" href="../api/grid.html#id16" title="up4.Grid.weights_to_numpy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up4.Grid.weights_to_numpy</span></code></a> method.
+<a class="reference internal" href="../api/grid.html#id0" title="up4.Grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up4.Grid</span></code></a> implements a crude plotting function that allows fast but
+nonflexible visualisation.
+This plotting function generates a depth-averaged 2D <a class="reference external" href="https://plotly.com/">Plotly</a>
+figure of the field and is not editable. Simply provide the axis along which the
+depth averaging should take place to the function:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">field</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># plot x-axis</span>
+</pre></div>
+</div>
+<p>To accurately visualize 2D fields there are two possibilities: Slices and depth averaged representations.</p>
+<p>Slices are simple 2D representations of the 3D field at a given position along a given axis:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">slice_x_axis</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span> <span class="c1"># slice the 3D array at the 20st cell index along x-axis</span>
+</pre></div>
+</div>
+<p>alternatively, one can slice the field at a given position:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">slice_x_axis</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">slice_pos</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">101.5</span><span class="p">)</span> <span class="c1"># slice the 3D array at x = 101.5 mm</span>
+</pre></div>
+</div>
+<p>Depth-averaging is achieved by calculating the accurate mean along each axis.
+The <a class="reference internal" href="../api/grid.html#id5" title="up4.Grid.collapse"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up4.Grid.collapse</span></code></a> function uses its internal weights for each cell to accurately
+determine the mean without loss of information.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">averaged_y_axis</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">collapse</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># depth average along the y-axis</span>
+</pre></div>
+</div>
+<p>one can also generate a 1D representation of the system by collapsing two dimensions:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">averaged_y_z_axis</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">collapse_two</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="c1"># depth averaging along x and y axis</span>
+</pre></div>
 </div>
 </section>
 
@@ -402,17 +434,17 @@
             <footer class="bd-footer-article">
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="../tutorials/conditional_analysis.html" title="previous page">
+  <a class='left-prev' id="prev-link" href="index.html" title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
           <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Conditional</p>
+          <p class="prev-next-title">Tutorials</p>
       </div>
   </a>
-  <a class='right-next' id="next-link" href="converter.html" title="next page">
+  <a class='right-next' id="next-link" href="grid_tutorial.html" title="next page">
   <div class="prev-next-info">
       <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">Converter</p>
+      <p class="prev-next-title">Grids</p>
   </div>
   <i class="fa-solid fa-angle-right"></i>
   </a>
@@ -434,7 +466,7 @@
   
 
 <div class="tocsection editthispage">
-    <a href="https://github.com/uob-positron-imaging-centre/up4/edit/uPPPP/api/index.rst">
+    <a href="https://github.com/uob-positron-imaging-centre/up4/edit/uPPPP/tutorials/scalar_fields.rst">
         <i class="fa-solid fa-pencil"></i> Edit this page
     </a>
 </div>
@@ -444,7 +476,7 @@
 <div class="toc-item">
   
 <div class="tocsection sourcelink">
-    <a href="../_sources/api/index.rst.txt">
+    <a href="../_sources/tutorials/scalar_fields.rst.txt">
         <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
 </div>

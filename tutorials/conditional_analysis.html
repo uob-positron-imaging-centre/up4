@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Manual &#8212; up4 v0.1.0 Manual</title>
+    <title>Conditional &#8212; up4 v0.1.0 Manual</title>
   
   
   
@@ -41,12 +41,12 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/clipboard.min.js"></script>
     <script src="../_static/copybutton.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'api/index';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/conditional_analysis';</script>
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Converter" href="converter.html" />
-    <link rel="prev" title="Conditional" href="../tutorials/conditional_analysis.html" />
+    <link rel="next" title="Manual" href="../api/index.html" />
+    <link rel="prev" title="Mixing" href="mixing.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
   </head>
@@ -126,15 +126,15 @@
                     </li>
                 
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../tutorials/index.html">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
                         Tutorials
                       </a>
                     </li>
                 
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="#">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api/index.html">
                         Manual
                       </a>
                     </li>
@@ -243,15 +243,15 @@
                     </li>
                 
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../tutorials/index.html">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
                         Tutorials
                       </a>
                     </li>
                 
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="#">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api/index.html">
                         Manual
                       </a>
                     </li>
@@ -318,11 +318,12 @@
     Section Navigation
   </p>
   <div class="bd-toc-item navbar-nav">
-    <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="converter.html">Converter</a></li>
-<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="grid.html">Grids</a></li>
-<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
+    <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="scalar_fields.html">Scalar Fields</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grid_tutorial.html">Grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converting.html">Converting data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mixing.html">Mixing</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Conditional</a></li>
 </ul>
 
   </div>
@@ -354,44 +355,8 @@
             
             <article class="bd-article" role="main">
               
-  <section id="manual">
-<h1>Manual<a class="headerlink" href="#manual" title="Permalink to this heading">#</a></h1>
-<p>From here on out, UPPPP will be referred to its Python package name, <code class="docutils literal notranslate"><span class="pre">up4</span></code>, for brevity. All public <code class="docutils literal notranslate"><span class="pre">up4</span></code> members are documented here alongside some examples that can be copied and pasted. You can also use the <code class="xref py py-obj docutils literal notranslate"><span class="pre">Search</span></code> bar to directly find what you need.</p>
-<p>We really want to make this library simplify the analysis of particle data in a quick, reproducible, transparent and easy to use manner; if you feel that something can be improved/ added, or care to share examples/ showcases, <em>please</em> feel free to get in contact with any of us!</p>
-<p>These docs cover the Python API, but the Rust source code is located <a class="reference external" href="../_static/doc/upppp_rust/index.html">here</a>.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="converter.html">Converter</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="converter.html#up4.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="converter.html#up4.Converter"><code class="docutils literal notranslate"><span class="pre">Converter</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="converter.html#up4.Grid"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="converter.html#id0"><code class="docutils literal notranslate"><span class="pre">Converter</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="data.html#up4.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="data.html#up4.Converter"><code class="docutils literal notranslate"><span class="pre">Converter</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="data.html#up4.Grid"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="data.html#id0"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="grid.html">Grids</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="grid.html#up4.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="grid.html#up4.Converter"><code class="docutils literal notranslate"><span class="pre">Converter</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="grid.html#up4.Grid"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="grid.html#id0"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="plotting.html#up4.plotting.create_plot"><code class="docutils literal notranslate"><span class="pre">create_plot()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="plotting.html#up4.plotting.save_fig"><code class="docutils literal notranslate"><span class="pre">save_fig()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="plotting.html#vector-plotting">Vector Plotting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plotting.html#scalar-plotting">Scalar Plotting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plotting.html#comparison-plotting">Comparison Plotting</a></li>
-</ul>
-</li>
-</ul>
-</div>
+  <section id="conditional">
+<h1>Conditional<a class="headerlink" href="#conditional" title="Permalink to this heading">#</a></h1>
 </section>
 
 
@@ -402,17 +367,17 @@
             <footer class="bd-footer-article">
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="../tutorials/conditional_analysis.html" title="previous page">
+  <a class='left-prev' id="prev-link" href="mixing.html" title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
           <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Conditional</p>
+          <p class="prev-next-title">Mixing</p>
       </div>
   </a>
-  <a class='right-next' id="next-link" href="converter.html" title="next page">
+  <a class='right-next' id="next-link" href="../api/index.html" title="next page">
   <div class="prev-next-info">
       <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">Converter</p>
+      <p class="prev-next-title">Manual</p>
   </div>
   <i class="fa-solid fa-angle-right"></i>
   </a>
@@ -434,7 +399,7 @@
   
 
 <div class="tocsection editthispage">
-    <a href="https://github.com/uob-positron-imaging-centre/up4/edit/uPPPP/api/index.rst">
+    <a href="https://github.com/uob-positron-imaging-centre/up4/edit/uPPPP/tutorials/conditional_analysis.rst">
         <i class="fa-solid fa-pencil"></i> Edit this page
     </a>
 </div>
@@ -444,7 +409,7 @@
 <div class="toc-item">
   
 <div class="tocsection sourcelink">
-    <a href="../_sources/api/index.rst.txt">
+    <a href="../_sources/tutorials/conditional_analysis.rst.txt">
         <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
 </div>

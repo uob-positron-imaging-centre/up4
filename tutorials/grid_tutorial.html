@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Manual &#8212; up4 v0.1.0 Manual</title>
+    <title>Grids &#8212; up4 v0.1.0 Manual</title>
   
   
   
@@ -41,12 +41,12 @@
     <script src="../_static/sphinx_highlight.js"></script>
     <script src="../_static/clipboard.min.js"></script>
     <script src="../_static/copybutton.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'api/index';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/grid_tutorial';</script>
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Converter" href="converter.html" />
-    <link rel="prev" title="Conditional" href="../tutorials/conditional_analysis.html" />
+    <link rel="next" title="Converting data" href="converting.html" />
+    <link rel="prev" title="Scalar Fields" href="scalar_fields.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="docsearch:language" content="en">
   </head>
@@ -126,15 +126,15 @@
                     </li>
                 
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../tutorials/index.html">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
                         Tutorials
                       </a>
                     </li>
                 
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="#">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api/index.html">
                         Manual
                       </a>
                     </li>
@@ -243,15 +243,15 @@
                     </li>
                 
 
-                    <li class="nav-item">
-                      <a class="nav-link nav-internal" href="../tutorials/index.html">
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
                         Tutorials
                       </a>
                     </li>
                 
 
-                    <li class="nav-item current active">
-                      <a class="nav-link nav-internal" href="#">
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api/index.html">
                         Manual
                       </a>
                     </li>
@@ -318,11 +318,12 @@
     Section Navigation
   </p>
   <div class="bd-toc-item navbar-nav">
-    <ul class="nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="converter.html">Converter</a></li>
-<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="grid.html">Grids</a></li>
-<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a></li>
+    <ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="scalar_fields.html">Scalar Fields</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Grids</a></li>
+<li class="toctree-l1"><a class="reference internal" href="converting.html">Converting data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mixing.html">Mixing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="conditional_analysis.html">Conditional</a></li>
 </ul>
 
   </div>
@@ -354,44 +355,136 @@
             
             <article class="bd-article" role="main">
               
-  <section id="manual">
-<h1>Manual<a class="headerlink" href="#manual" title="Permalink to this heading">#</a></h1>
-<p>From here on out, UPPPP will be referred to its Python package name, <code class="docutils literal notranslate"><span class="pre">up4</span></code>, for brevity. All public <code class="docutils literal notranslate"><span class="pre">up4</span></code> members are documented here alongside some examples that can be copied and pasted. You can also use the <code class="xref py py-obj docutils literal notranslate"><span class="pre">Search</span></code> bar to directly find what you need.</p>
-<p>We really want to make this library simplify the analysis of particle data in a quick, reproducible, transparent and easy to use manner; if you feel that something can be improved/ added, or care to share examples/ showcases, <em>please</em> feel free to get in contact with any of us!</p>
-<p>These docs cover the Python API, but the Rust source code is located <a class="reference external" href="../_static/doc/upppp_rust/index.html">here</a>.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="converter.html">Converter</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="converter.html#up4.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="converter.html#up4.Converter"><code class="docutils literal notranslate"><span class="pre">Converter</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="converter.html#up4.Grid"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="converter.html#id0"><code class="docutils literal notranslate"><span class="pre">Converter</span></code></a></li>
+  <section id="grids">
+<span id="grid-ref"></span><h1>Grids<a class="headerlink" href="#grids" title="Permalink to this heading">#</a></h1>
+<p>Grids are one of the main parts in <a class="reference internal" href="../api/grid.html#module-up4" title="up4"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up4</span></code></a>. They determine where (spatially) and in which way we want to have a look at the data.
+The grid is generated by the <code class="code docutils literal notranslate"><span class="pre">up4.Grid</span></code> class.</p>
+<p>Two different grid species are supported:</p>
+<ol class="arabic simple">
+<li><p>Cartesian</p></li>
+<li><p>Cylindrical</p></li>
+</ol>
+<p>the simplest way to generate a grid is to use <a class="reference internal" href="../api/grid.html#id0" title="up4.Grid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up4.Grid</span></code></a>.</p>
+<section id="grid-generation">
+<h2>Grid Generation<a class="headerlink" href="#grid-generation" title="Permalink to this heading">#</a></h2>
+<p>Grids, cylindical and cartesian, can be generated in a variity of ways.
+To offer full flexiility one can generate grids in the following ways:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>with a <a class="reference internal" href="../api/grid.html#up4.Data" title="up4.Data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up4.Data</span></code></a> object -&gt; uses system dimensions to wrap around the region of interest</dt><dd><ul>
+<li><p>with cell number</p></li>
+<li><p>with cell size</p></li>
+<li><p>with cell number + x/y/z limitations</p></li>
+<li><p>with cell size + x/y/z limitations</p></li>
 </ul>
+</dd>
+</dl>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="data.html">Data</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="data.html#up4.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="data.html#up4.Converter"><code class="docutils literal notranslate"><span class="pre">Converter</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="data.html#up4.Grid"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="data.html#id0"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a></li>
+<li><p>given a region of interest and a cell size or cell numbers</p></li>
+<li><p>given x/y/z limitations and a cell size or cell numbers</p></li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="grid.html">Grids</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="grid.html#up4.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="grid.html#up4.Converter"><code class="docutils literal notranslate"><span class="pre">Converter</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="grid.html#up4.Grid"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="grid.html#id0"><code class="docutils literal notranslate"><span class="pre">Grid</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="plotting.html">Plotting</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="plotting.html#up4.plotting.create_plot"><code class="docutils literal notranslate"><span class="pre">create_plot()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="plotting.html#up4.plotting.save_fig"><code class="docutils literal notranslate"><span class="pre">save_fig()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="plotting.html#vector-plotting">Vector Plotting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plotting.html#scalar-plotting">Scalar Plotting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="plotting.html#comparison-plotting">Comparison Plotting</a></li>
-</ul>
-</li>
-</ul>
+<p>Here some examples:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">up4</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="s2">&quot;path/to/data.hdf5&quot;</span><span class="p">)</span>
+
+<span class="c1"># Default grid, wraps the whole system with [50,50,50] cells</span>
+<span class="n">default_gird</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Grid</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+<span class="c1"># grid that wraps whole system with changed cell number</span>
+<span class="n">grid1</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Grid</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">num_cells</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span><span class="mi">30</span><span class="p">,</span><span class="mi">40</span><span class="p">])</span>
+
+<span class="c1"># grid that wraps whole system with [50,50,50] cells but has some limitations in x-axis</span>
+<span class="c1"># it only looks in the x-region around 100-200.4 mm</span>
+<span class="n">grid2</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Grid</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">xlim</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span><span class="mf">200.4</span><span class="p">])</span>
+
+<span class="c1"># same as before, however it has cells that are 5 mm cubes.</span>
+<span class="n">grid3</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Grid</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">xlim</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span><span class="mf">200.4</span><span class="p">],</span> <span class="n">cell_size</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span>
+
+<span class="c1"># grid in random space:</span>
+<span class="n">grid4</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Grid</span><span class="p">(</span><span class="n">xlim</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span><span class="mi">200</span><span class="p">],</span> <span class="n">ylim</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span><span class="mi">100</span><span class="p">],</span> <span class="n">zlim</span><span class="o">=</span><span class="p">[</span><span class="mi">100</span><span class="p">,</span><span class="mi">300</span><span class="p">],</span> <span class="n">cell_size</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+
+<span class="c1"># print all grids:</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;default_gird:</span><span class="si">{</span><span class="n">default_gird</span><span class="si">}</span><span class="se">\n</span><span class="s2">grid1:</span><span class="si">{</span><span class="n">grid1</span><span class="si">}</span><span class="se">\n</span><span class="s2">grid2:</span><span class="si">{</span><span class="n">grid2</span><span class="si">}</span><span class="se">\n</span><span class="s2">grid3:</span><span class="si">{</span><span class="n">grid3</span><span class="si">}</span><span class="se">\n</span><span class="s2">grid4:</span><span class="si">{</span><span class="n">grid4</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    default_gird:Grid3D:</span>
+<span class="sd">        Cells: [50, 50, 50]</span>
+<span class="sd">        xlim: [174.02695648134886, 372.21089969650967]</span>
+<span class="sd">        ylim: [74.71161491723201, 203.37554460929758]</span>
+<span class="sd">        zlim: [52.291522049547666, 239.25612145076877]</span>
+<span class="sd">        Data information:</span>
+<span class="sd">                Mean: 0.0</span>
+<span class="sd">                Std: 0.0</span>
+<span class="sd">                Min: 0.0</span>
+<span class="sd">                Max: 0.0</span>
+<span class="sd">    grid1:Grid3D:</span>
+<span class="sd">            Cells: [20, 30, 40]</span>
+<span class="sd">            xlim: [174.02695648134886, 372.21089969650967]</span>
+<span class="sd">            ylim: [74.71161491723201, 203.37554460929758]</span>
+<span class="sd">            zlim: [52.291522049547666, 239.25612145076877]</span>
+<span class="sd">            Data information:</span>
+<span class="sd">                    Mean: 0.0</span>
+<span class="sd">                    Std: 0.0</span>
+<span class="sd">                    Min: 0.0</span>
+<span class="sd">                    Max: 0.0</span>
+<span class="sd">    grid2:Grid3D:</span>
+<span class="sd">            Cells: [50, 50, 50]</span>
+<span class="sd">            xlim: [100.0, 200.4]</span>
+<span class="sd">            ylim: [74.71161491723201, 203.37554460929758]</span>
+<span class="sd">            zlim: [52.291522049547666, 239.25612145076877]</span>
+<span class="sd">            Data information:</span>
+<span class="sd">                    Mean: 0.0</span>
+<span class="sd">                    Std: 0.0</span>
+<span class="sd">                    Min: 0.0</span>
+<span class="sd">                    Max: 0.0</span>
+<span class="sd">    grid3:Grid3D:</span>
+<span class="sd">            Cells: [20, 25, 37]</span>
+<span class="sd">            xlim: [100.0, 200.4]</span>
+<span class="sd">            ylim: [74.71161491723201, 203.37554460929758]</span>
+<span class="sd">            zlim: [52.291522049547666, 239.25612145076877]</span>
+<span class="sd">            Data information:</span>
+<span class="sd">                    Mean: 0.0</span>
+<span class="sd">                    Std: 0.0</span>
+<span class="sd">                    Min: 0.0</span>
+<span class="sd">                    Max: 0.0</span>
+<span class="sd">    grid4:Grid3D:</span>
+<span class="sd">            Cells: [33, 26, 66]</span>
+<span class="sd">            xlim: [100.0, 200.0]</span>
+<span class="sd">            ylim: [20.0, 100.0]</span>
+<span class="sd">            zlim: [100.0, 300.0]</span>
+<span class="sd">            Data information:</span>
+<span class="sd">                    Mean: 0.0</span>
+<span class="sd">                    Std: 0.0</span>
+<span class="sd">                    Min: 0.0</span>
+<span class="sd">                    Max: 0.0</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
 </div>
+<p>All grids can be generated with: <code class="xref py py-obj docutils literal notranslate"><span class="pre">mode</span> <span class="pre">=</span> <span class="pre">&quot;cylindrical&quot;</span></code> to generate a system in
+cylindrical coordinates. Those coordinates are then r, omega, z instead of x,y,z</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">up4</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="s2">&quot;path/to/data.hdf5&quot;</span><span class="p">)</span>
+<span class="n">default_gird</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Grid</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">grid_style</span><span class="o">=</span>  <span class="s2">&quot;cylindrical&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">default_gird</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Grid3D:</span>
+<span class="sd">    Cells: [50, 50, 50]</span>
+<span class="sd">    xlim: [0.0, 99.09197160758043]</span>
+<span class="sd">    ylim: [-3.14159, 3.14159]</span>
+<span class="sd">    zlim: [52.291522049547666, 239.25612145076877]</span>
+<span class="sd">    Data information:</span>
+<span class="sd">            Mean: 0.0</span>
+<span class="sd">            Std: 0.0</span>
+<span class="sd">            Min: 0.0</span>
+<span class="sd">            Max: 0.0</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="grid-outlier-removal">
+<h2>Grid Outlier Removal<a class="headerlink" href="#grid-outlier-removal" title="Permalink to this heading">#</a></h2>
+</section>
 </section>
 
 
@@ -402,17 +495,17 @@
             <footer class="bd-footer-article">
                 <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="../tutorials/conditional_analysis.html" title="previous page">
+  <a class='left-prev' id="prev-link" href="scalar_fields.html" title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
           <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">Conditional</p>
+          <p class="prev-next-title">Scalar Fields</p>
       </div>
   </a>
-  <a class='right-next' id="next-link" href="converter.html" title="next page">
+  <a class='right-next' id="next-link" href="converting.html" title="next page">
   <div class="prev-next-info">
       <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">Converter</p>
+      <p class="prev-next-title">Converting data</p>
   </div>
   <i class="fa-solid fa-angle-right"></i>
   </a>
@@ -427,6 +520,28 @@
               
 <div class="toc-item">
   
+<div class="tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+</div>
+<nav id="bd-toc-nav" class="page-toc">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#grid-generation">
+   Grid Generation
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#grid-outlier-removal">
+   Grid Outlier Removal
+  </a>
+ </li>
+</ul>
+
+</nav>
+</div>
+
+<div class="toc-item">
+  
 <div id="searchbox"></div>
 </div>
 
@@ -434,7 +549,7 @@
   
 
 <div class="tocsection editthispage">
-    <a href="https://github.com/uob-positron-imaging-centre/up4/edit/uPPPP/api/index.rst">
+    <a href="https://github.com/uob-positron-imaging-centre/up4/edit/uPPPP/tutorials/grid_tutorial.rst">
         <i class="fa-solid fa-pencil"></i> Edit this page
     </a>
 </div>
@@ -444,7 +559,7 @@
 <div class="toc-item">
   
 <div class="tocsection sourcelink">
-    <a href="../_sources/api/index.rst.txt">
+    <a href="../_sources/tutorials/grid_tutorial.rst.txt">
         <i class="fa-solid fa-file-lines"></i> Show Source
     </a>
 </div>

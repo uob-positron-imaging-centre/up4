@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"fn":[["axis_range_x","Manually set x axis range"],["axis_range_y","Manually set y axis range"]],"struct":[["VectorPlotter","Vector data handling struct. The `true_norm` field contains the original vector norms, and is used for shading.  Norms used for drawing arrows are not necessarily the same as they may be scaled for display reasons."]]};

@@ -246,7 +246,6 @@
 <a href="#246" id="246">246</a>
 <a href="#247" id="247">247</a>
 <a href="#248" id="248">248</a>
-<a href="#249" id="249">249</a>
 </pre><pre class="rust"><code><span class="kw">extern crate </span>ndarray;
 <span class="kw">use super</span>::{CellId, GridFunctions3D, Position};
 <span class="kw">use crate</span>::{grid, CylindricalGrid3D};
@@ -263,16 +262,15 @@
 
 <span class="kw">impl </span>VectorGrid {
     <span class="kw">pub fn </span>new(grid: Box&lt;<span class="kw">dyn </span>GridFunctions3D&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>cyl_grid;
-        <span class="kw">if </span>grid.is_cylindrical() {
-            cyl_grid = grid
+        <span class="kw">let </span>cyl_grid = <span class="kw">if </span>grid.is_cylindrical() {
+            grid
                 .as_any()
                 .downcast_ref::&lt;CylindricalGrid3D&gt;()
                 .unwrap()
-                .clone();
+                .clone()
         } <span class="kw">else </span>{
-            cyl_grid = CylindricalGrid3D::default();
-        }
+            CylindricalGrid3D::default()
+        };
         VectorGrid {
             data: [grid.clone(), grid.clone(), grid.clone()],
             cyl_grid,

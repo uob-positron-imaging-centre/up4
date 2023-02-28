@@ -318,10 +318,10 @@
     </span><span class="kw">if </span>!is_sorted(<span class="kw-2">&amp;</span>data.column(<span class="number">0</span>)) {
         <span class="macro">panic!</span>(<span class="string">&quot;Data is not sorted by time. Please sort the data before interpolation.&quot;</span>)
     }
-    <span class="kw">let </span>time: ArrayView1&lt;f64&gt; = data.slice(<span class="macro">ndarray::s!</span>[.., <span class="number">0 </span><span class="kw">as </span>usize]);
-    <span class="kw">let </span>x: ArrayView1&lt;f64&gt; = data.slice(<span class="macro">ndarray::s!</span>[.., <span class="number">1 </span><span class="kw">as </span>usize]);
-    <span class="kw">let </span>y: ArrayView1&lt;f64&gt; = data.slice(<span class="macro">ndarray::s!</span>[.., <span class="number">2 </span><span class="kw">as </span>usize]);
-    <span class="kw">let </span>z: ArrayView1&lt;f64&gt; = data.slice(<span class="macro">ndarray::s!</span>[.., <span class="number">3 </span><span class="kw">as </span>usize]);
+    <span class="kw">let </span>time: ArrayView1&lt;f64&gt; = data.slice(<span class="macro">ndarray::s!</span>[.., <span class="number">0_usize</span>]);
+    <span class="kw">let </span>x: ArrayView1&lt;f64&gt; = data.slice(<span class="macro">ndarray::s!</span>[.., <span class="number">1_usize</span>]);
+    <span class="kw">let </span>y: ArrayView1&lt;f64&gt; = data.slice(<span class="macro">ndarray::s!</span>[.., <span class="number">2_usize</span>]);
+    <span class="kw">let </span>z: ArrayView1&lt;f64&gt; = data.slice(<span class="macro">ndarray::s!</span>[.., <span class="number">3_usize</span>]);
 
     <span class="kw">let </span>maxtime = max_time;
     <span class="kw">let </span>timesteps = steps;
@@ -347,7 +347,7 @@
             <span class="comment">// if the temporal distance between new time and old time is smaller
             // then distance between new time and next time return old timestep
             </span><span class="macro">print_debug!</span>(<span class="string">&quot;Real_step:{} time_len {}&quot;</span>, real_step, time.len());
-            <span class="kw">if </span>!(real_step &gt;= time.len() - <span class="number">1</span>) {
+            <span class="kw">if </span>real_step &lt; time.len() - <span class="number">1 </span>{
                 <span class="kw">let </span>old_time = time[real_step];
                 <span class="kw">let </span>new_time = time[real_step + <span class="number">1</span>];
                 <span class="macro">print_debug!</span>(<span class="string">&quot;Old time: {} New time: {}&quot;</span>, old_time, new_time);
@@ -356,7 +356,7 @@
                 } <span class="kw">else if </span>(time_new - old_time).abs() &lt; (time_new - new_time).abs() {
                 } <span class="kw">else </span>{
                     real_step += <span class="number">1</span>;
-                    <span class="kw">if </span>!(real_step &gt;= time.len() - <span class="number">1</span>) {
+                    <span class="kw">if </span>real_step &lt; time.len() - <span class="number">1 </span>{
                         <span class="kw">let </span>old_time = time[real_step];
                         <span class="kw">let </span>new_time = time[real_step + <span class="number">1</span>];
 
@@ -514,9 +514,8 @@
     pos_old: f64,
     pos_new: f64,
 ) -&gt; f64 {
-    <span class="kw">let </span>pos_current =
-        pos_old + ((pos_new - pos_old) / (time_new - time_old)) * (time_current - time_old);
-    pos_current
+    
+    pos_old + ((pos_new - pos_old) / (time_new - time_old)) * (time_current - time_old)
 }
 
 <span class="comment">// ndarray sorting by elements in another array
@@ -562,9 +561,10 @@
         <span class="kw">let </span>two = data[[<span class="kw-2">*</span>b, column]];
         one.partial_cmp(<span class="kw-2">&amp;</span>two).unwrap()
     });
-    <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..indices.len() {
-        new_data.row_mut(i).assign(<span class="kw-2">&amp;</span>data.row(indices[i]));
+    <span class="kw">for </span>(i, index) <span class="kw">in </span>indices.into_iter().enumerate() {
+        new_data.row_mut(i).assign(<span class="kw-2">&amp;</span>data.row(index));
     }
+    
     new_data
 }
 

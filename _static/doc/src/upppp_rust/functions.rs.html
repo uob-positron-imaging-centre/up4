@@ -847,7 +847,6 @@
 <a href="#847" id="847">847</a>
 <a href="#848" id="848">848</a>
 <a href="#849" id="849">849</a>
-<a href="#850" id="850">850</a>
 </pre><pre class="rust"><code><span class="kw">pub mod </span>conditional;
 <span class="kw">pub mod </span>extractions;
 <span class="kw">pub mod </span>mixing;
@@ -953,8 +952,8 @@
                 <span class="kw">let </span>vx: f64 = velocity[<span class="number">0</span>];
                 <span class="kw">let </span>vy: f64 = velocity[<span class="number">1</span>];
                 <span class="kw">let </span>vz: f64 = velocity[<span class="number">2</span>];
-                <span class="kw">let </span>abs_vel = (vx.powi(<span class="number">2</span>) + vy.powi(<span class="number">2</span>) + vz.powi(<span class="number">2</span>)).sqrt();
-                abs_vel
+                
+                (vx.powi(<span class="number">2</span>) + vy.powi(<span class="number">2</span>) + vz.powi(<span class="number">2</span>)).sqrt()
             }
             velocity_calc = velocity_calculation;
         } <span class="kw">else if </span>mode == <span class="string">&quot;x&quot; </span>{
@@ -1488,12 +1487,11 @@
         <span class="kw">if </span>property == <span class="string">&quot;velocity&quot; </span>{
             <span class="kw">let </span>velocity_mag = global_stats.velocity_mag();
             <span class="kw">let </span>min = velocity_mag[<span class="number">0</span>];
-            <span class="kw">let </span>max;
-            <span class="kw">if </span>max_limit == <span class="number">0.0 </span>{
-                max = velocity_mag[<span class="number">2</span>];
+            <span class="kw">let </span>max = <span class="kw">if </span>max_limit == <span class="number">0.0 </span>{
+                velocity_mag[<span class="number">2</span>]
             } <span class="kw">else </span>{
-                max = max_limit;
-            }
+                max_limit
+            };
             <span class="kw">let </span>bin_width = (max - min) / (bins <span class="kw">as </span>f64);
             <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..bins {
                 bin_edges[i] = min + i <span class="kw">as </span>f64 * bin_width;
@@ -1687,7 +1685,7 @@
             <span class="kw">if </span>value.is_nan() {
                 <span class="kw">continue</span>;
             }
-            ih += (value - <span class="kw-2">&amp;</span>mean) * (value - <span class="kw-2">&amp;</span>mean);
+            ih += (value - mean) * (value - mean);
         }
         ih /= field.len() <span class="kw">as </span>f64;
         ih.sqrt()

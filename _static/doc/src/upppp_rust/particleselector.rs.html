@@ -124,11 +124,6 @@
 <a href="#124" id="124">124</a>
 <a href="#125" id="125">125</a>
 <a href="#126" id="126">126</a>
-<a href="#127" id="127">127</a>
-<a href="#128" id="128">128</a>
-<a href="#129" id="129">129</a>
-<a href="#130" id="130">130</a>
-<a href="#131" id="131">131</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Module that implements the `ParticleSelector`, a struct deciding if a particle is valid or not
 
 </span><span class="kw">extern crate </span>ndarray;
@@ -236,17 +231,12 @@
 <span class="kw">impl </span>Selector <span class="kw">for </span>ParticleSelector {
     <span class="kw">fn </span>is_valid(<span class="kw-2">&amp;</span><span class="self">self</span>, radius: f64, clouds: f64, density: f64, particleid: usize) -&gt; bool {
         <span class="macro">print_debug!</span>(<span class="string">&quot;ParticleSelector: Checking if particle is valid.&quot;</span>);
-        <span class="kw">if </span>!<span class="self">self</span>.is_radius_valid(radius) {
-            <span class="kw">return </span><span class="bool-val">false</span>;
-        } <span class="kw">else if </span>!<span class="self">self</span>.is_cloud_valid(clouds) {
-            <span class="kw">return </span><span class="bool-val">false</span>;
-        } <span class="kw">else if </span>!<span class="self">self</span>.is_density_valid(density) {
-            <span class="kw">return </span><span class="bool-val">false</span>;
-        } <span class="kw">else if </span>!<span class="self">self</span>.is_particleid_valid(particleid) {
-            <span class="kw">return </span><span class="bool-val">false</span>;
-        };
-        <span class="bool-val">true
-    </span>}
+               
+        <span class="self">self</span>.is_radius_valid(radius) 
+            &amp;&amp; <span class="self">self</span>.is_cloud_valid(clouds) 
+            &amp;&amp; <span class="self">self</span>.is_density_valid(density) 
+            &amp;&amp; <span class="self">self</span>.is_particleid_valid(particleid)
+    }
 
     <span class="kw">fn </span>timestep_valid(<span class="kw-2">&amp;</span><span class="self">self</span>, time: f64) -&gt; bool {
         time &gt;= <span class="self">self</span>.time.<span class="number">0 </span>&amp;&amp; time &lt;= <span class="self">self</span>.time.<span class="number">1

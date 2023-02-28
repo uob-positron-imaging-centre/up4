@@ -231,9 +231,9 @@
         grid: Box&lt;<span class="kw">dyn </span>GridFunctions3D&gt;,
     ) -&gt; Comparer {
         Comparer {
-            data: data,
+            data,
             grid: grid.clone(),
-            data2: data2,
+            data2,
             grid2: grid.clone(),
             aligned: <span class="bool-val">false</span>,
         }
@@ -356,7 +356,7 @@
 }
 
 <span class="kw">fn </span>binary_threshold(field: <span class="kw-2">&amp;</span>Array3&lt;f64&gt;, quantile: f64) -&gt; Array3&lt;f64&gt; {
-    <span class="kw">if </span>quantile &gt; <span class="number">1.0 </span>|| quantile &lt; <span class="number">0.0 </span>{
+    <span class="kw">if </span>!(<span class="number">0.0</span>..=<span class="number">1.0</span>).contains(<span class="kw-2">&amp;</span>quantile) {
         <span class="macro">panic!</span>(<span class="string">&quot;Quantile must be between 0 and 1&quot;</span>);
     }
     <span class="kw">let </span>threshold = field
@@ -392,7 +392,7 @@
     } <span class="kw">else </span>{
         <span class="macro">panic!</span>(<span class="string">&quot;Grid type not supported&quot;</span>);
     }
-    <span class="kw">return </span>grid;
+    grid
 }
 
 <span class="kw">impl </span>Comparer {
@@ -417,8 +417,8 @@
             max_velocity,
         );
         (
-            field1.get_data().iter().map(|x| <span class="kw-2">*</span>x).collect(),
-            field2.get_data().iter().map(|x| <span class="kw-2">*</span>x).collect(),
+            field1.get_data().iter().copied().collect(),
+            field2.get_data().iter().copied().collect(),
         )
     }
 }

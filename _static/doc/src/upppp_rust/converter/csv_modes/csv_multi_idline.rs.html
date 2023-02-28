@@ -448,16 +448,6 @@
 <a href="#448" id="448">448</a>
 <a href="#449" id="449">449</a>
 <a href="#450" id="450">450</a>
-<a href="#451" id="451">451</a>
-<a href="#452" id="452">452</a>
-<a href="#453" id="453">453</a>
-<a href="#454" id="454">454</a>
-<a href="#455" id="455">455</a>
-<a href="#456" id="456">456</a>
-<a href="#457" id="457">457</a>
-<a href="#458" id="458">458</a>
-<a href="#459" id="459">459</a>
-<a href="#460" id="460">460</a>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
     check_signals,
     converter::convertertools::{make_sortlist, sort_by_array, sort_by_column},
@@ -476,7 +466,9 @@
 <span class="comment">// Maximum amount of failiures in a row available for a process
 </span><span class="kw">const </span>MAX_FAILS: i64 = <span class="number">500</span>;
 
-<span class="kw">pub fn </span>csv_multi_idline(
+<span class="comment">// 
+</span><span class="attr">#[allow(clippy::too_many_arguments)]
+</span><span class="kw">pub fn </span>csv_multi_idline(
     filename: <span class="kw-2">&amp;</span>str,
     outname: <span class="kw-2">&amp;</span>str,
     columns: Vec&lt;i64&gt;,
@@ -538,9 +530,9 @@
         <span class="kw">let </span><span class="kw-2">mut </span>particle_data: Vec&lt;ndarray::Array2&lt;f64&gt;&gt; = Vec::new();
 
         <span class="comment">// here, data is a vec of all particles, each particle is an array of [t, id, x, y, z, vx, vy, vz]
-        </span><span class="kw">for </span>idx <span class="kw">in </span><span class="number">0</span>..data.len() {
-            <span class="kw">let </span>particle_id = data[idx].slice(<span class="macro">ndarray::s!</span>[.., <span class="number">1</span>]).to_vec();
-            <span class="kw">let </span><span class="kw-2">mut </span>temp_data = data[idx].clone();
+        </span><span class="kw">for </span>arr <span class="kw">in </span>data {
+            <span class="kw">let </span>particle_id = arr.slice(<span class="macro">ndarray::s!</span>[.., <span class="number">1</span>]).to_vec();
+            <span class="kw">let </span><span class="kw-2">mut </span>temp_data = arr.clone();
             <span class="comment">// sort by time
             </span>temp_data = sort_by_column(temp_data, <span class="number">0</span>);
             <span class="comment">// remove id column because it was not implemented
@@ -548,7 +540,7 @@
             <span class="kw">if </span>interpolate {
                 temp_data = convertertools::interpolate(temp_data, max_t, max_steps);
             }
-            <span class="macro">print!</span>(<span class="string">&quot;Data after interpolation: {:?}\n&quot;</span>, temp_data);
+            <span class="macro">println!</span>(<span class="string">&quot;Data after interpolation: {:?}&quot;</span>, temp_data);
             <span class="kw">if </span>vel {
                 <span class="kw">if </span>columns.len() &gt; <span class="number">5 </span>{
                     <span class="macro">panic!</span>(
@@ -568,7 +560,7 @@
                     );
                 }
             }
-            <span class="macro">print!</span>(<span class="string">&quot;Data after velocity calc: {:?}\n&quot;</span>, temp_data);
+            <span class="macro">println!</span>(<span class="string">&quot;Data after velocity calc: {:?}&quot;</span>, temp_data);
             <span class="comment">// push the current particle data into the vector
             </span>particle_data.push(temp_data);
         }
@@ -585,18 +577,18 @@
     </span><span class="kw">let </span><span class="kw-2">mut </span>mean_counter: usize = <span class="number">0</span>;
     <span class="kw">let </span><span class="kw-2">mut </span>dimensions: ndarray::Array2&lt;f64&gt; = ndarray::Array2::&lt;f64&gt;::zeros((<span class="number">2</span>, <span class="number">3</span>)); <span class="comment">// [min:[x,y,z],max:[x,y,z]]
     </span>dimensions
-        .slice_mut(<span class="macro">ndarray::s!</span>[<span class="number">0 </span><span class="kw">as </span>usize, ..])
+        .slice_mut(<span class="macro">ndarray::s!</span>[<span class="number">0_usize</span>, ..])
         .fill(f64::MAX);
     dimensions
-        .slice_mut(<span class="macro">ndarray::s!</span>[<span class="number">1 </span><span class="kw">as </span>usize, ..])
+        .slice_mut(<span class="macro">ndarray::s!</span>[<span class="number">1_usize</span>, ..])
         .fill(f64::MIN);
     <span class="comment">//velocity: [x:[min, mean, max],y:[min,mean,max],z:[min,mean,max]]
     </span><span class="kw">let </span><span class="kw-2">mut </span>velocity: ndarray::Array2&lt;f64&gt; = ndarray::Array2::&lt;f64&gt;::zeros((<span class="number">3</span>, <span class="number">3</span>));
     velocity
-        .slice_mut(<span class="macro">ndarray::s!</span>[.., <span class="number">0 </span><span class="kw">as </span>usize])
+        .slice_mut(<span class="macro">ndarray::s!</span>[.., <span class="number">0_usize</span>])
         .fill(f64::MAX);
     velocity
-        .slice_mut(<span class="macro">ndarray::s!</span>[.., <span class="number">2 </span><span class="kw">as </span>usize])
+        .slice_mut(<span class="macro">ndarray::s!</span>[.., <span class="number">2_usize</span>])
         .fill(f64::MIN);
     <span class="comment">// vel mag = [min,mean,max]
     </span><span class="kw">let </span><span class="kw-2">mut </span>velocity_mag: ndarray::Array1&lt;f64&gt; = ndarray::Array1::&lt;f64&gt;::zeros(<span class="number">3</span>);
@@ -631,7 +623,7 @@
         </span><span class="macro">print_debug!</span>(<span class="string">&quot;Creating a new group \&quot;particle {}\&quot;&quot;</span>, p_id);
         <span class="kw">let </span>group = hdf5file
             .create_group(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;particle {}&quot;</span>, p_id))
-            .expect(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Can not create group particle {}&quot;</span>, p_id));
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Can not create group particle {}&quot;</span>, p_id));
 
         <span class="kw">if </span>data[[<span class="number">0</span>, <span class="number">6</span>]].is_nan() {
             <span class="macro">panic!</span>(<span class="string">&quot;Velocity information required&quot;</span>)
@@ -729,51 +721,39 @@
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_id_array)
             .create(<span class="string">&quot;id&quot;</span>)
-            .expect(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
-                <span class="string">&quot;Unable to create dataset \&quot;id\&quot; in file {}&quot;</span>,
-                filename
-            ));
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;id\&quot; in file {}&quot;</span>,
+                filename));
         <span class="kw">let </span>builder = group.new_dataset_builder();
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_radius_array)
             .create(<span class="string">&quot;radius&quot;</span>)
-            .expect(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
-                <span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>,
-                filename
-            ));
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>,
+                filename));
         <span class="kw">let </span>builder = group.new_dataset_builder();
         builder
             .with_data(<span class="kw-2">&amp;</span>ppclouds_array)
             .create(<span class="string">&quot;ppcloud&quot;</span>)
-            .expect(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
-                <span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>,
-                filename
-            ));
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>,
+                filename));
         <span class="kw">let </span>builder = group.new_dataset_builder();
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_type_array)
             .create(<span class="string">&quot;particletype&quot;</span>)
-            .expect(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
-                <span class="string">&quot;Unable to create dataset \&quot;particletype\&quot; in file {}&quot;</span>,
-                filename
-            ));
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;particletype\&quot; in file {}&quot;</span>,
+                filename));
 
         <span class="kw">let </span>builder = group.new_dataset_builder();
         builder
             .with_data(<span class="kw-2">&amp;</span>vel_array)
             .create(<span class="string">&quot;velocity&quot;</span>)
-            .expect(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
-                <span class="string">&quot;Unable to create dataset \&quot;velocity\&quot; in file {}&quot;</span>,
-                filename
-            ));
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;velocity\&quot; in file {}&quot;</span>,
+                filename));
         <span class="kw">let </span>builder = group.new_dataset_builder();
         builder
             .with_data(<span class="kw-2">&amp;</span>pos_array)
             .create(<span class="string">&quot;position&quot;</span>)
-            .expect(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
-                <span class="string">&quot;Unable to create dataset \&quot;position\&quot; in file {}&quot;</span>,
-                filename
-            ));
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;position\&quot; in file {}&quot;</span>,
+                filename));
     }
     bar.inc(<span class="number">20</span>);
     velocity_mag[<span class="number">1</span>] /= mean_counter <span class="kw">as </span>f64;
@@ -878,7 +858,7 @@
         </span><span class="kw">let </span><span class="kw-2">mut </span>ids_and_steps = ids
             .iter()
             .zip(ids_timesteps.iter())
-            .map(|(a, b)| (<span class="kw-2">*</span>a <span class="kw">as </span>usize, <span class="kw-2">*</span>b <span class="kw">as </span>usize))
+            .map(|(a, b)| (<span class="kw-2">*</span>a, <span class="kw-2">*</span>b))
             .collect::&lt;Vec&lt;(usize, usize)&gt;&gt;();
         ids_and_steps.sort_by(|a, b| a.<span class="number">0</span>.cmp(<span class="kw-2">&amp;</span>b.<span class="number">0</span>));
 

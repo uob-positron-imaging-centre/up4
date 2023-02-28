@@ -191,14 +191,14 @@ pub fn find_type(file: &amp;hdf5::File)-&gt; String{
 
 */
 
-</span><span class="kw">fn </span>rotate_position(position: Position, angle: [f64; <span class="number">3</span>], anchor: [f64; <span class="number">3</span>]) -&gt; Position {
+</span><span class="kw">fn </span>rotate_position(position: Position, angles: [f64; <span class="number">3</span>], anchor: [f64; <span class="number">3</span>]) -&gt; Position {
     <span class="kw">let </span><span class="kw-2">mut </span>new_position = [
         position[<span class="number">0</span>] - anchor[<span class="number">0</span>],
         position[<span class="number">1</span>] - anchor[<span class="number">1</span>],
         position[<span class="number">2</span>] - anchor[<span class="number">2</span>],
     ];
-    <span class="kw">for </span>axis <span class="kw">in </span><span class="number">0</span>..<span class="number">3 </span>{
-        <span class="kw">let </span>(sin, cos) = angle[axis].sin_cos();
+    <span class="kw">for </span>(axis, angle) <span class="kw">in </span>angles.iter().enumerate() {
+        <span class="kw">let </span>(sin, cos) = angle.sin_cos();
         <span class="kw">let </span>(x, y, z) = (new_position[<span class="number">0</span>], new_position[<span class="number">1</span>], new_position[<span class="number">2</span>]);
         <span class="kw">match </span>axis {
             <span class="number">0 </span>=&gt; {
@@ -223,10 +223,10 @@ pub fn find_type(file: &amp;hdf5::File)-&gt; String{
     ]
 }
 
-<span class="kw">fn </span>rotate_velocity(velocity: [f64; <span class="number">3</span>], angle: [f64; <span class="number">3</span>]) -&gt; [f64; <span class="number">3</span>] {
+<span class="kw">fn </span>rotate_velocity(velocity: [f64; <span class="number">3</span>], angles: [f64; <span class="number">3</span>]) -&gt; [f64; <span class="number">3</span>] {
     <span class="kw">let </span><span class="kw-2">mut </span>new_velocity = [velocity[<span class="number">0</span>], velocity[<span class="number">1</span>], velocity[<span class="number">2</span>]];
-    <span class="kw">for </span>axis <span class="kw">in </span><span class="number">0</span>..<span class="number">3 </span>{
-        <span class="kw">let </span>(sin, cos) = angle[axis].sin_cos();
+    <span class="kw">for </span>(axis, angle) <span class="kw">in </span>angles.iter().enumerate() {
+        <span class="kw">let </span>(sin, cos) = angle.sin_cos();
         <span class="kw">let </span>(x, y, z) = (new_velocity[<span class="number">0</span>], new_velocity[<span class="number">1</span>], new_velocity[<span class="number">2</span>]);
         <span class="kw">match </span>axis {
             <span class="number">0 </span>=&gt; {

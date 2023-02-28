@@ -513,9 +513,6 @@
 <a href="#513" id="513">513</a>
 <a href="#514" id="514">514</a>
 <a href="#515" id="515">515</a>
-<a href="#516" id="516">516</a>
-<a href="#517" id="517">517</a>
-<a href="#518" id="518">518</a>
 </pre><pre class="rust"><code><span class="kw">extern crate </span>ndarray;
 <span class="kw">use super</span>::{CellId, Dim, GridFunctions3D, Position, ThreeD};
 <span class="kw">use crate</span>::{print_debug, print_warning};
@@ -553,8 +550,9 @@
             Dim::ThreeD(x) =&gt; x,
             <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Grid3D got limits for other then three dimensions.&quot;</span>),
         };
+        <span class="kw">const </span>PI: f64 = std::f64::consts::PI;
         <span class="comment">// the distance beween two angles is constant therefore the cell size in omega dimension is
-        </span><span class="kw">let </span>ocellsize = (<span class="number">2.0 </span>* <span class="number">3.14159</span>) / cells[<span class="number">1</span>] <span class="kw">as </span>f64;
+        </span><span class="kw">let </span>ocellsize = (<span class="number">2.0 </span>* PI) / cells[<span class="number">1</span>] <span class="kw">as </span>f64;
         <span class="comment">// height distance is also easy to calculate
         </span><span class="kw">let </span>zcellsize = (lim[<span class="number">2</span>][<span class="number">1</span>] - lim[<span class="number">2</span>][<span class="number">0</span>]) / cells[<span class="number">2</span>] <span class="kw">as </span>f64;
         <span class="comment">// The radial positions depend on the mode
@@ -564,11 +562,11 @@
 
         <span class="comment">// positions contain the boundary of the cell
         </span><span class="kw">for </span>cellidy <span class="kw">in </span><span class="number">0</span>..cells[<span class="number">1</span>] {
-            opositions[cellidy <span class="kw">as </span>usize] = -<span class="number">3.14159 </span>+ cellidy <span class="kw">as </span>f64 * ocellsize + ocellsize;
+            opositions[cellidy] = -PI + cellidy <span class="kw">as </span>f64 * ocellsize + ocellsize;
         }
 
         <span class="kw">for </span>cellidz <span class="kw">in </span><span class="number">0</span>..cells[<span class="number">2</span>] {
-            zpositions[cellidz <span class="kw">as </span>usize] = cellidz <span class="kw">as </span>f64 * zcellsize + zcellsize + lim[<span class="number">2</span>][<span class="number">0</span>];
+            zpositions[cellidz] = cellidz <span class="kw">as </span>f64 * zcellsize + zcellsize + lim[<span class="number">2</span>][<span class="number">0</span>];
         }
         <span class="comment">// center in cartesian coords!!!
         </span><span class="kw">let </span>center = [
@@ -609,14 +607,14 @@
                     <span class="comment">// radius of cell before
                 </span>)
                     .sqrt();
-                rpositions[cellidx <span class="kw">as </span>usize] = [inner_radius, new]; <span class="comment">// inside, outside
+                rpositions[cellidx] = [inner_radius, new]; <span class="comment">// inside, outside
                 </span>inner_radius = new;
             }
         }
 
         <span class="kw">let </span>lim = [
             [<span class="number">0.0</span>, outer_radius],    <span class="comment">// radius
-            </span>[-<span class="number">3.14159</span>, <span class="number">3.14159</span>],    <span class="comment">// omega
+            </span>[-PI, PI],    <span class="comment">// omega
             </span>[lim[<span class="number">2</span>][<span class="number">0</span>], lim[<span class="number">2</span>][<span class="number">1</span>]], <span class="comment">// height4
         </span>];
         <span class="kw">let </span>rmeanpositions = rpositions
@@ -838,9 +836,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>axis2 = axis2;
         <span class="kw">if </span>axis1 &gt; axis2 {
             <span class="comment">// swap axis1 and axis2
-            </span><span class="kw">let </span>temp = axis1;
-            axis1 = axis2;
-            axis2 = temp;
+            </span>std::mem::swap(<span class="kw-2">&amp;mut </span>axis1, <span class="kw-2">&amp;mut </span>axis2);
         }
         <span class="kw">let </span>axis1 = Axis(axis1);
         <span class="kw">let </span>axis2 = Axis(axis2 - <span class="number">1</span>); <span class="comment">// we removed axis1 so axis2 is now one smaller
@@ -872,9 +868,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>axis2 = axis2;
         <span class="kw">if </span>axis1 &gt; axis2 {
             <span class="comment">// swap axis1 and axis2
-            </span><span class="kw">let </span>temp = axis1;
-            axis1 = axis2;
-            axis2 = temp;
+            </span>std::mem::swap(<span class="kw-2">&amp;mut </span>axis1, <span class="kw-2">&amp;mut </span>axis2);
         }
         <span class="kw">let </span>axis1 = Axis(axis1);
         <span class="kw">let </span>axis2 = Axis(axis2 - <span class="number">1</span>);
@@ -1014,9 +1008,9 @@
                             &amp;&amp; index.<span class="number">2 </span>&lt; <span class="self">self</span>.data.shape()[<span class="number">2</span>]
                         {
                             sum +=
-                                <span class="self">self</span>.data[[index.<span class="number">0 </span><span class="kw">as </span>usize, index.<span class="number">1 </span><span class="kw">as </span>usize, index.<span class="number">2 </span><span class="kw">as </span>usize]];
+                                <span class="self">self</span>.data[[index.<span class="number">0</span>, index.<span class="number">1</span>, index.<span class="number">2</span>]];
                             weight_sum +=
-                                <span class="self">self</span>.weight[[index.<span class="number">0 </span><span class="kw">as </span>usize, index.<span class="number">1 </span><span class="kw">as </span>usize, index.<span class="number">2 </span><span class="kw">as </span>usize]];
+                                <span class="self">self</span>.weight[[index.<span class="number">0</span>, index.<span class="number">1</span>, index.<span class="number">2</span>]];
                             counter_sum += <span class="number">1.0</span>;
                         }
                     }

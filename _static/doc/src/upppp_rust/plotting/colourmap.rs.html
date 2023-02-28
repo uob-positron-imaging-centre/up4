@@ -285,13 +285,27 @@
 <a href="#285" id="285">285</a>
 <a href="#286" id="286">286</a>
 <a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
 </pre><pre class="rust"><code><span class="kw">use </span>itertools::Itertools;
 <span class="kw">use </span>plotly::common::ColorScalePalette;
 
 <span class="kw">struct </span>Rgb {
     r: f64,
     g: f64,
-    b: f64
+    b: f64,
 }
 
 <span class="kw">impl </span>Rgb {
@@ -301,72 +315,78 @@
     </span><span class="kw">fn </span>from_rgb_string(rgb_string: String) -&gt; Rgb {
         <span class="comment">// cut rgb( and ) from the string
         </span><span class="kw">let </span>tuple = <span class="kw-2">&amp;</span>rgb_string[<span class="number">4</span>..rgb_string.len() - <span class="number">1</span>];
-        <span class="kw">let </span>rgb_strings: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = tuple.split(<span class="string">&quot;,&quot;</span>).collect();
-        <span class="kw">let </span>rgb_vec = <span class="macro">vec!</span>[rgb_strings[<span class="number">0</span>].parse::&lt;u8&gt;().unwrap(), rgb_strings[<span class="number">1</span>].parse::&lt;u8&gt;().unwrap(), rgb_strings[<span class="number">2</span>].parse::&lt;u8&gt;().unwrap()];
+        <span class="kw">let </span>rgb_strings: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = tuple.split(<span class="string">&#39;,&#39;</span>).collect();
+        <span class="kw">let </span>rgb_vec = <span class="macro">vec!</span>[
+            rgb_strings[<span class="number">0</span>].parse::&lt;u8&gt;().unwrap(),
+            rgb_strings[<span class="number">1</span>].parse::&lt;u8&gt;().unwrap(),
+            rgb_strings[<span class="number">2</span>].parse::&lt;u8&gt;().unwrap(),
+        ];
         Rgb::from_rgb_vec(rgb_vec)
     }
     <span class="kw">fn </span>from_rgb_vec(rgb_vec: Vec&lt;u8&gt;) -&gt; Rgb {
         <span class="comment">// conversion factor from 0 &lt; x &lt; 255 to 0 &lt; x &lt; 1
         </span><span class="kw">let </span>div = <span class="number">255.</span>;
-        <span class="kw">let </span>r = (rgb_vec[<span class="number">0</span>] <span class="kw">as </span>f64)/div;
-        <span class="kw">let </span>g = (rgb_vec[<span class="number">1</span>] <span class="kw">as </span>f64)/div;
-        <span class="kw">let </span>b = (rgb_vec[<span class="number">2</span>] <span class="kw">as </span>f64)/div;
-        Rgb{r, g, b}
+        <span class="kw">let </span>r = (rgb_vec[<span class="number">0</span>] <span class="kw">as </span>f64) / div;
+        <span class="kw">let </span>g = (rgb_vec[<span class="number">1</span>] <span class="kw">as </span>f64) / div;
+        <span class="kw">let </span>b = (rgb_vec[<span class="number">2</span>] <span class="kw">as </span>f64) / div;
+        Rgb { r, g, b }
     }
     <span class="kw">fn </span>as_array(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; [f64; <span class="number">3</span>] {
         [<span class="self">self</span>.r, <span class="self">self</span>.g, <span class="self">self</span>.b]
     }
-    <span class="comment">// taken from Agoston&#39;s Computer Graphics and Geometric Modeling: 
+    <span class="comment">// taken from Agoston&#39;s Computer Graphics and Geometric Modeling:
     // Implementation and Algorithms p. 303, with H -&gt; [0, 360] and S,V -&gt; [0, 1]
-    </span><span class="kw">fn </span>to_hsv(<span class="self">self</span>) -&gt; Hsv {
-        <span class="kw">let </span>max = <span class="self">self</span>.as_array().iter().fold(f64::NEG_INFINITY, |a, <span class="kw-2">&amp;</span>b| a.max(b));
+    </span><span class="kw">fn </span>to_hsv(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Hsv {
+        <span class="kw">let </span>max = <span class="self">self
+            </span>.as_array()
+            .iter()
+            .fold(f64::NEG_INFINITY, |a, <span class="kw-2">&amp;</span>b| a.max(b));
         <span class="kw">let </span>min = <span class="self">self</span>.as_array().iter().fold(f64::INFINITY, |a, <span class="kw-2">&amp;</span>b| a.min(b));
         <span class="kw">let </span>v = max;
-        <span class="kw">let </span>s = <span class="kw">if </span>max == <span class="number">0. </span>{ <span class="number">0. </span>} <span class="kw">else </span>{ (max - min)/max }; 
+        <span class="kw">let </span>s = <span class="kw">if </span>max == <span class="number">0. </span>{ <span class="number">0. </span>} <span class="kw">else </span>{ (max - min) / max };
         <span class="kw">let </span><span class="kw-2">mut </span>h = <span class="kw">if </span>s == <span class="number">0. </span>{
-            f64::NAN 
-        } <span class="kw">else </span>{ 
-            <span class="kw">let </span>delta = max - min; 
+            f64::NAN
+        } <span class="kw">else </span>{
+            <span class="kw">let </span>delta = max - min;
             <span class="comment">// colour between yellow and magenta
-            </span><span class="kw">if </span><span class="self">self</span>.r == max { 
-                (<span class="self">self</span>.g - <span class="self">self</span>.b)/delta 
-            } 
+            </span><span class="kw">if </span><span class="self">self</span>.r == max {
+                (<span class="self">self</span>.g - <span class="self">self</span>.b) / delta
+            }
             <span class="comment">// colour between cyan and yellow
             </span><span class="kw">else if </span><span class="self">self</span>.g == max {
-                <span class="number">2. </span>+ (<span class="self">self</span>.b - <span class="self">self</span>.r)/delta
-            } 
+                <span class="number">2. </span>+ (<span class="self">self</span>.b - <span class="self">self</span>.r) / delta
+            }
             <span class="comment">// colour between magenta and cyan
             </span><span class="kw">else </span>{
-                <span class="number">4. </span>+ (<span class="self">self</span>.r - <span class="self">self</span>.g)/delta
+                <span class="number">4. </span>+ (<span class="self">self</span>.r - <span class="self">self</span>.g) / delta
             }
         };
         <span class="comment">// convert to degrees
         </span>h <span class="kw-2">*</span>= <span class="number">60.</span>;
         <span class="comment">// ensure that 0 &lt; h &lt; 360
-        </span><span class="kw">if </span>h &lt; <span class="number">0. </span>{h += <span class="number">360.</span>}
-        Hsv{h, s, v}
+        </span><span class="kw">if </span>h &lt; <span class="number">0. </span>{
+            h += <span class="number">360.
+        </span>}
+        Hsv { h, s, v }
     }
 }
 
-
-<span class="kw">struct </span>Hsv{
+<span class="kw">struct </span>Hsv {
     h: f64,
     s: f64,
-    v: f64 
+    v: f64,
 }
 
 <span class="comment">// return the colour that the normalised value is located at along
 // the provided colourmap
 </span><span class="attr">#[allow(unused_variables)]
-</span><span class="kw">pub fn </span>interpolate_cmap(cmap: ColorScalePalette, cmap_loc: f64) <span class="comment">//-&gt; String 
+</span><span class="kw">pub fn </span>interpolate_cmap(cmap: ColorScalePalette, cmap_loc: f64) <span class="comment">//-&gt; String
 </span>{
     <span class="kw">let </span>cmap_strings = ColorScalePaletteRawValues::get_values(cmap);
-    <span class="kw">let </span><span class="kw-2">mut </span>cmap_rgb_values: Vec&lt;Rgb&gt;= Vec::with_capacity(cmap_strings.len());
+    <span class="kw">let </span><span class="kw-2">mut </span>cmap_rgb_values: Vec&lt;Rgb&gt; = Vec::with_capacity(cmap_strings.len());
     <span class="kw">for </span>colour <span class="kw">in </span>cmap_strings {
         cmap_rgb_values.push(Rgb::from_rgb_string(colour));
     }
-
-
 }
 
 <span class="kw">fn </span>convert_to_string(vector: Vec&lt;<span class="kw-2">&amp;</span>str&gt;) -&gt; Vec&lt;String&gt; {
@@ -395,7 +415,7 @@
 }
 
 <span class="kw">impl </span>ColorScalePaletteRawValues {
-    <span class="kw">fn </span>get_values(cmap: ColorScalePalette) -&gt; Vec&lt;String&gt;{
+    <span class="kw">fn </span>get_values(cmap: ColorScalePalette) -&gt; Vec&lt;String&gt; {
         <span class="kw">match </span>cmap {
             ColorScalePalette::Greys =&gt; convert_to_string(<span class="macro">vec!</span>[
                 <span class="string">&quot;rgb(255,255,255)&quot;</span>,
@@ -407,7 +427,7 @@
                 <span class="string">&quot;rgb(82,82,82)&quot;</span>,
                 <span class="string">&quot;rgb(37,37,37)&quot;</span>,
                 <span class="string">&quot;rgb(0,0,0)&quot;</span>,
-                ]),
+            ]),
             ColorScalePalette::YlGnBu =&gt; convert_to_string(<span class="macro">vec!</span>[
                 <span class="string">&quot;rgb(8,29,88)&quot;</span>,
                 <span class="string">&quot;rgb(37,52,148)&quot;</span>,
@@ -418,7 +438,7 @@
                 <span class="string">&quot;rgb(199,233,180)&quot;</span>,
                 <span class="string">&quot;rgb(237,248,217)&quot;</span>,
                 <span class="string">&quot;rgb(255,255,217)&quot;</span>,
-                ]),
+            ]),
             ColorScalePalette::Greens =&gt; convert_to_string(<span class="macro">vec!</span>[
                 <span class="string">&quot;rgb(0,68,27)&quot;</span>,
                 <span class="string">&quot;rgb(0,109,44)&quot;</span>,
@@ -428,8 +448,8 @@
                 <span class="string">&quot;rgb(161,217,155)&quot;</span>,
                 <span class="string">&quot;rgb(199,233,192)&quot;</span>,
                 <span class="string">&quot;rgb(229,245,224)&quot;</span>,
-                <span class="string">&quot;rgb(247,252,245)&quot;</span>,  
-                ]),
+                <span class="string">&quot;rgb(247,252,245)&quot;</span>,
+            ]),
             ColorScalePalette::YlOrRd =&gt; convert_to_string(<span class="macro">vec!</span>[
                 <span class="string">&quot;rgb(128,0,38)&quot;</span>,
                 <span class="string">&quot;rgb(189,0,38)&quot;</span>,
@@ -440,18 +460,27 @@
                 <span class="string">&quot;rgb(254,217,118)&quot;</span>,
                 <span class="string">&quot;rgb(255,237,160)&quot;</span>,
                 <span class="string">&quot;rgb(255,255,204)&quot;</span>,
-                ]),
-            ColorScalePalette::Bluered =&gt; convert_to_string(<span class="macro">vec!</span>[
-                <span class="string">&quot;rgb(0,0,255)&quot;</span>, 
-                <span class="string">&quot;rgb(255,0,0)&quot;</span>,
-                ]),
-            ColorScalePalette::RdBu =&gt; convert_to_string(<span class="macro">vec!</span>[<span class="string">&quot;rgb(103,0,31)&quot;</span>, <span class="string">&quot;rgb(178,24,43)&quot;</span>, <span class="string">&quot;rgb(214,96,77)&quot;</span>, <span class="string">&quot;rgb(244,165,130)&quot;</span>, <span class="string">&quot;rgb(253,219,199)&quot;</span>, <span class="string">&quot;rgb(247,247,247)&quot;</span>, <span class="string">&quot;rgb(209,229,240)&quot;</span>, <span class="string">&quot;rgb(146,197,222)&quot;</span>, <span class="string">&quot;rgb(67,147,195)&quot;</span>, <span class="string">&quot;rgb(33,102,172)&quot;</span>, <span class="string">&quot;rgb(5,48,97)&quot;</span>, ]),
+            ]),
+            ColorScalePalette::Bluered =&gt; convert_to_string(<span class="macro">vec!</span>[<span class="string">&quot;rgb(0,0,255)&quot;</span>, <span class="string">&quot;rgb(255,0,0)&quot;</span>]),
+            ColorScalePalette::RdBu =&gt; convert_to_string(<span class="macro">vec!</span>[
+                <span class="string">&quot;rgb(103,0,31)&quot;</span>,
+                <span class="string">&quot;rgb(178,24,43)&quot;</span>,
+                <span class="string">&quot;rgb(214,96,77)&quot;</span>,
+                <span class="string">&quot;rgb(244,165,130)&quot;</span>,
+                <span class="string">&quot;rgb(253,219,199)&quot;</span>,
+                <span class="string">&quot;rgb(247,247,247)&quot;</span>,
+                <span class="string">&quot;rgb(209,229,240)&quot;</span>,
+                <span class="string">&quot;rgb(146,197,222)&quot;</span>,
+                <span class="string">&quot;rgb(67,147,195)&quot;</span>,
+                <span class="string">&quot;rgb(33,102,172)&quot;</span>,
+                <span class="string">&quot;rgb(5,48,97)&quot;</span>,
+            ]),
             ColorScalePalette::Reds =&gt; convert_to_string(<span class="macro">vec!</span>[
-                <span class="string">&quot;rgb(220,220,220)&quot;</span>, 
-                <span class="string">&quot;rgb(245,195,157)&quot;</span>, 
-                <span class="string">&quot;rgb(245,160,105)&quot;</span>, 
-                <span class="string">&quot;rgb(178,10,28)&quot;
-                </span>]),
+                <span class="string">&quot;rgb(220,220,220)&quot;</span>,
+                <span class="string">&quot;rgb(245,195,157)&quot;</span>,
+                <span class="string">&quot;rgb(245,160,105)&quot;</span>,
+                <span class="string">&quot;rgb(178,10,28)&quot;</span>,
+            ]),
             ColorScalePalette::Blues =&gt; convert_to_string(<span class="macro">vec!</span>[
                 <span class="string">&quot;rgb(5,10,172)&quot;</span>,
                 <span class="string">&quot;rgb(40,60,190)&quot;</span>,
@@ -459,7 +488,7 @@
                 <span class="string">&quot;rgb(90,120,245)&quot;</span>,
                 <span class="string">&quot;rgb(106,137,247)&quot;</span>,
                 <span class="string">&quot;rgb(220,220,220)&quot;</span>,
-                ]),
+            ]),
             ColorScalePalette::Picnic =&gt; convert_to_string(<span class="macro">vec!</span>[
                 <span class="string">&quot;rgb(0,0,255)&quot;</span>,
                 <span class="string">&quot;rgb(51,153,255)&quot;</span>,
@@ -472,7 +501,7 @@
                 <span class="string">&quot;rgb(255,102,204)&quot;</span>,
                 <span class="string">&quot;rgb(255,102,102)&quot;</span>,
                 <span class="string">&quot;rgb(255,0,0)&quot;</span>,
-                ]),
+            ]),
             ColorScalePalette::Rainbow =&gt; convert_to_string(<span class="macro">vec!</span>[
                 <span class="string">&quot;rgb(150,0,90)&quot;</span>,
                 <span class="string">&quot;rgb(0,0,200)&quot;</span>,
@@ -483,14 +512,14 @@
                 <span class="string">&quot;rgb(255,234,0)&quot;</span>,
                 <span class="string">&quot;rgb(255,111,0)&quot;</span>,
                 <span class="string">&quot;rgb(255,0,0)&quot;</span>,
-                ]),
+            ]),
             ColorScalePalette::Portland =&gt; convert_to_string(<span class="macro">vec!</span>[
                 <span class="string">&quot;rgb(12,51,131)&quot;</span>,
                 <span class="string">&quot;rgb(10,136,186)&quot;</span>,
                 <span class="string">&quot;rgb(242,211,56)&quot;</span>,
                 <span class="string">&quot;rgb(242,143,56)&quot;</span>,
                 <span class="string">&quot;rgb(217,30,30)&quot;</span>,
-                ]),
+            ]),
             ColorScalePalette::Jet =&gt; convert_to_string(<span class="macro">vec!</span>[
                 <span class="string">&quot;rgb(0,0,131)&quot;</span>,
                 <span class="string">&quot;rgb(0,60,170)&quot;</span>,
@@ -498,20 +527,20 @@
                 <span class="string">&quot;rgb(255,255,0)&quot;</span>,
                 <span class="string">&quot;rgb(250,0,0)&quot;</span>,
                 <span class="string">&quot;rgb(128,0,0)&quot;</span>,
-                ]),
+            ]),
             ColorScalePalette::Hot =&gt; convert_to_string(<span class="macro">vec!</span>[
-                <span class="string">&quot;rgb(0,0,0)&quot;</span>, 
-                <span class="string">&quot;rgb(230,0,0)&quot;</span>, 
-                <span class="string">&quot;rgb(255,210,0)&quot;</span>, 
-                <span class="string">&quot;rgb(255,255,255)&quot;
-                </span>]),
+                <span class="string">&quot;rgb(0,0,0)&quot;</span>,
+                <span class="string">&quot;rgb(230,0,0)&quot;</span>,
+                <span class="string">&quot;rgb(255,210,0)&quot;</span>,
+                <span class="string">&quot;rgb(255,255,255)&quot;</span>,
+            ]),
             ColorScalePalette::Blackbody =&gt; convert_to_string(<span class="macro">vec!</span>[
                 <span class="string">&quot;rgb(0,0,0)&quot;</span>,
                 <span class="string">&quot;rgb(230,0,0)&quot;</span>,
                 <span class="string">&quot;rgb(230,210,0)&quot;</span>,
                 <span class="string">&quot;rgb(255,255,255)&quot;</span>,
                 <span class="string">&quot;rgb(160,200,255)&quot;</span>,
-                ]),
+            ]),
             ColorScalePalette::Earth =&gt; convert_to_string(<span class="macro">vec!</span>[
                 <span class="string">&quot;rgb(161, 105, 40)&quot;</span>,
                 <span class="string">&quot;rgb(189, 146, 90)&quot;</span>,
@@ -520,7 +549,7 @@
                 <span class="string">&quot;rgb(181, 200, 184)&quot;</span>,
                 <span class="string">&quot;rgb(121, 167, 172)&quot;</span>,
                 <span class="string">&quot;rgb(40, 135, 161)&quot;</span>,
-                ]),
+            ]),
             ColorScalePalette::Electric =&gt; convert_to_string(<span class="macro">vec!</span>[
                 <span class="string">&quot;rgb(0,0,0)&quot;</span>,
                 <span class="string">&quot;rgb(30,0,100)&quot;</span>,
@@ -528,7 +557,7 @@
                 <span class="string">&quot;rgb(160,90,0)&quot;</span>,
                 <span class="string">&quot;rgb(230,200,0)&quot;</span>,
                 <span class="string">&quot;rgb(255,250,220)&quot;</span>,
-                ]),
+            ]),
             ColorScalePalette::Viridis =&gt; convert_to_string(<span class="macro">vec!</span>[
                 <span class="string">&quot;rgb(68,1,84)&quot;</span>,
                 <span class="string">&quot;rgb(72,24,106)&quot;</span>,
@@ -547,7 +576,7 @@
                 <span class="string">&quot;rgb(173,220,48)&quot;</span>,
                 <span class="string">&quot;rgb(216,226,25)&quot;</span>,
                 <span class="string">&quot;rgb(253,231,37)&quot;</span>,
-                ]),
+            ]),
             ColorScalePalette::Cividis =&gt; convert_to_string(<span class="macro">vec!</span>[
                 <span class="string">&quot;rgb(0,32,76)&quot;</span>,
                 <span class="string">&quot;rgb(0,42,102)&quot;</span>,
@@ -567,10 +596,9 @@
                 <span class="string">&quot;rgb(225,204,92)&quot;</span>,
                 <span class="string">&quot;rgb(243,219,79)&quot;</span>,
                 <span class="string">&quot;rgb(255,233,69)&quot;</span>,
-                ]),
+            ]),
         }
     }
 }
-
 </code></pre></div>
 </section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="upppp_rust" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.1 (d5a82bbd2 2023-02-07)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>

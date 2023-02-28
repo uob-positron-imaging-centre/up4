@@ -1,7 +1,8 @@
 .. _scalarfield:
-*************
-Scalar Fields
-*************
+
+**********************
+Scalar Fields Tutorial
+**********************
 
 Scalar fields are a powerful tool to represent the state of a system. ``up4`` provides
 you with basic tools to extract an visualize different quantities.

@@ -50,84 +50,26 @@
 <a href="#50" id="50">50</a>
 <a href="#51" id="51">51</a>
 <a href="#52" id="52">52</a>
-<a href="#53" id="53">53</a>
-<a href="#54" id="54">54</a>
-<a href="#55" id="55">55</a>
-<a href="#56" id="56">56</a>
-<a href="#57" id="57">57</a>
-<a href="#58" id="58">58</a>
-<a href="#59" id="59">59</a>
-<a href="#60" id="60">60</a>
-<a href="#61" id="61">61</a>
-<a href="#62" id="62">62</a>
-<a href="#63" id="63">63</a>
-<a href="#64" id="64">64</a>
-<a href="#65" id="65">65</a>
-<a href="#66" id="66">66</a>
-<a href="#67" id="67">67</a>
-<a href="#68" id="68">68</a>
-<a href="#69" id="69">69</a>
-<a href="#70" id="70">70</a>
-<a href="#71" id="71">71</a>
-<a href="#72" id="72">72</a>
-<a href="#73" id="73">73</a>
-<a href="#74" id="74">74</a>
-<a href="#75" id="75">75</a>
-<a href="#76" id="76">76</a>
-<a href="#77" id="77">77</a>
-<a href="#78" id="78">78</a>
-<a href="#79" id="79">79</a>
-<a href="#80" id="80">80</a>
-<a href="#81" id="81">81</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Module that handles plotting of particle data.
 
-</span><span class="kw">use </span><span class="kw">crate</span>::GridFunctions3D;
-<span class="kw">use </span>ndarray::{Array1, Array2, Array3};
 
-<span class="kw">pub mod </span>comparison_plot;
-<span class="kw">pub mod </span>scalar_plot;
-<span class="kw">pub mod </span>vector_plot;
+</span><span class="kw">use </span>plotly::{Layout, Plot, Trace};
+
 <span class="kw">pub mod </span>colourmap;
+<span class="kw">pub mod </span>plotting_2d;
+<span class="kw">pub use </span>plotting_2d::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Return plane positions perpendicular to the provided axis.
-</span><span class="kw">pub fn </span>axis_selector(grid: Box&lt;<span class="kw">dyn </span>GridFunctions3D&gt;, axis: usize) -&gt; (Array1&lt;f64&gt;, Array1&lt;f64&gt;) {
-    <span class="kw">match </span>axis {
-        <span class="comment">// yz view
-        </span><span class="number">0 </span>=&gt; {
-            <span class="kw">let </span>xaxis = grid.get_ypositions().to_owned();
-            <span class="kw">let </span>yaxis = grid.get_zpositions().to_owned();
-            <span class="kw">return </span>(xaxis, yaxis);
-        }
-        <span class="comment">// xz view
-        </span><span class="number">1 </span>=&gt; {
-            <span class="kw">let </span>xaxis = grid.get_xpositions().to_owned();
-            <span class="kw">let </span>yaxis = grid.get_zpositions().to_owned();
-            <span class="kw">return </span>(xaxis, yaxis);
-        }
-        <span class="comment">// xy view
-        </span><span class="number">2 </span>=&gt; {
-            <span class="kw">let </span>xaxis = grid.get_xpositions().to_owned();
-            <span class="kw">let </span>yaxis = grid.get_ypositions().to_owned();
-            <span class="kw">return </span>(xaxis, yaxis);
-        }
-        <span class="comment">// panic
-        </span><span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;axis value must be either 0, 1 or 2!&quot;</span>),
-    };
-}
+<span class="doccomment">/// Take traces and plot them
+</span><span class="kw">pub fn </span>plot(traces: Vec&lt;Box&lt;<span class="kw">dyn </span>Trace&gt;&gt;, layout: Layout) -&gt; Plot {
+    <span class="kw">let </span><span class="kw-2">mut </span>plot: Plot = Plot::new();
+    <span class="comment">//use local render version
+    </span>plot.use_local_plotly();
+    <span class="kw">for </span>trace <span class="kw">in </span>traces {
+        plot.add_trace(trace);
+    }
+    plot.set_layout(layout);
 
-<span class="doccomment">/// Return data in plane perpendicular to provided axis, at the provided index.
-</span><span class="kw">pub fn </span>data_selector(grid: Box&lt;<span class="kw">dyn </span>GridFunctions3D&gt;, axis: usize, index: usize) -&gt; Array2&lt;f64&gt; {
-    <span class="kw">let </span>selected_data: Array2&lt;f64&gt; = grid
-        .get_data()
-        .index_axis(ndarray::Axis(axis), index)
-        .into_owned();
-    <span class="kw">return </span>selected_data;
-}
-
-<span class="doccomment">/// Return data in plane perpendicular to provided axis, at the provided index.
-</span><span class="kw">pub fn </span>component_data_selector(data: Array3&lt;f64&gt;, axis: usize, index: usize) -&gt; Array2&lt;f64&gt; {
-    <span class="kw">let </span>selected_data: Array2&lt;f64&gt; = data.index_axis(ndarray::Axis(axis), index).into_owned();
-    <span class="kw">return </span>selected_data;
+    plot
 }
 
 <span class="comment">/*

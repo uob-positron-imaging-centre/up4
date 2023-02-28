@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["PyConverter","Convert particle data from a given format to HDF5 (H5Part-like)"]]};
+window.SIDEBAR_ITEMS = {"struct":[["PyConverter","Convert particle data from a given format to HDF5 (H5Part-like)."]]};

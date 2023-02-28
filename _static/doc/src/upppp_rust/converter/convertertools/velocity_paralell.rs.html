@@ -204,7 +204,7 @@
 }
 
 <span class="kw">fn </span>to_array2&lt;T: Copy&gt;(source: Vec&lt;ndarray::Array1&lt;T&gt;&gt;) -&gt; ndarray::Array2&lt;T&gt; {
-    <span class="kw">if </span>source.len() == <span class="number">0 </span>{
+    <span class="kw">if </span>source.is_empty() {
         <span class="macro">panic!</span>(<span class="string">&quot;Source is empty&quot;</span>);
     }
     <span class="kw">let </span>width = source.len();

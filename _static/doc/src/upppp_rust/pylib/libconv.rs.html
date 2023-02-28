@@ -349,34 +349,12 @@
 <a href="#349" id="349">349</a>
 <a href="#350" id="350">350</a>
 <a href="#351" id="351">351</a>
-<a href="#352" id="352">352</a>
-<a href="#353" id="353">353</a>
-<a href="#354" id="354">354</a>
-<a href="#355" id="355">355</a>
-<a href="#356" id="356">356</a>
-<a href="#357" id="357">357</a>
-<a href="#358" id="358">358</a>
-<a href="#359" id="359">359</a>
-<a href="#360" id="360">360</a>
-<a href="#361" id="361">361</a>
-<a href="#362" id="362">362</a>
-<a href="#363" id="363">363</a>
-<a href="#364" id="364">364</a>
-<a href="#365" id="365">365</a>
-<a href="#366" id="366">366</a>
-<a href="#367" id="367">367</a>
-<a href="#368" id="368">368</a>
-<a href="#369" id="369">369</a>
-<a href="#370" id="370">370</a>
-<a href="#371" id="371">371</a>
-<a href="#372" id="372">372</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This file provides coupling of functions to convert data to HDF5 file format
 //! Functions are taken from base::converter.rs
-//!
 </span><span class="kw">use </span><span class="kw">crate</span>::converter::{<span class="self">self</span>, <span class="kw-2">*</span>};
 <span class="kw">use </span>pyo3::prelude::<span class="kw-2">*</span>;
 
-<span class="doccomment">/// Convert particle data from a given format to HDF5 (H5Part-like)
+<span class="doccomment">/// Convert particle data from a given format to HDF5 (H5Part-like).
 ///
 /// Methods
 /// -------
@@ -393,28 +371,21 @@
 
 <span class="attr">#[pymethods]
 </span><span class="kw">impl </span>PyConverter {
-    <span class="doccomment">/// Convert VTK file to a HDF5 file
+    <span class="doccomment">/// Convert VTK file to a HDF5 file.
     ///
     /// Parameters
     /// ----------
-    /// filenames: List(str)
-    ///     List of VTK files to convert
-    ///     List must be ordered by time
-    ///     Filenames must contain the timestep
+    /// filenames : List(str)
+    ///     List of VTK files to convert, the list must be ordered by time and filenames must contain the timestep.
     ///
-    /// timestep: float
-    ///     Time between two timesteps
+    /// timestep : float
+    ///     Time between two timesteps.
     ///
-    /// outname: str
-    ///     Name of the output HDF5 file
+    /// outname : str
+    ///     Name of the output HDF5 file.
     ///
-    /// filter: str, optional
-    ///     Regex Filter to apply to the data in order to extract the time for each file
-    ///     Default: &quot;r\&quot;(\\d+).vtk\&quot;&quot;
-    ///
-    /// Returns
-    /// -------
-    /// None
+    /// filter : str, optional
+    ///     Regex Filter to apply to the data in order to extract the time for each file, by default r&quot;(\d+).vtk&quot;
     ///
     </span><span class="attr">#[pyo3(signature = (filenames, timestep, outname, filter = <span class="string">&quot;(\\d+).vtk&quot;</span>))]
     #[staticmethod]
@@ -427,29 +398,28 @@
         vtk(filenames, timestep, outname, filter);
     }
 
-    <span class="doccomment">/// Convert all VTK files in a folder to a HDF5 file
+    <span class="doccomment">/// Convert all VTK files in a folder to a HDF5 file.
     ///
     /// Parameters
     /// ----------
-    /// folder: str
+    /// folder : str
     ///     Path to the folder containing the VTK files
     ///     Folder must only contain one type of vtk files
     ///
-    /// timestep: float
+    /// timestep : float
     ///     Time between two timesteps
     ///
-    /// outname: str
+    /// outname : str
     ///     Name of the output HDF5 file
     ///
-    /// filter: str, optional
-    ///     Regex Filter to apply to the data in order to extract the time for each file
-    ///     Default: &quot;r\&quot;(\\d+).vtk\&quot;&quot;
+    /// filter : str, optional
+    ///     Regex Filter to apply to the data in order to extract the time for each file, by default r&quot;(\d+).vtk&quot;
     ///
     /// Returns
     /// -------
     /// None
     ///
-    </span><span class="attr">#[pyo3(signature = (folder, timestep, outname, filter = <span class="string">&quot;(\\d+).vtk&quot;</span>))]
+    </span><span class="attr">#[pyo3(signature = (folder, timestep, outname, filter = <span class="string">r&quot;(\d+).vtk&quot;</span>))]
     #[staticmethod]
     </span><span class="kw">fn </span>vtk_from_folder(
         folder: <span class="kw-2">&amp;</span>str,
@@ -460,40 +430,39 @@
         vtk_from_folder(folder, timestep, outname, filter);
     }
 
-    <span class="doccomment">/// Convert CSV file to a HDF5 file
+    <span class="doccomment">/// Convert CSV file to a HDF5 file.
     ///
     /// Parameters
     /// ----------
-    /// filename: str
+    /// filename : str
     ///    Path to the CSV file
     ///
-    /// outname: str
+    /// outname : str
     ///    Name of the output HDF5 file
     ///
-    /// columns: List(int), optional
-    ///     List of columns to convert containing t,x,y,z,(optional vx,vy,vz)
-    ///     Default: [0,1,2,3]
-    /// header: bool, optional
-    ///     True if the CSV file contains a header
-    ///     Default: True
+    /// columns : List(int), optional
+    ///     List of columns to convert containing t,x,y,z,(optional vx,vy,vz), by default [0,1,2,3]
     ///
-    /// comment: str, optional
-    ///     Comment character to ignore
-    ///     Default: &quot;#&quot;
+    /// delimiter : str, optional
+    ///     Pattern for separating numbers in a csv file, by default &#39;,&#39;
+    ///
+    /// header : bool, optional
+    ///     True if the CSV file contains a header, by default True
+    ///
+    /// comment : str, optional
+    ///     Comment character to ignore, by default &#39;#&#39;
     ///
     /// vel : bool, optional
-    ///     If true the velocity will be computed from the position using the savitzky-golay filter
-    ///     Default: False
+    ///     If true the velocity will be computed from the position using the savitzky-golay filter, by default False
     ///
-    /// interpolate: bool, optional
-    ///     If true the particle positions will be interpolated in order to have a constant timestep
-    ///     Default: False
+    /// interpolate : bool, optional
+    ///     If true the particle positions will be interpolated in order to have a constant timestep, by default False
     ///
-    /// radius: float, optional
-    ///     Radius of the particle
+    /// radius : float, optional
+    ///     Particle radius, by default 0.0
     ///
-    /// sampling_steps: int, optional
-    ///    Number of sampling steps for the savitzky-golay filter to calculate the velocity
+    /// sampling_steps : int, optional
+    ///    Number of sampling steps for the savitzky-golay filter to calculate the velocity, by default 9
     ///
     /// Returns
     /// -------
@@ -503,9 +472,9 @@
         filename,
         outname,
         columns = <span class="macro">vec!</span>[<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>]</span>,
-        delimiter = <span class="string">&quot;\&quot;,\&quot;&quot;</span>,
+        delimiter = <span class="string">&quot;,&quot;</span>,
         header = <span class="bool-val">true</span>,
-        comment = <span class="string">&quot;\&quot;#\&quot;&quot;</span>,
+        comment = <span class="string">&quot;#&quot;</span>,
         vel = <span class="bool-val">false</span>,
         interpolate = <span class="bool-val">false</span>,
         radius = <span class="number">0.0</span>,
@@ -543,59 +512,57 @@
     }
 
     <span class="doccomment">/// Convert CSV file containing multiple particles into a HDF5 file.
+    ///
     /// There can be different ways how this is achieved, therefore the function
     /// takes an argument called `method` which can be one of the following:
-    ///    - `chain`:   The particles are chained in the file, i.e. the first particle
-    ///                 is followed by the second, the second by the third, etc.
-    ///                 all particles are stored in one file
+    ///     
+    /// - `chain`:   The particles are chained in the file, i.e. the first particle
+    ///     is followed by the second, the second by the third, etc.
+    ///     all particles are stored in one file
+    /// - `id_line`: This algorithm sorts the particles by their id column and
+    ///     their time column. The `columns` argument must contain the
+    ///     id column as the first element.
+    ///
     /// no other method is implemented yet. If you want to use another method, please
     /// contact the developers.
     ///
     /// Parameters
     /// ----------
-    /// filename: str
+    /// filename : str
     ///     Path to the CSV file
     ///
-    /// outname: str
+    /// outname : str
     ///     Name of the output HDF5 file
     ///
-    /// columns: List(int), optional
-    ///     List of columns to convert containing t,x,y,z,(optional vx,vy,vz)
-    ///     Default: [0,1,2,3]
+    /// columns : List(int), optional
+    ///     List of columns to convert containing t,x,y,z, (optional vx,vy,vz), by default [0,1,2,3]
     ///
-    /// header: bool, optional
-    ///     True if the CSV file contains a header
-    ///     Default: True
+    /// header : bool, optional
+    ///     True if the CSV file contains a header, by default True
     ///
-    /// comment: str, optional
-    ///     Comment character to ignore
-    ///     Default: &quot;#&quot;
+    /// comment : str, optional
+    ///     Comment character to ignore, by default &quot;#&quot;
     ///
     /// vel : bool, optional
-    ///     If true the velocity will be computed from the position using the savitzky-golay filter
-    ///     Default: False
+    ///     If true the velocity will be computed from the position using the savitzky-golay filter, by default False
     ///
-    /// interpolate: bool, optional
-    ///     If true the particle positions will be interpolated in order to have a constant timestep
-    ///     Default: False
+    /// interpolate : bool, optional
+    ///     If true the particle positions will be interpolated in order to have a constant timestep, by default False
     ///
-    /// radius: float, optional
-    ///     Radius of the particle
+    /// radius : float, optional
+    ///     Radius of the particle, by default 0.0
     ///
-    /// method: str, optional
+    /// method : str, optional
     ///     Method to use to convert the CSV file. Can be one of the following:
-    ///     - `chain`:  The particles are chained in the file, i.e. the first particle
-    ///                 is followed by the second, the second by the third, etc.
-    ///                 all particles are stored in one file
-    ///     - `id_line`: This algorithm sorts the particles by their id column and
-    ///                  their time column. The `columns` argument must contain the
-    ///                  id column as the first element.
     ///
-    ///     Default: `chain`
+    ///         -  `chain`:   The particles are chained in the file, i.e. the first particle
+    ///            is followed by the second, the second by the third, etc.
+    ///            all particles are stored in one file
+    ///         -  `id_line`: This algorithm sorts the particles by their id column and
+    ///            their time column. The `columns` argument must contain the
+    ///            id column as the first element.
     ///
-    /// Returns
-    /// -------
-    /// None
+    ///     , by default `chain`
     ///
     </span><span class="comment">//#[allow(unreachable_code, unused_variables)]
     </span><span class="attr">#[pyo3(signature = (
@@ -623,9 +590,9 @@
         radius: f64,
         method: <span class="kw-2">&amp;</span>str,
     ) -&gt; PyResult&lt;()&gt; {
-        <span class="comment">// errors out immediately because of the function is not implemented
+        <span class="comment">//errors out immediately because of the function is not implemented
         //return Err(PyErr::new::&lt;pyo3::exceptions::PyNotImplementedError, _&gt;(
-        //    &quot;Multi CSV reader is not implemented yet. This feature comes in future!&quot;,
+        //&quot;Multi CSV reader is not implemented yet. This feature comes in future!&quot;,
         //));
         </span>csv_multi_converter(
             filename,
@@ -643,31 +610,37 @@
     }
 
     <span class="doccomment">/// Convert CSV file containing multiple particles into a HDF5 file.
+    ///
     /// There can be different ways how this is achieved, therefore the function
     /// takes an argument called `method` which can be one of the following:
-    ///    - `chain`:   The particles are chained in the file, i.e. the first particle
-    ///                 is followed by the second, the second by the third, etc.
-    ///                 all particles are stored in one file
+    ///
+    ///     - `chain`:   The particles are chained in the file, i.e. the first particle
+    ///         is followed by the second, the second by the third, etc.
+    ///         all particles are stored in one file.
+    ///     - `id_line`: This algorithm sorts the particles by their id column and
+    ///         their time column. The `columns` argument must contain the
+    ///         id column as the first element.
+    ///
     /// no other method is implemented yet. If you want to use another method, please
     /// contact the developers.
     ///
     /// Parameters
     /// ----------
-    /// filename: str
-    ///     Path to the CSV file
+    /// filenames : str
+    ///     Path to the CSV files
     ///
-    /// outname: str
+    /// outname : str
     ///     Name of the output HDF5 file
     ///
-    /// columns: List(int), optional
+    /// columns : List(int), optional
     ///     List of columns to convert containing pid,x,y,z,(optional vx,vy,vz)
     ///     Default: [0,1,2,3]
     ///
-    /// header: bool, optional
+    /// header : bool, optional
     ///     True if the CSV file contains a header
     ///     Default: True
     ///
-    /// comment: str, optional
+    /// comment : str, optional
     ///     Comment character to ignore
     ///     Default: &quot;#&quot;
     ///
@@ -675,27 +648,12 @@
     ///     If true the velocity will be computed from the position using the savitzky-golay filter
     ///     Default: False
     ///
-    /// interpolate: bool, optional
+    /// interpolate : bool, optional
     ///     If true the particle positions will be interpolated in order to have a constant timestep
     ///     Default: False
     ///
-    /// radius: float, optional
+    /// radius : float, optional
     ///     Radius of the particle
-    ///
-    /// method: str, optional
-    ///     Method to use to convert the CSV file. Can be one of the following:
-    ///     - `chain`:  The particles are chained in the file, i.e. the first particle
-    ///                 is followed by the second, the second by the third, etc.
-    ///                 all particles are stored in one file
-    ///     - `id_line`: This algorithm sorts the particles by their id column and
-    ///                  their time column. The `columns` argument must contain the
-    ///                  id column as the first element.
-    ///
-    ///     Default: `chain`
-    ///
-    /// Returns
-    /// -------
-    /// None
     ///
     </span><span class="comment">//#[allow(unreachable_code, unused_variables)]
     </span><span class="attr">#[pyo3(signature = (
@@ -703,9 +661,9 @@
         outname,
         times,
         columns = <span class="macro">vec!</span>[<span class="number">0</span>,<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>]</span>,
-        delimiter = <span class="string">&quot;\&quot;,\&quot;&quot;</span>,
+        delimiter = <span class="string">&quot;,&quot;</span>,
         header = <span class="bool-val">true</span>,
-        comment = <span class="string">&quot;\&quot;#\&quot;&quot;</span>,
+        comment = <span class="string">&quot;#&quot;</span>,
         vel = <span class="bool-val">false</span>,
         interpolate = <span class="bool-val">false</span>,
         radius = <span class="number">0.0
@@ -727,7 +685,7 @@
         //return Err(PyErr::new::&lt;pyo3::exceptions::PyNotImplementedError, _&gt;(
         //    &quot;Multi CSV reader is not implemented yet. This feature comes in future!&quot;,
         //));
-        </span>converter::csv_multi_file_time_sep(
+        </span>converter::csv_multi_file_time_step(
             filenames,
             outname,
             columns,

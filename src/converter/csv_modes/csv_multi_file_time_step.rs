@@ -120,29 +120,30 @@ pub fn csv_multi_file_time_step(
         builder
             .with_data(&particle_id)
             .create("id")
-            .unwrap_or_else(|_| panic!("Unable to create dataset \"id\" in file {}",
-                filename));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"id\" in file {}", filename));
         //TODO: add a dict to that to read in other columns!
         let builder = group.new_dataset_builder();
         let zero_array = vec![0.0; particle_id.len()];
         builder
             .with_data(&zero_array)
             .create("radius")
-            .unwrap_or_else(|_| panic!("Unable to create dataset \"radius\" in file {}",
-                filename));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"radius\" in file {}", filename));
 
         let builder = group.new_dataset_builder();
         builder
             .with_data(&zero_array)
             .create("ppcloud")
-            .unwrap_or_else(|_| panic!("Unable to create dataset \"radius\" in file {}",
-                filename));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"radius\" in file {}", filename));
         let builder = group.new_dataset_builder();
         builder
             .with_data(&zero_array)
             .create("particletype")
-            .unwrap_or_else(|_| panic!("Unable to create dataset \"particletype\" in file {}",
-                filename));
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Unable to create dataset \"particletype\" in file {}",
+                    filename
+                )
+            });
 
         let particle_velocity: ndarray::Array2<f64> = timestep_data
             .slice(ndarray::s![.., 5usize..8usize])
@@ -175,8 +176,9 @@ pub fn csv_multi_file_time_step(
         builder
             .with_data(&particle_velocity)
             .create("velocity")
-            .unwrap_or_else(|_| panic!("Unable to create dataset \"velocity\" in file {}",
-                filename));
+            .unwrap_or_else(|_| {
+                panic!("Unable to create dataset \"velocity\" in file {}", filename)
+            });
         print_debug!("New: {:?}", particle_positions);
         for pos in particle_positions.axis_iter(ndarray::Axis(0)) {
             for i in 0..3 {
@@ -191,8 +193,9 @@ pub fn csv_multi_file_time_step(
         builder
             .with_data(&particle_positions)
             .create("position")
-            .unwrap_or_else(|_| panic!("Unable to create dataset \"position\" in file {}",
-                filename));
+            .unwrap_or_else(|_| {
+                panic!("Unable to create dataset \"position\" in file {}", filename)
+            });
         mean_counter += particle_id.len();
         sample_rate = current_time - old_time;
         old_time = current_time;

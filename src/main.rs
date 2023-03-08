@@ -49,7 +49,12 @@ fn main() {
 } */
 #[allow(dead_code, unused_imports, unused_variables, unreachable_code)]
 fn main() {
-    converter::vtu_from_folder("/home/dan/radioactive-mill/post", 1e-5, "lethe.hdf5", r"(\d+).pvtu");
+    converter::vtu_from_folder(
+        "/home/dan/radioactive-mill/post",
+        1e-5,
+        "lethe.hdf5",
+        r"(\d+).pvtu",
+    );
     let now = Instant::now();
     let mut pdata = TData::new("lethe.hdf5");
     let stats = pdata.global_stats();

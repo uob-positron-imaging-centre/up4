@@ -1,6 +1,5 @@
 //! Module that handles plotting of particle data.
 
-
 use plotly::{Layout, Plot, Trace};
 
 pub mod colourmap;

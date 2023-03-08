@@ -518,15 +518,11 @@ impl GridFunctions3D for CartesianGrid3D {
                             && index.1 < self.data.shape()[1]
                             && index.2 < self.data.shape()[2]
                         {
-                            if self.data[[index.0, index.1, index.2]]
-                                > threshold
-                            {
+                            if self.data[[index.0, index.1, index.2]] > threshold {
                                 continue;
                             }
-                            sum +=
-                                self.data[[index.0, index.1, index.2]];
-                            weight_sum +=
-                                self.weight[[index.0, index.1, index.2]];
+                            sum += self.data[[index.0, index.1, index.2]];
+                            weight_sum += self.weight[[index.0, index.1, index.2]];
                             counter_sum += 1.0;
                         }
                     }

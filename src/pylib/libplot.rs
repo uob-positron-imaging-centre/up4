@@ -1,7 +1,7 @@
 //! Submodule for export of plotting code to Python.
 
 use crate::{
-    libgrid::{PyVecGrid, PyGrid},
+    libgrid::{PyGrid, PyVecGrid},
     plotting::*,
     GridFunctions3D, VectorGrid,
 };
@@ -32,7 +32,10 @@ impl PyPlotter2D {
         let grid = grid.grid.to_owned();
         let plotting_string = String::new();
 
-        PyPlotter2D { plotting_string, grid }
+        PyPlotter2D {
+            plotting_string,
+            grid,
+        }
     }
 
     #[pyo3(signature = (axis, selection = "depth_average", index = None, scaling_mode = "none", scaling_args = None))]
@@ -226,16 +229,23 @@ impl PyPlotter2D {
 
         Ok(())
     }
-    
+
+    // BUG something isn't being done correctly as the square axes aren't behaving
     #[pyo3(signature = (grid_type, axis, selection = "depth_average", index = None))]
-    fn _scalar_map(&mut self, grid_type: &str, axis: usize, selection: &str, index: Option<usize>,) -> PyResult<()> {
+    fn _scalar_map(
+        &mut self,
+        grid_type: &str,
+        axis: usize,
+        selection: &str,
+        index: Option<usize>,
+    ) -> PyResult<()> {
         let scalar_plotter = if grid_type == "vector_grid" {
             let grid = self
-            .grid
-            .as_any()
-            .downcast_ref::<VectorGrid>()
-            .unwrap()
-            .clone();
+                .grid
+                .as_any()
+                .downcast_ref::<VectorGrid>()
+                .unwrap()
+                .clone();
             if selection == "depth_average" {
                 ScalarMap::from_vector_grid_depth_averaged(grid, axis)
             } else if selection == "plane" {
@@ -247,7 +257,9 @@ impl PyPlotter2D {
                     ));
                 }
             } else {
-                return Err(PyValueError::new_err("Valid selection modes are 'depth_average' and 'plane' only."))
+                return Err(PyValueError::new_err(
+                    "Valid selection modes are 'depth_average' and 'plane' only.",
+                ));
             }
         } else if grid_type == "grid" {
             let grid = self.grid.clone();
@@ -262,14 +274,16 @@ impl PyPlotter2D {
                     ));
                 }
             } else {
-                return Err(PyValueError::new_err("Valid selection modes are 'depth_average' and 'plane' only."))
+                return Err(PyValueError::new_err(
+                    "Valid selection modes are 'depth_average' and 'plane' only.",
+                ));
             }
         } else {
             return Err(PyValueError::new_err("Valid grid types are 'vector_grid' and 'grid' only. This was set implicitly
-                        by the Plotter2D class and you shouldn't be seeing this error. Please contact the developers."))
+                        by the Plotter2D class and you shouldn't be seeing this error. Please contact the developers."));
         };
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
-        let heatmap_traces = scalar_plotter.create_scalar_map();        
+        let heatmap_traces = scalar_plotter.create_scalar_map();
         for trace in heatmap_traces {
             traces.push(trace)
         }
@@ -281,15 +295,22 @@ impl PyPlotter2D {
         Ok(())
     }
 
+    // BUG something isn't being done correctly as the square axes aren't behaving
     #[pyo3(signature = (grid_type, axis, selection = "depth_average", index = None))]
-    fn _scalar_contour(&mut self, grid_type: &str, axis: usize, selection: &str, index: Option<usize>,) -> PyResult<()> {
+    fn _scalar_contour(
+        &mut self,
+        grid_type: &str,
+        axis: usize,
+        selection: &str,
+        index: Option<usize>,
+    ) -> PyResult<()> {
         let scalar_plotter = if grid_type == "vector_grid" {
             let grid = self
-            .grid
-            .as_any()
-            .downcast_ref::<VectorGrid>()
-            .unwrap()
-            .clone();
+                .grid
+                .as_any()
+                .downcast_ref::<VectorGrid>()
+                .unwrap()
+                .clone();
             if selection == "depth_average" {
                 ScalarContour::from_vector_grid_depth_averaged(grid, axis)
             } else if selection == "plane" {
@@ -301,7 +322,9 @@ impl PyPlotter2D {
                     ));
                 }
             } else {
-                return Err(PyValueError::new_err("Valid selection modes are 'depth_average' and 'plane' only."))
+                return Err(PyValueError::new_err(
+                    "Valid selection modes are 'depth_average' and 'plane' only.",
+                ));
             }
         } else if grid_type == "grid" {
             let grid = self.grid.clone();
@@ -316,14 +339,62 @@ impl PyPlotter2D {
                     ));
                 }
             } else {
-                return Err(PyValueError::new_err("Valid selection modes are 'depth_average' and 'plane' only."))
+                return Err(PyValueError::new_err(
+                    "Valid selection modes are 'depth_average' and 'plane' only.",
+                ));
             }
         } else {
             return Err(PyValueError::new_err("Valid grid types are 'vector_grid' and 'grid' only. This was set implicitly
-                        by the Plotter2D class and you shouldn't be seeing this error. Please contact the developers."))
+                        by the Plotter2D class and you shouldn't be seeing this error. Please contact the developers."));
         };
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
-        let heatmap_traces = scalar_plotter.create_scalar_contour();        
+        let contour_traces = scalar_plotter.create_scalar_contour();
+        for trace in contour_traces {
+            traces.push(trace)
+        }
+        let layout: Layout = Layout::new();
+        let plot: Plot = plot(traces, layout);
+        let plotting_string = plot.to_json();
+        self.plotting_string = plotting_string;
+
+        Ok(())
+    }
+
+    #[pyo3(signature = (comparison_grid, axis, selection = "depth_average", index = None))]
+    fn _parity_plot_from_vector_grid(
+        &mut self,
+        comparison_grid: &PyVecGrid,
+        axis: usize,
+        selection: &str,
+        index: Option<usize>,
+    ) -> PyResult<()> {
+        let ref_grid = self
+            .grid
+            .as_any()
+            .downcast_ref::<VectorGrid>()
+            .unwrap()
+            .clone();
+        let comp_grid = comparison_grid
+            .grid
+            .as_any()
+            .downcast_ref::<VectorGrid>()
+            .unwrap()
+            .clone();
+        let parity_plotter = if selection == "depth_average" {
+            ParityPlot::from_vector_grids_depth_averaged(ref_grid, comp_grid, axis)
+        } else if selection == "plane" {
+            if let Some(index) = index {
+                ParityPlot::from_vector_grids_single_plane(ref_grid, comp_grid, axis, index)
+            } else {
+                return Err(PyValueError::new_err(
+                    "A valid index is required to select an individual plane.",
+                ));
+            }
+        } else {
+            ParityPlot::from_vector_grids(ref_grid, comp_grid)
+        };
+        let mut traces: Vec<Box<dyn Trace>> = Vec::new();
+        let heatmap_traces = parity_plotter.create_parity_scatter();
         for trace in heatmap_traces {
             traces.push(trace)
         }
@@ -335,56 +406,31 @@ impl PyPlotter2D {
         Ok(())
     }
 
-    // TODO see if i have to make a fn for both vector grid and grid
-    #[pyo3(signature = (comparison_grid, grid_type, axis, selection = "depth_average", index = None))]
-    fn _parity_plot(&mut self, comparison_grid: &PyGrid, grid_type: &str, axis: usize, selection: &str, index: Option<usize>,) -> PyResult<()> {
-        let parity_plotter = if grid_type == "vector_grid" {
-            let ref_grid = self
-            .grid
-            .as_any()
-            .downcast_ref::<VectorGrid>()
-            .unwrap()
-            .clone();
-            let comp_grid = comparison_grid.grid
-                .as_any()
-                .downcast_ref::<VectorGrid>()
-                .unwrap()
-                .clone();
-            if selection == "depth_average" {
-                ParityPlot::from_vector_grids_depth_averaged(ref_grid, comp_grid, axis)
-            } else if selection == "plane" {
-                if let Some(index) = index {
-                    ParityPlot::from_vector_grids_single_plane(ref_grid, comp_grid, axis, index)
-                } else {
-                    return Err(PyValueError::new_err(
-                        "A valid index is required to select an individual plane.",
-                    ));
-                }
+    #[pyo3(signature = (comparison_grid, axis, selection = "depth_average", index = None))]
+    fn _parity_plot_from_grid(
+        &mut self,
+        comparison_grid: &PyGrid,
+        axis: usize,
+        selection: &str,
+        index: Option<usize>,
+    ) -> PyResult<()> {
+        let ref_grid = self.grid.clone();
+        let comp_grid = comparison_grid.grid.clone();
+        let parity_plotter = if selection == "depth_average" {
+            ParityPlot::from_grids_depth_averaged(ref_grid, comp_grid, axis)
+        } else if selection == "plane" {
+            if let Some(index) = index {
+                ParityPlot::from_grids_single_plane(ref_grid, comp_grid, axis, index)
             } else {
-                ParityPlot::from_vector_grids(ref_grid, comp_grid)
-            }
-        } else if grid_type == "grid" {
-            let ref_grid = self.grid.clone();
-            let comp_grid = comparison_grid.grid.to_owned();
-            if selection == "depth_average" {
-                ParityPlot::from_grids_depth_averaged(ref_grid, comp_grid, axis)
-            } else if selection == "plane" {
-                if let Some(index) = index {
-                    ParityPlot::from_grids_single_plane(ref_grid, comp_grid, axis, index)
-                } else {
-                    return Err(PyValueError::new_err(
-                        "A valid index is required to select an individual plane.",
-                    ));
-                }
-            } else {
-                ParityPlot::from_grids(ref_grid, comp_grid)
+                return Err(PyValueError::new_err(
+                    "A valid index is required to select an individual plane.",
+                ));
             }
         } else {
-            return Err(PyValueError::new_err("Valid grid types are 'vector_grid' and 'grid' only. This was set implicitly
-                        by the Plotter2D class and you shouldn't be seeing this error. Please contact the developers."))
+            ParityPlot::from_grids(ref_grid, comp_grid)
         };
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
-        let heatmap_traces = parity_plotter.create_parity_scatter();     
+        let heatmap_traces = parity_plotter.create_parity_scatter();
         for trace in heatmap_traces {
             traces.push(trace)
         }
@@ -396,56 +442,44 @@ impl PyPlotter2D {
         Ok(())
     }
 
-    #[pyo3(signature = (comparison_grid, grid_type, axis, selection = "depth_average", index = None))]
-    fn _parity_map(&mut self, comparison_grid: &PyGrid, grid_type: &str, axis: usize, selection: &str, index: Option<usize>,) -> PyResult<()> {
-        let parity_plotter = if grid_type == "vector_grid" {
-            let ref_grid = self
+    #[pyo3(signature = (comparison_grid, axis, selection = "depth_average", index = None))]
+    fn _parity_map_from_vector_grid(
+        &mut self,
+        comparison_grid: &PyVecGrid,
+        axis: usize,
+        selection: &str,
+        index: Option<usize>,
+    ) -> PyResult<()> {
+        let ref_grid = self
             .grid
             .as_any()
             .downcast_ref::<VectorGrid>()
             .unwrap()
             .clone();
-            let comp_grid = comparison_grid.grid
-                .as_any()
-                .downcast_ref::<VectorGrid>()
-                .unwrap()
-                .clone();
-            if selection == "depth_average" {
-                ParityMap::from_vector_grids_depth_averaged(ref_grid, comp_grid, axis)
-            } else if selection == "plane" {
-                if let Some(index) = index {
-                    ParityMap::from_vector_grids_single_plane(ref_grid, comp_grid, axis, index)
-                } else {
-                    return Err(PyValueError::new_err(
-                        "A valid index is required to select an individual plane.",
-                    ));
-                }
+        let comp_grid = comparison_grid
+            .grid
+            .as_any()
+            .downcast_ref::<VectorGrid>()
+            .unwrap()
+            .clone();
+        let parity_plotter = if selection == "depth_average" {
+            ParityMap::from_vector_grids_depth_averaged(ref_grid, comp_grid, axis)
+        } else if selection == "plane" {
+            if let Some(index) = index {
+                ParityMap::from_vector_grids_single_plane(ref_grid, comp_grid, axis, index)
             } else {
-                return Err(PyValueError::new_err("Valid selection modes are 'depth_average' and 'plane' only."))
-            }
-        } else if grid_type == "grid" {
-            let ref_grid = self.grid.clone();
-            let comp_grid = comparison_grid.grid.to_owned();
-            if selection == "depth_average" {
-                ParityMap::from_grids_depth_averaged(ref_grid, comp_grid, axis)
-            } else if selection == "plane" {
-                if let Some(index) = index {
-                    ParityMap::from_grids_single_plane(ref_grid, comp_grid, axis, index)
-                } else {
-                    return Err(PyValueError::new_err(
-                        "A valid index is required to select an individual plane.",
-                    ));
-                }
-            } else {
-                return Err(PyValueError::new_err("Valid selection modes are 'depth_average' and 'plane' only."))
+                return Err(PyValueError::new_err(
+                    "A valid index is required to select an individual plane.",
+                ));
             }
         } else {
-            return Err(PyValueError::new_err("Valid grid types are 'vector_grid' and 'grid' only. This was set implicitly
-                        by the Plotter2D class and you shouldn't be seeing this error. Please contact the developers."))
+            return Err(PyValueError::new_err(
+                "Valid selection modes are 'depth_average' and 'plane' only.",
+            ));
         };
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
-        let heatmap_traces = parity_plotter.create_parity_map(); 
-        for trace in heatmap_traces {
+        let parity_traces = parity_plotter.create_parity_map();
+        for trace in parity_traces {
             traces.push(trace)
         }
         let layout: Layout = Layout::new();
@@ -456,55 +490,119 @@ impl PyPlotter2D {
         Ok(())
     }
 
-    #[pyo3(signature = (comparison_grid, grid_type, axis, selection = "depth_average", index = None))]
-    fn _parity_contour(&mut self, comparison_grid: &PyGrid, grid_type: &str, axis: usize, selection: &str, index: Option<usize>,) -> PyResult<()> {
-        let parity_plotter = if grid_type == "vector_grid" {
-            let ref_grid = self
+    #[pyo3(signature = (comparison_grid, axis, selection = "depth_average", index = None))]
+    fn _parity_map_from_grid(
+        &mut self,
+        comparison_grid: &PyGrid,
+        axis: usize,
+        selection: &str,
+        index: Option<usize>,
+    ) -> PyResult<()> {
+        let ref_grid = self.grid.clone();
+        let comp_grid = comparison_grid.grid.clone();
+        let parity_plotter = if selection == "depth_average" {
+            ParityMap::from_grids_depth_averaged(ref_grid, comp_grid, axis)
+        } else if selection == "plane" {
+            if let Some(index) = index {
+                ParityMap::from_grids_single_plane(ref_grid, comp_grid, axis, index)
+            } else {
+                return Err(PyValueError::new_err(
+                    "A valid index is required to select an individual plane.",
+                ));
+            }
+        } else {
+            return Err(PyValueError::new_err(
+                "Valid selection modes are 'depth_average' and 'plane' only.",
+            ));
+        };
+        let mut traces: Vec<Box<dyn Trace>> = Vec::new();
+        let parity_traces = parity_plotter.create_parity_map();
+        for trace in parity_traces {
+            traces.push(trace)
+        }
+        let layout: Layout = Layout::new();
+        let plot: Plot = plot(traces, layout);
+        let plotting_string = plot.to_json();
+        self.plotting_string = plotting_string;
+
+        Ok(())
+    }
+
+    #[pyo3(signature = (comparison_grid, axis, selection = "depth_average", index = None))]
+    fn _parity_contour_from_vector_grid(
+        &mut self,
+        comparison_grid: &PyVecGrid,
+        axis: usize,
+        selection: &str,
+        index: Option<usize>,
+    ) -> PyResult<()> {
+        let ref_grid = self
             .grid
             .as_any()
             .downcast_ref::<VectorGrid>()
             .unwrap()
             .clone();
-            let comp_grid = comparison_grid.grid
-                .as_any()
-                .downcast_ref::<VectorGrid>()
-                .unwrap()
-                .clone();
-            if selection == "depth_average" {
-                ParityContour::from_vector_grids_depth_averaged(ref_grid, comp_grid, axis)
-            } else if selection == "plane" {
-                if let Some(index) = index {
-                    ParityContour::from_vector_grids_single_plane(ref_grid, comp_grid, axis, index)
-                } else {
-                    return Err(PyValueError::new_err(
-                        "A valid index is required to select an individual plane.",
-                    ));
-                }
+        let comp_grid = comparison_grid
+            .grid
+            .as_any()
+            .downcast_ref::<VectorGrid>()
+            .unwrap()
+            .clone();
+        let parity_plotter = if selection == "depth_average" {
+            ParityContour::from_vector_grids_depth_averaged(ref_grid, comp_grid, axis)
+        } else if selection == "plane" {
+            if let Some(index) = index {
+                ParityContour::from_vector_grids_single_plane(ref_grid, comp_grid, axis, index)
             } else {
-                return Err(PyValueError::new_err("Valid selection modes are 'depth_average' and 'plane' only."))
-            }
-        } else if grid_type == "grid" {
-            let ref_grid = self.grid.clone();
-            let comp_grid = comparison_grid.grid.to_owned();
-            if selection == "depth_average" {
-                ParityContour::from_grids_depth_averaged(ref_grid, comp_grid, axis)
-            } else if selection == "plane" {
-                if let Some(index) = index {
-                    ParityContour::from_grids_single_plane(ref_grid, comp_grid, axis, index)
-                } else {
-                    return Err(PyValueError::new_err(
-                        "A valid index is required to select an individual plane.",
-                    ));
-                }
-            } else {
-                return Err(PyValueError::new_err("Valid selection modes are 'depth_average' and 'plane' only."))
+                return Err(PyValueError::new_err(
+                    "A valid index is required to select an individual plane.",
+                ));
             }
         } else {
-            return Err(PyValueError::new_err("Valid grid types are 'vector_grid' and 'grid' only. This was set implicitly
-                        by the Plotter2D class and you shouldn't be seeing this error. Please contact the developers."))
+            return Err(PyValueError::new_err(
+                "Valid selection modes are 'depth_average' and 'plane' only.",
+            ));
         };
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
-        let heatmap_traces = parity_plotter.create_parity_contour(); 
+        let parity_traces = parity_plotter.create_parity_contour();
+        for trace in parity_traces {
+            traces.push(trace)
+        }
+        let layout: Layout = Layout::new();
+        let plot: Plot = plot(traces, layout);
+        let plotting_string = plot.to_json();
+        self.plotting_string = plotting_string;
+
+        Ok(())
+    }
+
+    #[pyo3(signature = (comparison_grid, axis, selection = "depth_average", index = None))]
+    fn _parity_contour_from_grid(
+        &mut self,
+        comparison_grid: &PyGrid,
+        axis: usize,
+        selection: &str,
+        index: Option<usize>,
+    ) -> PyResult<()> {
+        let ref_grid = self.grid.clone();
+        let comp_grid = comparison_grid.grid.clone();
+        let parity_plotter = if selection == "depth_average" {
+            ParityContour::from_grids_depth_averaged(ref_grid, comp_grid, axis)
+        } else if selection == "plane" {
+            if let Some(index) = index {
+                ParityContour::from_grids_single_plane(ref_grid, comp_grid, axis, index)
+            } else {
+                return Err(PyValueError::new_err(
+                    "A valid index is required to select an individual plane.",
+                ));
+            }
+        } else {
+            return Err(PyValueError::new_err(
+                "Valid selection modes are 'depth_average' and 'plane' only.",
+            ));
+        };
+        let mut traces: Vec<Box<dyn Trace>> = Vec::new();
+        let heatmap_traces = parity_plotter.create_parity_contour();
         for trace in heatmap_traces {
             traces.push(trace)
         }

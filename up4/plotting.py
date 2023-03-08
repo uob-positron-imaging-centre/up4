@@ -49,7 +49,7 @@ class Plotter2D:
         if isinstance(grid, RustGrid):
             self._grid_type = "grid"
             self._plotter = RustPlotter2D._from_grid(grid)
-        else:
+        else:  # TODO be more thorough to please the german
             self._grid_type = "vector_grid"
             self._plotter = RustPlotter2D._from_vector_grid(grid)
 
@@ -89,7 +89,7 @@ class Plotter2D:
     ) -> plotly.graph_objects.Figure:
         self._plotter._scalar_map(self._grid_type, axis, selection, index)
         scalar_map_plot = self._create_plot()
-        
+
         return scalar_map_plot
 
     def scalar_contour(
@@ -106,9 +106,14 @@ class Plotter2D:
     def parity_plot(
         self, comparison_grid: Grid, axis: int, selection="depth_average", index=None
     ) -> plotly.graph_objects.Figure:
-        self._plotter._parity_plot(
-            comparison_grid, self._grid_type, axis, selection, index
-        )
+        if self._grid_type == "vector_grid":
+            self._plotter._parity_plot_from_vector_grid(
+                comparison_grid, axis, selection, index
+            )
+        else:
+            self._plotter._parity_plot_from_grid(
+                comparison_grid, axis, selection, index
+            )
         parity_plot = self._create_plot()
 
         return parity_plot
@@ -116,9 +121,12 @@ class Plotter2D:
     def parity_map(
         self, comparison_grid: Grid, axis: int, selection="depth_average", index=None
     ) -> plotly.graph_objects.Figure:
-        self._plotter._parity_map(
-            comparison_grid, self._grid_type, axis, selection, index
-        )
+        if self._grid_type == "vector_grid":
+            self._plotter._parity_map_from_vector_grid(
+                comparison_grid, axis, selection, index
+            )
+        else:
+            self._plotter._parity_map_from_grid(comparison_grid, axis, selection, index)
         parity_map = self._create_plot()
 
         return parity_map
@@ -126,13 +134,19 @@ class Plotter2D:
     def parity_contour(
         self, comparison_grid: Grid, axis: int, selection="depth_average", index=None
     ) -> plotly.graph_objects.Figure:
-        self._plotter._parity_contour(
-            comparison_grid, self._grid_type, axis, selection, index
-        )
+        if self._grid_type == "vector_grid":
+            self._plotter._parity_contour_from_vector_grid(
+                comparison_grid, axis, selection, index
+            )
+        else:
+            self._plotter._parity_contour_from_grid(
+                comparison_grid, axis, selection, index
+            )
         parity_contour = self._create_plot()
 
         return parity_contour
 
+    # TODO consider forcing axes to be equal
     def _create_plot(self) -> plotly.graph_objects.Figure:
         """
         Converts generated JSON string into Plotly figure.

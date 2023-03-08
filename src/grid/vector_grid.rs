@@ -15,8 +15,7 @@ pub struct VectorGrid {
 impl VectorGrid {
     pub fn new(grid: Box<dyn GridFunctions3D>) -> Self {
         let cyl_grid = if grid.is_cylindrical() {
-            grid
-                .as_any()
+            grid.as_any()
                 .downcast_ref::<CylindricalGrid3D>()
                 .unwrap()
                 .clone()

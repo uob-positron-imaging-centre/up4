@@ -116,7 +116,7 @@ impl PyGrid {
                 [limit[4], limit[5]],
             ]),
         ));
-        
+
         PyGrid {
             grid, //Box::new(grid),
         }
@@ -174,7 +174,7 @@ impl PyGrid {
             ]),
             mode,
         ));
-        
+
         PyGrid {
             grid, //Box::new(grid),
         }

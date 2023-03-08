@@ -293,7 +293,6 @@
 <a href="#293" id="293">293</a>
 <a href="#294" id="294">294</a>
 <a href="#295" id="295">295</a>
-<a href="#296" id="296">296</a>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{print_debug, setup_bar};
 
 <span class="kw">use </span><span class="kw">super</span>::check_signals;
@@ -514,7 +513,6 @@
     pos_old: f64,
     pos_new: f64,
 ) -&gt; f64 {
-    
     pos_old + ((pos_new - pos_old) / (time_new - time_old)) * (time_current - time_old)
 }
 
@@ -564,7 +562,7 @@
     <span class="kw">for </span>(i, index) <span class="kw">in </span>indices.into_iter().enumerate() {
         new_data.row_mut(i).assign(<span class="kw-2">&amp;</span>data.row(index));
     }
-    
+
     new_data
 }
 

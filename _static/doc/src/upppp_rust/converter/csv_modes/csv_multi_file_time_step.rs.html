@@ -346,6 +346,9 @@
 <a href="#346" id="346">346</a>
 <a href="#347" id="347">347</a>
 <a href="#348" id="348">348</a>
+<a href="#349" id="349">349</a>
+<a href="#350" id="350">350</a>
+<a href="#351" id="351">351</a>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
     check_signals,
     converter::convertertools::{make_sortlist, sort_by_array, sort_by_column},
@@ -468,29 +471,30 @@
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_id)
             .create(<span class="string">&quot;id&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;id\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;id\&quot; in file {}&quot;</span>, filename));
         <span class="comment">//TODO: add a dict to that to read in other columns!
         </span><span class="kw">let </span>builder = group.new_dataset_builder();
         <span class="kw">let </span>zero_array = <span class="macro">vec!</span>[<span class="number">0.0</span>; particle_id.len()];
         builder
             .with_data(<span class="kw-2">&amp;</span>zero_array)
             .create(<span class="string">&quot;radius&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>, filename));
 
         <span class="kw">let </span>builder = group.new_dataset_builder();
         builder
             .with_data(<span class="kw-2">&amp;</span>zero_array)
             .create(<span class="string">&quot;ppcloud&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>, filename));
         <span class="kw">let </span>builder = group.new_dataset_builder();
         builder
             .with_data(<span class="kw-2">&amp;</span>zero_array)
             .create(<span class="string">&quot;particletype&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;particletype\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| {
+                <span class="macro">panic!</span>(
+                    <span class="string">&quot;Unable to create dataset \&quot;particletype\&quot; in file {}&quot;</span>,
+                    filename
+                )
+            });
 
         <span class="kw">let </span>particle_velocity: ndarray::Array2&lt;f64&gt; = timestep_data
             .slice(<span class="macro">ndarray::s!</span>[.., <span class="number">5usize</span>..<span class="number">8usize</span>])
@@ -523,8 +527,9 @@
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_velocity)
             .create(<span class="string">&quot;velocity&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;velocity\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| {
+                <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;velocity\&quot; in file {}&quot;</span>, filename)
+            });
         <span class="macro">print_debug!</span>(<span class="string">&quot;New: {:?}&quot;</span>, particle_positions);
         <span class="kw">for </span>pos <span class="kw">in </span>particle_positions.axis_iter(ndarray::Axis(<span class="number">0</span>)) {
             <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="number">3 </span>{
@@ -539,8 +544,9 @@
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_positions)
             .create(<span class="string">&quot;position&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;position\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| {
+                <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;position\&quot; in file {}&quot;</span>, filename)
+            });
         mean_counter += particle_id.len();
         sample_rate = current_time - old_time;
         old_time = current_time;

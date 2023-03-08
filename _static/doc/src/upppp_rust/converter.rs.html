@@ -1040,6 +1040,37 @@
 <a href="#1040" id="1040">1040</a>
 <a href="#1041" id="1041">1041</a>
 <a href="#1042" id="1042">1042</a>
+<a href="#1043" id="1043">1043</a>
+<a href="#1044" id="1044">1044</a>
+<a href="#1045" id="1045">1045</a>
+<a href="#1046" id="1046">1046</a>
+<a href="#1047" id="1047">1047</a>
+<a href="#1048" id="1048">1048</a>
+<a href="#1049" id="1049">1049</a>
+<a href="#1050" id="1050">1050</a>
+<a href="#1051" id="1051">1051</a>
+<a href="#1052" id="1052">1052</a>
+<a href="#1053" id="1053">1053</a>
+<a href="#1054" id="1054">1054</a>
+<a href="#1055" id="1055">1055</a>
+<a href="#1056" id="1056">1056</a>
+<a href="#1057" id="1057">1057</a>
+<a href="#1058" id="1058">1058</a>
+<a href="#1059" id="1059">1059</a>
+<a href="#1060" id="1060">1060</a>
+<a href="#1061" id="1061">1061</a>
+<a href="#1062" id="1062">1062</a>
+<a href="#1063" id="1063">1063</a>
+<a href="#1064" id="1064">1064</a>
+<a href="#1065" id="1065">1065</a>
+<a href="#1066" id="1066">1066</a>
+<a href="#1067" id="1067">1067</a>
+<a href="#1068" id="1068">1068</a>
+<a href="#1069" id="1069">1069</a>
+<a href="#1070" id="1070">1070</a>
+<a href="#1071" id="1071">1071</a>
+<a href="#1072" id="1072">1072</a>
+<a href="#1073" id="1073">1073</a>
 </pre><pre class="rust"><code><span class="doccomment">//! This file provides functionalities to convert data to HDF5 file format
 //!
 //!
@@ -1140,15 +1171,27 @@
         <span class="comment">// Extracting data from filename
         </span><span class="kw">let </span>current_step: i64 = re
             .captures(filename)
-            .unwrap_or_else(|| <span class="macro">panic!</span>(<span class="string">&quot;Unable to match filename {} with filter {}&quot;</span>,
-                filename, filter))
+            .unwrap_or_else(|| {
+                <span class="macro">panic!</span>(
+                    <span class="string">&quot;Unable to match filename {} with filter {}&quot;</span>,
+                    filename, filter
+                )
+            })
             .get(<span class="number">1</span>)
-            .unwrap_or_else(|| <span class="macro">panic!</span>(<span class="string">&quot;Unable collect mfirst match  of filename {} with filter {}&quot;</span>,
-                filename, filter))
+            .unwrap_or_else(|| {
+                <span class="macro">panic!</span>(
+                    <span class="string">&quot;Unable collect mfirst match  of filename {} with filter {}&quot;</span>,
+                    filename, filter
+                )
+            })
             .as_str()
             .parse::&lt;i64&gt;()
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to parse string to i64 from match filename {} with filter {}&quot;</span>,
-                filename, filter));
+            .unwrap_or_else(|<span class="kw">_</span>| {
+                <span class="macro">panic!</span>(
+                    <span class="string">&quot;Unable to parse string to i64 from match filename {} with filter {}&quot;</span>,
+                    filename, filter
+                )
+            });
         <span class="kw">let </span>current_time = current_step <span class="kw">as </span>f64 * timestep;
         <span class="kw">if </span>id == <span class="number">0 </span>{
             time[<span class="number">0</span>] = current_time;
@@ -1181,8 +1224,7 @@
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_id)
             .create(<span class="string">&quot;id&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;id\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;id\&quot; in file {}&quot;</span>, filename));
         <span class="macro">print_debug!</span>(<span class="string">&quot;  Creating radius dataset&quot;</span>);
         <span class="kw">let </span>particle_radius =
             sort_by_array(vtktools::get_field::&lt;f64&gt;(filename, <span class="string">&quot;radius&quot;</span>), <span class="kw-2">&amp;</span>sort_list);
@@ -1190,24 +1232,26 @@
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_radius)
             .create(<span class="string">&quot;radius&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>, filename));
         <span class="macro">print_debug!</span>(<span class="string">&quot;  Creating ppclouds dataset&quot;</span>);
         <span class="kw">let </span>ppclouds = ndarray::Array1::&lt;u64&gt;::ones(particle_radius.len());
         <span class="kw">let </span>builder = <span class="macro">make_dataset_builder!</span>(group);
         builder
             .with_data(<span class="kw-2">&amp;</span>ppclouds)
             .create(<span class="string">&quot;ppcloud&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>, filename));
         <span class="macro">print_debug!</span>(<span class="string">&quot;  Creating type dataset&quot;</span>);
         <span class="kw">let </span>particle_type = sort_by_array(vtktools::get_field::&lt;i64&gt;(filename, <span class="string">&quot;type&quot;</span>), <span class="kw-2">&amp;</span>sort_list);
         <span class="kw">let </span>builder = <span class="macro">make_dataset_builder!</span>(group);
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_type)
             .create(<span class="string">&quot;particletype&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;particletype\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| {
+                <span class="macro">panic!</span>(
+                    <span class="string">&quot;Unable to create dataset \&quot;particletype\&quot; in file {}&quot;</span>,
+                    filename
+                )
+            });
         <span class="macro">print_debug!</span>(<span class="string">&quot;  Creating velocity dataset&quot;</span>);
         <span class="kw">let </span>particle_velocity =
             sort_by_array(vtktools::get_field::&lt;f64&gt;(filename, <span class="string">&quot;v&quot;</span>), <span class="kw-2">&amp;</span>sort_list);
@@ -1237,8 +1281,9 @@
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_velocity)
             .create(<span class="string">&quot;velocity&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;velocity\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| {
+                <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;velocity\&quot; in file {}&quot;</span>, filename)
+            });
         <span class="macro">print_debug!</span>(<span class="string">&quot;  Creating position dataset&quot;</span>);
         <span class="kw">let </span>particle_positions =
             sort_by_array(vtktools::get_positions::&lt;f64&gt;(filename), <span class="kw-2">&amp;</span>sort_list);
@@ -1260,8 +1305,9 @@
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_positions)
             .create(<span class="string">&quot;position&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;position\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| {
+                <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;position\&quot; in file {}&quot;</span>, filename)
+            });
         mean_counter += particle_id.len();
         sample_rate = current_time - old_time;
         old_time = current_time;
@@ -1370,8 +1416,7 @@
         .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to read directory {}&quot;</span>, system_foldername))
         .map(|res| res.map(|e| e.path()))
         .collect::&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="kw">_</span>&gt;, std::io::Error&gt;&gt;()
-        .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to convert files in directory {}&quot;</span>,
-            system_foldername));
+        .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to convert files in directory {}&quot;</span>, system_foldername));
     <span class="kw">let </span><span class="kw-2">mut </span>out_vec: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = Vec::new();
     <span class="kw">for </span>filename_ <span class="kw">in </span>filenames.iter() {
         <span class="kw">let </span>filename = filename_.to_str().unwrap();
@@ -1444,15 +1489,27 @@
         <span class="comment">// Extracting data from filename
         </span><span class="kw">let </span>current_step: i64 = re
             .captures(filename)
-            .unwrap_or_else(|| <span class="macro">panic!</span>(<span class="string">&quot;Unable to match filename {} with filter {}&quot;</span>,
-                filename, filter))
+            .unwrap_or_else(|| {
+                <span class="macro">panic!</span>(
+                    <span class="string">&quot;Unable to match filename {} with filter {}&quot;</span>,
+                    filename, filter
+                )
+            })
             .get(<span class="number">1</span>)
-            .unwrap_or_else(|| <span class="macro">panic!</span>(<span class="string">&quot;Unable collect mfirst match  of filename {} with filter {}&quot;</span>,
-                filename, filter))
+            .unwrap_or_else(|| {
+                <span class="macro">panic!</span>(
+                    <span class="string">&quot;Unable collect mfirst match  of filename {} with filter {}&quot;</span>,
+                    filename, filter
+                )
+            })
             .as_str()
             .parse::&lt;i64&gt;()
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to parse string to i64 from match filename {} with filter {}&quot;</span>,
-                filename, filter));
+            .unwrap_or_else(|<span class="kw">_</span>| {
+                <span class="macro">panic!</span>(
+                    <span class="string">&quot;Unable to parse string to i64 from match filename {} with filter {}&quot;</span>,
+                    filename, filter
+                )
+            });
         <span class="kw">let </span>current_time = current_step <span class="kw">as </span>f64 * timestep;
         <span class="kw">if </span>id == <span class="number">0 </span>{
             time[<span class="number">0</span>] = current_time;
@@ -1485,34 +1542,39 @@
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_id)
             .create(<span class="string">&quot;id&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;ID\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;ID\&quot; in file {}&quot;</span>, filename));
         <span class="macro">print_debug!</span>(<span class="string">&quot;  Creating radius dataset&quot;</span>);
         <span class="kw">let </span>particle_radius =
             sort_by_array(vtutools::get_field::&lt;f64&gt;(filename, <span class="string">&quot;Diameter&quot;</span>), <span class="kw-2">&amp;</span>sort_list)
-            .iter().map(|x| x * <span class="number">0.5</span>).collect::&lt;Vec&lt;f64&gt;&gt;();
+                .iter()
+                .map(|x| x * <span class="number">0.5</span>)
+                .collect::&lt;Vec&lt;f64&gt;&gt;();
         <span class="kw">let </span>builder = <span class="macro">make_dataset_builder!</span>(group);
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_radius)
             .create(<span class="string">&quot;radius&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>, filename));
         <span class="macro">print_debug!</span>(<span class="string">&quot;  Creating ppclouds dataset&quot;</span>);
         <span class="kw">let </span>ppclouds = ndarray::Array1::&lt;u64&gt;::ones(particle_radius.len());
         <span class="kw">let </span>builder = <span class="macro">make_dataset_builder!</span>(group);
         builder
             .with_data(<span class="kw-2">&amp;</span>ppclouds)
             .create(<span class="string">&quot;ppcloud&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;ppcloud\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| {
+                <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;ppcloud\&quot; in file {}&quot;</span>, filename)
+            });
         <span class="macro">print_debug!</span>(<span class="string">&quot;  Creating type dataset&quot;</span>);
         <span class="kw">let </span>particle_type = sort_by_array(vtutools::get_field::&lt;i64&gt;(filename, <span class="string">&quot;Type&quot;</span>), <span class="kw-2">&amp;</span>sort_list);
         <span class="kw">let </span>builder = <span class="macro">make_dataset_builder!</span>(group);
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_type)
             .create(<span class="string">&quot;particletype&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;particletype\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| {
+                <span class="macro">panic!</span>(
+                    <span class="string">&quot;Unable to create dataset \&quot;particletype\&quot; in file {}&quot;</span>,
+                    filename
+                )
+            });
         <span class="macro">print_debug!</span>(<span class="string">&quot;  Creating velocity dataset&quot;</span>);
         <span class="kw">let </span>particle_velocity =
             sort_by_array(vtutools::get_field::&lt;f64&gt;(filename, <span class="string">&quot;Velocity&quot;</span>), <span class="kw-2">&amp;</span>sort_list);
@@ -1542,8 +1604,9 @@
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_velocity)
             .create(<span class="string">&quot;velocity&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;velocity\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| {
+                <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;velocity\&quot; in file {}&quot;</span>, filename)
+            });
         <span class="macro">print_debug!</span>(<span class="string">&quot;  Creating position dataset&quot;</span>);
         <span class="kw">let </span>particle_positions =
             sort_by_array(vtutools::get_positions::&lt;f64&gt;(filename), <span class="kw-2">&amp;</span>sort_list);
@@ -1565,8 +1628,9 @@
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_positions)
             .create(<span class="string">&quot;position&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;position\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| {
+                <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;position\&quot; in file {}&quot;</span>, filename)
+            });
         mean_counter += particle_id.len();
         sample_rate = current_time - old_time;
         old_time = current_time;
@@ -1657,12 +1721,15 @@
         .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to read directory {}&quot;</span>, system_foldername))
         .map(|res| res.map(|e| e.path()))
         .collect::&lt;<span class="prelude-ty">Result</span>&lt;Vec&lt;<span class="kw">_</span>&gt;, std::io::Error&gt;&gt;()
-        .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to convert files in directory {}&quot;</span>,
-            system_foldername));
+        .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to convert files in directory {}&quot;</span>, system_foldername));
     <span class="kw">let </span><span class="kw-2">mut </span>out_vec: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = Vec::new();
     <span class="kw">for </span>filename_ <span class="kw">in </span>filenames.iter() {
         <span class="kw">let </span>filename = filename_.to_str().unwrap();
-        <span class="kw">if </span>filename.ends_with(<span class="string">&quot;.pvtu&quot;</span>) &amp;&amp; !filename.contains(<span class="string">&quot;postprocess&quot;</span>) &amp;&amp; !filename.contains(<span class="string">&quot;boundaries&quot;</span>) &amp;&amp; !filename.contains(<span class="string">&quot;solid&quot;</span>) {
+        <span class="kw">if </span>filename.ends_with(<span class="string">&quot;.pvtu&quot;</span>)
+            &amp;&amp; !filename.contains(<span class="string">&quot;postprocess&quot;</span>)
+            &amp;&amp; !filename.contains(<span class="string">&quot;boundaries&quot;</span>)
+            &amp;&amp; !filename.contains(<span class="string">&quot;solid&quot;</span>)
+        {
             <span class="macro">print_debug!</span>(<span class="string">&quot;\t Found file: {}&quot;</span>, filename);
         } <span class="kw">else </span>{
             <span class="macro">print_debug!</span>(<span class="string">&quot;\t Ignoring file: {}&quot;</span>, filename);
@@ -1817,12 +1884,8 @@
     <span class="kw">let </span><span class="kw-2">mut </span>sample_rate: f64 = <span class="number">0.0</span>;
     <span class="comment">//velocity: [x:[min, mean, max],y:[min,mean,max],z:[min,mean,max]]
     </span><span class="kw">let </span><span class="kw-2">mut </span>velocity: ndarray::Array2&lt;f64&gt; = ndarray::Array2::&lt;f64&gt;::zeros((<span class="number">3</span>, <span class="number">3</span>));
-    velocity
-        .slice_mut(<span class="macro">ndarray::s!</span>[.., <span class="number">0_usize</span>])
-        .fill(f64::MAX);
-    velocity
-        .slice_mut(<span class="macro">ndarray::s!</span>[.., <span class="number">2_usize</span>])
-        .fill(f64::MIN);
+    velocity.slice_mut(<span class="macro">ndarray::s!</span>[.., <span class="number">0_usize</span>]).fill(f64::MAX);
+    velocity.slice_mut(<span class="macro">ndarray::s!</span>[.., <span class="number">2_usize</span>]).fill(f64::MIN);
     <span class="comment">// vel mag = [min,mean,max]
     </span><span class="kw">let </span><span class="kw-2">mut </span>velocity_mag: ndarray::Array1&lt;f64&gt; = ndarray::Array1::&lt;f64&gt;::zeros(<span class="number">3</span>);
     velocity_mag[<span class="number">0</span>] = f64::MAX;
@@ -1933,39 +1996,38 @@
     builder
         .with_data(<span class="kw-2">&amp;</span>particle_id_array)
         .create(<span class="string">&quot;id&quot;</span>)
-        .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;id\&quot; in file {}&quot;</span>,
-            filename));
+        .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;id\&quot; in file {}&quot;</span>, filename));
     <span class="kw">let </span>builder = <span class="macro">make_dataset_builder!</span>(group);
     builder
         .with_data(<span class="kw-2">&amp;</span>particle_radius_array)
         .create(<span class="string">&quot;radius&quot;</span>)
-        .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>,
-            filename));
+        .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>, filename));
     <span class="kw">let </span>builder = <span class="macro">make_dataset_builder!</span>(group);
     builder
         .with_data(<span class="kw-2">&amp;</span>ppclouds_array)
         .create(<span class="string">&quot;ppcloud&quot;</span>)
-        .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>,
-            filename));
+        .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>, filename));
     <span class="kw">let </span>builder = <span class="macro">make_dataset_builder!</span>(group);
     builder
         .with_data(<span class="kw-2">&amp;</span>particle_type_array)
         .create(<span class="string">&quot;particletype&quot;</span>)
-        .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;particletype\&quot; in file {}&quot;</span>,
-            filename));
+        .unwrap_or_else(|<span class="kw">_</span>| {
+            <span class="macro">panic!</span>(
+                <span class="string">&quot;Unable to create dataset \&quot;particletype\&quot; in file {}&quot;</span>,
+                filename
+            )
+        });
 
     <span class="kw">let </span>builder = <span class="macro">make_dataset_builder!</span>(group);
     builder
         .with_data(<span class="kw-2">&amp;</span>vel_array)
         .create(<span class="string">&quot;velocity&quot;</span>)
-        .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;velocity\&quot; in file {}&quot;</span>,
-            filename));
+        .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;velocity\&quot; in file {}&quot;</span>, filename));
     <span class="kw">let </span>builder = <span class="macro">make_dataset_builder!</span>(group);
     builder
         .with_data(<span class="kw-2">&amp;</span>pos_array)
         .create(<span class="string">&quot;position&quot;</span>)
-        .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;position\&quot; in file {}&quot;</span>,
-            filename));
+        .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;position\&quot; in file {}&quot;</span>, filename));
     velocity_mag[<span class="number">1</span>] /= mean_counter <span class="kw">as </span>f64;
     velocity[[<span class="number">0</span>, <span class="number">1</span>]] /= mean_counter <span class="kw">as </span>f64;
     velocity[[<span class="number">1</span>, <span class="number">1</span>]] /= mean_counter <span class="kw">as </span>f64;

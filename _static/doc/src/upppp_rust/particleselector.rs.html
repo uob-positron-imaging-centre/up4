@@ -231,10 +231,10 @@
 <span class="kw">impl </span>Selector <span class="kw">for </span>ParticleSelector {
     <span class="kw">fn </span>is_valid(<span class="kw-2">&amp;</span><span class="self">self</span>, radius: f64, clouds: f64, density: f64, particleid: usize) -&gt; bool {
         <span class="macro">print_debug!</span>(<span class="string">&quot;ParticleSelector: Checking if particle is valid.&quot;</span>);
-               
-        <span class="self">self</span>.is_radius_valid(radius) 
-            &amp;&amp; <span class="self">self</span>.is_cloud_valid(clouds) 
-            &amp;&amp; <span class="self">self</span>.is_density_valid(density) 
+
+        <span class="self">self</span>.is_radius_valid(radius)
+            &amp;&amp; <span class="self">self</span>.is_cloud_valid(clouds)
+            &amp;&amp; <span class="self">self</span>.is_density_valid(density)
             &amp;&amp; <span class="self">self</span>.is_particleid_valid(particleid)
     }
 

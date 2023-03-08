@@ -547,10 +547,6 @@
 <a href="#547" id="547">547</a>
 <a href="#548" id="548">548</a>
 <a href="#549" id="549">549</a>
-<a href="#550" id="550">550</a>
-<a href="#551" id="551">551</a>
-<a href="#552" id="552">552</a>
-<a href="#553" id="553">553</a>
 </pre><pre class="rust"><code><span class="kw">extern crate </span>ndarray;
 <span class="kw">use super</span>::{CellId, Dim, GridFunctions3D, Position, ThreeD};
 <span class="kw">use crate</span>::{print_debug, print_warning};
@@ -1071,15 +1067,11 @@
                             &amp;&amp; index.<span class="number">1 </span>&lt; <span class="self">self</span>.data.shape()[<span class="number">1</span>]
                             &amp;&amp; index.<span class="number">2 </span>&lt; <span class="self">self</span>.data.shape()[<span class="number">2</span>]
                         {
-                            <span class="kw">if </span><span class="self">self</span>.data[[index.<span class="number">0</span>, index.<span class="number">1</span>, index.<span class="number">2</span>]]
-                                &gt; threshold
-                            {
+                            <span class="kw">if </span><span class="self">self</span>.data[[index.<span class="number">0</span>, index.<span class="number">1</span>, index.<span class="number">2</span>]] &gt; threshold {
                                 <span class="kw">continue</span>;
                             }
-                            sum +=
-                                <span class="self">self</span>.data[[index.<span class="number">0</span>, index.<span class="number">1</span>, index.<span class="number">2</span>]];
-                            weight_sum +=
-                                <span class="self">self</span>.weight[[index.<span class="number">0</span>, index.<span class="number">1</span>, index.<span class="number">2</span>]];
+                            sum += <span class="self">self</span>.data[[index.<span class="number">0</span>, index.<span class="number">1</span>, index.<span class="number">2</span>]];
+                            weight_sum += <span class="self">self</span>.weight[[index.<span class="number">0</span>, index.<span class="number">1</span>, index.<span class="number">2</span>]];
                             counter_sum += <span class="number">1.0</span>;
                         }
                     }

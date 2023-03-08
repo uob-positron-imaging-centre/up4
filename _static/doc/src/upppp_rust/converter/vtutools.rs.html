@@ -71,59 +71,51 @@
 <a href="#71" id="71">71</a>
 <a href="#72" id="72">72</a>
 <a href="#73" id="73">73</a>
-<a href="#74" id="74">74</a>
-<a href="#75" id="75">75</a>
-<a href="#76" id="76">76</a>
-<a href="#77" id="77">77</a>
-<a href="#78" id="78">78</a>
 </pre><pre class="rust"><code><span class="kw">use </span>std::path::PathBuf;
 
 <span class="kw">use </span>regex::CaptureMatches;
 <span class="kw">use </span>vtkio::model::<span class="kw-2">*</span>;
 
-<span class="kw">use crate</span>::{vtu, print_debug};
+<span class="kw">use crate</span>::{print_debug, vtu};
 <span class="kw">pub fn </span>get_field&lt;T&gt;(filename: <span class="kw-2">&amp;</span>str, field: <span class="kw-2">&amp;</span>str) -&gt; Vec&lt;T&gt;
 <span class="kw">where
     </span>T: vtkio::model::Scalar,
-{   
+{
     <span class="kw">let </span>filepath = PathBuf::from(filename);
-    <span class="kw">let </span><span class="kw-2">mut </span>vtu_file = Vtk::import(filename).unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Failed to load file: {:?}&quot;</span>, filename));
+    <span class="kw">let </span><span class="kw-2">mut </span>vtu_file =
+        Vtk::import(filename).unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Failed to load file: {:?}&quot;</span>, filename));
     vtu_file.load_all_pieces();
     <span class="kw">let </span>pieces = <span class="kw">if let </span>DataSet::UnstructuredGrid { pieces, .. } = vtu_file.data {
         pieces
     } <span class="kw">else </span>{
         <span class="macro">panic!</span>(<span class="string">&quot;UnstructuredGrid not found.  Wrong vtk data type&quot;</span>);
     };
-    
+
     <span class="macro">print_debug!</span>(<span class="string">&quot;Number of pieces = {}&quot;</span>, pieces.len());
     <span class="macro">print_debug!</span>(<span class="string">&quot;File = {:?}&quot;</span>, filename);
 
-
     <span class="kw">let </span><span class="kw-2">mut </span>output_vector: Vec&lt;T&gt; = Vec::new();
     <span class="kw">for </span>raw_piece <span class="kw">in </span>pieces {
-        <span class="kw">let </span>piece = raw_piece
-            .load_piece_data(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>filepath))
-            .unwrap();
+        <span class="kw">let </span>piece = raw_piece.load_piece_data(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>filepath)).unwrap();
         <span class="kw">let </span>attributes = <span class="kw-2">&amp;</span>piece.data.point;
-        <span class="kw">for </span>attribute <span class="kw">in </span>attributes {
+        <span class="comment">// TODO add escape hatch when attribute is found
+        </span><span class="kw">for </span>attribute <span class="kw">in </span>attributes {
             <span class="kw">if </span>attribute.name() == field {
                 <span class="kw">if let </span>Attribute::DataArray(data_array) = attribute {
                     <span class="macro">print_debug!</span>(<span class="string">&quot;{:?}, {:?}&quot;</span>, attribute.name(), field);
-                
+
                     <span class="kw">let </span><span class="kw-2">mut </span>data = data_array
                         .data
                         .clone()
                         .cast_into::&lt;T&gt;()
                         .expect(<span class="string">&quot;Failed cast&quot;</span>);
                     output_vector.append(<span class="kw-2">&amp;mut </span>data)
-                    
-                } 
+                }
             }
         }
     }
-    
-    output_vector
 
+    output_vector
 }
 
 <span class="kw">pub fn </span>get_positions&lt;T&gt;(filename: <span class="kw-2">&amp;</span>str) -&gt; Vec&lt;T&gt;
@@ -131,27 +123,25 @@
     </span>T: vtkio::model::Scalar,
 {
     <span class="kw">let </span>filepath = PathBuf::from(filename);
-    <span class="kw">let </span><span class="kw-2">mut </span>vtu_file = Vtk::import(filename).unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Failed to load file: {:?}&quot;</span>, filename));
+    <span class="kw">let </span><span class="kw-2">mut </span>vtu_file =
+        Vtk::import(filename).unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Failed to load file: {:?}&quot;</span>, filename));
     vtu_file.load_all_pieces();
     <span class="kw">let </span>pieces = <span class="kw">if let </span>DataSet::UnstructuredGrid { pieces, .. } = vtu_file.data {
         pieces
     } <span class="kw">else </span>{
         <span class="macro">panic!</span>(<span class="string">&quot;UnstructuredGrid not found.  Wrong vtk data type&quot;</span>);
     };
-    
+
     <span class="macro">print_debug!</span>(<span class="string">&quot;Number of pieces = {}&quot;</span>, pieces.len());
     <span class="macro">print_debug!</span>(<span class="string">&quot;File = {:?}&quot;</span>, filename);
 
-
     <span class="kw">let </span><span class="kw-2">mut </span>output_vector: Vec&lt;T&gt; = Vec::new();
     <span class="kw">for </span>raw_piece <span class="kw">in </span>pieces {
-        <span class="kw">let </span>piece = raw_piece
-            .load_piece_data(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>filepath))
-            .unwrap();
+        <span class="kw">let </span>piece = raw_piece.load_piece_data(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span>filepath)).unwrap();
         <span class="kw">let </span><span class="kw-2">mut </span>points = piece.points.cast_into::&lt;T&gt;().expect(<span class="string">&quot;Failed cast&quot;</span>);
         output_vector.append(<span class="kw-2">&amp;mut </span>points)
     }
-    
+
     output_vector
 }
 </code></pre></div>

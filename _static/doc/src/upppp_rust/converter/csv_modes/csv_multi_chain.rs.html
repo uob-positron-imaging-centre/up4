@@ -387,8 +387,6 @@
 <a href="#387" id="387">387</a>
 <a href="#388" id="388">388</a>
 <a href="#389" id="389">389</a>
-<a href="#390" id="390">390</a>
-<a href="#391" id="391">391</a>
 </pre><pre class="rust"><code><span class="kw">use crate</span>::{
     check_signals,
     converter::convertertools::{make_sortlist, sort_by_array},
@@ -514,8 +512,7 @@
                 <span class="kw">if </span>!vel {
                     <span class="macro">panic!</span>(<span class="string">&quot;Interpolation is activated but velocity computation is not. Currently this will lead to a loss of information. Please activate velocity computation or deactivate interpolation.&quot;</span>);
                 }
-                temp_data =
-                    convertertools::interpolate(temp_data, max_duration, max_steps);
+                temp_data = convertertools::interpolate(temp_data, max_duration, max_steps);
             }
             <span class="kw">if </span>vel {
                 <span class="kw">if </span>columns.len() &gt;= <span class="number">5 </span>{
@@ -553,12 +550,8 @@
         .fill(f64::MIN);
     <span class="comment">//velocity: [x:[min, mean, max],y:[min,mean,max],z:[min,mean,max]]
     </span><span class="kw">let </span><span class="kw-2">mut </span>velocity: ndarray::Array2&lt;f64&gt; = ndarray::Array2::&lt;f64&gt;::zeros((<span class="number">3</span>, <span class="number">3</span>));
-    velocity
-        .slice_mut(<span class="macro">ndarray::s!</span>[.., <span class="number">0_usize</span>])
-        .fill(f64::MAX);
-    velocity
-        .slice_mut(<span class="macro">ndarray::s!</span>[.., <span class="number">2_usize</span>])
-        .fill(f64::MIN);
+    velocity.slice_mut(<span class="macro">ndarray::s!</span>[.., <span class="number">0_usize</span>]).fill(f64::MAX);
+    velocity.slice_mut(<span class="macro">ndarray::s!</span>[.., <span class="number">2_usize</span>]).fill(f64::MIN);
     <span class="comment">// vel mag = [min,mean,max]
     </span><span class="kw">let </span><span class="kw-2">mut </span>velocity_mag: ndarray::Array1&lt;f64&gt; = ndarray::Array1::&lt;f64&gt;::zeros(<span class="number">3</span>);
     velocity_mag[<span class="number">0</span>] = f64::MAX;
@@ -689,39 +682,42 @@
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_id_array)
             .create(<span class="string">&quot;id&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;id\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;id\&quot; in file {}&quot;</span>, filename));
         <span class="kw">let </span>builder = group.new_dataset_builder();
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_radius_array)
             .create(<span class="string">&quot;radius&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>, filename));
         <span class="kw">let </span>builder = group.new_dataset_builder();
         builder
             .with_data(<span class="kw-2">&amp;</span>ppclouds_array)
             .create(<span class="string">&quot;ppcloud&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>, filename));
         <span class="kw">let </span>builder = group.new_dataset_builder();
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_type_array)
             .create(<span class="string">&quot;particleid&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;particleid\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| {
+                <span class="macro">panic!</span>(
+                    <span class="string">&quot;Unable to create dataset \&quot;particleid\&quot; in file {}&quot;</span>,
+                    filename
+                )
+            });
 
         <span class="kw">let </span>builder = group.new_dataset_builder();
         builder
             .with_data(<span class="kw-2">&amp;</span>vel_array)
             .create(<span class="string">&quot;velocity&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;velocity\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| {
+                <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;velocity\&quot; in file {}&quot;</span>, filename)
+            });
         <span class="kw">let </span>builder = group.new_dataset_builder();
         builder
             .with_data(<span class="kw-2">&amp;</span>pos_array)
             .create(<span class="string">&quot;position&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;position\&quot; in file {}&quot;</span>,
-                filename));
+            .unwrap_or_else(|<span class="kw">_</span>| {
+                <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;position\&quot; in file {}&quot;</span>, filename)
+            });
         bar.finish();
     }
     velocity_mag[<span class="number">1</span>] /= mean_counter <span class="kw">as </span>f64;

@@ -1,7 +1,5 @@
 //! Create Python bindings for crate.
 
-
-
 use pyo3::prelude::*;
 use pyo3::types::IntoPyDict;
 extern crate ndarray;
@@ -104,15 +102,23 @@ impl PyData {
     ///     Data class.
     #[new]
     fn constructor(filename: &str) -> Self {
-        let file = hdf5::File::open(filename).unwrap_or_else(|_| panic!("Unable to open file {}. Check if file exists.",
-            filename));
+        let file = hdf5::File::open(filename)
+            .unwrap_or_else(|_| panic!("Unable to open file {}. Check if file exists.", filename));
         let hdf5type: i32 = file
             .attr("hdf5_up4_type")
-            .unwrap_or_else(|_| panic!("Can not find attribute \"hdf5_up4_type\" in file {}",
-                filename))
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Can not find attribute \"hdf5_up4_type\" in file {}",
+                    filename
+                )
+            })
             .read_scalar()
-            .unwrap_or_else(|_| panic!("Can not read scalar from attribute \"hdf5_up4_type\" in file {}",
-                filename));
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Can not read scalar from attribute \"hdf5_up4_type\" in file {}",
+                    filename
+                )
+            });
         file.close().expect("Unable to close file");
         let data;
         if hdf5type == 0x1_i32 {
@@ -408,7 +414,7 @@ impl PyData {
                 Some(b) => b,
                 None => panic!("Can not convert PyGrid to Grid1D as "),
             };
-        
+
         // return
         self.data.mean_velocity(selector)
     } //End mean_velocity
@@ -592,7 +598,6 @@ impl PyData {
                 Some(b) => b,
                 None => panic!("Can not convert PyGrid to Grid1D as "),
             };
-        
 
         self.data.circulation_time(selector, axis, position)
     }

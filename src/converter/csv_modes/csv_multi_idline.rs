@@ -16,7 +16,7 @@ use crate::converter::convertertools;
 // Maximum amount of failiures in a row available for a process
 const MAX_FAILS: i64 = 500;
 
-// 
+//
 #[allow(clippy::too_many_arguments)]
 pub fn csv_multi_idline(
     filename: &str,
@@ -134,12 +134,8 @@ pub fn csv_multi_idline(
         .fill(f64::MIN);
     //velocity: [x:[min, mean, max],y:[min,mean,max],z:[min,mean,max]]
     let mut velocity: ndarray::Array2<f64> = ndarray::Array2::<f64>::zeros((3, 3));
-    velocity
-        .slice_mut(ndarray::s![.., 0_usize])
-        .fill(f64::MAX);
-    velocity
-        .slice_mut(ndarray::s![.., 2_usize])
-        .fill(f64::MIN);
+    velocity.slice_mut(ndarray::s![.., 0_usize]).fill(f64::MAX);
+    velocity.slice_mut(ndarray::s![.., 2_usize]).fill(f64::MIN);
     // vel mag = [min,mean,max]
     let mut velocity_mag: ndarray::Array1<f64> = ndarray::Array1::<f64>::zeros(3);
     velocity_mag[0] = f64::MAX;
@@ -271,39 +267,42 @@ pub fn csv_multi_idline(
         builder
             .with_data(&particle_id_array)
             .create("id")
-            .unwrap_or_else(|_| panic!("Unable to create dataset \"id\" in file {}",
-                filename));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"id\" in file {}", filename));
         let builder = group.new_dataset_builder();
         builder
             .with_data(&particle_radius_array)
             .create("radius")
-            .unwrap_or_else(|_| panic!("Unable to create dataset \"radius\" in file {}",
-                filename));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"radius\" in file {}", filename));
         let builder = group.new_dataset_builder();
         builder
             .with_data(&ppclouds_array)
             .create("ppcloud")
-            .unwrap_or_else(|_| panic!("Unable to create dataset \"radius\" in file {}",
-                filename));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"radius\" in file {}", filename));
         let builder = group.new_dataset_builder();
         builder
             .with_data(&particle_type_array)
             .create("particletype")
-            .unwrap_or_else(|_| panic!("Unable to create dataset \"particletype\" in file {}",
-                filename));
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Unable to create dataset \"particletype\" in file {}",
+                    filename
+                )
+            });
 
         let builder = group.new_dataset_builder();
         builder
             .with_data(&vel_array)
             .create("velocity")
-            .unwrap_or_else(|_| panic!("Unable to create dataset \"velocity\" in file {}",
-                filename));
+            .unwrap_or_else(|_| {
+                panic!("Unable to create dataset \"velocity\" in file {}", filename)
+            });
         let builder = group.new_dataset_builder();
         builder
             .with_data(&pos_array)
             .create("position")
-            .unwrap_or_else(|_| panic!("Unable to create dataset \"position\" in file {}",
-                filename));
+            .unwrap_or_else(|_| {
+                panic!("Unable to create dataset \"position\" in file {}", filename)
+            });
     }
     bar.inc(20);
     velocity_mag[1] /= mean_counter as f64;

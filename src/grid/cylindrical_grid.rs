@@ -99,7 +99,7 @@ impl CylindricalGrid3D {
 
         let lim = [
             [0.0, outer_radius],    // radius
-            [-PI, PI],    // omega
+            [-PI, PI],              // omega
             [lim[2][0], lim[2][1]], // height4
         ];
         let rmeanpositions = rpositions
@@ -492,10 +492,8 @@ impl GridFunctions3D for CylindricalGrid3D {
                             && index.1 < self.data.shape()[1]
                             && index.2 < self.data.shape()[2]
                         {
-                            sum +=
-                                self.data[[index.0, index.1, index.2]];
-                            weight_sum +=
-                                self.weight[[index.0, index.1, index.2]];
+                            sum += self.data[[index.0, index.1, index.2]];
+                            weight_sum += self.weight[[index.0, index.1, index.2]];
                             counter_sum += 1.0;
                         }
                     }

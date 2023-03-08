@@ -5,8 +5,10 @@ use itertools::izip;
 use ndarray::{Array1, Array2, Zip};
 use ndarray_stats::QuantileExt;
 use plotly::{
-    common::{ColorBar, ColorScale, ColorScalePalette, Fill, Line, Marker, Mode, MarkerSymbol},
-    Scatter, HeatMap, heat_map::Smoothing, color::NamedColor, Contour, Trace
+    color::NamedColor,
+    common::{ColorBar, ColorScale, ColorScalePalette, Fill, Line, Marker, MarkerSymbol, Mode},
+    heat_map::Smoothing,
+    Contour, HeatMap, Scatter, Trace,
 };
 use std::f64::consts::PI;
 
@@ -21,8 +23,12 @@ struct Arrow {
 }
 
 impl Arrow {
-    fn new(base: (f64, f64), tip: (f64, f64), left_point: (f64, f64), right_point: (f64, f64)) -> Arrow {
-
+    fn new(
+        base: (f64, f64),
+        tip: (f64, f64),
+        left_point: (f64, f64),
+        right_point: (f64, f64),
+    ) -> Arrow {
         Arrow {
             base,
             tip,
@@ -55,16 +61,8 @@ impl QuiverPlot {
         } else {
             grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 {
-            1
-        } else {
-            0
-        };
-        let j = if axis == 0 || axis == 1 {
-            2
-        } else {
-            1
-        };
+        let i = if axis == 0 { 1 } else { 0 };
+        let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let u = grid.data[i].collapse(axis);
         let v = grid.data[j].collapse(axis);
         let mut norm = Array2::zeros(u.dim());
@@ -96,19 +94,11 @@ impl QuiverPlot {
         };
         let y = if axis == 0 || axis == 1 {
             grid.get_zpositions().to_owned()
-        }  else {
+        } else {
             grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 {
-            1
-        } else {
-            0
-        };
-        let j = if axis == 0 || axis == 1 {
-            2
-        } else {
-            1
-        };
+        let i = if axis == 0 { 1 } else { 0 };
+        let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let u = grid.data[i]
             .get_data()
             .to_owned()
@@ -177,18 +167,14 @@ impl QuiverPlot {
         let arrows: Vec<Arrow> =
             izip!(x, y, end_x, end_y, point_1_x, point_1_y, point_2_x, point_2_y)
                 .map(|(x, y, e_x, e_y, p1x, p1y, p2x, p2y)| {
-                    Arrow::new(
-                        (x, y),
-                        (e_x, e_y),
-                        (p1x, p1y),
-                        (p2x, p2y),
-                    )
+                    Arrow::new((x, y), (e_x, e_y), (p1x, p1y), (p2x, p2y))
                 })
                 .collect();
 
         arrows
     }
 
+    // BUG colourbar does not appear
     pub fn create_quiver_traces(&self) -> Vec<Box<Scatter<f64, f64>>> {
         let arrows = self.create_arrows();
         let mut traces = Vec::with_capacity(arrows.len() + 1);
@@ -334,7 +320,6 @@ impl QuiverPlot {
     fn normalise_colour(&self) -> Array2<f64> {
         let min = *self.true_norm.min_skipnan();
         let max = *self.true_norm.max_skipnan();
-        
 
         (&self.true_norm - min) / (max - min)
     }
@@ -364,36 +349,32 @@ impl UnitVectorPlot {
         } else {
             grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 {
-            1
-        } else {
-            0
-        };
-        let j = if axis == 0 || axis == 1 {
-            2
-        } else {
-            1
-        };
+        let i = if axis == 0 { 1 } else { 0 };
+        let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let mut u = grid.data[i].collapse(axis);
         let mut v = grid.data[j].collapse(axis);
-        let mut norm = Array2::zeros(u.dim());
-        Zip::from(&mut norm).and(&u).and(&v).for_each(|n, &u, &v| {
-            *n = f64::hypot(u, v);
-        });
-        let true_norm = norm.clone();
+        let mut true_norm = Array2::zeros(u.dim());
+        Zip::from(&mut true_norm)
+            .and(&u)
+            .and(&v)
+            .for_each(|n, &u, &v| {
+                *n = f64::hypot(u, v);
+            });
+        u /= &true_norm;
+        v /= &true_norm;
+        let norm = Array2::ones(u.dim());
 
-        u /= &norm;
-        v /= &norm;
         let dx = x[1] - x[0];
         let dy = y[1] - y[0];
-        UnitVectorPlot {
+        let plot = UnitVectorPlot {
             x,
             y,
             u,
             v,
             norm,
             true_norm,
-        }.bound_half_node(dx, dy)
+        };
+        plot.bound_half_node(dx, dy)
     }
 
     pub fn from_vector_grid_single_plane(
@@ -409,19 +390,11 @@ impl UnitVectorPlot {
         };
         let y = if axis == 0 || axis == 1 {
             grid.get_zpositions().to_owned()
-        }  else {
+        } else {
             grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 {
-            1
-        } else {
-            0
-        };
-        let j = if axis == 0 || axis == 1 {
-            2
-        } else {
-            1
-        };
+        let i = if axis == 0 { 1 } else { 0 };
+        let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let mut u = grid.data[i]
             .get_data()
             .to_owned()
@@ -430,24 +403,28 @@ impl UnitVectorPlot {
             .get_data()
             .to_owned()
             .index_axis_move(ndarray::Axis(axis), index);
-        let mut norm = Array2::zeros(u.dim());
-        Zip::from(&mut norm).and(&u).and(&v).for_each(|n, &u, &v| {
-            *n = f64::hypot(u, v);
-        });
-        let true_norm = norm.clone();
-        
-        u /= &norm;
-        v /= &norm;
+        let mut true_norm = Array2::zeros(u.dim());
+        Zip::from(&mut true_norm)
+            .and(&u)
+            .and(&v)
+            .for_each(|n, &u, &v| {
+                *n = f64::hypot(u, v);
+            });
+        u /= &true_norm;
+        v /= &true_norm;
+        let norm = Array2::ones(u.dim());
+
         let dx = x[1] - x[0];
         let dy = y[1] - y[0];
-        UnitVectorPlot {
+        let plot = UnitVectorPlot {
             x,
             y,
             u,
             v,
             norm,
             true_norm,
-        }.bound_half_node(dx, dy)
+        };
+        plot.bound_half_node(dx, dy)
     }
 
     // BUG arrowheads are not drawn properly in method from plotly.py
@@ -494,12 +471,7 @@ impl UnitVectorPlot {
         let arrows: Vec<Arrow> =
             izip!(x, y, end_x, end_y, point_1_x, point_1_y, point_2_x, point_2_y)
                 .map(|(x, y, e_x, e_y, p1x, p1y, p2x, p2y)| {
-                    Arrow::new(
-                        (x, y),
-                        (e_x, e_y),
-                        (p1x, p1y),
-                        (p2x, p2y),
-                    )
+                    Arrow::new((x, y), (e_x, e_y), (p1x, p1y), (p2x, p2y))
                 })
                 .collect();
 
@@ -543,7 +515,7 @@ impl UnitVectorPlot {
         let heatmap = HeatMap::new(
             x.into_raw_vec(),
             y.into_raw_vec(),
-            self.true_norm.to_owned().into_raw_vec()
+            self.true_norm.to_owned().into_raw_vec(),
         )
         .zsmooth(Smoothing::False)
         .zmin(*self.true_norm.min_skipnan())
@@ -619,14 +591,18 @@ impl UnitVectorPlot {
 
     pub fn bound_half_node(mut self, dx: f64, dy: f64) -> Self {
         let largest_norm = *self.norm().max_skipnan();
+        println!("{:?}", largest_norm);
+        println!("{:?} {:?}", self.u[[0, 8]], self.v[[0, 8]]);
         self.u *= 0.5 * dx / largest_norm;
         self.v *= 0.5 * dy / largest_norm;
+        println!("{:?} {:?}", self.u[[0, 8]], self.v[[0, 8]]);
         Zip::from(&mut self.norm)
             .and(&self.u)
             .and(&self.v)
             .for_each(|n, &u, &v| {
                 *n = f64::hypot(u, v);
             });
+        println!("{:?} {:?}", self.x[8], self.y[8]);
 
         self
     }
@@ -648,7 +624,6 @@ impl UnitVectorPlot {
     fn normalise_colour(&self) -> Array2<f64> {
         let min = *self.true_norm.min_skipnan();
         let max = *self.true_norm.max_skipnan();
-        
 
         (&self.true_norm - min) / (max - min)
     }
@@ -673,16 +648,8 @@ impl ScalarMap {
         } else {
             grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 {
-            1
-        } else {
-            0
-        };
-        let j = if axis == 0 || axis == 1 {
-            2
-        } else {
-            1
-        };
+        let i = if axis == 0 { 1 } else { 0 };
+        let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let u = grid.data[i].collapse(axis);
         let v = grid.data[j].collapse(axis);
         let mut data = Array2::zeros(u.dim());
@@ -690,8 +657,7 @@ impl ScalarMap {
             *d = f64::hypot(u, v);
         });
 
-        ScalarMap {x,y,data}
-
+        ScalarMap { x, y, data }
     }
 
     pub fn from_vector_grid_single_plane(grid: VectorGrid, axis: usize, index: usize) -> ScalarMap {
@@ -703,19 +669,11 @@ impl ScalarMap {
         };
         let y = if axis == 0 || axis == 1 {
             grid.get_zpositions().to_owned()
-        }  else {
+        } else {
             grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 {
-            1
-        } else {
-            0
-        };
-        let j = if axis == 0 || axis == 1 {
-            2
-        } else {
-            1
-        };
+        let i = if axis == 0 { 1 } else { 0 };
+        let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let u = grid.data[i]
             .get_data()
             .to_owned()
@@ -729,44 +687,48 @@ impl ScalarMap {
             *d = f64::hypot(u, v);
         });
 
-        ScalarMap { x, y, data}
+        ScalarMap { x, y, data }
     }
 
     pub fn from_grid_depth_averaged(grid: Box<dyn GridFunctions3D>, axis: usize) -> ScalarMap {
-    // select yz (0), xz (1) or xy (2) plane
-    let x = if axis == 0 {
-        grid.get_ypositions().to_owned()
-    } else {
-        grid.get_xpositions().to_owned()
-    };
-    let y = if axis == 0 || axis == 1 {
-        grid.get_zpositions().to_owned()
-    }  else {
-        grid.get_ypositions().to_owned()
-    };        
-    let data = grid.collapse(axis);
+        // select yz (0), xz (1) or xy (2) plane
+        let x = if axis == 0 {
+            grid.get_ypositions().to_owned()
+        } else {
+            grid.get_xpositions().to_owned()
+        };
+        let y = if axis == 0 || axis == 1 {
+            grid.get_zpositions().to_owned()
+        } else {
+            grid.get_ypositions().to_owned()
+        };
+        let data = grid.collapse(axis);
 
-    ScalarMap { x, y, data }
+        ScalarMap { x, y, data }
     }
 
-    pub fn from_grid_single_plane(grid: Box<dyn GridFunctions3D>, axis: usize, index: usize) -> ScalarMap {
-    // select yz (0), xz (1) or xy (2) plane
-    let x = if axis == 0 {
-        grid.get_ypositions().to_owned()
-    } else {
-        grid.get_xpositions().to_owned()
-    };
-    let y = if axis == 0 || axis == 1 {
-        grid.get_zpositions().to_owned()
-    }  else {
-        grid.get_ypositions().to_owned()
-    };   
-    let data = grid
-    .get_data()
-    .to_owned()
-    .index_axis_move(ndarray::Axis(axis), index);
+    pub fn from_grid_single_plane(
+        grid: Box<dyn GridFunctions3D>,
+        axis: usize,
+        index: usize,
+    ) -> ScalarMap {
+        // select yz (0), xz (1) or xy (2) plane
+        let x = if axis == 0 {
+            grid.get_ypositions().to_owned()
+        } else {
+            grid.get_xpositions().to_owned()
+        };
+        let y = if axis == 0 || axis == 1 {
+            grid.get_zpositions().to_owned()
+        } else {
+            grid.get_ypositions().to_owned()
+        };
+        let data = grid
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
 
-    ScalarMap { x, y, data }
+        ScalarMap { x, y, data }
     }
 
     pub fn create_scalar_map(&self) -> Vec<Box<HeatMap<f64, f64, f64>>> {
@@ -801,16 +763,8 @@ impl ScalarContour {
         } else {
             grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 {
-            1
-        } else {
-            0
-        };
-        let j = if axis == 0 || axis == 1 {
-            2
-        } else {
-            1
-        };
+        let i = if axis == 0 { 1 } else { 0 };
+        let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let u = grid.data[i].collapse(axis);
         let v = grid.data[j].collapse(axis);
         let mut data = Array2::zeros(u.dim());
@@ -818,11 +772,14 @@ impl ScalarContour {
             *d = f64::hypot(u, v);
         });
 
-        ScalarContour {x,y,data}
-
+        ScalarContour { x, y, data }
     }
 
-    pub fn from_vector_grid_single_plane(grid: VectorGrid, axis: usize, index: usize) -> ScalarContour {
+    pub fn from_vector_grid_single_plane(
+        grid: VectorGrid,
+        axis: usize,
+        index: usize,
+    ) -> ScalarContour {
         // select yz (0), xz (1) or xy (2) plane
         let x = if axis == 0 {
             grid.get_ypositions().to_owned()
@@ -831,19 +788,11 @@ impl ScalarContour {
         };
         let y = if axis == 0 || axis == 1 {
             grid.get_zpositions().to_owned()
-        }  else {
+        } else {
             grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 {
-            1
-        } else {
-            0
-        };
-        let j = if axis == 0 || axis == 1 {
-            2
-        } else {
-            1
-        };
+        let i = if axis == 0 { 1 } else { 0 };
+        let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let u = grid.data[i]
             .get_data()
             .to_owned()
@@ -857,52 +806,61 @@ impl ScalarContour {
             *d = f64::hypot(u, v);
         });
 
-        ScalarContour { x, y, data}
+        ScalarContour { x, y, data }
     }
 
     pub fn from_grid_depth_averaged(grid: Box<dyn GridFunctions3D>, axis: usize) -> ScalarContour {
-    // select yz (0), xz (1) or xy (2) plane
-    let x = if axis == 0 {
-        grid.get_ypositions().to_owned()
-    } else {
-        grid.get_xpositions().to_owned()
-    };
-    let y = if axis == 0 || axis == 1 {
-        grid.get_zpositions().to_owned()
-    }  else {
-        grid.get_ypositions().to_owned()
-    };        
-    let data = grid.collapse(axis);
+        // select yz (0), xz (1) or xy (2) plane
+        let x = if axis == 0 {
+            grid.get_ypositions().to_owned()
+        } else {
+            grid.get_xpositions().to_owned()
+        };
+        let y = if axis == 0 || axis == 1 {
+            grid.get_zpositions().to_owned()
+        } else {
+            grid.get_ypositions().to_owned()
+        };
+        let data = grid.collapse(axis);
 
-    ScalarContour { x, y, data }
+        ScalarContour { x, y, data }
     }
 
-    pub fn from_grid_single_plane(grid: Box<dyn GridFunctions3D>, axis: usize, index: usize) -> ScalarContour {
-    // select yz (0), xz (1) or xy (2) plane
-    let x = if axis == 0 {
-        grid.get_ypositions().to_owned()
-    } else {
-        grid.get_xpositions().to_owned()
-    };
-    let y = if axis == 0 || axis == 1 {
-        grid.get_zpositions().to_owned()
-    }  else {
-        grid.get_ypositions().to_owned()
-    };   
-    let data = grid
-    .get_data()
-    .to_owned()
-    .index_axis_move(ndarray::Axis(axis), index);
+    pub fn from_grid_single_plane(
+        grid: Box<dyn GridFunctions3D>,
+        axis: usize,
+        index: usize,
+    ) -> ScalarContour {
+        // select yz (0), xz (1) or xy (2) plane
+        let x = if axis == 0 {
+            grid.get_ypositions().to_owned()
+        } else {
+            grid.get_xpositions().to_owned()
+        };
+        let y = if axis == 0 || axis == 1 {
+            grid.get_zpositions().to_owned()
+        } else {
+            grid.get_ypositions().to_owned()
+        };
+        let data = grid
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
 
-    ScalarContour { x, y, data }
+        ScalarContour { x, y, data }
     }
 
-    pub fn create_scalar_contour(&self) -> Vec<Box<Contour<f64, f64, f64>>> {
-        let (x, y) = meshgrid(self.x.to_owned(), self.y.to_owned());
+    // TODO use this change on other heatmap and contour plots
+    // TODO consider making z like this anyway in the struct
+    pub fn create_scalar_contour(&self) -> Vec<Box<Contour<Vec<f64>>>> {
+        let mut z: Vec<Vec<f64>> = Vec::new();
+        for row in self.data.to_owned().columns() {
+            z.push(row.to_vec());
+        }
         let contour = Contour::new(
-            x.into_raw_vec(),
-            y.into_raw_vec(),
-            self.data.to_owned().into_raw_vec(),
+            self.x.to_owned().into_raw_vec(),
+            self.y.to_owned().into_raw_vec(),
+            z,
         );
         let trace = vec![contour];
 
@@ -911,21 +869,25 @@ impl ScalarContour {
 }
 
 // TODO we need to tell off users for unequal inputs
+// BUG the plot is drawn wrong
 pub struct ParityPlot {
     reference_data: Vec<f64>,
     comparison_data: Vec<f64>,
     xmin: f64,
     xmax: f64,
     ymin: f64,
-    ymax: f64
+    ymax: f64,
 }
 
 impl ParityPlot {
-    pub fn from_vector_grids(reference_grid: VectorGrid, comparison_grid: VectorGrid) -> ParityPlot {
+    pub fn from_vector_grids(
+        reference_grid: VectorGrid,
+        comparison_grid: VectorGrid,
+    ) -> ParityPlot {
         let capacity = reference_grid.get_data().len() * 3;
         let mut reference_data: Vec<f64> = Vec::with_capacity(capacity);
-        let mut comparison_data: Vec<f64>= Vec::with_capacity(capacity);
-        
+        let mut comparison_data: Vec<f64> = Vec::with_capacity(capacity);
+
         let xmin_reference = *reference_grid.get_data().min_skipnan();
         let xmax_reference = *reference_grid.get_data().max_skipnan();
         let xmin_comparison = *comparison_grid.get_data().min_skipnan();
@@ -940,7 +902,7 @@ impl ParityPlot {
         } else {
             xmin_comparison
         };
-        let xmax = if xmax_reference < xmax_comparison {
+        let xmax = if xmax_reference > xmax_comparison {
             xmax_reference
         } else {
             xmax_comparison
@@ -950,7 +912,7 @@ impl ParityPlot {
         } else {
             ymin_comparison
         };
-        let ymax = if ymax_reference < ymax_comparison {
+        let ymax = if ymax_reference > ymax_comparison {
             ymax_reference
         } else {
             ymax_comparison
@@ -965,10 +927,21 @@ impl ParityPlot {
             }
         }
 
-        ParityPlot { reference_data, comparison_data, xmin, xmax, ymin, ymax }
-    }   
+        ParityPlot {
+            reference_data,
+            comparison_data,
+            xmin,
+            xmax,
+            ymin,
+            ymax,
+        }
+    }
 
-    pub fn from_vector_grids_depth_averaged(reference_grid: VectorGrid, comparison_grid: VectorGrid, axis: usize) -> ParityPlot {      
+    pub fn from_vector_grids_depth_averaged(
+        reference_grid: VectorGrid,
+        comparison_grid: VectorGrid,
+        axis: usize,
+    ) -> ParityPlot {
         let xmin_reference = *reference_grid.get_data().min_skipnan();
         let xmax_reference = *reference_grid.get_data().max_skipnan();
         let xmin_comparison = *comparison_grid.get_data().min_skipnan();
@@ -983,7 +956,7 @@ impl ParityPlot {
         } else {
             xmin_comparison
         };
-        let xmax = if xmax_reference < xmax_comparison {
+        let xmax = if xmax_reference > xmax_comparison {
             xmax_reference
         } else {
             xmax_comparison
@@ -993,22 +966,14 @@ impl ParityPlot {
         } else {
             ymin_comparison
         };
-        let ymax = if ymax_reference < ymax_comparison {
+        let ymax = if ymax_reference > ymax_comparison {
             ymax_reference
         } else {
             ymax_comparison
         };
 
-        let i = if axis == 0 {
-            1
-        } else {
-            0
-        };
-        let j = if axis == 0 || axis == 1 {
-            2
-        } else {
-            1
-        };
+        let i = if axis == 0 { 1 } else { 0 };
+        let j = if axis == 0 || axis == 1 { 2 } else { 1 };
 
         let ref_u = reference_grid.data[i].collapse(axis);
         let ref_v = reference_grid.data[j].collapse(axis);
@@ -1018,26 +983,38 @@ impl ParityPlot {
 
         let capacity = ref_u.len() + ref_v.len();
         let mut reference_data: Vec<f64> = Vec::with_capacity(capacity);
-        let mut comparison_data: Vec<f64>= Vec::with_capacity(capacity);
+        let mut comparison_data: Vec<f64> = Vec::with_capacity(capacity);
 
-        for el in ref_u{
+        for el in ref_u {
             reference_data.push(el);
         }
-        for el in ref_v{
+        for el in ref_v {
             reference_data.push(el);
         }
 
-        for el in comp_u{
+        for el in comp_u {
             comparison_data.push(el);
         }
-        for el in comp_v{
+        for el in comp_v {
             comparison_data.push(el);
         }
 
-        ParityPlot { reference_data, comparison_data, xmin, xmax, ymin, ymax }
+        ParityPlot {
+            reference_data,
+            comparison_data,
+            xmin,
+            xmax,
+            ymin,
+            ymax,
+        }
     }
 
-    pub fn from_vector_grids_single_plane(reference_grid: VectorGrid, comparison_grid: VectorGrid, axis: usize, index: usize) -> ParityPlot {
+    pub fn from_vector_grids_single_plane(
+        reference_grid: VectorGrid,
+        comparison_grid: VectorGrid,
+        axis: usize,
+        index: usize,
+    ) -> ParityPlot {
         let xmin_reference = *reference_grid.get_data().min_skipnan();
         let xmax_reference = *reference_grid.get_data().max_skipnan();
         let xmin_comparison = *comparison_grid.get_data().min_skipnan();
@@ -1052,7 +1029,7 @@ impl ParityPlot {
         } else {
             xmin_comparison
         };
-        let xmax = if xmax_reference < xmax_comparison {
+        let xmax = if xmax_reference > xmax_comparison {
             xmax_reference
         } else {
             xmax_comparison
@@ -1062,64 +1039,69 @@ impl ParityPlot {
         } else {
             ymin_comparison
         };
-        let ymax = if ymax_reference < ymax_comparison {
+        let ymax = if ymax_reference > ymax_comparison {
             ymax_reference
         } else {
             ymax_comparison
         };
 
-        let i = if axis == 0 {
-            1
-        } else {
-            0
-        };
-        let j = if axis == 0 || axis == 1 {
-            2
-        } else {
-            1
-        };
+        let i = if axis == 0 { 1 } else { 0 };
+        let j = if axis == 0 || axis == 1 { 2 } else { 1 };
 
-        let ref_u = reference_grid.data[i].get_data()
-        .to_owned()
-        .index_axis_move(ndarray::Axis(axis), index);
-        let ref_v = reference_grid.data[j].get_data()
-        .to_owned()
-        .index_axis_move(ndarray::Axis(axis), index);
+        let ref_u = reference_grid.data[i]
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
+        let ref_v = reference_grid.data[j]
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
 
-        let comp_u = comparison_grid.data[i].get_data()
-        .to_owned()
-        .index_axis_move(ndarray::Axis(axis), index);
-        let comp_v = comparison_grid.data[j].get_data()
-        .to_owned()
-        .index_axis_move(ndarray::Axis(axis), index);
+        let comp_u = comparison_grid.data[i]
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
+        let comp_v = comparison_grid.data[j]
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
 
         let capacity = ref_u.len() + ref_v.len();
         let mut reference_data: Vec<f64> = Vec::with_capacity(capacity);
-        let mut comparison_data: Vec<f64>= Vec::with_capacity(capacity);
+        let mut comparison_data: Vec<f64> = Vec::with_capacity(capacity);
 
-        for el in ref_u{
+        for el in ref_u {
             reference_data.push(el);
         }
-        for el in ref_v{
+        for el in ref_v {
             reference_data.push(el);
         }
 
-        for el in comp_u{
+        for el in comp_u {
             comparison_data.push(el);
         }
-        for el in comp_v{
+        for el in comp_v {
             comparison_data.push(el);
         }
 
-        ParityPlot { reference_data, comparison_data, xmin, xmax, ymin, ymax }
-
+        ParityPlot {
+            reference_data,
+            comparison_data,
+            xmin,
+            xmax,
+            ymin,
+            ymax,
+        }
     }
 
-    pub fn from_grids(reference_grid: Box<dyn GridFunctions3D>, comparison_grid: Box<dyn GridFunctions3D> ) -> ParityPlot {
+    pub fn from_grids(
+        reference_grid: Box<dyn GridFunctions3D>,
+        comparison_grid: Box<dyn GridFunctions3D>,
+    ) -> ParityPlot {
         let capacity = reference_grid.get_data().len();
         let mut reference_data: Vec<f64> = Vec::with_capacity(capacity);
-        let mut comparison_data: Vec<f64>= Vec::with_capacity(capacity);
-        
+        let mut comparison_data: Vec<f64> = Vec::with_capacity(capacity);
+
         let xmin_reference = *reference_grid.get_data().min_skipnan();
         let xmax_reference = *reference_grid.get_data().max_skipnan();
         let xmin_comparison = *comparison_grid.get_data().min_skipnan();
@@ -1134,7 +1116,7 @@ impl ParityPlot {
         } else {
             xmin_comparison
         };
-        let xmax = if xmax_reference < xmax_comparison {
+        let xmax = if xmax_reference > xmax_comparison {
             xmax_reference
         } else {
             xmax_comparison
@@ -1144,26 +1126,35 @@ impl ParityPlot {
         } else {
             ymin_comparison
         };
-        let ymax = if ymax_reference < ymax_comparison {
+        let ymax = if ymax_reference > ymax_comparison {
             ymax_reference
         } else {
             ymax_comparison
         };
 
-        for el in reference_grid.get_data(){
+        for el in reference_grid.get_data() {
             reference_data.push(*el);
         }
 
-
-        for el in comparison_grid.get_data(){
+        for el in comparison_grid.get_data() {
             comparison_data.push(*el);
-        }        
+        }
 
-        ParityPlot { reference_data, comparison_data, xmin, xmax, ymin, ymax }
-
+        ParityPlot {
+            reference_data,
+            comparison_data,
+            xmin,
+            xmax,
+            ymin,
+            ymax,
+        }
     }
 
-    pub fn from_grids_depth_averaged(reference_grid: Box<dyn GridFunctions3D>, comparison_grid: Box<dyn GridFunctions3D>, axis: usize ) -> ParityPlot {       
+    pub fn from_grids_depth_averaged(
+        reference_grid: Box<dyn GridFunctions3D>,
+        comparison_grid: Box<dyn GridFunctions3D>,
+        axis: usize,
+    ) -> ParityPlot {
         let xmin_reference = *reference_grid.get_data().min_skipnan();
         let xmax_reference = *reference_grid.get_data().max_skipnan();
         let xmin_comparison = *comparison_grid.get_data().min_skipnan();
@@ -1178,7 +1169,7 @@ impl ParityPlot {
         } else {
             xmin_comparison
         };
-        let xmax = if xmax_reference < xmax_comparison {
+        let xmax = if xmax_reference > xmax_comparison {
             xmax_reference
         } else {
             xmax_comparison
@@ -1188,7 +1179,7 @@ impl ParityPlot {
         } else {
             ymin_comparison
         };
-        let ymax = if ymax_reference < ymax_comparison {
+        let ymax = if ymax_reference > ymax_comparison {
             ymax_reference
         } else {
             ymax_comparison
@@ -1199,21 +1190,32 @@ impl ParityPlot {
 
         let capacity = collapsed_ref.len();
         let mut reference_data: Vec<f64> = Vec::with_capacity(capacity);
-        let mut comparison_data: Vec<f64>= Vec::with_capacity(capacity);
+        let mut comparison_data: Vec<f64> = Vec::with_capacity(capacity);
 
         for el in collapsed_ref {
             reference_data.push(el);
         }
-        
+
         for el in collapsed_comp {
             comparison_data.push(el)
         }
 
-        ParityPlot { reference_data, comparison_data, xmin, xmax, ymin, ymax }
-
+        ParityPlot {
+            reference_data,
+            comparison_data,
+            xmin,
+            xmax,
+            ymin,
+            ymax,
+        }
     }
 
-    pub fn from_grids_single_plane(reference_grid: Box<dyn GridFunctions3D>, comparison_grid: Box<dyn GridFunctions3D> , axis: usize, index: usize) -> ParityPlot {
+    pub fn from_grids_single_plane(
+        reference_grid: Box<dyn GridFunctions3D>,
+        comparison_grid: Box<dyn GridFunctions3D>,
+        axis: usize,
+        index: usize,
+    ) -> ParityPlot {
         let xmin_reference = *reference_grid.get_data().min_skipnan();
         let xmax_reference = *reference_grid.get_data().max_skipnan();
         let xmin_comparison = *comparison_grid.get_data().min_skipnan();
@@ -1228,7 +1230,7 @@ impl ParityPlot {
         } else {
             xmin_comparison
         };
-        let xmax = if xmax_reference < xmax_comparison {
+        let xmax = if xmax_reference > xmax_comparison {
             xmax_reference
         } else {
             xmax_comparison
@@ -1238,22 +1240,24 @@ impl ParityPlot {
         } else {
             ymin_comparison
         };
-        let ymax = if ymax_reference < ymax_comparison {
+        let ymax = if ymax_reference > ymax_comparison {
             ymax_reference
         } else {
             ymax_comparison
         };
 
-        let collapsed_ref = reference_grid.get_data()
-        .to_owned()
-        .index_axis_move(ndarray::Axis(axis), index);
-        let collapsed_comp = comparison_grid.get_data()
-        .to_owned()
-        .index_axis_move(ndarray::Axis(axis), index);
+        let collapsed_ref = reference_grid
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
+        let collapsed_comp = comparison_grid
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
 
         let capacity = collapsed_ref.len();
         let mut reference_data: Vec<f64> = Vec::with_capacity(capacity);
-        let mut comparison_data: Vec<f64>= Vec::with_capacity(capacity);
+        let mut comparison_data: Vec<f64> = Vec::with_capacity(capacity);
 
         for el in collapsed_ref {
             reference_data.push(el);
@@ -1263,9 +1267,14 @@ impl ParityPlot {
             comparison_data.push(el);
         }
 
-        ParityPlot { reference_data, comparison_data, xmin, xmax, ymin, ymax }
-
-
+        ParityPlot {
+            reference_data,
+            comparison_data,
+            xmin,
+            xmax,
+            ymin,
+            ymax,
+        }
     }
 
     pub fn create_parity_scatter(&self) -> Vec<Box<Scatter<f64, f64>>> {
@@ -1283,7 +1292,7 @@ impl ParityPlot {
         .show_legend(false);
 
         let traces = vec![parity_line, parity_scatter];
-        
+
         traces
     }
 }
@@ -1293,11 +1302,15 @@ pub struct ParityMap {
     comparison_data: Array2<f64>,
     x: Array2<f64>,
     y: Array2<f64>,
-    delta: Array2<f64>
+    delta: Array2<f64>,
 }
 
 impl ParityMap {
-    pub fn from_vector_grids_depth_averaged(reference_grid: VectorGrid, comparison_grid: VectorGrid, axis: usize) -> ParityMap {
+    pub fn from_vector_grids_depth_averaged(
+        reference_grid: VectorGrid,
+        comparison_grid: VectorGrid,
+        axis: usize,
+    ) -> ParityMap {
         // select yz (0), xz (1) or xy (2) plane
         let x = if axis == 0 || axis == 1 {
             reference_grid.get_ypositions().to_owned()
@@ -1309,42 +1322,47 @@ impl ParityMap {
         } else {
             reference_grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 {
-            1
-        } else {
-            0
-        };
-        let j = if axis == 0 || axis == 1 {
-            2
-        } else {
-            1
-        };
+        let i = if axis == 0 { 1 } else { 0 };
+        let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let (x, y) = meshgrid(x, y);
-        
+
         let ref_u = reference_grid.data[i].collapse(axis);
         let ref_v = reference_grid.data[j].collapse(axis);
         let mut reference_data = Array2::zeros(ref_u.dim());
-        Zip::from(&mut reference_data).and(&ref_u).and(&ref_v).for_each(|d, &u, &v| {
-            *d = f64::hypot(u, v);
-        });
+        Zip::from(&mut reference_data)
+            .and(&ref_u)
+            .and(&ref_v)
+            .for_each(|d, &u, &v| {
+                *d = f64::hypot(u, v);
+            });
 
         let comp_u = comparison_grid.data[i].collapse(axis);
         let comp_v = comparison_grid.data[j].collapse(axis);
         let mut comparison_data = Array2::zeros(comp_u.dim());
-        Zip::from(&mut comparison_data).and(&comp_u).and(&comp_v).for_each(|d, &u, &v| {
-            *d = f64::hypot(u, v);
-        });
+        Zip::from(&mut comparison_data)
+            .and(&comp_u)
+            .and(&comp_v)
+            .for_each(|d, &u, &v| {
+                *d = f64::hypot(u, v);
+            });
 
         let delta = &reference_data - &comparison_data;
 
-        ParityMap { reference_data, 
-            comparison_data, 
-            x, 
-            y, 
-            delta }
+        ParityMap {
+            reference_data,
+            comparison_data,
+            x,
+            y,
+            delta,
+        }
     }
 
-    pub fn from_vector_grids_single_plane(reference_grid: VectorGrid, comparison_grid: VectorGrid, axis: usize, index: usize) -> ParityMap {
+    pub fn from_vector_grids_single_plane(
+        reference_grid: VectorGrid,
+        comparison_grid: VectorGrid,
+        axis: usize,
+        index: usize,
+    ) -> ParityMap {
         // select yz (0), xz (1) or xy (2) plane
         let x = if axis == 0 || axis == 1 {
             reference_grid.get_ypositions().to_owned()
@@ -1356,50 +1374,58 @@ impl ParityMap {
         } else {
             reference_grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 {
-            1
-        } else {
-            0
-        };
-        let j = if axis == 0 || axis == 1 {
-            2
-        } else {
-            1
-        };
+        let i = if axis == 0 { 1 } else { 0 };
+        let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let (x, y) = meshgrid(x, y);
-        
-        let ref_u = reference_grid.data[i].get_data()
-        .to_owned()
-        .index_axis_move(ndarray::Axis(axis), index);
-        let ref_v = reference_grid.data[j].get_data()
-        .to_owned()
-        .index_axis_move(ndarray::Axis(axis), index);
-        let mut reference_data = Array2::zeros(ref_u.dim());
-        Zip::from(&mut reference_data).and(&ref_u).and(&ref_v).for_each(|d, &u, &v| {
-            *d = f64::hypot(u, v);
-        });
 
-        let comp_u = comparison_grid.data[i].get_data()
-        .to_owned()
-        .index_axis_move(ndarray::Axis(axis), index);
-        let comp_v = comparison_grid.data[j].get_data()
-        .to_owned()
-        .index_axis_move(ndarray::Axis(axis), index);
+        let ref_u = reference_grid.data[i]
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
+        let ref_v = reference_grid.data[j]
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
+        let mut reference_data = Array2::zeros(ref_u.dim());
+        Zip::from(&mut reference_data)
+            .and(&ref_u)
+            .and(&ref_v)
+            .for_each(|d, &u, &v| {
+                *d = f64::hypot(u, v);
+            });
+
+        let comp_u = comparison_grid.data[i]
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
+        let comp_v = comparison_grid.data[j]
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
         let mut comparison_data = Array2::zeros(comp_u.dim());
-        Zip::from(&mut comparison_data).and(&comp_u).and(&comp_v).for_each(|d, &u, &v| {
-            *d = f64::hypot(u, v);
-        });
+        Zip::from(&mut comparison_data)
+            .and(&comp_u)
+            .and(&comp_v)
+            .for_each(|d, &u, &v| {
+                *d = f64::hypot(u, v);
+            });
 
         let delta = &reference_data - &comparison_data;
 
-        ParityMap { reference_data, 
-            comparison_data, 
-            x, 
-            y, 
-            delta }
+        ParityMap {
+            reference_data,
+            comparison_data,
+            x,
+            y,
+            delta,
         }
-    
-    pub fn from_grids_depth_averaged(reference_grid: Box<dyn GridFunctions3D>, comparison_grid: Box<dyn GridFunctions3D>, axis: usize) -> ParityMap {
+    }
+
+    pub fn from_grids_depth_averaged(
+        reference_grid: Box<dyn GridFunctions3D>,
+        comparison_grid: Box<dyn GridFunctions3D>,
+        axis: usize,
+    ) -> ParityMap {
         // select yz (0), xz (1) or xy (2) plane
         let x = if axis == 0 || axis == 1 {
             reference_grid.get_ypositions().to_owned()
@@ -1413,21 +1439,28 @@ impl ParityMap {
         };
 
         let (x, y) = meshgrid(x, y);
-        
+
         let reference_data = reference_grid.collapse(axis);
 
         let comparison_data = comparison_grid.collapse(axis);
 
         let delta = &reference_data - &comparison_data;
 
-        ParityMap { reference_data, 
-            comparison_data, 
-            x, 
-            y, 
-            delta }
+        ParityMap {
+            reference_data,
+            comparison_data,
+            x,
+            y,
+            delta,
+        }
     }
 
-    pub fn from_grids_single_plane(reference_grid: Box<dyn GridFunctions3D>, comparison_grid: Box<dyn GridFunctions3D>, axis: usize, index: usize) -> ParityMap {
+    pub fn from_grids_single_plane(
+        reference_grid: Box<dyn GridFunctions3D>,
+        comparison_grid: Box<dyn GridFunctions3D>,
+        axis: usize,
+        index: usize,
+    ) -> ParityMap {
         // select yz (0), xz (1) or xy (2) plane
         let x = if axis == 0 || axis == 1 {
             reference_grid.get_ypositions().to_owned()
@@ -1441,64 +1474,77 @@ impl ParityMap {
         };
 
         let (x, y) = meshgrid(x, y);
-        
-        let reference_data = reference_grid.get_data()
-        .to_owned()
-        .index_axis_move(ndarray::Axis(axis), index);
 
-        let comparison_data = comparison_grid.get_data()
-        .to_owned()
-        .index_axis_move(ndarray::Axis(axis), index);
+        let reference_data = reference_grid
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
+
+        let comparison_data = comparison_grid
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
 
         let delta = &reference_data - &comparison_data;
 
-        ParityMap { reference_data, 
-            comparison_data, 
-            x, 
-            y, 
-            delta }
+        ParityMap {
+            reference_data,
+            comparison_data,
+            x,
+            y,
+            delta,
+        }
     }
 
     pub fn create_parity_map(&self) -> Vec<Box<HeatMap<f64, f64, f64>>> {
-
         let heatmap = HeatMap::new(
             self.x.to_owned().into_raw_vec(),
             self.y.to_owned().into_raw_vec(),
-            self.delta.to_owned().into_raw_vec()
+            self.delta.to_owned().into_raw_vec(),
         );
         let traces = vec![heatmap];
 
         traces
     }
 
-    pub fn delta_as_percent(self)-> Self {
+    pub fn delta_as_percent(self) -> Self {
         let delta = (&self.reference_data - &self.comparison_data) / &self.reference_data * 100.;
 
-        ParityMap { reference_data: self.reference_data,
+        ParityMap {
+            reference_data: self.reference_data,
             comparison_data: self.comparison_data,
-            x: self.x, 
-            y: self.y, 
-            delta}
+            x: self.x,
+            y: self.y,
+            delta,
+        }
     }
 
     pub fn delta_as_difference(self) -> Self {
         let delta = &self.reference_data - &self.comparison_data;
 
-        ParityMap { reference_data: self.reference_data,
+        ParityMap {
+            reference_data: self.reference_data,
             comparison_data: self.comparison_data,
-            x: self.x, 
-            y: self.y, 
-            delta}
+            x: self.x,
+            y: self.y,
+            delta,
+        }
     }
 
     pub fn delta_as_absolute_difference(self) -> Self {
-        let delta_vec: Vec<f64> = (&self.reference_data - &self.comparison_data).into_iter().map(f64::abs).collect();
-        let delta: Array2<f64> = Array2::from_shape_vec(self.reference_data.raw_dim(), delta_vec).unwrap();
-        ParityMap { reference_data: self.reference_data,
+        let delta_vec: Vec<f64> = (&self.reference_data - &self.comparison_data)
+            .into_iter()
+            .map(f64::abs)
+            .collect();
+        let delta: Array2<f64> =
+            Array2::from_shape_vec(self.reference_data.raw_dim(), delta_vec).unwrap();
+        ParityMap {
+            reference_data: self.reference_data,
             comparison_data: self.comparison_data,
-            x: self.x, 
-            y: self.y, 
-            delta}
+            x: self.x,
+            y: self.y,
+            delta,
+        }
     }
 }
 
@@ -1507,11 +1553,15 @@ pub struct ParityContour {
     comparison_data: Array2<f64>,
     x: Array2<f64>,
     y: Array2<f64>,
-    delta: Array2<f64>
+    delta: Array2<f64>,
 }
 
 impl ParityContour {
-    pub fn from_vector_grids_depth_averaged(reference_grid: VectorGrid, comparison_grid: VectorGrid, axis: usize) -> ParityContour {
+    pub fn from_vector_grids_depth_averaged(
+        reference_grid: VectorGrid,
+        comparison_grid: VectorGrid,
+        axis: usize,
+    ) -> ParityContour {
         // select yz (0), xz (1) or xy (2) plane
         let x = if axis == 0 || axis == 1 {
             reference_grid.get_ypositions().to_owned()
@@ -1523,42 +1573,47 @@ impl ParityContour {
         } else {
             reference_grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 {
-            1
-        } else {
-            0
-        };
-        let j = if axis == 0 || axis == 1 {
-            2
-        } else {
-            1
-        };
+        let i = if axis == 0 { 1 } else { 0 };
+        let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let (x, y) = meshgrid(x, y);
-        
+
         let ref_u = reference_grid.data[i].collapse(axis);
         let ref_v = reference_grid.data[j].collapse(axis);
         let mut reference_data = Array2::zeros(ref_u.dim());
-        Zip::from(&mut reference_data).and(&ref_u).and(&ref_v).for_each(|d, &u, &v| {
-            *d = f64::hypot(u, v);
-        });
+        Zip::from(&mut reference_data)
+            .and(&ref_u)
+            .and(&ref_v)
+            .for_each(|d, &u, &v| {
+                *d = f64::hypot(u, v);
+            });
 
         let comp_u = comparison_grid.data[i].collapse(axis);
         let comp_v = comparison_grid.data[j].collapse(axis);
         let mut comparison_data = Array2::zeros(comp_u.dim());
-        Zip::from(&mut comparison_data).and(&comp_u).and(&comp_v).for_each(|d, &u, &v| {
-            *d = f64::hypot(u, v);
-        });
+        Zip::from(&mut comparison_data)
+            .and(&comp_u)
+            .and(&comp_v)
+            .for_each(|d, &u, &v| {
+                *d = f64::hypot(u, v);
+            });
 
         let delta = &reference_data - &comparison_data;
 
-        ParityContour { reference_data, 
-            comparison_data, 
-            x, 
-            y, 
-            delta }
+        ParityContour {
+            reference_data,
+            comparison_data,
+            x,
+            y,
+            delta,
+        }
     }
 
-    pub fn from_vector_grids_single_plane(reference_grid: VectorGrid, comparison_grid: VectorGrid, axis: usize, index: usize) -> ParityContour {
+    pub fn from_vector_grids_single_plane(
+        reference_grid: VectorGrid,
+        comparison_grid: VectorGrid,
+        axis: usize,
+        index: usize,
+    ) -> ParityContour {
         // select yz (0), xz (1) or xy (2) plane
         let x = if axis == 0 || axis == 1 {
             reference_grid.get_ypositions().to_owned()
@@ -1570,50 +1625,58 @@ impl ParityContour {
         } else {
             reference_grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 {
-            1
-        } else {
-            0
-        };
-        let j = if axis == 0 || axis == 1 {
-            2
-        } else {
-            1
-        };
+        let i = if axis == 0 { 1 } else { 0 };
+        let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let (x, y) = meshgrid(x, y);
-        
-        let ref_u = reference_grid.data[i].get_data()
-        .to_owned()
-        .index_axis_move(ndarray::Axis(axis), index);
-        let ref_v = reference_grid.data[j].get_data()
-        .to_owned()
-        .index_axis_move(ndarray::Axis(axis), index);
-        let mut reference_data = Array2::zeros(ref_u.dim());
-        Zip::from(&mut reference_data).and(&ref_u).and(&ref_v).for_each(|d, &u, &v| {
-            *d = f64::hypot(u, v);
-        });
 
-        let comp_u = comparison_grid.data[i].get_data()
-        .to_owned()
-        .index_axis_move(ndarray::Axis(axis), index);
-        let comp_v = comparison_grid.data[j].get_data()
-        .to_owned()
-        .index_axis_move(ndarray::Axis(axis), index);
+        let ref_u = reference_grid.data[i]
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
+        let ref_v = reference_grid.data[j]
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
+        let mut reference_data = Array2::zeros(ref_u.dim());
+        Zip::from(&mut reference_data)
+            .and(&ref_u)
+            .and(&ref_v)
+            .for_each(|d, &u, &v| {
+                *d = f64::hypot(u, v);
+            });
+
+        let comp_u = comparison_grid.data[i]
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
+        let comp_v = comparison_grid.data[j]
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
         let mut comparison_data = Array2::zeros(comp_u.dim());
-        Zip::from(&mut comparison_data).and(&comp_u).and(&comp_v).for_each(|d, &u, &v| {
-            *d = f64::hypot(u, v);
-        });
+        Zip::from(&mut comparison_data)
+            .and(&comp_u)
+            .and(&comp_v)
+            .for_each(|d, &u, &v| {
+                *d = f64::hypot(u, v);
+            });
 
         let delta = &reference_data - &comparison_data;
 
-        ParityContour { reference_data, 
-            comparison_data, 
-            x, 
-            y, 
-            delta }
+        ParityContour {
+            reference_data,
+            comparison_data,
+            x,
+            y,
+            delta,
         }
-    
-    pub fn from_grids_depth_averaged(reference_grid: Box<dyn GridFunctions3D>, comparison_grid: Box<dyn GridFunctions3D>, axis: usize) -> ParityContour {
+    }
+
+    pub fn from_grids_depth_averaged(
+        reference_grid: Box<dyn GridFunctions3D>,
+        comparison_grid: Box<dyn GridFunctions3D>,
+        axis: usize,
+    ) -> ParityContour {
         // select yz (0), xz (1) or xy (2) plane
         let x = if axis == 0 || axis == 1 {
             reference_grid.get_ypositions().to_owned()
@@ -1627,21 +1690,28 @@ impl ParityContour {
         };
 
         let (x, y) = meshgrid(x, y);
-        
+
         let reference_data = reference_grid.collapse(axis);
 
         let comparison_data = comparison_grid.collapse(axis);
 
         let delta = &reference_data - &comparison_data;
 
-        ParityContour { reference_data, 
-            comparison_data, 
-            x, 
-            y, 
-            delta }
+        ParityContour {
+            reference_data,
+            comparison_data,
+            x,
+            y,
+            delta,
+        }
     }
 
-    pub fn from_grids_single_plane(reference_grid: Box<dyn GridFunctions3D>, comparison_grid: Box<dyn GridFunctions3D>, axis: usize, index: usize) -> ParityContour {
+    pub fn from_grids_single_plane(
+        reference_grid: Box<dyn GridFunctions3D>,
+        comparison_grid: Box<dyn GridFunctions3D>,
+        axis: usize,
+        index: usize,
+    ) -> ParityContour {
         // select yz (0), xz (1) or xy (2) plane
         let x = if axis == 0 || axis == 1 {
             reference_grid.get_ypositions().to_owned()
@@ -1655,63 +1725,76 @@ impl ParityContour {
         };
 
         let (x, y) = meshgrid(x, y);
-        
-        let reference_data = reference_grid.get_data()
-        .to_owned()
-        .index_axis_move(ndarray::Axis(axis), index);
 
-        let comparison_data = comparison_grid.get_data()
-        .to_owned()
-        .index_axis_move(ndarray::Axis(axis), index);
+        let reference_data = reference_grid
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
+
+        let comparison_data = comparison_grid
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
 
         let delta = &reference_data - &comparison_data;
 
-        ParityContour { reference_data, 
-            comparison_data, 
-            x, 
-            y, 
-            delta }
+        ParityContour {
+            reference_data,
+            comparison_data,
+            x,
+            y,
+            delta,
+        }
     }
 
     pub fn create_parity_contour(&self) -> Vec<Box<HeatMap<f64, f64, f64>>> {
-
         let heatmap = HeatMap::new(
             self.x.to_owned().into_raw_vec(),
             self.y.to_owned().into_raw_vec(),
-            self.delta.to_owned().into_raw_vec()
+            self.delta.to_owned().into_raw_vec(),
         );
         let traces = vec![heatmap];
 
         traces
     }
 
-    pub fn delta_as_percent(self)-> Self {
+    pub fn delta_as_percent(self) -> Self {
         let delta = (&self.reference_data - &self.comparison_data) / &self.reference_data * 100.;
 
-        ParityContour { reference_data: self.reference_data,
+        ParityContour {
+            reference_data: self.reference_data,
             comparison_data: self.comparison_data,
-            x: self.x, 
-            y: self.y, 
-            delta}
+            x: self.x,
+            y: self.y,
+            delta,
+        }
     }
 
     pub fn delta_as_difference(self) -> Self {
         let delta = &self.reference_data - &self.comparison_data;
 
-        ParityContour { reference_data: self.reference_data,
+        ParityContour {
+            reference_data: self.reference_data,
             comparison_data: self.comparison_data,
-            x: self.x, 
-            y: self.y, 
-            delta}
+            x: self.x,
+            y: self.y,
+            delta,
+        }
     }
 
     pub fn delta_as_absolute_difference(self) -> Self {
-        let delta_vec: Vec<f64> = (&self.reference_data - &self.comparison_data).into_iter().map(f64::abs).collect();
-        let delta: Array2<f64> = Array2::from_shape_vec(self.reference_data.raw_dim(), delta_vec).unwrap();
-        ParityContour { reference_data: self.reference_data,
+        let delta_vec: Vec<f64> = (&self.reference_data - &self.comparison_data)
+            .into_iter()
+            .map(f64::abs)
+            .collect();
+        let delta: Array2<f64> =
+            Array2::from_shape_vec(self.reference_data.raw_dim(), delta_vec).unwrap();
+        ParityContour {
+            reference_data: self.reference_data,
             comparison_data: self.comparison_data,
-            x: self.x, 
-            y: self.y, 
-            delta}
+            x: self.x,
+            y: self.y,
+            delta,
+        }
     }
 }

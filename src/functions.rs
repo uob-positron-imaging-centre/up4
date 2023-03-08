@@ -103,7 +103,7 @@ pub trait Granular: DataManager {
                 let vx: f64 = velocity[0];
                 let vy: f64 = velocity[1];
                 let vz: f64 = velocity[2];
-                
+
                 (vx.powi(2) + vy.powi(2) + vz.powi(2)).sqrt()
             }
             velocity_calc = velocity_calculation;

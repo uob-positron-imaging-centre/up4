@@ -30,8 +30,6 @@ Indices and tables
    tutorials/index
    api/index
 
-Miscellaneous
-
 .. toctree::
    :maxdepth: 2
 

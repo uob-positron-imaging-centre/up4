@@ -52,7 +52,7 @@ pub fn csv_multi_file_time_sep(
     let mut dimensions: ndarray::Array2<f64> = ndarray::Array2::<f64>::zeros((2, 3)); // [min:[x,y,z],max:[x,y,z]]
     dimensions.slice_mut(ndarray::s![0usize, ..]).fill(f64::MAX);
     dimensions.slice_mut(ndarray::s![1usize, ..]).fill(f64::MIN);
-    let nparticles: u64 = 0;
+    let mut nparticles: u64 = 0;
     let timesteps: usize = filenames.len();
     let mut time: ndarray::Array1<f64> = ndarray::Array1::<f64>::zeros(2);
     let mut time_array = Vec::<f64>::new();
@@ -67,8 +67,8 @@ pub fn csv_multi_file_time_sep(
     velocity_mag[0] = f64::MAX;
     velocity_mag[2] = f64::MIN;
     let mut mean_counter: usize = 0;
+    // for each file
     for (id, filename) in filenames.iter().enumerate() {
-        println!("Reading file: {}", filename);
         let group = hdf5file
             .create_group(&format!("timestep {}", id))
             .expect(&format!("Can not create group timestep {}", id));
@@ -206,6 +206,7 @@ pub fn csv_multi_file_time_sep(
             ));
         step += 1;
         mean_counter += particle_id.len();
+        nparticles = particle_id.len() as u64;
         sample_rate = current_time - old_time;
         old_time = current_time;
         if id % 10 == 0 {

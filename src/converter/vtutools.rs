@@ -11,7 +11,9 @@ where
     let filepath = PathBuf::from(filename);
     let mut vtu_file =
         Vtk::import(filename).unwrap_or_else(|_| panic!("Failed to load file: {:?}", filename));
-    vtu_file.load_all_pieces();
+    vtu_file
+        .load_all_pieces()
+        .unwrap_or_else(|_| panic!("{} load failed", field));
     let pieces = if let DataSet::UnstructuredGrid { pieces, .. } = vtu_file.data {
         pieces
     } else {
@@ -52,7 +54,7 @@ where
     let filepath = PathBuf::from(filename);
     let mut vtu_file =
         Vtk::import(filename).unwrap_or_else(|_| panic!("Failed to load file: {:?}", filename));
-    vtu_file.load_all_pieces();
+    vtu_file.load_all_pieces().expect("Positions load failed");
     let pieces = if let DataSet::UnstructuredGrid { pieces, .. } = vtu_file.data {
         pieces
     } else {

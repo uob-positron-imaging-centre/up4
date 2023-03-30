@@ -61,7 +61,7 @@ impl QuiverPlot {
         } else {
             grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 { 1 } else { 0 };
+        let i = usize::from(axis == 0);
         let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let u = grid.data[i].collapse(axis);
         let v = grid.data[j].collapse(axis);
@@ -97,7 +97,7 @@ impl QuiverPlot {
         } else {
             grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 { 1 } else { 0 };
+        let i = usize::from(axis == 0);
         let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let u = grid.data[i]
             .get_data()
@@ -339,7 +339,7 @@ pub struct UnitVectorPlot {
 impl UnitVectorPlot {
     pub fn from_vector_grid_depth_averaged(grid: VectorGrid, axis: usize) -> UnitVectorPlot {
         // select yz (0), xz (1) or xy (2) plane
-        let x = if axis == 0 || axis == 1 {
+        let x = if axis == 0 {
             grid.get_ypositions().to_owned()
         } else {
             grid.get_xpositions().to_owned()
@@ -349,7 +349,7 @@ impl UnitVectorPlot {
         } else {
             grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 { 1 } else { 0 };
+        let i = usize::from(axis == 0);
         let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let mut u = grid.data[i].collapse(axis);
         let mut v = grid.data[j].collapse(axis);
@@ -393,7 +393,7 @@ impl UnitVectorPlot {
         } else {
             grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 { 1 } else { 0 };
+        let i = usize::from(axis == 0);
         let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let mut u = grid.data[i]
             .get_data()
@@ -591,18 +591,14 @@ impl UnitVectorPlot {
 
     pub fn bound_half_node(mut self, dx: f64, dy: f64) -> Self {
         let largest_norm = *self.norm().max_skipnan();
-        println!("{:?}", largest_norm);
-        println!("{:?} {:?}", self.u[[0, 8]], self.v[[0, 8]]);
         self.u *= 0.5 * dx / largest_norm;
         self.v *= 0.5 * dy / largest_norm;
-        println!("{:?} {:?}", self.u[[0, 8]], self.v[[0, 8]]);
         Zip::from(&mut self.norm)
             .and(&self.u)
             .and(&self.v)
             .for_each(|n, &u, &v| {
                 *n = f64::hypot(u, v);
             });
-        println!("{:?} {:?}", self.x[8], self.y[8]);
 
         self
     }
@@ -638,7 +634,7 @@ pub struct ScalarMap {
 impl ScalarMap {
     pub fn from_vector_grid_depth_averaged(grid: VectorGrid, axis: usize) -> ScalarMap {
         // select yz (0), xz (1) or xy (2) plane
-        let x = if axis == 0 || axis == 1 {
+        let x = if axis == 0 {
             grid.get_ypositions().to_owned()
         } else {
             grid.get_xpositions().to_owned()
@@ -648,7 +644,7 @@ impl ScalarMap {
         } else {
             grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 { 1 } else { 0 };
+        let i = usize::from(axis == 0);
         let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let u = grid.data[i].collapse(axis);
         let v = grid.data[j].collapse(axis);
@@ -672,7 +668,7 @@ impl ScalarMap {
         } else {
             grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 { 1 } else { 0 };
+        let i = usize::from(axis == 0);
         let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let u = grid.data[i]
             .get_data()
@@ -753,7 +749,7 @@ pub struct ScalarContour {
 impl ScalarContour {
     pub fn from_vector_grid_depth_averaged(grid: VectorGrid, axis: usize) -> ScalarContour {
         // select yz (0), xz (1) or xy (2) plane
-        let x = if axis == 0 || axis == 1 {
+        let x = if axis == 0 {
             grid.get_ypositions().to_owned()
         } else {
             grid.get_xpositions().to_owned()
@@ -763,7 +759,7 @@ impl ScalarContour {
         } else {
             grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 { 1 } else { 0 };
+        let i = usize::from(axis == 0);
         let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let u = grid.data[i].collapse(axis);
         let v = grid.data[j].collapse(axis);
@@ -791,7 +787,7 @@ impl ScalarContour {
         } else {
             grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 { 1 } else { 0 };
+        let i = usize::from(axis == 0);
         let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let u = grid.data[i]
             .get_data()
@@ -972,7 +968,7 @@ impl ParityPlot {
             ymax_comparison
         };
 
-        let i = if axis == 0 { 1 } else { 0 };
+        let i = usize::from(axis == 0);
         let j = if axis == 0 || axis == 1 { 2 } else { 1 };
 
         let ref_u = reference_grid.data[i].collapse(axis);
@@ -1045,7 +1041,7 @@ impl ParityPlot {
             ymax_comparison
         };
 
-        let i = if axis == 0 { 1 } else { 0 };
+        let i = usize::from(axis == 0);
         let j = if axis == 0 || axis == 1 { 2 } else { 1 };
 
         let ref_u = reference_grid.data[i]
@@ -1322,7 +1318,7 @@ impl ParityMap {
         } else {
             reference_grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 { 1 } else { 0 };
+        let i = usize::from(axis == 0);
         let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let (x, y) = meshgrid(x, y);
 
@@ -1374,7 +1370,7 @@ impl ParityMap {
         } else {
             reference_grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 { 1 } else { 0 };
+        let i = usize::from(axis == 0);
         let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let (x, y) = meshgrid(x, y);
 
@@ -1573,7 +1569,7 @@ impl ParityContour {
         } else {
             reference_grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 { 1 } else { 0 };
+        let i = usize::from(axis == 0);
         let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let (x, y) = meshgrid(x, y);
 
@@ -1625,7 +1621,7 @@ impl ParityContour {
         } else {
             reference_grid.get_ypositions().to_owned()
         };
-        let i = if axis == 0 { 1 } else { 0 };
+        let i = usize::from(axis == 0);
         let j = if axis == 0 || axis == 1 { 2 } else { 1 };
         let (x, y) = meshgrid(x, y);
 

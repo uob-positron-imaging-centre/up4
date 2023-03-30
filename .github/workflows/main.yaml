@@ -49,16 +49,6 @@ jobs:
       - name: Install mamba
         run:
           conda install -y -c ${{matrix.channel}} mamba
-      - name: Install HDF5 (${{matrix.version}}${{matrix.mpi && '-' || ''}}${{matrix.mpi}})
-        run: |
-          [ "${{matrix.mpi}}" != "" ] && MPICC_PKG=${{matrix.mpi}}-mpicc
-          mamba install -y -c ${{matrix.channel}} 'hdf5=${{matrix.version}}=*${{matrix.mpi}}*' $MPICC_PKG
-      - name: Build Rust version
-        run: |
-          export HDF5_DIR="$CONDA_PREFIX"
-          export PYO3_PYTHON=python3
-          [ "${{runner.os}}" != "Windows" ] && export RUSTFLAGS="-C link-args=-Wl,-rpath,$CONDA_PREFIX/lib"
-          cargo check
       - name: "Install dependencies"
         run: |
           pwd
@@ -70,6 +60,16 @@ jobs:
           python -m pip install --upgrade pip setuptools
           [ "${{runner.os}}" != "Windows" ] && export RUSTFLAGS="-C link-args=-Wl,-rpath,$CONDA_PREFIX/lib"
           mamba install --file requirements_test.txt
+      - name: Install HDF5 (${{matrix.version}}${{matrix.mpi && '-' || ''}}${{matrix.mpi}})
+        run: |
+          [ "${{matrix.mpi}}" != "" ] && MPICC_PKG=${{matrix.mpi}}-mpicc
+          mamba install -y -c ${{matrix.channel}} 'hdf5=${{matrix.version}}=*${{matrix.mpi}}*' $MPICC_PKG
+      - name: Build Rust version
+        run: |
+          export HDF5_DIR="$CONDA_PREFIX"
+          export PYO3_PYTHON=python3
+          [ "${{runner.os}}" != "Windows" ] && export RUSTFLAGS="-C link-args=-Wl,-rpath,$CONDA_PREFIX/lib"
+          cargo check
       - name: Install up4 on python
         run: |
           export HDF5_DIR="$CONDA_PREFIX"

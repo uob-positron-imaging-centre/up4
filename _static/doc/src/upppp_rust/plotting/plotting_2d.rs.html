@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/plotting/plotting_2d.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>plotting_2d.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-6827029ac823cab7.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../static.files/light-ebce58d0a40c3431.css"><link rel="stylesheet" disabled href="../../../static.files/dark-f23faae4a2daf9a6.css"><link rel="stylesheet" disabled href="../../../static.files/ayu-8af5e100b21cd173.css"><script id="default-settings" ></script><script src="../../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../../static.files/source-script-5cf2e01a42cc9858.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-c55e1eb52e1886b4.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><div class="width-limiter"><nav class="sub"><a class="sub-logo-container" href="../../../upppp_rust/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-5ec35bf9ca753509.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/plotting/plotting_2d.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>plotting_2d.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-1f7d512b176f0f72.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-124a1ca42af929b6.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-93196c7a1c3542a8.css" id="mainThemeStyle"><link rel="stylesheet" id="themeStyle" href="../../../static.files/light-4743e13df3dfe8c4.css"><link rel="stylesheet" disabled href="../../../static.files/dark-0e1b889528bd466b.css"><link rel="stylesheet" disabled href="../../../static.files/ayu-65289d5d067c7c66.css"><script id="default-settings" ></script><script src="../../../static.files/storage-d43fa987303ecbbb.js"></script><script defer src="../../../static.files/source-script-ea63cb6500f71309.js"></script><script defer src="../../../source-files.js"></script><script defer src="../../../static.files/main-3367e395607fafc1.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-13285aec31fa243e.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../upppp_rust/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-5ec35bf9ca753509.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1794,10 +1794,6 @@
 <a href="#1794" id="1794">1794</a>
 <a href="#1795" id="1795">1795</a>
 <a href="#1796" id="1796">1796</a>
-<a href="#1797" id="1797">1797</a>
-<a href="#1798" id="1798">1798</a>
-<a href="#1799" id="1799">1799</a>
-<a href="#1800" id="1800">1800</a>
 </pre><pre class="rust"><code><span class="doccomment">//! Submodule for handling 2D plots.
 
 </span><span class="kw">use </span>derive_getters::Getters;
@@ -1861,7 +1857,7 @@
         } <span class="kw">else </span>{
             grid.get_ypositions().to_owned()
         };
-        <span class="kw">let </span>i = <span class="kw">if </span>axis == <span class="number">0 </span>{ <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">0 </span>};
+        <span class="kw">let </span>i = usize::from(axis == <span class="number">0</span>);
         <span class="kw">let </span>j = <span class="kw">if </span>axis == <span class="number">0 </span>|| axis == <span class="number">1 </span>{ <span class="number">2 </span>} <span class="kw">else </span>{ <span class="number">1 </span>};
         <span class="kw">let </span>u = grid.data[i].collapse(axis);
         <span class="kw">let </span>v = grid.data[j].collapse(axis);
@@ -1897,7 +1893,7 @@
         } <span class="kw">else </span>{
             grid.get_ypositions().to_owned()
         };
-        <span class="kw">let </span>i = <span class="kw">if </span>axis == <span class="number">0 </span>{ <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">0 </span>};
+        <span class="kw">let </span>i = usize::from(axis == <span class="number">0</span>);
         <span class="kw">let </span>j = <span class="kw">if </span>axis == <span class="number">0 </span>|| axis == <span class="number">1 </span>{ <span class="number">2 </span>} <span class="kw">else </span>{ <span class="number">1 </span>};
         <span class="kw">let </span>u = grid.data[i]
             .get_data()
@@ -2139,7 +2135,7 @@
 <span class="kw">impl </span>UnitVectorPlot {
     <span class="kw">pub fn </span>from_vector_grid_depth_averaged(grid: VectorGrid, axis: usize) -&gt; UnitVectorPlot {
         <span class="comment">// select yz (0), xz (1) or xy (2) plane
-        </span><span class="kw">let </span>x = <span class="kw">if </span>axis == <span class="number">0 </span>|| axis == <span class="number">1 </span>{
+        </span><span class="kw">let </span>x = <span class="kw">if </span>axis == <span class="number">0 </span>{
             grid.get_ypositions().to_owned()
         } <span class="kw">else </span>{
             grid.get_xpositions().to_owned()
@@ -2149,7 +2145,7 @@
         } <span class="kw">else </span>{
             grid.get_ypositions().to_owned()
         };
-        <span class="kw">let </span>i = <span class="kw">if </span>axis == <span class="number">0 </span>{ <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">0 </span>};
+        <span class="kw">let </span>i = usize::from(axis == <span class="number">0</span>);
         <span class="kw">let </span>j = <span class="kw">if </span>axis == <span class="number">0 </span>|| axis == <span class="number">1 </span>{ <span class="number">2 </span>} <span class="kw">else </span>{ <span class="number">1 </span>};
         <span class="kw">let </span><span class="kw-2">mut </span>u = grid.data[i].collapse(axis);
         <span class="kw">let </span><span class="kw-2">mut </span>v = grid.data[j].collapse(axis);
@@ -2193,7 +2189,7 @@
         } <span class="kw">else </span>{
             grid.get_ypositions().to_owned()
         };
-        <span class="kw">let </span>i = <span class="kw">if </span>axis == <span class="number">0 </span>{ <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">0 </span>};
+        <span class="kw">let </span>i = usize::from(axis == <span class="number">0</span>);
         <span class="kw">let </span>j = <span class="kw">if </span>axis == <span class="number">0 </span>|| axis == <span class="number">1 </span>{ <span class="number">2 </span>} <span class="kw">else </span>{ <span class="number">1 </span>};
         <span class="kw">let </span><span class="kw-2">mut </span>u = grid.data[i]
             .get_data()
@@ -2391,18 +2387,14 @@
 
     <span class="kw">pub fn </span>bound_half_node(<span class="kw-2">mut </span><span class="self">self</span>, dx: f64, dy: f64) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>largest_norm = <span class="kw-2">*</span><span class="self">self</span>.norm().max_skipnan();
-        <span class="macro">println!</span>(<span class="string">&quot;{:?}&quot;</span>, largest_norm);
-        <span class="macro">println!</span>(<span class="string">&quot;{:?} {:?}&quot;</span>, <span class="self">self</span>.u[[<span class="number">0</span>, <span class="number">8</span>]], <span class="self">self</span>.v[[<span class="number">0</span>, <span class="number">8</span>]]);
         <span class="self">self</span>.u <span class="kw-2">*</span>= <span class="number">0.5 </span>* dx / largest_norm;
         <span class="self">self</span>.v <span class="kw-2">*</span>= <span class="number">0.5 </span>* dy / largest_norm;
-        <span class="macro">println!</span>(<span class="string">&quot;{:?} {:?}&quot;</span>, <span class="self">self</span>.u[[<span class="number">0</span>, <span class="number">8</span>]], <span class="self">self</span>.v[[<span class="number">0</span>, <span class="number">8</span>]]);
         Zip::from(<span class="kw-2">&amp;mut </span><span class="self">self</span>.norm)
             .and(<span class="kw-2">&amp;</span><span class="self">self</span>.u)
             .and(<span class="kw-2">&amp;</span><span class="self">self</span>.v)
             .for_each(|n, <span class="kw-2">&amp;</span>u, <span class="kw-2">&amp;</span>v| {
                 <span class="kw-2">*</span>n = f64::hypot(u, v);
             });
-        <span class="macro">println!</span>(<span class="string">&quot;{:?} {:?}&quot;</span>, <span class="self">self</span>.x[<span class="number">8</span>], <span class="self">self</span>.y[<span class="number">8</span>]);
 
         <span class="self">self
     </span>}
@@ -2438,7 +2430,7 @@
 <span class="kw">impl </span>ScalarMap {
     <span class="kw">pub fn </span>from_vector_grid_depth_averaged(grid: VectorGrid, axis: usize) -&gt; ScalarMap {
         <span class="comment">// select yz (0), xz (1) or xy (2) plane
-        </span><span class="kw">let </span>x = <span class="kw">if </span>axis == <span class="number">0 </span>|| axis == <span class="number">1 </span>{
+        </span><span class="kw">let </span>x = <span class="kw">if </span>axis == <span class="number">0 </span>{
             grid.get_ypositions().to_owned()
         } <span class="kw">else </span>{
             grid.get_xpositions().to_owned()
@@ -2448,7 +2440,7 @@
         } <span class="kw">else </span>{
             grid.get_ypositions().to_owned()
         };
-        <span class="kw">let </span>i = <span class="kw">if </span>axis == <span class="number">0 </span>{ <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">0 </span>};
+        <span class="kw">let </span>i = usize::from(axis == <span class="number">0</span>);
         <span class="kw">let </span>j = <span class="kw">if </span>axis == <span class="number">0 </span>|| axis == <span class="number">1 </span>{ <span class="number">2 </span>} <span class="kw">else </span>{ <span class="number">1 </span>};
         <span class="kw">let </span>u = grid.data[i].collapse(axis);
         <span class="kw">let </span>v = grid.data[j].collapse(axis);
@@ -2472,7 +2464,7 @@
         } <span class="kw">else </span>{
             grid.get_ypositions().to_owned()
         };
-        <span class="kw">let </span>i = <span class="kw">if </span>axis == <span class="number">0 </span>{ <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">0 </span>};
+        <span class="kw">let </span>i = usize::from(axis == <span class="number">0</span>);
         <span class="kw">let </span>j = <span class="kw">if </span>axis == <span class="number">0 </span>|| axis == <span class="number">1 </span>{ <span class="number">2 </span>} <span class="kw">else </span>{ <span class="number">1 </span>};
         <span class="kw">let </span>u = grid.data[i]
             .get_data()
@@ -2553,7 +2545,7 @@
 <span class="kw">impl </span>ScalarContour {
     <span class="kw">pub fn </span>from_vector_grid_depth_averaged(grid: VectorGrid, axis: usize) -&gt; ScalarContour {
         <span class="comment">// select yz (0), xz (1) or xy (2) plane
-        </span><span class="kw">let </span>x = <span class="kw">if </span>axis == <span class="number">0 </span>|| axis == <span class="number">1 </span>{
+        </span><span class="kw">let </span>x = <span class="kw">if </span>axis == <span class="number">0 </span>{
             grid.get_ypositions().to_owned()
         } <span class="kw">else </span>{
             grid.get_xpositions().to_owned()
@@ -2563,7 +2555,7 @@
         } <span class="kw">else </span>{
             grid.get_ypositions().to_owned()
         };
-        <span class="kw">let </span>i = <span class="kw">if </span>axis == <span class="number">0 </span>{ <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">0 </span>};
+        <span class="kw">let </span>i = usize::from(axis == <span class="number">0</span>);
         <span class="kw">let </span>j = <span class="kw">if </span>axis == <span class="number">0 </span>|| axis == <span class="number">1 </span>{ <span class="number">2 </span>} <span class="kw">else </span>{ <span class="number">1 </span>};
         <span class="kw">let </span>u = grid.data[i].collapse(axis);
         <span class="kw">let </span>v = grid.data[j].collapse(axis);
@@ -2591,7 +2583,7 @@
         } <span class="kw">else </span>{
             grid.get_ypositions().to_owned()
         };
-        <span class="kw">let </span>i = <span class="kw">if </span>axis == <span class="number">0 </span>{ <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">0 </span>};
+        <span class="kw">let </span>i = usize::from(axis == <span class="number">0</span>);
         <span class="kw">let </span>j = <span class="kw">if </span>axis == <span class="number">0 </span>|| axis == <span class="number">1 </span>{ <span class="number">2 </span>} <span class="kw">else </span>{ <span class="number">1 </span>};
         <span class="kw">let </span>u = grid.data[i]
             .get_data()
@@ -2772,7 +2764,7 @@
             ymax_comparison
         };
 
-        <span class="kw">let </span>i = <span class="kw">if </span>axis == <span class="number">0 </span>{ <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">0 </span>};
+        <span class="kw">let </span>i = usize::from(axis == <span class="number">0</span>);
         <span class="kw">let </span>j = <span class="kw">if </span>axis == <span class="number">0 </span>|| axis == <span class="number">1 </span>{ <span class="number">2 </span>} <span class="kw">else </span>{ <span class="number">1 </span>};
 
         <span class="kw">let </span>ref_u = reference_grid.data[i].collapse(axis);
@@ -2845,7 +2837,7 @@
             ymax_comparison
         };
 
-        <span class="kw">let </span>i = <span class="kw">if </span>axis == <span class="number">0 </span>{ <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">0 </span>};
+        <span class="kw">let </span>i = usize::from(axis == <span class="number">0</span>);
         <span class="kw">let </span>j = <span class="kw">if </span>axis == <span class="number">0 </span>|| axis == <span class="number">1 </span>{ <span class="number">2 </span>} <span class="kw">else </span>{ <span class="number">1 </span>};
 
         <span class="kw">let </span>ref_u = reference_grid.data[i]
@@ -3122,7 +3114,7 @@
         } <span class="kw">else </span>{
             reference_grid.get_ypositions().to_owned()
         };
-        <span class="kw">let </span>i = <span class="kw">if </span>axis == <span class="number">0 </span>{ <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">0 </span>};
+        <span class="kw">let </span>i = usize::from(axis == <span class="number">0</span>);
         <span class="kw">let </span>j = <span class="kw">if </span>axis == <span class="number">0 </span>|| axis == <span class="number">1 </span>{ <span class="number">2 </span>} <span class="kw">else </span>{ <span class="number">1 </span>};
         <span class="kw">let </span>(x, y) = meshgrid(x, y);
 
@@ -3174,7 +3166,7 @@
         } <span class="kw">else </span>{
             reference_grid.get_ypositions().to_owned()
         };
-        <span class="kw">let </span>i = <span class="kw">if </span>axis == <span class="number">0 </span>{ <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">0 </span>};
+        <span class="kw">let </span>i = usize::from(axis == <span class="number">0</span>);
         <span class="kw">let </span>j = <span class="kw">if </span>axis == <span class="number">0 </span>|| axis == <span class="number">1 </span>{ <span class="number">2 </span>} <span class="kw">else </span>{ <span class="number">1 </span>};
         <span class="kw">let </span>(x, y) = meshgrid(x, y);
 
@@ -3373,7 +3365,7 @@
         } <span class="kw">else </span>{
             reference_grid.get_ypositions().to_owned()
         };
-        <span class="kw">let </span>i = <span class="kw">if </span>axis == <span class="number">0 </span>{ <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">0 </span>};
+        <span class="kw">let </span>i = usize::from(axis == <span class="number">0</span>);
         <span class="kw">let </span>j = <span class="kw">if </span>axis == <span class="number">0 </span>|| axis == <span class="number">1 </span>{ <span class="number">2 </span>} <span class="kw">else </span>{ <span class="number">1 </span>};
         <span class="kw">let </span>(x, y) = meshgrid(x, y);
 
@@ -3425,7 +3417,7 @@
         } <span class="kw">else </span>{
             reference_grid.get_ypositions().to_owned()
         };
-        <span class="kw">let </span>i = <span class="kw">if </span>axis == <span class="number">0 </span>{ <span class="number">1 </span>} <span class="kw">else </span>{ <span class="number">0 </span>};
+        <span class="kw">let </span>i = usize::from(axis == <span class="number">0</span>);
         <span class="kw">let </span>j = <span class="kw">if </span>axis == <span class="number">0 </span>|| axis == <span class="number">1 </span>{ <span class="number">2 </span>} <span class="kw">else </span>{ <span class="number">1 </span>};
         <span class="kw">let </span>(x, y) = meshgrid(x, y);
 
@@ -3599,4 +3591,4 @@
     }
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="upppp_rust" data-themes="" data-resource-suffix="" data-rustdoc-version="1.67.1 (d5a82bbd2 2023-02-07)" data-search-js="search-444266647c4dba98.js" data-settings-js="settings-bebeae96e00e4617.js" data-settings-css="settings-af96d9e2fc13e081.css" ></div></body></html>
+</section></main><div id="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="upppp_rust" data-themes="" data-resource-suffix="" data-rustdoc-version="1.68.2 (9eb3afe9e 2023-03-27)" data-search-js="search-98d53477a794af0b.js" data-settings-js="settings-c3c521c753752a1a.js" data-settings-css="settings-08ddfdda51b8ee2e.css" ></div></body></html>

@@ -47,7 +47,7 @@ jobs:
           channels: "conda-forge,anaconda"
           activate-environment: testenv
       - name: Install mamba
-        run:
+        run: |
           # hdf5 version 1.14 not currently supported yet so we restrict hdf5 to 1.13 at most
           echo "hdf5<=1.13" > $CONDA_PREFIX/conda-meta/pinned
           conda install -y -c ${{matrix.channel}} mamba

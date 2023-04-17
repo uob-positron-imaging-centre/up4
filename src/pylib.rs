@@ -511,11 +511,20 @@ impl PyData {
     /// grid : PyGrid
     ///     The grid that defines the region of the system.
     ///
+    /// mode : str
+    ///    The mode in which the granular temperature is calculated.
+    ///    The following modes are available:
+    ///     - 'xyz' (default)
+    ///     - 'x'
+    ///     - 'y'
+    ///     - 'z'
+    ///
     /// Returns
     /// -------
     /// granular_temperature : PyGrid
     ///     The granular temperature of the system.
-    fn granular_temperature<'py>(&mut self, _py: Python<'py>, grid: &PyGrid) -> PyGrid {
+    #[pyo3(signature = (grid, mode = "xyz"))]
+    fn granular_temperature<'py>(&mut self, _py: Python<'py>, grid: &PyGrid, mode: &str) -> PyGrid {
         print_debug!("Starting Granular Temperature function");
         let selector: &ParticleSelector =
             match self.selector.as_any().downcast_ref::<ParticleSelector>() {
@@ -524,7 +533,7 @@ impl PyData {
             };
         let grid = self
             .data
-            .granular_temperature_field(grid.grid.clone(), selector);
+            .granular_temperature_field(grid.grid.clone(), selector, mode);
 
         PyGrid { grid: grid }
     }
@@ -725,6 +734,38 @@ impl PyData {
 
         (msd.into_pyarray(_py), time.into_pyarray(_py))
     }
+
+    /// set the rotation of the system
+    /// The rotation is set by rotating the system around a axis specified by the user.
+    ///
+    /// Parameters
+    /// ----------
+    /// anker : list
+    ///     A point around which the system is rotated.
+    ///
+    /// angle : list
+    ///     The angle of rotation defined in 3 rotations around the x, y and z axis.
+    ///     The rotation is defined in radians.
+    ///
+    /// Returns
+    /// -------
+    /// None
+    // #[pyo3(signature = (anker, angle))]
+    // fn set_rotation(&mut self, anker: Vec<f64>, angle: Vec<f64>) {
+    //     print_debug!("Starting set_rotation function");
+
+    //     if anker.len() != 3 {
+    //         panic!("The anker must be a list of 3 elements");
+    //     }
+    //     if angle.len() != 3 {
+    //         panic!("The angle must be a list of 3 elements");
+    //     }
+    //     for i in 0..3 {
+    //         self.data.set_rotation_angle(angle[i], i);
+    //     }
+
+    //     self.data.set_rotation_anker([anker[0], anker[1], anker[2]]);
+    // }
 
     fn __str__(&self) -> PyResult<String> {
         Ok(self.data.info().expect("Could not get info"))

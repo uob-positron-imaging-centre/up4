@@ -114,7 +114,7 @@ impl GridFunctions3D for CartesianGrid3D {
         self.limits
             .iter()
             .zip(pos.iter())
-            .map(|(lim, pos)| pos > &lim[0] && pos < &lim[1])
+            .map(|(lim, pos)| pos >= &lim[0] && pos <= &lim[1])
             .all(|value| value)
     }
 
@@ -267,6 +267,15 @@ impl GridFunctions3D for CartesianGrid3D {
             Ok(cell_id) => cell_id,
             Err(_) => return,
         };
+        // add bounds check
+        if cell_id[0] >= self.cells[0] || cell_id[1] >= self.cells[1] || cell_id[2] >= self.cells[2]
+        {
+            println!(
+                "Error: cell_id out of bounds: CellId: {:?}, limits: {:?}",
+                cell_id, self.limits
+            );
+            return;
+        }
         self.data[(cell_id[0], cell_id[1], cell_id[2])] += value;
         self.weight[(cell_id[0], cell_id[1], cell_id[2])] += 1.;
     }

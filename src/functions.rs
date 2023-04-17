@@ -117,6 +117,30 @@ pub trait Granular: DataManager {
                 velocity[1]
             }
             velocity_calc = velocity_calculation;
+        } else if mode == "xy" {
+            fn velocity_calculation(velocity: Array1<f64>) -> f64 {
+                let vx: f64 = velocity[0];
+                let vy: f64 = velocity[1];
+                let abs_vel = (vx.powi(2) + vy.powi(2)).sqrt();
+                abs_vel
+            }
+            velocity_calc = velocity_calculation;
+        } else if mode == "xz" {
+            fn velocity_calculation(velocity: Array1<f64>) -> f64 {
+                let vx: f64 = velocity[0];
+                let vz: f64 = velocity[2];
+                let abs_vel = (vx.powi(2) + vz.powi(2)).sqrt();
+                abs_vel
+            }
+            velocity_calc = velocity_calculation;
+        } else if mode == "yz" {
+            fn velocity_calculation(velocity: Array1<f64>) -> f64 {
+                let vy: f64 = velocity[1];
+                let vz: f64 = velocity[2];
+                let abs_vel = (vy.powi(2) + vz.powi(2)).sqrt();
+                abs_vel
+            }
+            velocity_calc = velocity_calculation;
         } else if mode == "z" {
             fn velocity_calculation(velocity: Array1<f64>) -> f64 {
                 velocity[2]
@@ -481,11 +505,16 @@ pub trait Granular: DataManager {
                     continue;
                 }
             };
+            //println!("This timestep is {}", timestep);
+            //println!("Dt is {}", time_for_dispersion);
+            //println!("Next timestep is {}", next_timestep);
+            //println!("Current time is {}", current_time);
 
             //   global_stats.timestep_at_seconds(current_time + time_for_dispersion);
 
             print_debug!("Next timestep is {}", next_timestep);
             let timestep_future = self.get_timestep_buffer(next_timestep, 0);
+            //println!("Next time is {}", *timestep_future.time());
             print_debug!("extracting position");
             let position_future = timestep_future.position();
             print_debug!("Starting particle loop");
@@ -727,6 +756,7 @@ pub trait Granular: DataManager {
         &mut self,
         grid: Box<dyn GridFunctions3D>,
         selector: &ParticleSelector,
+        mode: &str,
     ) -> Box<dyn GridFunctions3D> {
         //read the number of timesteps inside this hdf5file
         let global_stats = self.global_stats();
@@ -811,9 +841,20 @@ pub trait Granular: DataManager {
         let fluct_x = &squared_sum_x - &sum_x * &sum_x / &num_counts;
         let fluct_y = &squared_sum_y - &sum_y * &sum_y / &num_counts;
         let fluct_z = &squared_sum_z - &sum_z * &sum_z / &num_counts;
-        let mut temp = &fluct_x + &fluct_y + &fluct_z;
+        let mut temp;
+
+        if mode == "x" {
+            temp = fluct_x;
+        } else if mode == "y" {
+            temp = fluct_y;
+        } else if mode == "z" {
+            temp = fluct_z;
+        } else if mode == "xyz" {
+            temp = (&fluct_x + &fluct_y + &fluct_z) / 3.0;
+        } else {
+            panic!("Mode {} is not supported", mode);
+        }
         temp /= &num_counts;
-        temp /= 3.0;
         temp.mapv_inplace(|x| x.sqrt());
         grantemp.set_data(temp);
         grantemp.set_weights(num_counts);

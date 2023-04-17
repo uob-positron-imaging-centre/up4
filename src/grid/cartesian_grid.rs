@@ -134,11 +134,11 @@ impl GridFunctions3D for CartesianGrid3D {
             ));
         }
         let cell_idx = ((pos[0] - self.limits[0][0]) / (self.limits[0][1] - self.limits[0][0])
-            * (self.cells[0]) as f64) as usize;
+            * (self.cells[0] - 1) as f64) as usize;
         let cell_idy = ((pos[1] - self.limits[1][0]) / (self.limits[1][1] - self.limits[1][0])
-            * (self.cells[1]) as f64) as usize;
+            * (self.cells[1] - 1) as f64) as usize;
         let cell_idz = ((pos[2] - self.limits[2][0]) / (self.limits[2][1] - self.limits[2][0])
-            * (self.cells[2]) as f64) as usize;
+            * (self.cells[2] - 1) as f64) as usize;
 
         Ok([cell_idx, cell_idy, cell_idz])
     }
@@ -271,8 +271,9 @@ impl GridFunctions3D for CartesianGrid3D {
         if cell_id[0] >= self.cells[0] || cell_id[1] >= self.cells[1] || cell_id[2] >= self.cells[2]
         {
             println!(
-                "Error: cell_id out of bounds: CellId: {:?}, limits: {:?}",
-                cell_id, self.limits
+                "Error: cell_id out of bounds: CellId: {:?} with grid of size: {:?}",
+                cell_id,
+                self.cells()
             );
             return;
         }

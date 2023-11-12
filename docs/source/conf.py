@@ -38,8 +38,6 @@ _HERE = os.path.dirname(__file__)
 _ROOT_DIR = os.path.abspath(os.path.join(_HERE, "../.."))
 _PACKAGE_DIR = os.path.abspath(os.path.join(_HERE, "up4"))
 _SUBPACKAGE_DIR = os.path.abspath(os.path.join(_HERE, "up4/plotting"))
-print(_HERE)
-print(_ROOT_DIR)
 sys.path.insert(0, _ROOT_DIR)
 sys.path.insert(0, _PACKAGE_DIR)
 sys.path.insert(0, _SUBPACKAGE_DIR)
@@ -180,12 +178,15 @@ default_role = "py:obj"
 
 html_theme = "pydata_sphinx_theme"
 
+version_match = version if "dev" in version else "v" + version
+
 html_theme_options = {
     # The URL the GitHub icon points to
     "github_url": "https://github.com/uob-positron-imaging-centre/up4",
     # Show previous and next buttons on each page
     # "show_prev_next": False,
     # Show the navbar and search at the top
+    "navbar_start": ["navbar-logo", "version-switcher"],
     "navbar_end": ["search-field.html", "navbar-icon-links.html", "theme-switcher"],
     # Show `edit this page` button
     "use_edit_page_button": True,
@@ -193,15 +194,19 @@ html_theme_options = {
     # "icon_links": [
     #     {
     #         "name": "PyPI",
-    #         "url": "https://pypi.org/project/pept",
+    #         "url": "https://pypi.org/project/up4",
     #         "icon": "fas fa-cubes",
     #     },
     #     {
     #         "name": "Anaconda",
-    #         "url": "https://anaconda.org/conda-forge/pept",
+    #         "url": "https://anaconda.org/conda-forge/up4",
     #         "icon": "fas fa-arrow-circle-down",
     #     },
     # ],
+    "switcher": dict(
+        json_url = "./_static/version.json",
+        version_match = version_match
+    )
 }
 
 html_context = {
@@ -209,6 +214,7 @@ html_context = {
     "github_repo": "up4",
     "github_version": "uPPPP",
     "default_mode": "auto",
+    "doc_path": "docs",
 }
 
 html_sidebars = {

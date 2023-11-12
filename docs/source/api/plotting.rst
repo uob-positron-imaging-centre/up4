@@ -1,4 +1,4 @@
 Plotting
 ========
 
-.. autoclass:: up4.plotting.P2D
+.. autoclass:: up4.Plotter2D

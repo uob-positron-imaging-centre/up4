@@ -52,35 +52,41 @@ the mean velocity of all  particle passes through that each cell.
 `up4.Grid` also contains the weights of each cell. Meaning that it stores
 the number of particles that crossed the cell. These weights are accessible using
 the  `up4.Grid.weights_to_numpy` method.
-`up4.Grid` implements a crude plotting function that allows fast but
-nonflexible visualisation.
+
+`up4.Grid` also implements a crude plotting function that allows fast but
+nonflexible visualisation, for instance to quickly assess if the cell size is adequate.
 This plotting function generates a depth-averaged 2D `Plotly <https://plotly.com/>`_
-figure of the field and is not editable. Simply provide the axis along which the
-depth averaging should take place to the function:
+figure of the field and is not editable. The methods of `up4.Plotter2D` return fully
+customisable figures, for presenting results calculated by ``up4``. 
+
+Simply provide the axis along which the depth averaging should take place to the 
+plotting method:
 
 .. code-block:: python
 
     field.plot(0) # plot x-axis
 
 
-To accurately visualize 2D fields there are two possibilities: Slices and depth averaged representations.
-
-Slices are simple 2D representations of the 3D field at a given position along a given axis:
+To accurately visualize 2D fields there are two possibilities: slices and depth-averaged 
+representations. Slices are simply the plane perpendicular to an axis, at a given
+location along it.
 
 .. code-block:: python
 
     slice_x_axis = field.slice(0, 20) # slice the 3D array at the 20st cell index along x-axis
 
 alternatively, one can slice the field at a given position:
+.. // TODO give a bit more detail on how it decides which cells are returned
 
 .. code-block:: python
 
     slice_x_axis = field.slice_pos(0, 101.5) # slice the 3D array at x = 101.5 mm
 
 
-Depth-averaging is achieved by calculating the accurate mean along each axis.
-The `up4.Grid.collapse` function uses its internal weights for each cell to accurately
-determine the mean without loss of information.
+Depth-averaging is achieved by calculating the weighted mean along each axis.
+The `up4.Grid.collapse` function uses its internal weights for each cell to fairly weight
+the contributions of each cell to the average; cells where few particles cross will have
+less of a contribution to the mean quantity than those will numerous particles.
 
 .. code-block:: python
 
@@ -88,10 +94,7 @@ determine the mean without loss of information.
 
 one can also generate a 1D representation of the system by collapsing two dimensions:
 
-
-
 .. code-block:: python
 
     averaged_y_z_axis = field.collapse_two(1,2) # depth averaging along x and y axis
-
 

@@ -1,3 +1,13 @@
+#!/usr/bin/env python
+# -*-coding:utf-8 -*-
+# File     :   grid.py
+# Time     :   03/04/2023
+# Author   :   Dominik Werner, Daniel Weston
+# Version  :   0.1.0
+# Contact  :   dxw963@bham.ac.uk, dtw545@bham.ac.uk
+# Licence  :   GNU v3.0
+
+from __future__ import annotations
 import numpy as np
 from upppp_rust import RustGrid
 from upppp_rust import Data

@@ -1,0 +1,64 @@
+name: Lint Python
+# TODO test this works using act
+
+on:
+  pull_request:
+    paths:
+      - up4/**
+      - .github/workflows/lint-python.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint-python:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: up4
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python and Conda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          auto-update-conda: true
+          python-version: "3.11"
+          channels: "conda-forge,anaconda"
+          activate-environment: testenv
+      
+      - name: Install mamba
+        run: |
+            # hdf5 version 1.14 not currently supported yet so we restrict hdf5 to 1.13 at most
+            echo "hdf5<=1.13" > $CONDA_PREFIX/conda-meta/pinned
+            conda install -y -c conda-forge mamba
+    
+      - name: Lint Python
+        run: |
+          black --check .
+          blackdoc --check .
+          flake8 .
+
+  lint-rust:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: up4/src
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Rust
+        run: rustup component add rustfmt clippy
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: up4
+
+      - name: Lint Rust
+        run: |
+          cargo fmt --all -- --check
+          cargo clippy -- -D warnings

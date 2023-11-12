@@ -370,7 +370,7 @@ pub fn vtu(
     filenames: Vec<&str>,
     timestep: f64,
     outname: &str,
-    filter: &str, // example r"vtk_(\d+).vtk"
+    filter: &str, // example r"vtk_(\d+).pvtu"
 ) {
     if filenames.is_empty() {
         panic!("No files to convert");

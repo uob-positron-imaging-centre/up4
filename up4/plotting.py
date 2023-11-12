@@ -7,6 +7,7 @@
 # Contact :   dxw963@bham.ac.uk, dtw545@bham.ac.uk
 # Licence :   GNU v3.0
 
+from __future__ import annotations
 from plotly.io import from_json
 import plotly
 from upppp_rust import RustPlotter2D, RustGrid
@@ -14,7 +15,6 @@ from .grid import Grid
 
 
 def save_fig(
-    self,
     fig: plotly.graph_objects.Figure,
     filename: str,
     dpi: int,
@@ -52,7 +52,8 @@ class Plotter2D:
         else:  # TODO be more thorough to please the german
             self._grid_type = "vector_grid"
             self._plotter = RustPlotter2D._from_vector_grid(grid)
-
+    # TODO add docstrings
+    # TODO enable kwargs/ dict of figure properties to be passed to plotly
     def quiver_plot(
         self,
         axis: int,
@@ -65,7 +66,9 @@ class Plotter2D:
         quiver_plot = self._create_plot()
 
         return quiver_plot
-
+    
+    # TODO add docstrings
+    # TODO enable kwargs/ dict of figure properties to be passed to plotly
     def unit_vector_plot(
         self,
         axis: int,
@@ -81,6 +84,8 @@ class Plotter2D:
 
         return unit_vector_plot
 
+    # TODO add docstrings
+    # TODO enable kwargs/ dict of figure properties to be passed to plotly
     def scalar_map(
         self,
         axis: int,
@@ -92,6 +97,8 @@ class Plotter2D:
 
         return scalar_map_plot
 
+    # TODO add docstrings
+    # TODO enable kwargs/ dict of figure properties to be passed to plotly
     def scalar_contour(
         self,
         axis: int,
@@ -103,6 +110,8 @@ class Plotter2D:
 
         return scalar_contour_plot
 
+    # TODO add docstrings
+    # TODO enable kwargs/ dict of figure properties to be passed to plotly
     def parity_plot(
         self, comparison_grid: Grid, axis: int, selection="depth_average", index=None
     ) -> plotly.graph_objects.Figure:
@@ -118,6 +127,8 @@ class Plotter2D:
 
         return parity_plot
 
+    # TODO add docstrings
+    # TODO enable kwargs/ dict of figure properties to be passed to plotly
     def parity_map(
         self, comparison_grid: Grid, axis: int, selection="depth_average", index=None
     ) -> plotly.graph_objects.Figure:
@@ -131,6 +142,8 @@ class Plotter2D:
 
         return parity_map
 
+    # TODO add docstrings
+    # TODO enable kwargs/ dict of figure properties to be passed to plotly
     def parity_contour(
         self, comparison_grid: Grid, axis: int, selection="depth_average", index=None
     ) -> plotly.graph_objects.Figure:
@@ -147,6 +160,7 @@ class Plotter2D:
         return parity_contour
 
     # TODO consider forcing axes to be equal
+    # TODO enable kwargs/ dict of figure properties to be passed to plotly
     def _create_plot(self) -> plotly.graph_objects.Figure:
         """
         Converts generated JSON string into Plotly figure.

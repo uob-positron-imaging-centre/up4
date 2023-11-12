@@ -25,60 +25,50 @@ pub mod types;
 use std::time::Instant;
 
 use plotly::{HeatMap, Plot};
+use plotly::traces::heat_map;
 
-/*
 fn main() {
+    let z = vec![vec![1, 20, 30], vec![20, 1, 60], vec![30, 60, 1]];
+    let trace = HeatMap::new_z(z).zsmooth(heat_map::Smoothing::False);
+    let mut plot = Plot::new();
+    plot.add_trace(trace);
+    let show = true;
+    plot.write_html("test.html");
 
-    println!("Welcome to uPPPP!\nTesting current version...!\nTesting PData");
-    let now = Instant::now();
-    let mut pdata = PData::new("TEST/HSM_Glass_2l_250.hdf5");
-    pdata.stats();
-
-    pdata.test();
-    println!("End time: {}", now.elapsed().as_millis());
-    println!("Check completed. No errors found in PData!\n\nChecking TData");//lol
-    let now = Instant::now();
-    let mut tdata = TData::new("TEST/drum.hdf5");
-    tdata.stats();
-
-    tdata.test();
-    println!("End time: {}", now.elapsed().as_millis());
-    println!("Check completed. No errors found in TData!");
-
-
-} */
-#[allow(dead_code, unused_imports, unused_variables, unreachable_code)]
-fn main() {
-    converter::vtu_from_folder(
-        "/home/dan/radioactive-mill/post",
-        1e-5,
-        "lethe.hdf5",
-        r"(\d+).pvtu",
-    );
-    let now = Instant::now();
-    let mut pdata = TData::new("lethe.hdf5");
-    let stats = pdata.global_stats();
-    let dim = stats.dimensions();
-    let grid = Box::new(CartesianGrid3D::new(
-        //[800, 800, 800],
-        [10, 10, 10],
-        Dim::ThreeD([
-            [dim[[0, 0]], dim[[1, 0]]],
-            [dim[[0, 1]], dim[[1, 1]]],
-            [dim[[0, 2]], dim[[1, 2]]],
-        ]),
-    ));
-    let selector = ParticleSelector::default();
-    let disp = pdata.velocityfield(grid.clone(), &selector, "x", 0.0, 10000.0);
-    println!("Disp: {}", disp);
-    let disp = pdata.numberfield(grid.clone(), &selector);
-    println!("Disp: {}", disp);
-    let disp = pdata.vectorfield(grid, &selector);
-    println!("Disp: {}", disp);
-
-    println!("time needed: {} milliseconds", now.elapsed().as_millis());
-    let _y = 0;
-
-    //plot.show();
-    //println!("End time: {}", now.elapsed().as_millis());
 }
+
+// #[allow(dead_code, unused_imports, unused_variables, unreachable_code)]
+// fn main() {
+//     converter::vtu_from_folder(
+//         "/home/dan/radioactive-mill/post",
+//         1e-5,
+//         "lethe.hdf5",
+//         r"(\d+).pvtu",
+//     );
+//     let now = Instant::now();
+//     let mut pdata = TData::new("lethe.hdf5");
+//     let stats = pdata.global_stats();
+//     let dim = stats.dimensions();
+//     let grid = Box::new(CartesianGrid3D::new(
+//         //[800, 800, 800],
+//         [10, 10, 10],
+//         Dim::ThreeD([
+//             [dim[[0, 0]], dim[[1, 0]]],
+//             [dim[[0, 1]], dim[[1, 1]]],
+//             [dim[[0, 2]], dim[[1, 2]]],
+//         ]),
+//     ));
+//     let selector = ParticleSelector::default();
+//     let disp = pdata.velocityfield(grid.clone(), &selector, "x", 0.0, 10000.0);
+//     println!("Disp: {}", disp);
+//     let disp = pdata.numberfield(grid.clone(), &selector);
+//     println!("Disp: {}", disp);
+//     let disp = pdata.vectorfield(grid, &selector);
+//     println!("Disp: {}", disp);
+
+//     println!("time needed: {} milliseconds", now.elapsed().as_millis());
+//     let _y = 0;
+
+//     //plot.show();
+//     //println!("End time: {}", now.elapsed().as_millis());
+// }

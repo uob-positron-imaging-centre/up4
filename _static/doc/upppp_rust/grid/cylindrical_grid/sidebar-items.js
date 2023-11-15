@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["CylindricalGrid3D",""]]};
+window.SIDEBAR_ITEMS = {"struct":["CylindricalGrid3D"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"type":[["CellId",""],["OneD",""],["Position",""],["ThreeD",""],["TwoD",""]]};
+window.SIDEBAR_ITEMS = {"type":["CellId","OneD","Position","ThreeD","TwoD"]};

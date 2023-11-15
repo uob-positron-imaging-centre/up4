@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["PyPlotter2D",""]]};
+window.SIDEBAR_ITEMS = {"struct":["PyPlotter2D"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["csv_multi_file_time_step",""]]};
+window.SIDEBAR_ITEMS = {"fn":["csv_multi_file_time_step"]};

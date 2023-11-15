@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["ParityContour",""],["ParityMap",""],["ParityPlot",""],["QuiverPlot",""],["ScalarContour",""],["ScalarMap",""],["UnitVectorPlot",""]]};
+window.SIDEBAR_ITEMS = {"struct":["ParityContour","ParityMap","ParityPlot","QuiverPlot","ScalarContour","ScalarMap","UnitVectorPlot"]};

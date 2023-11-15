@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["plot","Take traces and plot them"]],"mod":[["colourmap",""],["plotting_2d","Submodule for handling 2D plots."]]};
+window.SIDEBAR_ITEMS = {"fn":["plot"],"mod":["colourmap","plotting_2d"]};

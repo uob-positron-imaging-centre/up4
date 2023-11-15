@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"enum":[["Dim","Provides a generic way to send ranges to nD-Grid struct."]],"mod":[["cartesian_grid",""],["cylindrical_grid",""],["vector_grid",""]],"struct":[["Grid",""]],"trait":[["GridFunctions3D",""]]};
+window.SIDEBAR_ITEMS = {"enum":["Dim"],"mod":["cartesian_grid","cylindrical_grid","vector_grid"],"struct":["Grid"],"trait":["GridFunctions3D"]};

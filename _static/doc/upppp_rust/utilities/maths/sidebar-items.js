@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["flatten_2d","Flattens a 2D array into a 1D array."],["flatten_3d","Flattens a 3D array into a 1D array."],["meshgrid",""],["meshgrid3d",""],["minmax",""]]};
+window.SIDEBAR_ITEMS = {"fn":["flatten_2d","flatten_3d","meshgrid","meshgrid3d","minmax"]};

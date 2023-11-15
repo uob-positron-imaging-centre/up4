@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["TData",""]]};
+window.SIDEBAR_ITEMS = {"struct":["TData"]};

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["ParticleSelector",""]],"trait":[["Selector",""]]};
+window.SIDEBAR_ITEMS = {"struct":["ParticleSelector"],"trait":["Selector"]};

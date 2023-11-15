@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":[["libcomp",""],["libconv","This file provides coupling of functions to convert data to HDF5 file format Functions are taken from base::converter.rs"],["libgrid",""],["libplot","Submodule for export of plotting code to Python."]]};
+window.SIDEBAR_ITEMS = {"mod":["libcomp","libconv","libgrid","libplot"]};

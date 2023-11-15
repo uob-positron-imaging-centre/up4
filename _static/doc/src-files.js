@@ -1,0 +1,4 @@
+var srcIndex = JSON.parse('{\
+"upppp_rust":["",[["converter",[["convertertools",[],["velocity_paralell.rs"]],["csv_modes",[],["csv_multi_chain.rs","csv_multi_file_time_step.rs","csv_multi_idline.rs"]]],["convertertools.rs","csv_modes.rs","vtktools.rs","vtutools.rs"]],["datamanager",[],["pdata.rs","tdata.rs","utilities.rs"]],["functions",[],["conditional.rs","extractions.rs","mixing.rs"]],["grid",[],["cartesian_grid.rs","cylindrical_grid.rs","vector_grid.rs"]],["plotting",[],["colourmap.rs","plotting_2d.rs"]],["pylib",[],["libcomp.rs","libconv.rs","libgrid.rs","libplot.rs"]],["utilities",[],["maths.rs"]]],["comparison.rs","converter.rs","datamanager.rs","functions.rs","grid.rs","lib.rs","particleselector.rs","plotting.rs","pylib.rs","types.rs","utilities.rs"]]\
+}');
+createSrcSidebar();

@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["VectorGrid",""]]};
+window.SIDEBAR_ITEMS = {"struct":["VectorGrid"]};

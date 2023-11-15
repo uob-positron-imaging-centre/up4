@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":[["interpolate_cmap",""]]};
+window.SIDEBAR_ITEMS = {"fn":["interpolate_cmap"]};

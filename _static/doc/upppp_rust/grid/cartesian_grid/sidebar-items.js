@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["CartesianGrid3D",""]]};
+window.SIDEBAR_ITEMS = {"struct":["CartesianGrid3D"]};

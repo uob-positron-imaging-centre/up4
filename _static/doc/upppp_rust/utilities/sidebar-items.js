@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":[["maths","Module of common maths functions exposed to users"]]};
+window.SIDEBAR_ITEMS = {"mod":["maths"]};

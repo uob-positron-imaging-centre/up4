@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":[["Comparer",""]],"trait":[["Comparison",""]]};
+window.SIDEBAR_ITEMS = {"struct":["Comparer"],"trait":["Comparison"]};

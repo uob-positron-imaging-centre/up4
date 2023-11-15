@@ -1,3 +1,4 @@
+use indicatif::{ProgressBar, ProgressStyle, ProgressState};
 use crate::{
     check_signals,
     converter::convertertools::{make_sortlist, sort_by_array},
@@ -5,11 +6,12 @@ use crate::{
 };
 use csv;
 use hdf5::File;
-use indicatif::{ProgressBar, ProgressStyle};
+
 use ndarray;
 use ndarray_csv::Array2Reader;
 use regex::Regex;
 use std::path::Path;
+use std::fmt::Write;
 
 use crate::converter::convertertools;
 // Maximum amount of failiures in a row available for a process

@@ -1,6 +1,7 @@
 use derive_getters::Getters;
 use ndarray::{Array1, Array2, Zip};
-use crate::grid::VectorGrid;
+use ndarray_stats::QuantileExt;
+use crate::{grid::VectorGrid, GridFunctions3D};
 use crate::plotting::plotting_2d::Arrow;
 use std::f64::consts::PI;
 use itertools::izip;

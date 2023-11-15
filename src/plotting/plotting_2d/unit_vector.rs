@@ -1,3 +1,18 @@
+use std::f64::consts::PI;
+
+use derive_getters::Getters;
+use itertools::izip;
+use ndarray::{Array1, Array2, Zip};
+use ndarray_stats::QuantileExt;
+use plotly::common::{Line, Fill};
+use plotly::{color::NamedColor, common::Mode};
+use plotly::traces::heat_map;
+use crate::{VectorGrid, GridFunctions3D};
+use crate::plotting_2d::Arrow;
+use crate::utilities::maths::meshgrid;
+use plotly::{HeatMap, Trace, Scatter};
+
+
 // TODO make sure that the arrow centres are in the centre of the cell
 #[derive(Getters, Clone)]
 pub struct UnitVectorPlot {

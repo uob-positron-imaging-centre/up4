@@ -1,3 +1,11 @@
+use itertools::izip;
+use ndarray::Zip;
+use ndarray::{Array1, Array2};
+use plotly::HeatMap;
+use crate::VectorGrid;
+use crate::GridFunctions3D;
+use crate::utilities::maths::meshgrid;
+
 pub struct ScalarMap {
     x: Array1<f64>,
     y: Array1<f64>,

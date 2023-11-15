@@ -3,7 +3,7 @@
 use crate::{
     libgrid::{PyGrid, PyVecGrid},
     plotting::*,
-    GridFunctions3D, VectorGrid,
+    GridFunctions3D, VectorGrid, quiver::QuiverPlot, unit_vector::UnitVectorPlot, scalar_map::ScalarMap, scalar_contour::ScalarContour, parity_plot::ParityPlot, parity_map::ParityMap, parity_contour::ParityContour,
 };
 use plotly::{Layout, Plot, Trace};
 use pyo3::{exceptions::PyValueError, prelude::*};

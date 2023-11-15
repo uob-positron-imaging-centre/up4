@@ -1,3 +1,10 @@
+use ndarray::Array1;
+use ndarray::Zip;
+use plotly::Contour;
+use crate::VectorGrid;
+use crate::GridFunctions3D;
+use itertools::izip;
+
 pub struct ScalarContour {
     x: Array1<f64>,
     y: Array1<f64>,

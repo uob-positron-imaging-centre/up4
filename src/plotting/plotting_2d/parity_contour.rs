@@ -1,3 +1,8 @@
+use ndarray::{Array2, Zip};
+use plotly::HeatMap;
+
+use crate::{VectorGrid, utilities::maths::meshgrid, GridFunctions3D};
+
 pub struct ParityContour {
     reference_data: Array2<f64>,
     comparison_data: Array2<f64>,

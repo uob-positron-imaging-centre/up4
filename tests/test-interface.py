@@ -41,7 +41,7 @@ plotter = up4.Plotter2D(vec_field)
 # fig.show()
 
 # TODO see what squaring the plot does to the arrows
-fig = plotter.unit_vector_plot(axis, selection="dominik")
+fig = plotter.unit_vector_plot(axis, selection="depth_average")
 fig.update_layout(width=600, height=600)
 fig.update_xaxes(title="x position (mm)")
 fig.update_yaxes(title="y position (mm)")
@@ -51,7 +51,7 @@ fig.update_traces(
     ),
     selector=dict(type="heatmap"),
 )
-print(fig)
+
 fig.show()
 
 # fig = plotter.unit_vector_plot(axis, selection="plane", index=1)

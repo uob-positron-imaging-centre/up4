@@ -7,7 +7,7 @@ use ndarray_stats::QuantileExt;
 use plotly::{
     color::NamedColor,
     common::{ColorBar, ColorScale, ColorScalePalette, Fill, Line, Marker, MarkerSymbol, Mode},
-    heat_map::Smoothing,
+    traces::heat_map::Smoothing,
     Contour, HeatMap, Scatter, Trace,
 };
 use std::f64::consts::PI;

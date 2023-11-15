@@ -1,3 +1,11 @@
+use ndarray::Zip;
+use ndarray::{Array1, Array2};
+use plotly::HeatMap;
+use crate::VectorGrid;
+use crate::GridFunctions3D;
+use crate::utilities::maths::meshgrid;
+
+
 pub struct ParityMap {
     reference_data: Array2<f64>,
     comparison_data: Array2<f64>,

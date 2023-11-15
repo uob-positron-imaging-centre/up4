@@ -43,6 +43,7 @@ macro_rules! check_signals {
     };
 }
 
+// FIXME: issues with scopes
 #[macro_export]
 macro_rules! setup_bar {
     ($name:expr,$len:expr) => {{
@@ -54,13 +55,14 @@ macro_rules! setup_bar {
                     "{spinner:.green} ",
                     $name,
                     " [{elapsed_precise}] [{wide_bar:.cyan/blue}] {percent}% {per_sec} ({eta})"
-                ))
-                .with_key("eta", |state| {
-                    format!("Time left: {:.1}s", state.eta().as_secs_f64())
+                )).unwrap()
+                .with_key("eta", |state: &ProgressState, w: &mut dyn Write| {
+                    write!(w, "Time left: {:.1}s", state.eta().as_secs_f64()).unwrap()
                 })
-                .with_key("per_sec", |state| format!("{:.1} steps/s", state.per_sec()))
+                .with_key("per_sec", |state: &ProgressState, w: &mut dyn Write| write!(w, "{:.1} steps/s", state.per_sec()).unwrap())
                 .progress_chars("#>-"),
         );
         bar
     }};
 }
+

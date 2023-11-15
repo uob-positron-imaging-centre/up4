@@ -1,13 +1,4 @@
 //! Submodule for handling 2D plots.
-mod parity_contour;
-mod parity_map;
-mod parity_plot;
-mod quiver;
-mod scalar_contour;
-mod scalar_map;
-mod unit_vector;
-
-
 /// Internal representation of arrow data
 struct Arrow {
     base: (f64, f64),
@@ -31,3 +22,12 @@ impl Arrow {
         }
     }
 }
+
+
+pub mod parity_contour;
+pub mod parity_map;
+pub mod parity_plot;
+pub mod quiver;
+pub mod scalar_contour;
+pub mod scalar_map;
+pub mod unit_vector;

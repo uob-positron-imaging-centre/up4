@@ -5,6 +5,7 @@ use crate::VectorGrid;
 use crate::GridFunctions3D;
 use itertools::izip;
 
+
 pub struct ScalarContour {
     x: Array1<f64>,
     y: Array1<f64>,
@@ -116,7 +117,7 @@ impl ScalarContour {
         } else {
             grid.get_ypositions().to_owned()
         };
-        let data_arr = grid.collapse(axis);
+        let data_arr = grid.get_data().to_owned().index_axis_move(ndarray::Axis(axis), index);
         let mut data: Vec<Vec<f64>> = Vec::with_capacity(data_arr.dim().0);
         for row in data_arr.rows() {
             let inner_vec = row.to_vec();
@@ -136,4 +137,16 @@ impl ScalarContour {
 
         trace
     }
+}
+
+// TODO tests
+#[cfg(test)]
+mod test {
+
+use super::*;
+
+// Helper functions
+
+// Tests
+
 }

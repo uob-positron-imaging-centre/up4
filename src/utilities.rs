@@ -43,10 +43,12 @@ macro_rules! check_signals {
     };
 }
 
-// FIXME: issues with scopes
 #[macro_export]
 macro_rules! setup_bar {
     ($name:expr,$len:expr) => {{
+        // import types to satisfy the compiler
+        use indicatif::{ProgressBar, ProgressStyle, ProgressState};
+        use std::fmt::Write;
         let bar = ProgressBar::new($len as u64);
         bar.set_style(
             ProgressStyle::default_bar()

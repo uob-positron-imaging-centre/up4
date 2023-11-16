@@ -280,7 +280,7 @@ where
 
 #[cfg(feature = "blosc")]
 use hdf5::filters::{blosc_get_nthreads, blosc_set_nthreads};
-//// Make a builder for blosc datasets in hdf5 so we dont have to change stuff all the time
+// Make a builder for blosc datasets in hdf5 so we dont have to change stuff all the time
 
 macro_rules! make_dataset_builder {
     ($group:expr) => {{

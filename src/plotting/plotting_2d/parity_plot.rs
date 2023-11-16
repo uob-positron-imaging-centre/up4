@@ -1,14 +1,13 @@
 use ndarray_stats::QuantileExt;
-use plotly::Scatter;
 use plotly::color::NamedColor;
 use plotly::common::Line;
 use plotly::common::Marker;
 use plotly::common::MarkerSymbol;
 use plotly::common::Mode;
+use plotly::Scatter;
 
-use crate::VectorGrid;
 use crate::GridFunctions3D;
-
+use crate::VectorGrid;
 
 // TODO we need to tell off users for unequal inputs
 // BUG the plot is drawn wrong
@@ -443,10 +442,9 @@ impl ParityPlot {
 #[cfg(test)]
 mod test {
 
-use super::*;
+    use super::*;
 
-// Helper functions
+    // Helper functions
 
-// Tests
-
+    // Tests
 }

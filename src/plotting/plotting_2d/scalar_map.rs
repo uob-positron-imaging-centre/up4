@@ -1,10 +1,10 @@
-use itertools::izip;
-use ndarray::Zip;
-use ndarray::Array1;
-use plotly::HeatMap;
-use crate::VectorGrid;
-use crate::GridFunctions3D;
 use crate::utilities::maths::meshgrid;
+use crate::GridFunctions3D;
+use crate::VectorGrid;
+use itertools::izip;
+use ndarray::Array1;
+use ndarray::Zip;
+use plotly::HeatMap;
 
 pub struct ScalarMap {
     x: Array1<f64>,
@@ -32,9 +32,12 @@ impl ScalarMap {
         let mut data = Vec::with_capacity(u.dim().0);
         for (u_row, v_row) in izip!(u.axis_iter(ndarray::Axis(0)), v.axis_iter(ndarray::Axis(0))) {
             let mut inner_vec = Vec::with_capacity(u.dim().1);
-            Zip::from(&mut inner_vec).and(&u_row).and(&v_row).for_each(|d, &u, &v|{
-                *d = f64::hypot(u, v);
-            });
+            Zip::from(&mut inner_vec)
+                .and(&u_row)
+                .and(&v_row)
+                .for_each(|d, &u, &v| {
+                    *d = f64::hypot(u, v);
+                });
             data.push(inner_vec);
         }
 
@@ -66,9 +69,12 @@ impl ScalarMap {
         let mut data = Vec::with_capacity(u.dim().0);
         for (u_row, v_row) in izip!(u.axis_iter(ndarray::Axis(0)), v.axis_iter(ndarray::Axis(0))) {
             let mut inner_vec = Vec::with_capacity(u.dim().1);
-            Zip::from(&mut inner_vec).and(&u_row).and(&v_row).for_each(|d, &u, &v|{
-                *d = f64::hypot(u, v);
-            });
+            Zip::from(&mut inner_vec)
+                .and(&u_row)
+                .and(&v_row)
+                .for_each(|d, &u, &v| {
+                    *d = f64::hypot(u, v);
+                });
             data.push(inner_vec);
         }
 
@@ -112,7 +118,10 @@ impl ScalarMap {
         } else {
             grid.get_ypositions().to_owned()
         };
-        let data_arr = grid.get_data().to_owned().index_axis_move(ndarray::Axis(axis), index);
+        let data_arr = grid
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
         let mut data: Vec<Vec<f64>> = Vec::with_capacity(data_arr.dim().0);
         for row in data_arr.rows() {
             let inner_vec = row.to_vec();
@@ -124,11 +133,7 @@ impl ScalarMap {
 
     pub fn create_scalar_map(&self) -> Vec<Box<HeatMap<f64, f64, Vec<f64>>>> {
         let (x, y) = meshgrid(self.x.to_owned(), self.y.to_owned());
-        let heatmap = HeatMap::new(
-            x.into_raw_vec(),
-            y.into_raw_vec(),
-            self.data.to_owned(),
-        );
+        let heatmap = HeatMap::new(x.into_raw_vec(), y.into_raw_vec(), self.data.to_owned());
         let trace = vec![heatmap];
 
         trace
@@ -139,10 +144,9 @@ impl ScalarMap {
 #[cfg(test)]
 mod test {
 
-use super::*;
+    use super::*;
 
-// Helper functions
+    // Helper functions
 
-// Tests
-
+    // Tests
 }

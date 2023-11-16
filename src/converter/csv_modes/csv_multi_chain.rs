@@ -10,8 +10,8 @@ use hdf5::File;
 use ndarray;
 use ndarray_csv::Array2Reader;
 use regex::Regex;
-use std::path::Path;
 use std::fmt::Write;
+use std::path::Path;
 
 use crate::converter::convertertools;
 // Maximum amount of failiures in a row available for a process

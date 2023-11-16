@@ -1,10 +1,9 @@
+use crate::GridFunctions3D;
+use crate::VectorGrid;
+use itertools::izip;
 use ndarray::Array1;
 use ndarray::Zip;
 use plotly::Contour;
-use crate::VectorGrid;
-use crate::GridFunctions3D;
-use itertools::izip;
-
 
 pub struct ScalarContour {
     x: Array1<f64>,
@@ -32,9 +31,12 @@ impl ScalarContour {
         let mut data = Vec::with_capacity(u.dim().0);
         for (u_row, v_row) in izip!(u.axis_iter(ndarray::Axis(0)), v.axis_iter(ndarray::Axis(0))) {
             let mut inner_vec = Vec::with_capacity(u.dim().1);
-            Zip::from(&mut inner_vec).and(&u_row).and(&v_row).for_each(|d, &u, &v|{
-                *d = f64::hypot(u, v);
-            });
+            Zip::from(&mut inner_vec)
+                .and(&u_row)
+                .and(&v_row)
+                .for_each(|d, &u, &v| {
+                    *d = f64::hypot(u, v);
+                });
             data.push(inner_vec);
         }
 
@@ -70,9 +72,12 @@ impl ScalarContour {
         let mut data = Vec::with_capacity(u.dim().0);
         for (u_row, v_row) in izip!(u.axis_iter(ndarray::Axis(0)), v.axis_iter(ndarray::Axis(0))) {
             let mut inner_vec = Vec::with_capacity(u.dim().1);
-            Zip::from(&mut inner_vec).and(&u_row).and(&v_row).for_each(|d, &u, &v|{
-                *d = f64::hypot(u, v);
-            });
+            Zip::from(&mut inner_vec)
+                .and(&u_row)
+                .and(&v_row)
+                .for_each(|d, &u, &v| {
+                    *d = f64::hypot(u, v);
+                });
             data.push(inner_vec);
         }
 
@@ -117,7 +122,10 @@ impl ScalarContour {
         } else {
             grid.get_ypositions().to_owned()
         };
-        let data_arr = grid.get_data().to_owned().index_axis_move(ndarray::Axis(axis), index);
+        let data_arr = grid
+            .get_data()
+            .to_owned()
+            .index_axis_move(ndarray::Axis(axis), index);
         let mut data: Vec<Vec<f64>> = Vec::with_capacity(data_arr.dim().0);
         for row in data_arr.rows() {
             let inner_vec = row.to_vec();
@@ -126,7 +134,7 @@ impl ScalarContour {
 
         ScalarContour { x, y, data }
     }
- 
+
     pub fn create_scalar_contour(&self) -> Vec<Box<Contour<Vec<f64>>>> {
         let contour = Contour::new(
             self.x.to_owned().into_raw_vec(),
@@ -143,10 +151,9 @@ impl ScalarContour {
 #[cfg(test)]
 mod test {
 
-use super::*;
+    use super::*;
 
-// Helper functions
+    // Helper functions
 
-// Tests
-
+    // Tests
 }

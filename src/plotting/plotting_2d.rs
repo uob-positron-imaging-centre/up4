@@ -23,7 +23,6 @@ impl Arrow {
     }
 }
 
-
 pub mod parity_contour;
 pub mod parity_map;
 pub mod parity_plot;

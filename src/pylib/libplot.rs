@@ -2,8 +2,15 @@
 // TODO break this up into multiple files
 use crate::{
     libgrid::{PyGrid, PyVecGrid},
+    parity_contour::ParityContour,
+    parity_map::ParityMap,
+    parity_plot::ParityPlot,
     plotting::*,
-    GridFunctions3D, VectorGrid, quiver::QuiverPlot, unit_vector::UnitVectorPlot, scalar_map::ScalarMap, scalar_contour::ScalarContour, parity_plot::ParityPlot, parity_map::ParityMap, parity_contour::ParityContour,
+    quiver::QuiverPlot,
+    scalar_contour::ScalarContour,
+    scalar_map::ScalarMap,
+    unit_vector::UnitVectorPlot,
+    GridFunctions3D, VectorGrid,
 };
 use plotly::{Layout, Plot, Trace};
 use pyo3::{exceptions::PyValueError, prelude::*};

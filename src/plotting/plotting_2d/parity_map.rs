@@ -1,10 +1,9 @@
-use ndarray::Zip;
-use ndarray::Array2;
-use plotly::HeatMap;
-use crate::VectorGrid;
-use crate::GridFunctions3D;
 use crate::utilities::maths::meshgrid;
-
+use crate::GridFunctions3D;
+use crate::VectorGrid;
+use ndarray::Array2;
+use ndarray::Zip;
+use plotly::HeatMap;
 
 pub struct ParityMap {
     reference_data: Array2<f64>,
@@ -261,10 +260,9 @@ impl ParityMap {
 #[cfg(test)]
 mod test {
 
-use super::*;
+    use super::*;
 
-// Helper functions
+    // Helper functions
 
-// Tests
-
+    // Tests
 }

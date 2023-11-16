@@ -1,17 +1,16 @@
 use std::f64::consts::PI;
 
+use crate::plotting_2d::Arrow;
+use crate::utilities::maths::meshgrid;
+use crate::{GridFunctions3D, VectorGrid};
 use derive_getters::Getters;
 use itertools::izip;
 use ndarray::{Array1, Array2, Zip};
 use ndarray_stats::QuantileExt;
-use plotly::common::{Line, Fill};
-use plotly::{color::NamedColor, common::Mode};
+use plotly::common::{Fill, Line};
 use plotly::traces::heat_map;
-use crate::{VectorGrid, GridFunctions3D};
-use crate::plotting_2d::Arrow;
-use crate::utilities::maths::meshgrid;
-use plotly::{HeatMap, Trace, Scatter};
-
+use plotly::{color::NamedColor, common::Mode};
+use plotly::{HeatMap, Scatter, Trace};
 
 // TODO make sure that the arrow centres are in the centre of the cell
 #[derive(Getters, Clone)]
@@ -317,10 +316,9 @@ impl UnitVectorPlot {
 #[cfg(test)]
 mod test {
 
-use super::*;
+    use super::*;
 
-// Helper functions
+    // Helper functions
 
-// Tests
-
+    // Tests
 }

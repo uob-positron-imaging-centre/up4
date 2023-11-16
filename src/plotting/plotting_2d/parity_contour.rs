@@ -1,7 +1,7 @@
 use ndarray::{Array2, Zip};
 use plotly::HeatMap;
 
-use crate::{VectorGrid, utilities::maths::meshgrid, GridFunctions3D};
+use crate::{utilities::maths::meshgrid, GridFunctions3D, VectorGrid};
 
 pub struct ParityContour {
     reference_data: Array2<f64>,
@@ -258,10 +258,9 @@ impl ParityContour {
 #[cfg(test)]
 mod test {
 
-use super::*;
+    use super::*;
 
-// Helper functions
+    // Helper functions
 
-// Tests
-
+    // Tests
 }

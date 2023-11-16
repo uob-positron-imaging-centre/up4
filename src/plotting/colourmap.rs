@@ -304,10 +304,9 @@ impl ColorScalePaletteRawValues {
 #[cfg(test)]
 mod test {
 
-use super::*;
+    use super::*;
 
-// Helper functions
+    // Helper functions
 
-// Tests
-
+    // Tests
 }

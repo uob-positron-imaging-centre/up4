@@ -47,7 +47,7 @@ macro_rules! check_signals {
 macro_rules! setup_bar {
     ($name:expr,$len:expr) => {{
         // import types to satisfy the compiler
-        use indicatif::{ProgressBar, ProgressStyle, ProgressState};
+        use indicatif::{ProgressBar, ProgressState, ProgressStyle};
         use std::fmt::Write;
         let bar = ProgressBar::new($len as u64);
         bar.set_style(
@@ -57,14 +57,16 @@ macro_rules! setup_bar {
                     "{spinner:.green} ",
                     $name,
                     " [{elapsed_precise}] [{wide_bar:.cyan/blue}] {percent}% {per_sec} ({eta})"
-                )).unwrap()
+                ))
+                .unwrap()
                 .with_key("eta", |state: &ProgressState, w: &mut dyn Write| {
                     write!(w, "Time left: {:.1}s", state.eta().as_secs_f64()).unwrap()
                 })
-                .with_key("per_sec", |state: &ProgressState, w: &mut dyn Write| write!(w, "{:.1} steps/s", state.per_sec()).unwrap())
+                .with_key("per_sec", |state: &ProgressState, w: &mut dyn Write| {
+                    write!(w, "{:.1} steps/s", state.per_sec()).unwrap()
+                })
                 .progress_chars("#>-"),
         );
         bar
     }};
 }
-

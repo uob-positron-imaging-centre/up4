@@ -5,7 +5,7 @@ use crate::{
 };
 use csv;
 use hdf5::File;
-use indicatif::{ProgressBar, ProgressStyle};
+// use indicatif::{ProgressBar, ProgressStyle};
 use itertools::Itertools;
 use ndarray;
 use ndarray_csv::Array2Reader;

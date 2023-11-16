@@ -1,4 +1,4 @@
-use indicatif::{ProgressBar, ProgressStyle, ProgressState};
+// use indicatif::{ProgressBar, ProgressStyle, ProgressState};
 use crate::{
     check_signals,
     converter::convertertools::{make_sortlist, sort_by_array},

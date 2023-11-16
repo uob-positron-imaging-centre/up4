@@ -312,3 +312,15 @@ impl UnitVectorPlot {
         (&self.true_norm - min) / (max - min)
     }
 }
+
+// TODO tests
+#[cfg(test)]
+mod test {
+
+use super::*;
+
+// Helper functions
+
+// Tests
+
+}

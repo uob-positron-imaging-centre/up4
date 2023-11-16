@@ -1,5 +1,5 @@
 use ndarray::Zip;
-use ndarray::{Array1, Array2};
+use ndarray::Array2;
 use plotly::HeatMap;
 use crate::VectorGrid;
 use crate::GridFunctions3D;
@@ -255,4 +255,16 @@ impl ParityMap {
             delta,
         }
     }
+}
+
+// TODO tests
+#[cfg(test)]
+mod test {
+
+use super::*;
+
+// Helper functions
+
+// Tests
+
 }

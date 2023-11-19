@@ -34,25 +34,25 @@ use plotly::{HeatMap, Layout, Plot, Trace};
 use crate::utilities::maths::meshgrid;
 
 fn main() {
-    const PI: f64 = consts::PI;
-    const PTS: f64 = 10.; //number of points
-    let x: Array1<f64> = Array::range(0., 2. * PI + PI / PTS, 2. * PI / PTS);
-    let y: Array1<f64> = Array::range(0., 2. * PI + PI / PTS, 2. * PI / PTS);
-    let (xx, yy) = meshgrid(x.clone(), y.clone());
-    let u: Array2<f64> = &xx.mapv(f64::sin) * &yy.mapv(f64::cos);
-    let v: Array2<f64> = -&yy.mapv(f64::sin) * &xx.mapv(f64::cos);
-    let mut norm = Array2::zeros(u.dim());
-    Zip::from(&mut norm).and(&u).and(&v).for_each(|n, &u, &v| {
-        *n = f64::hypot(u, v);
-    });
-    let true_norm = norm.clone();
+    // const PI: f64 = consts::PI;
+    // const PTS: f64 = 10.; //number of points
+    // let x: Array1<f64> = Array::range(0., 2. * PI + PI / PTS, 2. * PI / PTS);
+    // let y: Array1<f64> = Array::range(0., 2. * PI + PI / PTS, 2. * PI / PTS);
+    // let (xx, yy) = meshgrid(x.clone(), y.clone());
+    // let u: Array2<f64> = &xx.mapv(f64::sin) * &yy.mapv(f64::cos);
+    // let v: Array2<f64> = -&yy.mapv(f64::sin) * &xx.mapv(f64::cos);
+    // let mut norm = Array2::zeros(u.dim());
+    // Zip::from(&mut norm).and(&u).and(&v).for_each(|n, &u, &v| {
+    //     *n = f64::hypot(u, v);
+    // });
+    // let true_norm = norm.clone();
 
-    let arrows = QuiverPlot::new(x, y, u, v, norm, true_norm);
-    let tr = arrows.create_quiver_traces();
-    let l = Layout::new();
-    let plot = plot(tr, l);
-    // plot.show();
-    plot.write_html("test.html")
+    // let arrows = QuiverPlot::new(x, y, u, v, norm, true_norm);
+    // let tr = arrows.create_quiver_traces();
+    // let l = Layout::new();
+    // let plot = plot(tr, l);
+    // // plot.show();
+    // plot.write_html("test.html")
 }
 
 // #[allow(dead_code, unused_imports, unused_variables, unreachable_code)]

@@ -45,6 +45,8 @@ impl PyPlotter2D {
         }
     }
 
+    // TODO add scaleratio to the signature of this method
+    // TODO default layout should remove the x and y axis lines
     #[pyo3(signature = (axis, selection = "depth_average", index = None, scaling_mode = "none", scaling_args = None))]
     fn _quiver_plot(
         &mut self,
@@ -75,15 +77,15 @@ impl PyPlotter2D {
                 "Valid selection modes are 'depth_average' and 'plane' only.",
             ));
         };
-        let len = quiver_plotter.x().len();
+        let len = quiver_plotter.norm().len();
         let mut traces: Vec<Box<dyn Trace>> = Vec::with_capacity(len);
         let quiver_traces = if scaling_mode == "none" {
-            quiver_plotter.create_quiver_traces()
+            quiver_plotter.create_quiver_traces(1.0)
         } else if scaling_mode == "min" {
             if let Some(scaling_args) = scaling_args {
                 quiver_plotter
                     .bound_min(scaling_args[0])
-                    .create_quiver_traces()
+                    .create_quiver_traces(1.0)
             } else {
                 return Err(PyValueError::new_err(
                     "A valid scaling argument is required.",
@@ -93,7 +95,7 @@ impl PyPlotter2D {
             if let Some(scaling_args) = scaling_args {
                 quiver_plotter
                     .bound_max(scaling_args[0])
-                    .create_quiver_traces()
+                    .create_quiver_traces(1.0)
             } else {
                 return Err(PyValueError::new_err(
                     "A valid scaling argument is required.",
@@ -109,7 +111,7 @@ impl PyPlotter2D {
                 }
                 quiver_plotter
                     .bound_min_max(scaling_vector[0], scaling_vector[1])
-                    .create_quiver_traces()
+                    .create_quiver_traces(1.0)
             } else {
                 return Err(PyValueError::new_err(
                     "A valid scaling argument is required.",
@@ -120,13 +122,13 @@ impl PyPlotter2D {
             let dy = quiver_plotter.y()[1] - quiver_plotter.y()[0];
             quiver_plotter
                 .bound_half_node(dx, dy)
-                .create_quiver_traces()
+                .create_quiver_traces(1.0)
         } else if scaling_mode == "full_node" {
             let dx = quiver_plotter.x()[1] - quiver_plotter.x()[0];
             let dy = quiver_plotter.y()[1] - quiver_plotter.y()[0];
             quiver_plotter
                 .bound_full_node(dx, dy)
-                .create_quiver_traces()
+                .create_quiver_traces(1.0)
         } else {
             return Err(PyValueError::new_err("Invalid scaling mode provided, valid types are: 'none', 'min', 'max', 'minmax', 'half_node', 'full_node'."));
         };

@@ -111,107 +111,61 @@ impl QuiverPlot {
         }
     }
 
-    // BUG arrowheads are not drawn properly in method from plotly.py
-    // need to reconsider how the arrows are drawn to do this properly
-    fn create_arrows(&self) -> Vec<Arrow> {
+    // TODO see if there's anything that I can do to preserve arrow shape if layout isn't square
+    fn create_arrows(&self, scale_ratio: f64) -> Vec<Arrow> {
         // angle between arrows
         const ANGLE: f64 = PI / 9.0;
         // default scale in plotly's quiver plot is 0.3
         const SCALE_FACTOR: f64 = 0.3;
         let arrow_length = &self.norm * SCALE_FACTOR;
+        let u = &self.u * scale_ratio;
         let mut barb_angles = Array2::zeros(self.u.dim());
         Zip::from(&mut barb_angles)
             .and(&self.v)
-            .and(&self.u)
+            .and(&u)
             .for_each(|a, &v, &u| {
                 *a = f64::atan2(v, u);
             });
         let (x, y) = meshgrid(self.x.to_owned(), self.y.to_owned());
-        let end_x: Array2<f64> = &x + &self.u;
-        let end_y: Array2<f64> = &y + &self.v;
-        
-        let unit_u = &self.u / &self.norm;
-        let unit_v = &self.v / &self.norm;
-
-        let upper_point_x = &x + (1.0 - SCALE_FACTOR) * &self.norm + 1.0 / &unit_u * &arrow_length * f64::tan(ANGLE);
-        let upper_point_y = &y + (1.0 - SCALE_FACTOR) * &self.norm + 1.0 / &unit_v * &arrow_length * f64::tan(ANGLE);
-        let lower_point_x = &x + (1.0 - SCALE_FACTOR) * &self.norm - 1.0 / &unit_u * &arrow_length * f64::tan(ANGLE);
-        let lower_point_y = &y + (1.0 - SCALE_FACTOR) * &self.norm - 1.0 / &unit_v * &arrow_length * f64::tan(ANGLE);
-
-        
-        // // find arrow positions as if arrow has 0 angle and at origin
-        // let raw_upper_point_x = (1.0 - SCALE_FACTOR) * &arrow_length;
-        // let raw_upper_point_y = &arrow_length * f64::tan(ANGLE);
-        // let raw_lower_point_x = (1.0 - SCALE_FACTOR) * &arrow_length;
-        // let raw_lower_point_y = -&arrow_length * f64::tan(ANGLE);
-
-        // // x' = (x - x0) cos(t) - (y - y0) sin(t) + x0
-        // // y' = (x - x0) sin(t) + (y - y0) cos(t) + y0
-        // let cos_angle1 = (&barb_angles + ANGLE).mapv(f64::cos);
-        // let sin_angle1 = (&barb_angles + ANGLE).mapv(f64::sin);
-        // let cos_angle2 = (&barb_angles - ANGLE).mapv(f64::cos);
-        // let sin_angle2 = (&barb_angles - ANGLE).mapv(f64::sin);
-
-
-        // // rotate these points about the base of the arrow, by the arrow's angle and translate to correct position
-        // let upper_point_x = &raw_upper_point_x * &cos_angle1 - &raw_upper_point_y * &sin_angle1 + &x;
-        // let upper_point_y = &raw_upper_point_x * &sin_angle1 + &raw_upper_point_y * &cos_angle1 + &y;
-        // let lower_point_x = &raw_lower_point_x * &cos_angle2 - &raw_lower_point_y * &sin_angle2 + &x;
-        // let lower_point_y = &raw_lower_point_x * &sin_angle2 + &raw_lower_point_y * &cos_angle2 + &y;
-
-        let arrows: Vec<Arrow> = izip!(
-            x,
-            y,
-            end_x,
-            end_y,
-            upper_point_x,
-            upper_point_y,
-            lower_point_x,
-            lower_point_y
-        )
-        .map(|(x, y, e_x, e_y, p1x, p1y, p2x, p2y)| {
-            Arrow::new((x, y), (e_x, e_y), (p1x, p1y), (p2x, p2y))
-        })
-        .collect();
 
         // find angles for either side of arrow
-        // let arrow_angle_1: Array2<f64> = &barb_angles + ANGLE;
-        // let arrow_angle_2: Array2<f64> = &barb_angles - ANGLE;
+        let arrow_angle_1: Array2<f64> = &barb_angles + ANGLE;
+        let arrow_angle_2: Array2<f64> = &barb_angles - ANGLE;
 
-        // //find angles for both sides of arrow point
-        // let sin_angle_1: Array2<f64> = arrow_angle_1.mapv(f64::sin);
-        // let cos_angle_1: Array2<f64> = arrow_angle_1.mapv(f64::cos);
-        // let sin_angle_2: Array2<f64> = arrow_angle_2.mapv(f64::sin);
-        // let cos_angle_2: Array2<f64> = arrow_angle_2.mapv(f64::cos);
+        //find angles for both sides of arrow point
+        let sin_angle_1: Array2<f64> = arrow_angle_1.mapv(f64::sin);
+        let cos_angle_1: Array2<f64> = arrow_angle_1.mapv(f64::cos);
+        let sin_angle_2: Array2<f64> = arrow_angle_2.mapv(f64::sin);
+        let cos_angle_2: Array2<f64> = arrow_angle_2.mapv(f64::cos);
 
-        // //find corresponding components
-        // let seg_1_x: Array2<f64> = &arrow_length * &cos_angle_1;
-        // let seg_1_y: Array2<f64> = &arrow_length * &sin_angle_1;
-        // let seg_2_x: Array2<f64> = &arrow_length * &cos_angle_2;
-        // let seg_2_y: Array2<f64> = &arrow_length * &sin_angle_2;
+        //find corresponding components
+        let seg_1_x: Array2<f64> = &arrow_length * &cos_angle_1;
+        let seg_1_y: Array2<f64> = &arrow_length * &sin_angle_1;
+        let seg_2_x: Array2<f64> = &arrow_length * &cos_angle_2;
+        let seg_2_y: Array2<f64> = &arrow_length * &sin_angle_2;
 
-        // let end_x: Array2<f64> = &x + &self.u;
-        // let end_y: Array2<f64> = &y + &self.v;
+        let end_x: Array2<f64> = &x + &u;
+        let end_y: Array2<f64> = &y + &self.v;
 
-        // //set coordinates of the arrow
-        // let point_1_x: Array2<f64> = &end_x - seg_1_x;
-        // let point_1_y: Array2<f64> = &end_y - seg_1_y;
-        // let point_2_x: Array2<f64> = &end_x - seg_2_x;
-        // let point_2_y: Array2<f64> = &end_y - seg_2_y;
+        //set coordinates of the arrow
+        let point_1_x: Array2<f64> = &end_x - seg_1_x;
+        let point_1_y: Array2<f64> = &end_y - seg_1_y;
+        let point_2_x: Array2<f64> = &end_x - seg_2_x;
+        let point_2_y: Array2<f64> = &end_y - seg_2_y;
 
-        // let arrows: Vec<Arrow> =
-        //     izip!(x, y, end_x, end_y, point_1_x, point_1_y, point_2_x, point_2_y)
-        //         .map(|(x, y, e_x, e_y, p1x, p1y, p2x, p2y)| {
-        //             Arrow::new((x, y), (e_x, e_y), (p1x, p1y), (p2x, p2y))
-        //         })
-        //         .collect();
+        let arrows: Vec<Arrow> =
+            izip!(x, y, end_x, end_y, point_1_x, point_1_y, point_2_x, point_2_y)
+                .map(|(x, y, e_x, e_y, p1x, p1y, p2x, p2y)| {
+                    Arrow::new((x, y), (e_x, e_y), (p1x, p1y), (p2x, p2y))
+                })
+                .collect();
 
         arrows
     }
 
     // BUG colourbar does not appear
-    pub fn create_quiver_traces(&self) -> Vec<Box<dyn Trace>> {
-        let arrows = self.create_arrows();
+    pub fn create_quiver_traces(&self, scale_ratio: f64) -> Vec<Box<dyn Trace>> {
+        let arrows = self.create_arrows(scale_ratio);
         let mut traces: Vec<Box<dyn Trace>> = Vec::with_capacity(arrows.len() + 1);
         let colours = self.normalise_colour();
         for (arrow, colour) in izip!(arrows, &colours) {
@@ -367,5 +321,23 @@ mod test {
 
     // Helper functions
 
+    // fn direct_construction() -> QuiverPlot {}
+
+    // fn vector_grid() -> QuiverPlot {}
+
     // Tests
+
+    // correct construction
+
+    // arrows created properly
+
+    // norm is adjusted properly
+
+    // scaling correctness
+
+    // colour range is determined properly
+
+    //
+
+    // traces are created properly
 }

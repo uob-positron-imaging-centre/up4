@@ -79,6 +79,7 @@ impl PyConverter {
         vtk_from_folder(folder, timestep, outname, filter);
     }
 
+    // TODO ensure this doesn't get accidentally swept up into doctests
     /// Convert CSV file to a HDF5 file.
     ///
     /// Parameters
@@ -160,6 +161,7 @@ impl PyConverter {
         )
     }
 
+    // TODO ensure this doesn't get accidentally swept up into doctests
     /// Convert CSV file containing multiple particles into a HDF5 file.
     ///
     /// There can be different ways how this is achieved, therefore the function
@@ -204,14 +206,14 @@ impl PyConverter {
     /// method : str, optional
     ///     Method to use to convert the CSV file. Can be one of the following:
     ///
-    ///         -  `chain`:   The particles are chained in the file, i.e. the first particle
-    ///            is followed by the second, the second by the third, etc.
+    /// - `chain`: The particles are chained in the file, i.e. the first particle
+    ///              is followed by the second, the second by the third, etc.
     ///            all particles are stored in one file
-    ///         -  `id_line`: This algorithm sorts the particles by their id column and
+    ///         -  id_line: This algorithm sorts the particles by their id column and
     ///            their time column. The `columns` argument must contain the
     ///            id column as the first element.
     ///
-    ///     , by default `chain`
+    ///     , by default chain
     ///
     //#[allow(unreachable_code, unused_variables)]
     #[pyo3(signature = (
@@ -263,10 +265,10 @@ impl PyConverter {
     /// There can be different ways how this is achieved, therefore the function
     /// takes an argument called `method` which can be one of the following:
     ///
-    ///     - `chain`:   The particles are chained in the file, i.e. the first particle
+    ///   - chain:   The particles are chained in the file, i.e. the first particle
     ///         is followed by the second, the second by the third, etc.
     ///         all particles are stored in one file.
-    ///     - `id_line`: This algorithm sorts the particles by their id column and
+    ///   - id_line: This algorithm sorts the particles by their id column and
     ///         their time column. The `columns` argument must contain the
     ///         id column as the first element.
     ///

@@ -146,14 +146,3 @@ impl ScalarContour {
         trace
     }
 }
-
-// TODO tests
-#[cfg(test)]
-mod test {
-
-    use super::*;
-
-    // Helper functions
-
-    // Tests
-}

@@ -12,8 +12,10 @@ use crate::{
     unit_vector::UnitVectorPlot,
     GridFunctions3D, VectorGrid,
 };
+
+use colorous::Gradient;
 use plotly::{Layout, Plot, Trace};
-use pyo3::{exceptions::PyValueError, prelude::*};
+use pyo3::{prelude::*, exceptions::PyValueError};
 
 #[pyclass(name = "RustPlotter2D", subclass)]
 pub struct PyPlotter2D {
@@ -45,17 +47,20 @@ impl PyPlotter2D {
         }
     }
 
-    // TODO add scaleratio to the signature of this method
+    //TODO add scaleratio to the signature of this method
     // TODO default layout should remove the x and y axis lines
-    #[pyo3(signature = (axis, selection = "depth_average", index = None, scaling_mode = "none", scaling_args = None))]
+    #[pyo3(signature = (axis, selection = "depth_average", index = None, scaling_mode = None, scaling_args = None, colour_map = "viridis"))]
     fn _quiver_plot(
         &mut self,
         axis: usize,
         selection: &str,
         index: Option<usize>,
-        scaling_mode: &str,
+        scaling_mode: Option<&str>,
         scaling_args: Option<Vec<f64>>,
+        colour_map: Option<&str>,
     ) -> PyResult<()> {
+        // Arguments are checked for validity at the Python layer, so we can relax
+        // checks here.
         let vector_grid = self
             .grid
             .as_any()
@@ -64,74 +69,44 @@ impl PyPlotter2D {
             .clone();
         let quiver_plotter = if selection == "depth_average" {
             QuiverPlot::from_vector_grid_depth_averaged(vector_grid, axis)
-        } else if selection == "plane" {
-            if let Some(index) = index {
-                QuiverPlot::from_vector_grid_single_plane(vector_grid, axis, index)
-            } else {
-                return Err(PyValueError::new_err(
-                    "A valid index is required to select an individual plane.",
-                ));
-            }
         } else {
-            return Err(PyValueError::new_err(
-                "Valid selection modes are 'depth_average' and 'plane' only.",
-            ));
+            QuiverPlot::from_vector_grid_single_plane(vector_grid, axis, index.unwrap())
         };
         let len = quiver_plotter.norm().len();
         let mut traces: Vec<Box<dyn Trace>> = Vec::with_capacity(len);
-        let quiver_traces = if scaling_mode == "none" {
-            quiver_plotter.create_quiver_traces(1.0)
-        } else if scaling_mode == "min" {
-            if let Some(scaling_args) = scaling_args {
-                quiver_plotter
-                    .bound_min(scaling_args[0])
-                    .create_quiver_traces(1.0)
-            } else {
-                return Err(PyValueError::new_err(
-                    "A valid scaling argument is required.",
-                ));
-            }
-        } else if scaling_mode == "max" {
-            if let Some(scaling_args) = scaling_args {
-                quiver_plotter
-                    .bound_max(scaling_args[0])
-                    .create_quiver_traces(1.0)
-            } else {
-                return Err(PyValueError::new_err(
-                    "A valid scaling argument is required.",
-                ));
-            }
-        } else if scaling_mode == "minmax" {
-            if let Some(scaling_args) = scaling_args {
-                let scaling_vector = scaling_args;
-                if scaling_vector.len() < 2 {
-                    return Err(PyValueError::new_err(
-                        "Min-max scaling requires 2 arguments.",
-                    ));
-                }
-                quiver_plotter
-                    .bound_min_max(scaling_vector[0], scaling_vector[1])
-                    .create_quiver_traces(1.0)
-            } else {
-                return Err(PyValueError::new_err(
-                    "A valid scaling argument is required.",
-                ));
-            }
-        } else if scaling_mode == "half_node" {
-            let dx = quiver_plotter.x()[1] - quiver_plotter.x()[0];
-            let dy = quiver_plotter.y()[1] - quiver_plotter.y()[0];
-            quiver_plotter
-                .bound_half_node(dx, dy)
-                .create_quiver_traces(1.0)
-        } else if scaling_mode == "full_node" {
-            let dx = quiver_plotter.x()[1] - quiver_plotter.x()[0];
-            let dy = quiver_plotter.y()[1] - quiver_plotter.y()[0];
-            quiver_plotter
-                .bound_full_node(dx, dy)
-                .create_quiver_traces(1.0)
-        } else {
-            return Err(PyValueError::new_err("Invalid scaling mode provided, valid types are: 'none', 'min', 'max', 'minmax', 'half_node', 'full_node'."));
+        let cmap = match colour_map {
+            Some(colour_map) => Some(self.get_gradient(colour_map)),
+            None => None,
         };
+        let quiver_traces = match scaling_mode {
+            Some("min") => quiver_plotter
+                .bound_min(scaling_args.unwrap()[0])
+                .create_quiver_traces(1.0, cmap),
+            Some("max") => quiver_plotter
+                .bound_max(scaling_args.unwrap()[0])
+                .create_quiver_traces(1.0, cmap),
+            Some("minmax") => quiver_plotter
+                // FIXME sort unpacking an optional vector because i forget how
+                .bound_min_max(scaling_args[0], scaling_args.unwrap()[1])
+                .create_quiver_traces(1.0, cmap),
+            Some("half_node") => {
+                let dx = quiver_plotter.x()[1] - quiver_plotter.x()[0];
+                let dy = quiver_plotter.y()[1] - quiver_plotter.y()[0];
+                quiver_plotter
+                    .bound_half_node(dx, dy)
+                    .create_quiver_traces(1.0, cmap)
+            }
+            Some("full_node") => {
+                let dx = quiver_plotter.x()[1] - quiver_plotter.x()[0];
+                let dy = quiver_plotter.y()[1] - quiver_plotter.y()[0];
+                quiver_plotter
+                    .bound_full_node(dx, dy)
+                    .create_quiver_traces(1.0, cmap)
+            }
+            None => quiver_plotter.create_quiver_traces(1.0, cmap),
+            _ => quiver_plotter.create_quiver_traces(1.0, cmap),
+        };
+
         for trace in quiver_traces {
             traces.push(trace)
         }
@@ -143,15 +118,18 @@ impl PyPlotter2D {
         Ok(())
     }
 
-    #[pyo3(signature = (axis, selection = "depth_average", index = None, scaling_mode = "none", scaling_args = None))]
+    #[pyo3(signature = (axis, selection = "depth_average", index = None, scaling_mode = "none", scaling_args = None, colour_map = "viridis"))]
     fn _unit_vector_plot(
         &mut self,
         axis: usize,
         selection: &str,
         index: Option<usize>,
-        scaling_mode: &str,
+        scaling_mode: Option<&str>,
         scaling_args: Option<Vec<f64>>,
+        colour_map: Option<&str>,
     ) -> PyResult<()> {
+        // Arguments are checked for validity at the Python layer, so we can relax
+        // checks here.
         let vector_grid = self
             .grid
             .as_any()
@@ -160,73 +138,40 @@ impl PyPlotter2D {
             .clone();
         let unit_vector_plotter = if selection == "depth_average" {
             UnitVectorPlot::from_vector_grid_depth_averaged(vector_grid, axis)
-        } else if selection == "plane" {
-            if let Some(index) = index {
-                UnitVectorPlot::from_vector_grid_single_plane(vector_grid, axis, index)
-            } else {
-                return Err(PyValueError::new_err(
-                    "A valid index is required to select an individual plane.",
-                ));
-            }
         } else {
-            return Err(PyValueError::new_err(
-                "Valid selection modes are 'depth_average' and 'plane' only.",
-            ));
+            UnitVectorPlot::from_vector_grid_single_plane(vector_grid, axis, index.unwrap())
         };
         let len = unit_vector_plotter.x().len();
         let mut traces: Vec<Box<dyn Trace>> = Vec::with_capacity(len);
-        let unit_vector_traces = if scaling_mode == "none" {
-            unit_vector_plotter.create_quiver_traces()
-        } else if scaling_mode == "min" {
-            if let Some(scaling_args) = scaling_args {
+        let cmap = match colour_map {
+            Some(colour_map) => Some(self.get_gradient(colour_map)),
+            None => None,
+        };
+        let unit_vector_traces = match scaling_mode {
+            Some("min") => unit_vector_plotter
+                .bound_min(scaling_args.unwrap()[0])
+                .create_quiver_traces(1.0, cmap),
+            Some("max") => unit_vector_plotter
+                .bound_max(scaling_args.unwrap()[0])
+                .create_quiver_traces(1.0, cmap),
+            Some("minmax") => unit_vector_plotter
+                .bound_min_max(scaling_args.unwrap()[0], scaling_args.unwrap()[1])
+                .create_quiver_traces(1.0, cmap),
+            Some("half_node") => {
+                let dx = unit_vector_plotter.x()[1] - unit_vector_plotter.x()[0];
+                let dy = unit_vector_plotter.y()[1] - unit_vector_plotter.y()[0];
                 unit_vector_plotter
-                    .bound_min(scaling_args[0])
-                    .create_quiver_traces()
-            } else {
-                return Err(PyValueError::new_err(
-                    "A valid scaling argument is required.",
-                ));
+                    .bound_half_node(dx, dy)
+                    .create_quiver_traces(1.0, cmap)
             }
-        } else if scaling_mode == "max" {
-            if let Some(scaling_args) = scaling_args {
+            Some("full_node") => {
+                let dx = unit_vector_plotter.x()[1] - unit_vector_plotter.x()[0];
+                let dy = unit_vector_plotter.y()[1] - unit_vector_plotter.y()[0];
                 unit_vector_plotter
-                    .bound_max(scaling_args[0])
-                    .create_quiver_traces()
-            } else {
-                return Err(PyValueError::new_err(
-                    "A valid scaling argument is required.",
-                ));
+                    .bound_full_node(dx, dy)
+                    .create_quiver_traces(1.0, cmap)
             }
-        } else if scaling_mode == "minmax" {
-            if let Some(scaling_args) = scaling_args {
-                let scaling_vector = scaling_args;
-                if scaling_vector.len() < 2 {
-                    return Err(PyValueError::new_err(
-                        "Min-max scaling requires 2 arguments.",
-                    ));
-                }
-                unit_vector_plotter
-                    .bound_min_max(scaling_vector[0], scaling_vector[1])
-                    .create_quiver_traces()
-            } else {
-                return Err(PyValueError::new_err(
-                    "A valid scaling argument is required.",
-                ));
-            }
-        } else if scaling_mode == "half_node" {
-            let dx = unit_vector_plotter.x()[1] - unit_vector_plotter.x()[0];
-            let dy = unit_vector_plotter.y()[1] - unit_vector_plotter.y()[0];
-            unit_vector_plotter
-                .bound_half_node(dx, dy)
-                .create_quiver_traces()
-        } else if scaling_mode == "full_node" {
-            let dx = unit_vector_plotter.x()[1] - unit_vector_plotter.x()[0];
-            let dy = unit_vector_plotter.y()[1] - unit_vector_plotter.y()[0];
-            unit_vector_plotter
-                .bound_full_node(dx, dy)
-                .create_quiver_traces()
-        } else {
-            return Err(PyValueError::new_err("Invalid scaling mode provided, valid types are: 'none', 'min', 'max', 'minmax', 'half_node', 'full_node'."));
+            None => unit_vector_plotter.create_quiver_traces(1.0, cmap),
         };
         for trace in unit_vector_traces {
             traces.push(trace)
@@ -240,14 +185,17 @@ impl PyPlotter2D {
     }
 
     // BUG something isn't being done correctly as the square axes aren't behaving
-    #[pyo3(signature = (grid_type, axis, selection = "depth_average", index = None))]
+    #[pyo3(signature = (grid_type, axis, selection = "depth_average", index = None, colour_map = "viridis"))]
     fn _scalar_map(
         &mut self,
         grid_type: &str,
         axis: usize,
         selection: &str,
         index: Option<usize>,
+        colour_map: Option<&str>,
     ) -> PyResult<()> {
+        // Arguments are checked for validity at the Python layer, so we can relax
+        // checks here.
         let scalar_plotter = if grid_type == "vector_grid" {
             let grid = self
                 .grid
@@ -257,39 +205,17 @@ impl PyPlotter2D {
                 .clone();
             if selection == "depth_average" {
                 ScalarMap::from_vector_grid_depth_averaged(grid, axis)
-            } else if selection == "plane" {
-                if let Some(index) = index {
-                    ScalarMap::from_vector_grid_single_plane(grid, axis, index)
-                } else {
-                    return Err(PyValueError::new_err(
-                        "A valid index is required to select an individual plane.",
-                    ));
-                }
             } else {
-                return Err(PyValueError::new_err(
-                    "Valid selection modes are 'depth_average' and 'plane' only.",
-                ));
+                ScalarMap::from_vector_grid_single_plane(grid, axis, index.unwrap())
             }
-        } else if grid_type == "grid" {
+        } else {
+            // type == "grid"
             let grid = self.grid.clone();
             if selection == "depth_average" {
                 ScalarMap::from_grid_depth_averaged(grid, axis)
-            } else if selection == "plane" {
-                if let Some(index) = index {
-                    ScalarMap::from_grid_single_plane(grid, axis, index)
-                } else {
-                    return Err(PyValueError::new_err(
-                        "A valid index is required to select an individual plane.",
-                    ));
-                }
             } else {
-                return Err(PyValueError::new_err(
-                    "Valid selection modes are 'depth_average' and 'plane' only.",
-                ));
+                ScalarMap::from_grid_single_plane(grid, axis, index.unwrap())
             }
-        } else {
-            return Err(PyValueError::new_err("Valid grid types are 'vector_grid' and 'grid' only. This was set implicitly
-                        by the Plotter2D class and you shouldn't be seeing this error. Please contact the developers."));
         };
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
         let heatmap_traces = scalar_plotter.create_scalar_map();
@@ -305,14 +231,17 @@ impl PyPlotter2D {
     }
 
     // BUG something isn't being done correctly as the square axes aren't behaving
-    #[pyo3(signature = (grid_type, axis, selection = "depth_average", index = None))]
+    #[pyo3(signature = (grid_type, axis, selection = "depth_average", index = None, colour_map = "viridis"))]
     fn _scalar_contour(
         &mut self,
         grid_type: &str,
         axis: usize,
         selection: &str,
         index: Option<usize>,
+        colour_map: Option<&str>,
     ) -> PyResult<()> {
+        // Arguments are checked for validity at the Python layer, so we can relax
+        // checks here.
         let scalar_plotter = if grid_type == "vector_grid" {
             let grid = self
                 .grid
@@ -322,39 +251,17 @@ impl PyPlotter2D {
                 .clone();
             if selection == "depth_average" {
                 ScalarContour::from_vector_grid_depth_averaged(grid, axis)
-            } else if selection == "plane" {
-                if let Some(index) = index {
-                    ScalarContour::from_vector_grid_single_plane(grid, axis, index)
-                } else {
-                    return Err(PyValueError::new_err(
-                        "A valid index is required to select an individual plane.",
-                    ));
-                }
             } else {
-                return Err(PyValueError::new_err(
-                    "Valid selection modes are 'depth_average' and 'plane' only.",
-                ));
+                ScalarContour::from_vector_grid_single_plane(grid, axis, index.unwrap())
             }
-        } else if grid_type == "grid" {
+        } else {
+            // type == "grid"
             let grid = self.grid.clone();
             if selection == "depth_average" {
                 ScalarContour::from_grid_depth_averaged(grid, axis)
-            } else if selection == "plane" {
-                if let Some(index) = index {
-                    ScalarContour::from_grid_single_plane(grid, axis, index)
-                } else {
-                    return Err(PyValueError::new_err(
-                        "A valid index is required to select an individual plane.",
-                    ));
-                }
             } else {
-                return Err(PyValueError::new_err(
-                    "Valid selection modes are 'depth_average' and 'plane' only.",
-                ));
+                ScalarContour::from_grid_single_plane(grid, axis, index.unwrap())
             }
-        } else {
-            return Err(PyValueError::new_err("Valid grid types are 'vector_grid' and 'grid' only. This was set implicitly
-                        by the Plotter2D class and you shouldn't be seeing this error. Please contact the developers."));
         };
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
         let contour_traces = scalar_plotter.create_scalar_contour();
@@ -626,5 +533,50 @@ impl PyPlotter2D {
     #[getter]
     fn get_plotting_string(&self) -> PyResult<String> {
         Ok(self.plotting_string.to_owned())
+    }
+}
+
+impl PyPlotter2D {
+    fn get_gradient(&self, colour_map: &str) -> Gradient {
+        // Once we get reflection, maybe this will look less bad??
+        match colour_map {
+            "turbo" => colorous::TURBO,
+            "viridis" => colorous::VIRIDIS,
+            "inferno" => colorous::INFERNO,
+            "spectral" => colorous::SPECTRAL,
+            "magma" => colorous::MAGMA,
+            "plasma" => colorous::PLASMA,
+            "cividis" => colorous::CIVIDIS,
+            "warm" => colorous::WARM,
+            "cool" => colorous::COOL,
+            "cubehelix" => colorous::CUBEHELIX,
+            "blue_green" => colorous::BLUE_GREEN,
+            "blue_purple" => colorous::BLUE_PURPLE,
+            "green_blue" => colorous::GREEN_BLUE,
+            "orange_red" => colorous::ORANGE_RED,
+            "purple_blue_green" => colorous::PURPLE_BLUE_GREEN,
+            "purple_blue" => colorous::PURPLE_BLUE,
+            "purple_red" => colorous::PURPLE_RED,
+            "red_purple" => colorous::RED_PURPLE,
+            "yellow_green_blue" => colorous::YELLOW_GREEN_BLUE,
+            "yellow_green" => colorous::YELLOW_GREEN,
+            "yellow_orange_brown" => colorous::YELLOW_ORANGE_BROWN,
+            "yellow_orange_red" => colorous::YELLOW_ORANGE_RED,
+            "blues" => colorous::BLUES,
+            "greens" => colorous::GREENS,
+            "greys" => colorous::GREYS,
+            "oranges" => colorous::ORANGES,
+            "purples" => colorous::PURPLES,
+            "reds" => colorous::REDS,
+            "brown_green" => colorous::BROWN_GREEN,
+            "purple_green" => colorous::PURPLE_GREEN,
+            "pink_green" => colorous::PINK_GREEN,
+            "purple_orange" => colorous::PURPLE_ORANGE,
+            "red_blue" => colorous::RED_BLUE,
+            "red_grey" => colorous::RED_GREY,
+            "red_yellow_blue" => colorous::RED_YELLOW_BLUE,
+            "red_yellow_green" => colorous::RED_YELLOW_GREEN,
+            "spectral" => colorous::SPECTRAL,
+        }
     }
 }

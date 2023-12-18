@@ -30,7 +30,7 @@ impl ParityContour {
         };
         let i = usize::from(axis == 0);
         let j = if axis == 0 || axis == 1 { 2 } else { 1 };
-        let (x, y) = meshgrid(x, y);
+        let (x, y) = meshgrid(&x, &y);
 
         let ref_u = reference_grid.data[i].collapse(axis);
         let ref_v = reference_grid.data[j].collapse(axis);
@@ -82,7 +82,7 @@ impl ParityContour {
         };
         let i = usize::from(axis == 0);
         let j = if axis == 0 || axis == 1 { 2 } else { 1 };
-        let (x, y) = meshgrid(x, y);
+        let (x, y) = meshgrid(&x, &y);
 
         let ref_u = reference_grid.data[i]
             .get_data()
@@ -144,7 +144,7 @@ impl ParityContour {
             reference_grid.get_ypositions().to_owned()
         };
 
-        let (x, y) = meshgrid(x, y);
+        let (x, y) = meshgrid(&x, &y);
 
         let reference_data = reference_grid.collapse(axis);
 
@@ -179,7 +179,7 @@ impl ParityContour {
             reference_grid.get_ypositions().to_owned()
         };
 
-        let (x, y) = meshgrid(x, y);
+        let (x, y) = meshgrid(&x, &y);
 
         let reference_data = reference_grid
             .get_data()
@@ -252,15 +252,4 @@ impl ParityContour {
             delta,
         }
     }
-}
-
-// TODO tests
-#[cfg(test)]
-mod test {
-
-    use super::*;
-
-    // Helper functions
-
-    // Tests
 }

@@ -8,6 +8,7 @@ authors = ["Dominik Werner, Daniel Weston"]
 name = "upppp_rust"
 crate-type = ["cdylib", "rlib"]
 
+# TODO consider using thiserror for error handling
 [dependencies]
 anyhow = "1.0.69"
 colorous = "1.0.5"

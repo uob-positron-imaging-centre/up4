@@ -41,3 +41,5 @@ for the selected plane.
 
 Parity Contour
 --------------
+
+.. TODO include using dicts in formatting

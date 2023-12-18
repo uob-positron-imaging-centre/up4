@@ -192,7 +192,7 @@ instead following a functional paradigm. Thus, the choice was made that ``up4`` 
 expose the figure in a manner compatible with the language's API.
 
 Finally, saving static plotly images to a required dpi is supported in ``up4``:
-
+.. TODO include using dicts
 .. code-block:: python
 
     # create a plot

@@ -1,6 +1,7 @@
 use crate::plotting::plotting_2d::Arrow;
 use crate::utilities::maths::meshgrid;
 use crate::{grid::VectorGrid, GridFunctions3D};
+use colorous::Gradient;
 use derive_getters::Getters;
 use itertools::izip;
 use ndarray::{Array1, Array2, Zip};
@@ -126,7 +127,7 @@ impl QuiverPlot {
             .for_each(|a, &v, &u| {
                 *a = f64::atan2(v, u);
             });
-        let (x, y) = meshgrid(self.x.to_owned(), self.y.to_owned());
+        let (x, y) = meshgrid(self.x(), self.y());
 
         // find angles for either side of arrow
         let arrow_angle_1: Array2<f64> = &barb_angles + ANGLE;
@@ -164,11 +165,16 @@ impl QuiverPlot {
     }
 
     // BUG colourbar does not appear
-    pub fn create_quiver_traces(&self, scale_ratio: f64) -> Vec<Box<dyn Trace>> {
+    // TODO ensure that creating many traces works okay for users
+    pub fn create_quiver_traces(
+        &self,
+        scale_ratio: f64,
+        colourmap: Option<Gradient>,
+    ) -> Vec<Box<dyn Trace>> {
         let arrows = self.create_arrows(scale_ratio);
         let mut traces: Vec<Box<dyn Trace>> = Vec::with_capacity(arrows.len() + 1);
-        let colours = self.normalise_colour();
-        for (arrow, colour) in izip!(arrows, &colours) {
+        let cmap_values = self.normalise_colour();
+        for (arrow, cmap_value) in izip!(arrows, &cmap_values) {
             let xs = vec![
                 arrow.base.0,
                 arrow.tip.0,
@@ -183,9 +189,10 @@ impl QuiverPlot {
                 arrow.right_point.1,
                 arrow.tip.1,
             ];
-            // TODO replace colours with our own custom implementation
-            let colourmap = colorous::VIRIDIS;
-            let colour = format!("#{:x}", colourmap.eval_continuous(*colour));
+            let colour = match colourmap {
+                Some(colourmap) => format!("#{:x}", colourmap.eval_continuous(*cmap_value)),
+                None => String::from("Black"),
+            };
             let trace = Scatter::new(xs, ys)
                 .mode(Mode::Lines)
                 .show_legend(false)
@@ -201,8 +208,8 @@ impl QuiverPlot {
             .mode(Mode::Markers)
             .marker(
                 Marker::new()
-                    .cmin(*colours.min_skipnan())
-                    .cmax(*colours.max_skipnan())
+                    .cmin(*cmap_values.min_skipnan())
+                    .cmax(*cmap_values.max_skipnan())
                     .color_scale(ColorScale::Palette(ColorScalePalette::Viridis))
                     .color_bar(ColorBar::new())
                     .size(1),
@@ -312,32 +319,4 @@ impl QuiverPlot {
 
         (&self.true_norm - min) / (max - min)
     }
-}
-
-#[cfg(test)]
-mod test {
-
-    use super::*;
-
-    // Helper functions
-
-    // fn direct_construction() -> QuiverPlot {}
-
-    // fn vector_grid() -> QuiverPlot {}
-
-    // Tests
-
-    // correct construction
-
-    // arrows created properly
-
-    // norm is adjusted properly
-
-    // scaling correctness
-
-    // colour range is determined properly
-
-    //
-
-    // traces are created properly
 }

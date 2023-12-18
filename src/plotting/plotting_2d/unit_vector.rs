@@ -3,14 +3,15 @@ use std::f64::consts::PI;
 use crate::plotting_2d::Arrow;
 use crate::utilities::maths::meshgrid;
 use crate::{GridFunctions3D, VectorGrid};
+use colorous::Gradient;
 use derive_getters::Getters;
 use itertools::izip;
 use ndarray::{Array1, Array2, Zip};
 use ndarray_stats::QuantileExt;
-use plotly::common::{Fill, Line};
+use plotly::common::{ColorScale, ColorScaleElement, Fill, Line};
 use plotly::traces::heat_map;
-use plotly::{color::NamedColor, common::Mode};
 use plotly::{HeatMap, Scatter, Trace};
+use plotly::{color::NamedColor, common::Mode};
 
 // TODO make sure that the arrow centres are in the centre of the cell
 #[derive(Getters, Clone)]
@@ -129,7 +130,7 @@ impl UnitVectorPlot {
             .for_each(|a, &v, &u| {
                 *a = f64::atan2(v, u);
             });
-        let (x, y) = meshgrid(self.x.to_owned(), self.y.to_owned());
+        let (x, y) = meshgrid(self.x(), self.y());
         // find angles for either side of arrow
         let arrow_angle_1: Array2<f64> = &barb_angles + ANGLE;
         let arrow_angle_2: Array2<f64> = &barb_angles - ANGLE;
@@ -165,7 +166,11 @@ impl UnitVectorPlot {
         arrows
     }
 
-    pub fn create_quiver_traces(&self) -> Vec<Box<dyn Trace>> {
+    pub fn create_quiver_traces(
+        &self,
+        scale_ratio: f64,
+        colourmap: Option<Gradient>,
+    ) -> Vec<Box<dyn Trace>> {
         let arrows = self.create_arrows();
         let mut traces = Vec::<Box<dyn Trace>>::with_capacity(arrows.len() + 1);
         for arrow in arrows {
@@ -192,13 +197,21 @@ impl UnitVectorPlot {
                 .line(Line::new().color(NamedColor::Black));
             traces.push(trace);
         }
-        traces.push(self.create_unit_vector_background());
+        traces.push(self.create_unit_vector_background(colourmap));
 
         traces
     }
 
-    fn create_unit_vector_background(&self) -> Box<HeatMap<f64, f64, f64>> {
-        let (x, y) = meshgrid(self.x.to_owned(), self.y.to_owned());
+    fn create_unit_vector_background(
+        &self,
+        colourmap: Option<Gradient>,
+    ) -> Box<HeatMap<f64, f64, f64>> {
+        let (x, y) = meshgrid(self.x(), self.y());
+        // let cmap = match colourmap {
+        //     Some(colourmap) => colourmap,
+        //     None => ColorScalePalette::Viridis,
+        // };
+        let cmap = self.get_colour_map(colourmap);
         let heatmap = HeatMap::new(
             x.into_raw_vec(),
             y.into_raw_vec(),
@@ -206,9 +219,26 @@ impl UnitVectorPlot {
         )
         .zsmooth(heat_map::Smoothing::False)
         .zmin(*self.true_norm.min_skipnan())
-        .zmax(*self.true_norm.min_skipnan());
+        .zmax(*self.true_norm.min_skipnan())
+        .color_scale(ColorScale::Vector(cmap));
 
         heatmap
+    }
+
+    fn get_colour_map(&self, colourmap: Option<Gradient>) -> Vec<ColorScaleElement> {
+        let n = 10;
+        let mut colour_vector = Vec::with_capacity(n);
+        let gradient = match colourmap {
+            Some(colourmap) => colourmap,
+            None => colorous::PLASMA,
+        };
+        for i in 0..=n {
+            let frac = (i as f64) / (n as f64);
+            let element = ColorScaleElement(frac, format!("#{:x}", gradient.eval_continuous(frac)));
+            colour_vector.push(element);
+        }
+
+        colour_vector
     }
 
     pub fn scale_global(mut self, scale_factor: f64) -> Self {
@@ -310,15 +340,4 @@ impl UnitVectorPlot {
 
         (&self.true_norm - min) / (max - min)
     }
-}
-
-// TODO tests
-#[cfg(test)]
-mod test {
-
-    use super::*;
-
-    // Helper functions
-
-    // Tests
 }

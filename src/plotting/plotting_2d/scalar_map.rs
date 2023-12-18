@@ -1,11 +1,13 @@
 use crate::utilities::maths::meshgrid;
 use crate::GridFunctions3D;
 use crate::VectorGrid;
+use derive_getters::Getters;
 use itertools::izip;
 use ndarray::Array1;
 use ndarray::Zip;
 use plotly::HeatMap;
 
+#[derive(Getters, Clone)]
 pub struct ScalarMap {
     x: Array1<f64>,
     y: Array1<f64>,
@@ -132,21 +134,10 @@ impl ScalarMap {
     }
 
     pub fn create_scalar_map(&self) -> Vec<Box<HeatMap<f64, f64, Vec<f64>>>> {
-        let (x, y) = meshgrid(self.x.to_owned(), self.y.to_owned());
+        let (x, y) = meshgrid(self.x(), self.y());
         let heatmap = HeatMap::new(x.into_raw_vec(), y.into_raw_vec(), self.data.to_owned());
         let trace = vec![heatmap];
 
         trace
     }
-}
-
-// TODO tests
-#[cfg(test)]
-mod test {
-
-    use super::*;
-
-    // Helper functions
-
-    // Tests
 }

@@ -2,7 +2,6 @@
 
 use plotly::{Layout, Plot, Trace};
 
-pub mod colourmap;
 pub mod plotting_2d;
 pub use plotting_2d::*;
 

@@ -45,11 +45,16 @@ We can visualise the depth-averaged velocity field, a vector quantity using
     vel_field = data.vectorfield(grid_car) # velocity vectorfield
     plotter = up4.Plotter2D(vel_field) # create a Plotter2D instance
     axis = 0 # interested in the y-z plane 
-    fig = plotter.quiver_plot(axis = axis, selection = "depth_average") # depth-average the vector grid 
-    # from here, you can customise your figure however you like 
-    fig.update_layout(width=800, height=800)
-    fig.update_xaxes(title="y position (m)")
-    fig.update_yaxes(title="z position (m)")
+    plot_layout = dict(
+        width=800, height=800,
+        xaxis=dict(title="y position (m)"),
+        yaxis=dict(title="z position (m)")
+    )
+    fig = plotter.quiver_plot(
+        axis = axis, 
+        selection = "depth_average", 
+        layout = plot_layout
+    ) # depth-average the vector grid 
 
 Alternatively, we could view just a slice of the y-z plane:
 
@@ -60,11 +65,12 @@ Alternatively, we could view just a slice of the y-z plane:
     axis = 0 # interested in the y-z plane 
     # select the y-z plane located at index 2, note that index is a required
     # argument for "plane" selection.
-    fig = plotter.quiver_plot(axis = axis, selection = "plane", index = 2)  
-    # from here, you can customise your figure however you like 
-    fig.update_layout(width=800, height=800)
-    fig.update_xaxes(title="y position (m)")
-    fig.update_yaxes(title="z position (m)")
+    fig = plotter.quiver_plot(
+        axis = axis, 
+        selection = "plane", 
+        index = 2, 
+        layout = plot_layout
+    ) # reuse the same plot_layout as before 
 
 Note that these two examples could be combined into one, as a `up4.Plotter2D` instance
 can generate multiple figures based on the input grid provided to it since its plotting
@@ -75,19 +81,27 @@ methods return a `plotly.graph_objects.Figure` instance.
     vel_field = data.vectorfield(grid_car) # velocity vectorfield
     plotter = up4.Plotter2D(vel_field) # create a Plotter2D instance
     axis = 0 # interested in the y-z plane 
+    plot_layout = dict(
+        width=800, height=800,
+        xaxis=dict(title="y position (m)"),
+        yaxis=dict(title="z position (m)")
+    )
 
-    depth_fig = plotter.quiver_plot(axis = axis, selection = "depth_average")  
-    # from here, you can customise your figure however you like 
-    depth_fig.update_layout(width=800, height=800)
-    depth_fig.update_xaxes(title="y position (m)")
-    depth_fig.update_yaxes(title="z position (m)")
+    depth_fig = plotter.quiver_plot(
+        axis = axis, 
+        selection = "depth_average", 
+        layout = plot_layout
+    )  
 
-    # the same Plotter2D instance as above is used here to generate a different figure
-    plane_fig = plotter.quiver_plot(axis = axis, selection = "plane", index = 2)  
-    # from here, you can customise your figure however you like 
-    plane_fig.update_layout(width=800, height=800)
-    plane_fig.update_xaxes(title="y position (m)")
-    plane_fig.update_yaxes(title="z position (m)")
+    # The same Plotter2D instance as above is used here to generate a different figure
+    # but with the same layout!
+    plane_fig = plotter.quiver_plot(
+        axis = axis, 
+        selection = "plane", 
+        index = 2, 
+        layout = plot_layout
+    )  
+
 
 Arrow Scaling
 -------------
@@ -120,22 +134,39 @@ Let's see some examples of these in action, shall we?
     axis = 0 # interested in the y-z plane 
 
     # all arrows at least as long as 0.1 units
-    min_fig = plotter.quiver_plot(axis = axis, selection = "depth_average", 
-                                    scaling_mode = "min", scaling_args = [0.1])  
+    min_fig = plotter.quiver_plot(
+        axis = axis, 
+        selection = "depth_average", 
+        scaling_mode = "min", 
+        min_size = 0.1
+    )  
     # all arrows are no longer than 0.5 units
-    max_fig = plotter.quiver_plot(axis = axis, selection = "depth_average", 
-                                    scaling_mode = "min", scaling_args = [0.5]) 
+    max_fig = plotter.quiver_plot(
+        axis = axis, 
+        selection = "depth_average", 
+        scaling_mode = "max", 
+        max_size = 0.5
+    ) 
     # all arrows are at least 0.1 units long, but no longer than 0.5 units
-    minmax_fig = plotter.quiver_plot(axis = axis, selection = "depth_average", 
-                                    scaling_mode = "min", scaling_args = [0.1, 0.5])
+    minmax_fig = plotter.quiver_plot(
+        axis = axis, 
+        selection = "depth_average", 
+        scaling_mode = "minmax", 
+        min_size = 0.1, 
+        max_size = 0.5
+    )
     # all arrows have lengths no longer than 0.5*sqrt(dx**2 + dy**2)
-    half_node_fig = plotter.quiver_plot(axis = axis, selection = "depth_average", 
-                                    scaling_mode = "half_node")
+    half_node_fig = plotter.quiver_plot(
+        axis = axis, 
+        selection = "depth_average", 
+        scaling_mode = "half_node"
+    )
     # all arrows have lengths no longer than sqrt(dx**2 + dy**2)
-    full_node_fig = plotter.quiver_plot(axis = axis, selection = "depth_average", 
-                                    scaling_mode = "full_node")
-
-Notice that `scaling_args` *must* be a list!
+    full_node_fig = plotter.quiver_plot(
+        axis = axis, 
+        selection = "depth_average", 
+        scaling_mode = "full_node"
+    )
 
 Unit Vector Plot
 ================
@@ -152,12 +183,15 @@ two plots are:
     vel_field = data.vectorfield(grid_car) # velocity vectorfield
     plotter = up4.Plotter2D(vel_field) # create a Plotter2D instance
     axis = 0 # interested in the y-z plane 
-
-    depth_fig = plotter.unit_vector_plot(axis = axis, selection = "depth_average")  
-    # from here, you can customise your figure however you like 
-    depth_fig.update_layout(width=800, height=800)
-    depth_fig.update_xaxes(title="y position (m)")
-    depth_fig.update_yaxes(title="z position (m)")
+    plot_layout = dict(
+        width=800, height=800,
+        xaxis=dict(title="y position (m)"),
+        yaxis=dict(title="z position (m)")
+    )
+    depth_fig = plotter.unit_vector_plot(
+        axis = axis, 
+        selection = "depth_average"
+        layout = plot_layout)  
 
 As before, perhaps we may be interested in a specific plane:
 
@@ -167,23 +201,26 @@ As before, perhaps we may be interested in a specific plane:
     plotter = up4.Plotter2D(vel_field) # create a Plotter2D instance
     axis = 0 # interested in the y-z plane 
     # the same Plotter2D instance as above is used here to generate a different figure
-    plane_fig = plotter.quiver_plot(axis = axis, selection = "plane", index = 2)  
-    # from here, you can customise your figure however you like 
-    plane_fig.update_layout(width=800, height=800)
-    plane_fig.update_xaxes(title="y position (m)")
-    plane_fig.update_yaxes(title="z position (m)")
+    plane_fig = plotter.quiver_plot(
+        axis = axis, 
+        selection = "plane", 
+        index = 2, 
+        layout = plot_layout
+    ) # reuse the same plot_layout as before  
 
-Note that the plots discussed in the tutorials for :ref:`scalar plotting <scalarplots>`
-and :ref:`data comparison <datacomparison>` can also be used on the dataset used in these
+Note that the plots discussed in the tutorials for :ref:`scalar plotting <scalarplots>` 
+can also be used on the dataset used in these
 tutorials, with the same `up4.Plotter2D` instance!
 
-Formatting
-==========
+Formatting Vector Plots
+=======================
 
 The methods of `up4.Plotter2D` return `plotly.graph_objects.Figure` instances, so you can
 customise your plots to the same level of detail as natively using plotly. Examples of
-this are shown at the bottom of each code block, where the x- and y-axes have been given
-labels, and the colourbar has been given a title. 
+this are shown in each code block, where the x- and y-axes have been given
+labels, and the colourbar has been given a title. At the Python level, you can either pass
+dictionaries of `plotly.graph_objects.Layout` and `trace` style specifications, or 
+interact with the returned `plotly.graph_objects.Figure` instance directly.
 
 The choice to do this is deliberate as the plotly API in Python and Rust is *substantially*
 different. In Python, it is a fully object-oriented approach with a myriad of optional
@@ -192,7 +229,7 @@ instead following a functional paradigm. Thus, the choice was made that ``up4`` 
 expose the figure in a manner compatible with the language's API.
 
 Finally, saving static plotly images to a required dpi is supported in ``up4``:
-.. TODO include using dicts
+
 .. code-block:: python
 
     # create a plot
@@ -204,12 +241,17 @@ Finally, saving static plotly images to a required dpi is supported in ``up4``:
     vel_field = data.vectorfield(grid_car) # velocity vectorfield
     plotter = up4.Plotter2D(vel_field) # create a Plotter2D instance
     axis = 0 # interested in the y-z plane 
+    plot_layout = dict(
+        width=800, height=800,
+        xaxis=dict(title="y position (m)"),
+        yaxis=dict(title="z position (m)")
+    )
 
-    depth_fig = plotter.unit_vector_plot(axis = axis, selection = "depth_average")  
-    # from here, you can customise your figure however you like 
-    depth_fig.update_layout(width=800, height=800)
-    depth_fig.update_xaxes(title="y position (m)")
-    depth_fig.update_yaxes(title="z position (m)")
+    depth_fig = plotter.unit_vector_plot(
+        axis = axis, 
+        selection = "depth_average", 
+        layout = plot_layout
+    )  
 
     # now, save it with a required dpi
     dpi = 600 # typical requirement for many journals

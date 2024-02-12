@@ -10,8 +10,8 @@ use ndarray::{Array1, Array2, Zip};
 use ndarray_stats::QuantileExt;
 use plotly::common::{ColorScale, ColorScaleElement, Fill, Line};
 use plotly::traces::heat_map;
-use plotly::{HeatMap, Scatter, Trace};
 use plotly::{color::NamedColor, common::Mode};
+use plotly::{HeatMap, Scatter, Trace};
 
 // TODO make sure that the arrow centres are in the centre of the cell
 #[derive(Getters, Clone)]
@@ -207,19 +207,20 @@ impl UnitVectorPlot {
         colourmap: Option<Gradient>,
     ) -> Box<HeatMap<f64, f64, f64>> {
         let (x, y) = meshgrid(self.x(), self.y());
-        // let cmap = match colourmap {
-        //     Some(colourmap) => colourmap,
-        //     None => ColorScalePalette::Viridis,
-        // };
         let cmap = self.get_colour_map(colourmap);
+        // let mut z = Vec::with_capacity(self.true_norm.dim().0);
+        // for row in self.true_norm.rows() {
+        //     let mut inner_vec = Vec::with_capacity(row.len());
+        //     for val in row {
+        //         inner_vec.push(*val);
+        //     }
+        //     z.push(inner_vec);
+        // }
         let heatmap = HeatMap::new(
             x.into_raw_vec(),
             y.into_raw_vec(),
             self.true_norm.to_owned().into_raw_vec(),
         )
-        .zsmooth(heat_map::Smoothing::False)
-        .zmin(*self.true_norm.min_skipnan())
-        .zmax(*self.true_norm.min_skipnan())
         .color_scale(ColorScale::Vector(cmap));
 
         heatmap

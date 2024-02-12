@@ -327,6 +327,7 @@ impl GridFunctions3D for CartesianGrid3D {
             result_weight += &weight;
         }
         result /= &result_weight;
+
         result
     }
 
@@ -546,4 +547,33 @@ impl GridFunctions3D for CartesianGrid3D {
             );
         }
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_set_data() {
+        let limit = Dim::ThreeD([[-2.0, 2.0], [-2.0, 2.0], [-2.0, 2.0]]);
+        let n = 10;
+        let cells = [n; 3];
+        let mut grid = CartesianGrid3D::new(cells, limit);
+        let data = Array3::<f64>::zeros((n, n, n));
+        grid.set_data(data.clone());
+        assert_eq!(grid.data, data);
+    }
+
+    #[test]
+    fn test_set_weights() {
+        let limit = Dim::ThreeD([[-2.0, 2.0], [-2.0, 2.0], [-2.0, 2.0]]);
+        let n = 10;
+        let cells = [n; 3];
+        let mut grid = CartesianGrid3D::new(cells, limit);
+        let weights = Array3::<f64>::zeros((n, n, n));
+        grid.set_weights(weights.clone());
+        assert_eq!(grid.weight, weights);
+    }
+
+    // TODO test outlier removal
 }

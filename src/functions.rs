@@ -107,12 +107,12 @@ pub trait Granular: DataManager {
                 (vx.powi(2) + vy.powi(2) + vz.powi(2)).sqrt()
             }
             velocity_calc = velocity_calculation;
-        } else if mode == "x" {
+        } else if mode == "x" || mode == "r" {
             fn velocity_calculation(velocity: Array1<f64>) -> f64 {
-                velocity[2]
+                velocity[0]
             }
             velocity_calc = velocity_calculation;
-        } else if mode == "y" {
+        } else if mode == "y" || mode == "theta" {
             fn velocity_calculation(velocity: Array1<f64>) -> f64 {
                 velocity[1]
             }
@@ -124,7 +124,7 @@ pub trait Granular: DataManager {
             velocity_calc = velocity_calculation;
         } else {
             panic!(
-                "Mode {} is not valid. Valid modes are: \"absolute\", \"x\", \"y\", \"z\"",
+                "Mode {} is not valid. Valid modes are: \"absolute\", \"x\" \"r\", \"y\", \"theta\" \"z\"",
                 mode
             );
         }

@@ -35,27 +35,46 @@ The velocity field in this example can also be calculated in cylindrical coordin
 Data Visualisation
 ------------------
 
-Visualisation is done by one of the classes in :code:`up4.plotting`. These are:
+.. TODO update
 
-- :code:`up4.plotting.VectorPlotter`: Calculates the velocity vector field of the data
-- :code:`up4.plotting.ScalarPlotter`: Calculates the magnitude velocity field of the data
-- :code:`up4.plotting.ComparisonPlotter`: Calculates the number field of the data
+Visualisation is done by :code:`up4.Plotter2D`, which can visualise scalar and vector
+fields in 2D.
 
 If we reuse the example from above, plotting can be done by adding the following lines:
 
 .. code-block:: python
 
-    from up4.plotting import VectorPlotter, ScalarPlotter
+    from up4.plotting import Plotter2D
     dpi = 600 # nice quality image saving
     axis = 1 # look along y-axis
     index = 4
     vector_field = data.vector_field(grid) # for vector plotting
 
-    # plot vector field
-    vec_field_plotter = VectorPlotter(vector_field)
-    vec_field_plotter.unit_vector_plot(vector_field)
-    vec_fig = vec_field_plotter.plot()
+    # style plot
+    layout = dict(
+        title = "Velocity vector field xz projection",
+        xaxis_title = "x position (m)",
+        yaxis_title = "z position (m)",
+    )
+    style = dict(
+        colorbar_title = "Magnitude (m/s)",
+        zmin = 0.0,
+        zmax = 0.6,
+    )
 
-Which, if used on the `tests/fixtures/drum.hdf5` file, looks a little like this:
+    # plot vector field
+    vec_field_plotter = Plotter2D(vector_field)
+    vec_fig = vec_field_plotter.unit_vector_plot(
+        axis = axis, 
+        index = index, 
+        selection = "plane", 
+        layout = layout, 
+        style = style
+    )
+
+    #save plot 
+    up4.save_fig(vec_fig, "unitv.png", dpi=dpi)
+
+Which, looks a little like this:
 
 .. image:: ../_static/unitv.png

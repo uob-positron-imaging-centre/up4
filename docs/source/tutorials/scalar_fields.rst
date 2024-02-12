@@ -76,7 +76,6 @@ location along it.
     slice_x_axis = field.slice(0, 20) # slice the 3D array at the 20st cell index along x-axis
 
 alternatively, one can slice the field at a given position:
-.. // TODO give a bit more detail on how it decides which cells are returned
 
 .. code-block:: python
 

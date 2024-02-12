@@ -12,10 +12,10 @@ use crate::{
     unit_vector::UnitVectorPlot,
     GridFunctions3D, VectorGrid,
 };
-
 use colorous::Gradient;
-use plotly::{Layout, Plot, Trace};
-use pyo3::{prelude::*, exceptions::PyValueError};
+
+use plotly::{contour::Contours, layout::themes::PLOTLY_WHITE, Layout, Plot, Trace};
+use pyo3::{exceptions::PyValueError, prelude::*};
 
 #[pyclass(name = "RustPlotter2D", subclass)]
 pub struct PyPlotter2D {
@@ -49,14 +49,15 @@ impl PyPlotter2D {
 
     //TODO add scaleratio to the signature of this method
     // TODO default layout should remove the x and y axis lines
-    #[pyo3(signature = (axis, selection = "depth_average", index = None, scaling_mode = None, scaling_args = None, colour_map = "viridis"))]
+    #[pyo3(signature = (axis, selection = "depth_average", index = None, scaling_mode = None, min_size = None, max_size = None, colour_map = "viridis"))]
     fn _quiver_plot(
         &mut self,
         axis: usize,
         selection: &str,
         index: Option<usize>,
         scaling_mode: Option<&str>,
-        scaling_args: Option<Vec<f64>>,
+        min_size: Option<f64>,
+        max_size: Option<f64>,
         colour_map: Option<&str>,
     ) -> PyResult<()> {
         // Arguments are checked for validity at the Python layer, so we can relax
@@ -65,29 +66,23 @@ impl PyPlotter2D {
             .grid
             .as_any()
             .downcast_ref::<VectorGrid>()
-            .unwrap()
+            .expect("This method should only be called from data that is a vector grid.")
             .clone();
         let quiver_plotter = if selection == "depth_average" {
             QuiverPlot::from_vector_grid_depth_averaged(vector_grid, axis)
         } else {
             QuiverPlot::from_vector_grid_single_plane(vector_grid, axis, index.unwrap())
         };
-        let len = quiver_plotter.norm().len();
-        let mut traces: Vec<Box<dyn Trace>> = Vec::with_capacity(len);
-        let cmap = match colour_map {
-            Some(colour_map) => Some(self.get_gradient(colour_map)),
-            None => None,
-        };
+        let cmap = self.get_gradient(colour_map);
         let quiver_traces = match scaling_mode {
             Some("min") => quiver_plotter
-                .bound_min(scaling_args.unwrap()[0])
+                .bound_min(min_size.unwrap())
                 .create_quiver_traces(1.0, cmap),
             Some("max") => quiver_plotter
-                .bound_max(scaling_args.unwrap()[0])
+                .bound_max(max_size.unwrap())
                 .create_quiver_traces(1.0, cmap),
             Some("minmax") => quiver_plotter
-                // FIXME sort unpacking an optional vector because i forget how
-                .bound_min_max(scaling_args[0], scaling_args.unwrap()[1])
+                .bound_min_max(min_size.unwrap(), max_size.unwrap())
                 .create_quiver_traces(1.0, cmap),
             Some("half_node") => {
                 let dx = quiver_plotter.x()[1] - quiver_plotter.x()[0];
@@ -106,26 +101,28 @@ impl PyPlotter2D {
             None => quiver_plotter.create_quiver_traces(1.0, cmap),
             _ => quiver_plotter.create_quiver_traces(1.0, cmap),
         };
-
-        for trace in quiver_traces {
-            traces.push(trace)
-        }
-        let layout: Layout = Layout::new();
-        let plot: Plot = plot(traces, layout);
+        // println!("quiver_traces: {:?}", quiver_traces.len());
+        // for trace in quiver_traces {
+        //     traces.push(trace);
+        // }
+        let template = &*PLOTLY_WHITE;
+        let layout = Layout::new().template(template);
+        let plot: Plot = plot(quiver_traces, layout);
         let plotting_string = plot.to_json();
         self.plotting_string = plotting_string;
 
         Ok(())
     }
 
-    #[pyo3(signature = (axis, selection = "depth_average", index = None, scaling_mode = "none", scaling_args = None, colour_map = "viridis"))]
+    #[pyo3(signature = (axis, selection = "depth_average", index = None, scaling_mode = "none", min_size = None, max_size = None, colour_map = "viridis"))]
     fn _unit_vector_plot(
         &mut self,
         axis: usize,
         selection: &str,
         index: Option<usize>,
         scaling_mode: Option<&str>,
-        scaling_args: Option<Vec<f64>>,
+        min_size: Option<f64>,
+        max_size: Option<f64>,
         colour_map: Option<&str>,
     ) -> PyResult<()> {
         // Arguments are checked for validity at the Python layer, so we can relax
@@ -134,28 +131,23 @@ impl PyPlotter2D {
             .grid
             .as_any()
             .downcast_ref::<VectorGrid>()
-            .unwrap()
+            .expect("This method should only be called from data that is a vector grid.")
             .clone();
         let unit_vector_plotter = if selection == "depth_average" {
             UnitVectorPlot::from_vector_grid_depth_averaged(vector_grid, axis)
         } else {
             UnitVectorPlot::from_vector_grid_single_plane(vector_grid, axis, index.unwrap())
         };
-        let len = unit_vector_plotter.x().len();
-        let mut traces: Vec<Box<dyn Trace>> = Vec::with_capacity(len);
-        let cmap = match colour_map {
-            Some(colour_map) => Some(self.get_gradient(colour_map)),
-            None => None,
-        };
+        let cmap = self.get_gradient(colour_map);
         let unit_vector_traces = match scaling_mode {
             Some("min") => unit_vector_plotter
-                .bound_min(scaling_args.unwrap()[0])
+                .bound_min(min_size.unwrap())
                 .create_quiver_traces(1.0, cmap),
             Some("max") => unit_vector_plotter
-                .bound_max(scaling_args.unwrap()[0])
+                .bound_max(max_size.unwrap())
                 .create_quiver_traces(1.0, cmap),
             Some("minmax") => unit_vector_plotter
-                .bound_min_max(scaling_args.unwrap()[0], scaling_args.unwrap()[1])
+                .bound_min_max(min_size.unwrap(), max_size.unwrap())
                 .create_quiver_traces(1.0, cmap),
             Some("half_node") => {
                 let dx = unit_vector_plotter.x()[1] - unit_vector_plotter.x()[0];
@@ -171,13 +163,12 @@ impl PyPlotter2D {
                     .bound_full_node(dx, dy)
                     .create_quiver_traces(1.0, cmap)
             }
-            None => unit_vector_plotter.create_quiver_traces(1.0, cmap),
+            // None => unit_vector_plotter.create_quiver_traces(1.0, cmap),
+            _ => unit_vector_plotter.create_quiver_traces(1.0, cmap),
         };
-        for trace in unit_vector_traces {
-            traces.push(trace)
-        }
+
         let layout: Layout = Layout::new();
-        let plot: Plot = plot(traces, layout);
+        let plot: Plot = plot(unit_vector_traces, layout);
         let plotting_string = plot.to_json();
         self.plotting_string = plotting_string;
 
@@ -185,6 +176,7 @@ impl PyPlotter2D {
     }
 
     // BUG something isn't being done correctly as the square axes aren't behaving
+    // TODO remove unwrap
     #[pyo3(signature = (grid_type, axis, selection = "depth_average", index = None, colour_map = "viridis"))]
     fn _scalar_map(
         &mut self,
@@ -196,6 +188,7 @@ impl PyPlotter2D {
     ) -> PyResult<()> {
         // Arguments are checked for validity at the Python layer, so we can relax
         // checks here.
+        let cmap = self.get_gradient(colour_map);
         let scalar_plotter = if grid_type == "vector_grid" {
             let grid = self
                 .grid
@@ -218,7 +211,7 @@ impl PyPlotter2D {
             }
         };
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
-        let heatmap_traces = scalar_plotter.create_scalar_map();
+        let heatmap_traces = scalar_plotter.create_scalar_map(cmap);
         for trace in heatmap_traces {
             traces.push(trace)
         }
@@ -231,7 +224,9 @@ impl PyPlotter2D {
     }
 
     // BUG something isn't being done correctly as the square axes aren't behaving
-    #[pyo3(signature = (grid_type, axis, selection = "depth_average", index = None, colour_map = "viridis"))]
+    // TODO do something with sizes because the default is SHITE for the contour plot (too big)
+    // this may mean figuring out some optimal spacing
+    #[pyo3(signature = (grid_type, axis, selection = "depth_average", index = None, colour_map = "viridis", n_contours = 10))]
     fn _scalar_contour(
         &mut self,
         grid_type: &str,
@@ -239,15 +234,17 @@ impl PyPlotter2D {
         selection: &str,
         index: Option<usize>,
         colour_map: Option<&str>,
+        n_contours: Option<usize>,
     ) -> PyResult<()> {
         // Arguments are checked for validity at the Python layer, so we can relax
         // checks here.
+        let cmap = self.get_gradient(colour_map);
         let scalar_plotter = if grid_type == "vector_grid" {
             let grid = self
                 .grid
                 .as_any()
                 .downcast_ref::<VectorGrid>()
-                .unwrap()
+                .expect("This method should only be called from data that is a vector grid.")
                 .clone();
             if selection == "depth_average" {
                 ScalarContour::from_vector_grid_depth_averaged(grid, axis)
@@ -264,9 +261,20 @@ impl PyPlotter2D {
             }
         };
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
-        let contour_traces = scalar_plotter.create_scalar_contour();
+        let contour_traces = scalar_plotter.create_scalar_contour(cmap);
         for trace in contour_traces {
-            traces.push(trace)
+            let min = scalar_plotter.min;
+            let max = scalar_plotter.max;
+            traces.push(
+                trace
+                    .contours(
+                        Contours::new()
+                            .start(min)
+                            .end(max)
+                            .size((max - min) / n_contours.unwrap() as f64),
+                    )
+                    .auto_contour(false),
+            );
         }
         let layout: Layout = Layout::new();
         let plot: Plot = plot(traces, layout);
@@ -537,46 +545,46 @@ impl PyPlotter2D {
 }
 
 impl PyPlotter2D {
-    fn get_gradient(&self, colour_map: &str) -> Gradient {
+    fn get_gradient(&self, colour_map: Option<&str>) -> Option<Gradient> {
         // Once we get reflection, maybe this will look less bad??
         match colour_map {
-            "turbo" => colorous::TURBO,
-            "viridis" => colorous::VIRIDIS,
-            "inferno" => colorous::INFERNO,
-            "spectral" => colorous::SPECTRAL,
-            "magma" => colorous::MAGMA,
-            "plasma" => colorous::PLASMA,
-            "cividis" => colorous::CIVIDIS,
-            "warm" => colorous::WARM,
-            "cool" => colorous::COOL,
-            "cubehelix" => colorous::CUBEHELIX,
-            "blue_green" => colorous::BLUE_GREEN,
-            "blue_purple" => colorous::BLUE_PURPLE,
-            "green_blue" => colorous::GREEN_BLUE,
-            "orange_red" => colorous::ORANGE_RED,
-            "purple_blue_green" => colorous::PURPLE_BLUE_GREEN,
-            "purple_blue" => colorous::PURPLE_BLUE,
-            "purple_red" => colorous::PURPLE_RED,
-            "red_purple" => colorous::RED_PURPLE,
-            "yellow_green_blue" => colorous::YELLOW_GREEN_BLUE,
-            "yellow_green" => colorous::YELLOW_GREEN,
-            "yellow_orange_brown" => colorous::YELLOW_ORANGE_BROWN,
-            "yellow_orange_red" => colorous::YELLOW_ORANGE_RED,
-            "blues" => colorous::BLUES,
-            "greens" => colorous::GREENS,
-            "greys" => colorous::GREYS,
-            "oranges" => colorous::ORANGES,
-            "purples" => colorous::PURPLES,
-            "reds" => colorous::REDS,
-            "brown_green" => colorous::BROWN_GREEN,
-            "purple_green" => colorous::PURPLE_GREEN,
-            "pink_green" => colorous::PINK_GREEN,
-            "purple_orange" => colorous::PURPLE_ORANGE,
-            "red_blue" => colorous::RED_BLUE,
-            "red_grey" => colorous::RED_GREY,
-            "red_yellow_blue" => colorous::RED_YELLOW_BLUE,
-            "red_yellow_green" => colorous::RED_YELLOW_GREEN,
-            "spectral" => colorous::SPECTRAL,
+            Some("turbo") => Some(colorous::TURBO),
+            Some("viridis") => Some(colorous::VIRIDIS),
+            Some("inferno") => Some(colorous::INFERNO),
+            Some("spectral") => Some(colorous::SPECTRAL),
+            Some("magma") => Some(colorous::MAGMA),
+            Some("plasma") => Some(colorous::PLASMA),
+            Some("cividis") => Some(colorous::CIVIDIS),
+            Some("warm") => Some(colorous::WARM),
+            Some("cool") => Some(colorous::COOL),
+            Some("cubehelix") => Some(colorous::CUBEHELIX),
+            Some("blue_green") => Some(colorous::BLUE_GREEN),
+            Some("blue_purple") => Some(colorous::BLUE_PURPLE),
+            Some("green_blue") => Some(colorous::GREEN_BLUE),
+            Some("orange_red") => Some(colorous::ORANGE_RED),
+            Some("purple_blue_green") => Some(colorous::PURPLE_BLUE_GREEN),
+            Some("purple_blue") => Some(colorous::PURPLE_BLUE),
+            Some("purple_red") => Some(colorous::PURPLE_RED),
+            Some("red_purple") => Some(colorous::RED_PURPLE),
+            Some("yellow_green_blue") => Some(colorous::YELLOW_GREEN_BLUE),
+            Some("yellow_green") => Some(colorous::YELLOW_GREEN),
+            Some("yellow_orange_brown") => Some(colorous::YELLOW_ORANGE_BROWN),
+            Some("yellow_orange_red") => Some(colorous::YELLOW_ORANGE_RED),
+            Some("blues") => Some(colorous::BLUES),
+            Some("greens") => Some(colorous::GREENS),
+            Some("greys") => Some(colorous::GREYS),
+            Some("oranges") => Some(colorous::ORANGES),
+            Some("purples") => Some(colorous::PURPLES),
+            Some("reds") => Some(colorous::REDS),
+            Some("brown_green") => Some(colorous::BROWN_GREEN),
+            Some("purple_green") => Some(colorous::PURPLE_GREEN),
+            Some("pink_green") => Some(colorous::PINK_GREEN),
+            Some("purple_orange") => Some(colorous::PURPLE_ORANGE),
+            Some("red_blue") => Some(colorous::RED_BLUE),
+            Some("red_grey") => Some(colorous::RED_GREY),
+            Some("red_yellow_blue") => Some(colorous::RED_YELLOW_BLUE),
+            Some("red_yellow_green") => Some(colorous::RED_YELLOW_GREEN),
+            _ => None,
         }
     }
 }

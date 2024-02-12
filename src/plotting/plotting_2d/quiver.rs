@@ -6,10 +6,12 @@ use derive_getters::Getters;
 use itertools::izip;
 use ndarray::{Array1, Array2, Zip};
 use ndarray_stats::QuantileExt;
-use plotly::common::{ColorBar, ColorScale, ColorScalePalette, Fill, Line, Marker, Mode};
+use plotly::common::{
+    ColorBar, ColorScale, ColorScaleElement, Fill, Line, Marker, Mode,
+};
 use plotly::{Scatter, Trace};
 use std::f64::consts::PI;
-#[derive(Getters, Clone)]
+#[derive(Getters, Clone, Debug)]
 pub struct QuiverPlot {
     x: Array1<f64>,
     y: Array1<f64>,
@@ -112,7 +114,8 @@ impl QuiverPlot {
         }
     }
 
-    // TODO see if there's anything that I can do to preserve arrow shape if layout isn't square
+    // TODO investigate if there are means to querying the plot's aspect ratio at runtime, or if we can precompute the aspect ratio
+    // knowing the relative size of the legend
     fn create_arrows(&self, scale_ratio: f64) -> Vec<Arrow> {
         // angle between arrows
         const ANGLE: f64 = PI / 9.0;
@@ -200,18 +203,22 @@ impl QuiverPlot {
                 .fill_color(colour.clone())
                 .show_legend(false)
                 .line(Line::new().color(colour));
+
             traces.push(trace);
         }
 
-        //create an invisible marker to get the colorbar to appear - use the same map as above
+        // Create an invisible marker to get the colorbar to appear - use the same map as above
+        let cmap = self.get_colour_map(colourmap);
+        let show = colourmap.is_some(); // only show if colourmap is provided - else we just have black arrows
         let invisible_marker = Scatter::new(vec![self.x[0]], vec![self.y[0]])
             .mode(Mode::Markers)
             .marker(
                 Marker::new()
-                    .cmin(*cmap_values.min_skipnan())
-                    .cmax(*cmap_values.max_skipnan())
-                    .color_scale(ColorScale::Palette(ColorScalePalette::Viridis))
+                    .cmin(*self.true_norm().min_skipnan())
+                    .cmax(*self.true_norm().max_skipnan())
                     .color_bar(ColorBar::new())
+                    .color_scale(ColorScale::Vector(cmap))
+                    .show_scale(show)
                     .size(1),
             )
             .show_legend(false);
@@ -319,4 +326,266 @@ impl QuiverPlot {
 
         (&self.true_norm - min) / (max - min)
     }
+
+    fn get_colour_map(&self, colourmap: Option<Gradient>) -> Vec<ColorScaleElement> {
+        let n = 10;
+        let mut colour_vector = Vec::with_capacity(n);
+        let gradient = match colourmap {
+            Some(colourmap) => colourmap,
+            None => colorous::PLASMA,
+        };
+        for i in 0..=n {
+            let frac = (i as f64) / (n as f64);
+            let element = ColorScaleElement(frac, format!("#{:x}", gradient.eval_continuous(frac)));
+            colour_vector.push(element);
+        }
+
+        colour_vector
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use ndarray::Axis;
+
+    use super::*;
+    use crate::plotting_test_support::*;
+    // correct construction
+    #[test]
+    fn quiver_from_vector_grid_depth_averaged() {
+        let grid = vector_grid();
+
+        for axis in 0..=2 {
+            let quiver_plot = QuiverPlot::from_vector_grid_depth_averaged(grid.clone(), axis);
+
+            let i = usize::from(axis == 0);
+            let j = if axis == 0 || axis == 1 { 2 } else { 1 };
+            // i and j cannot be equal to the axis we are averaging along
+            assert!(i != axis);
+            assert!(j != axis);
+            let test_u = grid.data[i].collapse(axis);
+            let test_v = grid.data[j].collapse(axis);
+            let delta_u = &test_u - &quiver_plot.u;
+            let delta_v = &test_v - &quiver_plot.v;
+            // check all elements of delta_u are less than a certain tolerance
+            delta_u.iter().for_each(|&u| assert!(u.abs() < 1e-10));
+            delta_v.iter().for_each(|&v| assert!(v.abs() < 1e-10));
+        }
+    }
+
+    // TODO make these tests less bad
+    #[test]
+    fn quiver_from_vector_grid_single_plane() {
+        let grid = vector_grid();
+        for axis in 0..=2 {
+            let i = usize::from(axis == 0);
+            let j = if axis == 0 || axis == 1 { 2 } else { 1 };
+            for index in 0..grid.data[i].get_data().len_of(Axis(axis)) {
+                let quiver_plot =
+                    QuiverPlot::from_vector_grid_single_plane(grid.clone(), axis, index);
+                let test_u = grid.data[i].get_data().index_axis(Axis(axis), index);
+                let test_v = grid.data[j].get_data().index_axis(Axis(axis), index);
+                let delta_u = &test_u - &quiver_plot.u;
+                let delta_v = &test_v - &quiver_plot.v;
+                // check all elements of delta_u are less than a certain tolerance
+                delta_u.iter().for_each(|&x| assert!(x.abs() < 1e-10));
+                delta_v.iter().for_each(|&x| assert!(x.abs() < 1e-10));
+            }
+        }
+    }
+
+    #[test]
+    fn min_scaling() {
+        let grid = vector_grid();
+        let axis = 1;
+        let index = 0;
+        let quiver_plot = QuiverPlot::from_vector_grid_single_plane(grid.clone(), axis, index);
+        let scale_factor = 0.1;
+        let quiver_plot = quiver_plot.bound_min(scale_factor);
+        let i = usize::from(axis == 0);
+        let j = if axis == 0 || axis == 1 { 2 } else { 1 };
+        let mut test_u = &quiver_plot.u / &grid.data[i].get_data().index_axis(Axis(axis), index);
+        let mut test_v = &quiver_plot.v / &grid.data[j].get_data().index_axis(Axis(axis), index);
+        // Here we define 0/0 as scale_factor because the scaling factor is essentially not applied to zero values
+        test_u.mapv_inplace(|x| if x.is_nan() { scale_factor } else { x });
+        test_v.mapv_inplace(|x| if x.is_nan() { scale_factor } else { x });
+        // Check that u and v are greater than or equal to the scale factor
+        test_u
+            .iter()
+            .for_each(|&u| assert!((u.abs() - scale_factor) >= -1e-10));
+        test_v
+            .iter()
+            .for_each(|&v| assert!((v.abs() - scale_factor) >= -1e-10));
+        // Check that the norms are greater than or equal to the scale factor
+        quiver_plot
+            .norm
+            .iter()
+            .for_each(|&n| assert!(n >= scale_factor));
+    }
+    #[test]
+    fn max_scaling() {
+        let grid = vector_grid();
+        let axis = 1;
+        let index = 0;
+        let quiver = QuiverPlot::from_vector_grid_single_plane(grid.clone(), axis, index);
+        let scale_factor = 0.5;
+        let quiver = quiver.bound_max(scale_factor);
+        let i = usize::from(axis == 0);
+        let j = if axis == 0 || axis == 1 { 2 } else { 1 };
+        let mut test_u = &quiver.u / &grid.data[i].get_data().index_axis(Axis(axis), index);
+        let mut test_v = &quiver.v / &grid.data[j].get_data().index_axis(Axis(axis), index);
+        // Here we define 0/0 as scale_factor because the scaling factor is essentially not applied to zero values
+        test_u.mapv_inplace(|x| if x.is_nan() { scale_factor } else { x });
+        test_v.mapv_inplace(|x| if x.is_nan() { scale_factor } else { x });
+        // Check that u and v are at less than or equal to the scale factor
+        test_u
+            .iter()
+            .for_each(|&u| assert!((u.abs() - scale_factor) <= 1e-10));
+        test_v
+            .iter()
+            .for_each(|&v| assert!((v.abs() - scale_factor) <= 1e-10));
+        // Check that the norms are less than or equal to the scale factor
+        quiver.norm.iter().for_each(|&n| assert!(n <= scale_factor));
+    }
+    #[test]
+    fn min_max_scaling() {
+        let grid = vector_grid();
+        let axis = 1;
+        let index = 0;
+        let quiver = QuiverPlot::from_vector_grid_single_plane(grid.clone(), axis, index);
+        let max_size = 0.5;
+        let min_size = 0.1;
+        let i = usize::from(axis == 0);
+        let j = if axis == 0 || axis == 1 { 2 } else { 1 };
+        let quiver = quiver.bound_min_max(min_size, max_size);
+        let mut test_u = &quiver.u / &grid.data[i].get_data().index_axis(Axis(axis), index);
+        let mut test_v = &quiver.v / &grid.data[j].get_data().index_axis(Axis(axis), index);
+        // Here we define 0/0 as min_size because the scaling factor is essentially not applied to zero values
+        test_u.mapv_inplace(|x| if x.is_nan() { min_size } else { x });
+        test_v.mapv_inplace(|x| if x.is_nan() { min_size } else { x });
+        // Check that u and v are less than or equal to the scale factor
+        test_u
+            .iter()
+            .for_each(|&u| assert!((u.abs() - max_size) <= 1e-10));
+        test_v
+            .iter()
+            .for_each(|&v| assert!((v.abs() - max_size) <= 1e-10));
+        // Also check that u and v are greater than or equal to the scale factor
+        test_u
+            .iter()
+            .for_each(|&u| assert!((u.abs() - min_size) >= -1e-10));
+        test_v
+            .iter()
+            .for_each(|&v| assert!((v.abs() - min_size) >= -1e-10));
+        // Check that the norms are less than or equal to the scale factor
+        quiver.norm.iter().for_each(|&n| assert!(n <= max_size));
+        // Also check that they are greater than or equal to the scale factor
+        quiver.norm.iter().for_each(|&n| assert!(n >= min_size));
+    }
+    #[test]
+    fn half_node_scaling() {
+        let grid = vector_grid();
+        let axis = 1;
+        let index = 0;
+        let quiver = QuiverPlot::from_vector_grid_single_plane(grid.clone(), axis, index);
+        let dx = 0.5;
+        let dy = 0.5;
+        let quiver = quiver.bound_half_node(dx, dy);
+        let largest_norm = *quiver.norm().max_skipnan();
+        let mut test_u = &quiver.u * 0.5 * dx / largest_norm;
+        let mut test_v = &quiver.v * 0.5 * dy / largest_norm;
+        // Here we define 0/0 as 0.5 * dx / largest_norm because the scaling factor is essentially not applied to zero values
+        test_u.mapv_inplace(|x| {
+            if x.is_nan() {
+                0.5 * dx / largest_norm
+            } else {
+                x
+            }
+        });
+        test_v.mapv_inplace(|x| {
+            if x.is_nan() {
+                0.5 * dy / largest_norm
+            } else {
+                x
+            }
+        });
+        // Check that u and v are less than or equal to the scale factor
+        test_u
+            .iter()
+            .for_each(|&u| assert!((u.abs() - 0.5 * dx / largest_norm) <= 1e-10));
+        test_v
+            .iter()
+            .for_each(|&v| assert!((v.abs() - 0.5 * dy / largest_norm) <= 1e-10));
+        // Check that the norms are less than or equal to the scale factor
+        quiver
+            .norm
+            .iter()
+            .for_each(|&n| assert!(n <= 0.5 * dx / largest_norm));
+    }
+    #[test]
+    fn full_node_scaling() {
+        let grid = vector_grid();
+        let axis = 1;
+        let index = 0;
+        let quiver = QuiverPlot::from_vector_grid_single_plane(grid.clone(), axis, index);
+        let dx = 0.5;
+        let dy = 0.5;
+        let quiver = quiver.bound_full_node(dx, dy);
+        let largest_norm = *quiver.norm().max_skipnan();
+        let mut test_u = &quiver.u * dx / largest_norm;
+        let mut test_v = &quiver.v * dy / largest_norm;
+        // Here we define 0/0 as dx / largest_norm because the scaling factor is essentially not applied to zero values
+        test_u.mapv_inplace(|x| if x.is_nan() { dx / largest_norm } else { x });
+        test_v.mapv_inplace(|x| if x.is_nan() { dy / largest_norm } else { x });
+        // Check that u and v are less than or equal to the scale factor
+        test_u
+            .iter()
+            .for_each(|&u| assert!((u.abs() - dx / largest_norm) <= 1e-10));
+        test_v
+            .iter()
+            .for_each(|&v| assert!((v.abs() - dy / largest_norm) <= 1e-10));
+        // Check that the norms are less than or equal to the scale factor
+        quiver
+            .norm
+            .iter()
+            .for_each(|&n| assert!(n <= dx / largest_norm));
+    }
+    #[test]
+    fn norm_correctness() {
+        // check for each axis and index
+        let grid = vector_grid();
+        for axis in 0..=2 {
+            for index in 0..grid.data[0].get_data().len_of(Axis(axis)) {
+                let quiver_plot =
+                    QuiverPlot::from_vector_grid_single_plane(grid.clone(), axis, index);
+                let mut norm = Array2::zeros(quiver_plot.u.dim());
+                Zip::from(&mut norm)
+                    .and(&quiver_plot.u)
+                    .and(&quiver_plot.v)
+                    .for_each(|n, &u, &v| {
+                        *n = f64::hypot(u, v);
+                    });
+                let delta = &norm - &quiver_plot.norm;
+                delta.iter().for_each(|&x| assert!(x.abs() < 1e-10));
+            }
+        }
+
+        // now with depth-averaging
+        for axis in 0..=2 {
+            let quiver_plot = QuiverPlot::from_vector_grid_depth_averaged(grid.clone(), axis);
+            let mut norm = Array2::zeros(quiver_plot.u.dim());
+            Zip::from(&mut norm)
+                .and(&quiver_plot.u)
+                .and(&quiver_plot.v)
+                .for_each(|n, &u, &v| {
+                    *n = f64::hypot(u, v);
+                });
+            let delta = &norm - &quiver_plot.norm;
+            delta.iter().for_each(|&x| assert!(x.abs() < 1e-10));
+        }
+    }
+    #[test]
+    fn colour_range() {}
+    #[test]
+    fn trace_creation() {}
 }

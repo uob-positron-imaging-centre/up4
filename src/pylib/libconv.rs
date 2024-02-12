@@ -206,12 +206,12 @@ impl PyConverter {
     /// method : str, optional
     ///     Method to use to convert the CSV file. Can be one of the following:
     ///
-    /// - `chain`: The particles are chained in the file, i.e. the first particle
-    ///              is followed by the second, the second by the third, etc.
-    ///            all particles are stored in one file
-    ///         -  id_line: This algorithm sorts the particles by their id column and
-    ///            their time column. The `columns` argument must contain the
-    ///            id column as the first element.
+    ///     - `chain`: The particles are chained in the file, i.e. the first particle 
+    ///         is followed by the second, the second by the third, etc.
+    ///         all particles are stored in one file
+    ///     -  id_line: This algorithm sorts the particles by their id column and
+    ///         their time column. The `columns` argument must contain the
+    ///         id column as the first element.
     ///
     ///     , by default chain
     ///

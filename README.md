@@ -1,4 +1,4 @@
-# up4: Universal Post-Processor for Particulate Processes
+<h1><img src="docs/source/_static/logo.jpeg" width = "70px", style = "float: right">up4: Universal Post-Processor for Particulate Processes</h1>
 
 ![example workflow](https://github.com/uob-positron-imaging-centre/up4/actions/workflows/main.yaml/badge.svg)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)

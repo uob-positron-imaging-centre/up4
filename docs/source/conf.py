@@ -203,10 +203,7 @@ html_theme_options = {
     #         "icon": "fas fa-arrow-circle-down",
     #     },
     # ],
-    "switcher": dict(
-        json_url = "./_static/version.json",
-        version_match = version_match
-    )
+    "switcher": dict(json_url="./_static/version.json", version_match=version_match),
 }
 
 html_context = {

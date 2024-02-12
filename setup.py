@@ -40,7 +40,7 @@ with open("README.md", "r") as f:
 setup(
     name="up4",
     version="0.1.0",
-    author=("Dominik Werner <dxw963@bham.ac.uk>"),
+    author="Dominik Werner <dxw963@bham.ac.uk>",
     classifiers=[
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Development Status :: 2 - Pre-Alpha",

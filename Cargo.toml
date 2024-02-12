@@ -20,13 +20,13 @@ hdf5 = { git = "https://github.com/aldanor/hdf5-rust.git" }
 indicatif = "=0.17.7"
 itertools = "0.10.1"
 natord = "1.0.9"
-ndarray = "0.15"
+ndarray = "0.15.6"
 ndarray-csv = { version = "0.5.1" }
 ndarray-stats = "0.5.0"
 num-traits = "0.2.14"
 numpy = "0.20.0"
 #plotly = "0.8.4"
-plotly = { git = "https://github.com/DanW97/plotly.git", features = ["plotly_ndarray"] }
+plotly = { git = "https://github.com/DanW97/plotly.git"}
 polyfit-rs = "0.2.0"
 pyo3 = { version = "0.20.0", features = ["extension-module"] }
 rayon = "1.5.3"

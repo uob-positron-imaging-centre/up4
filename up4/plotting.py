@@ -10,14 +10,14 @@
 from __future__ import annotations
 from plotly.io import from_json
 import plotly
-from upppp_rust import RustPlotter2D, RustGrid, VectorGrid
+from upppp_rust import RustPlotter2D, RustGrid, RustVectorGrid
 from .grid import Grid
 
 
 def save_fig(
     fig: plotly.graph_objects.Figure,
     filename: str,
-    dpi: int,
+    dpi: int = 600,
     border_width: int = 20,
     paper_width: int = 210,
 ) -> None:
@@ -30,8 +30,8 @@ def save_fig(
         Plotly figure to save.
     filename : str
         Filename for saved figure.
-    dpi : int
-        DPI value for image.
+    dpi : int, optional
+        DPI value for image, by default 600 dots per inch.
     border_width : int, optional
         Width of margins of document (in mm), by default 20mm
     paper_width : int, optional
@@ -46,21 +46,21 @@ def save_fig(
 
 
 class Plotter2D:
-    def __init__(self, grid: Grid):
+    def __init__(self, field: Grid):
         """
         Plotting class for 2D plots.
 
         Parameters
         ----------
-        grid : Grid
-            An `up4.Grid` instance.
+        field : Grid
+            An `up4.Grid` instance containing field data.
         """
-        if isinstance(grid, RustGrid):
+        if isinstance(field, RustGrid):
             self._grid_type = "grid"
-            self._plotter = RustPlotter2D._from_grid(grid)
-        elif isinstance(grid, VectorGrid):
+            self._plotter = RustPlotter2D._from_grid(field)
+        elif isinstance(field, RustVectorGrid):
             self._grid_type = "vector_grid"
-            self._plotter = RustPlotter2D._from_vector_grid(grid)
+            self._plotter = RustPlotter2D._from_vector_grid(field)
         else:
             raise ValueError("Unknown grid type used.")
 
@@ -70,7 +70,8 @@ class Plotter2D:
         selection: str = "depth_average",
         index: int = None,
         scaling_mode: str = None,
-        scaling_args: list[float] = None,
+        min_size: float = None,
+        max_size: float = None,
         colour_map: str = None,
         layout: dict = None,
         style: dict = None,
@@ -99,24 +100,20 @@ class Plotter2D:
 
         scaling_mode : str, optional
             Method by which to scale vector arrows. Permitted values are:
-            - "max": Arrows will be no longer than `scaling_args[0]`
-            - "min": Arrows will be no shorter than `scaling_args[0]`
-            - "minmax": Arrows will be no shorter than `scaling_args[0]` and no
-                longer than `scaling_args[1]`
+
+            - "max": Arrows will be no longer than `max_size`
+            - "min": Arrows will be no shorter than `min_size`
+            - "minmax": Arrows will be no shorter than `min_size` and no longer than `max_size`
             - "half_node": Arrows will be no longer than half of the cell size.
             - "full_node": Arrows fill be no longer than the cell size.
+
             , by default None
 
-        scaling_args : list[float], optional
-            List of required parameters for chosen `scaling_mode`,
-            each requires the following:
-            - "max": 1 value for maximum length
-            - "min": 1 value for minimum length
-            - "minmax": 2 values, the first for miniumum length, and the other for
-                the maximum length
-            - "half_node": 0 values
-            - "full_node": 0 values
-            , by default None
+        min_size : float, optional
+            Minimum length of arrows, by default None
+
+        max_size : float, optional
+            Maximum length of arrows, by default None
 
         colour_map : str, optional
             Colourmap to use in the plot, case-insensitive. See the
@@ -137,7 +134,7 @@ class Plotter2D:
         Returns
         -------
         plotly.graph_objects.Figure
-            Quiver plot
+            Quiver plot.
 
         Examples
         --------
@@ -171,7 +168,7 @@ class Plotter2D:
             ),
         )
         >>> fig = plotter.quiver_plot(axis, selection = "depth_average",
-            scaling_mode = "minmax", scaling_args = [0.01, 0.5], layout = layout)
+            scaling_mode = "minmax", min_size = 0.01, max_size = 0.5, layout = layout)
         >>> fig.show()
         """
         # Ensure that the Rust layer is passed valid parameters
@@ -180,11 +177,28 @@ class Plotter2D:
             selection,
             index,
             scaling_mode=scaling_mode,
-            scaling_args=scaling_args,
+            min_size=min_size,
+            max_size=max_size,
             colour_map=colour_map,
         )
-        self._plotter._quiver_plot(axis, selection, index, scaling_mode, scaling_args)
-        quiver_plot = self._create_plot(layout = layout, style = style)
+        # Quiver plots are only available for VectorGrids
+        if self._grid_type == "grid":
+            raise ValueError(
+                "Quiver plots are only available for `VectorGrid`s. "
+                "Please use ensure that your input grid is of type `VectorGrid` "
+                "method instead."
+            )
+
+        self._plotter._quiver_plot(
+            axis,
+            selection,
+            index=index,
+            scaling_mode=scaling_mode,
+            min_size=min_size,
+            max_size=max_size,
+            colour_map=colour_map,
+        )
+        quiver_plot = self._create_plot(layout=layout, style=style)
 
         return quiver_plot
 
@@ -194,9 +208,10 @@ class Plotter2D:
         axis: int,
         selection: str = "depth_average",
         index: int = None,
-        scaling_mode: str = "none",
-        scaling_args: list[float] = None,
-        colour_map: str = "viridis",
+        scaling_mode: str = None,
+        min_size: float = None,
+        max_size: float = None,
+        colour_map: str = None,
         layout: dict = None,
         style: dict = None,
     ) -> plotly.graph_objects.Figure:
@@ -224,29 +239,26 @@ class Plotter2D:
 
         scaling_mode : str, optional
             Method by which to scale vector arrows. Permitted values are:
+
             - "max": Arrows will be no longer than `scaling_args[0]`
             - "min": Arrows will be no shorter than `scaling_args[0]`
             - "minmax": Arrows will be no shorter than `scaling_args[0]` and no
                 longer than `scaling_args[1]`
             - "half_node": Arrows will be no longer than half of the cell size.
             - "full_node": Arrows fill be no longer than the cell size.
+
             , by default None
 
-        scaling_args : list[float], optional
-            List of required parameters for chosen `scaling_mode`,
-            each requires the following:
-            - "max": 1 value for maximum length
-            - "min": 1 value for minimum length
-            - "minmax": 2 values, the first for miniumum length, and the other for
-                the maximum length
-            - "half_node": 0 values
-            - "full_node": 0 values
-            , by default None
+        min_size : float, optional
+            Minimum length of arrows, by default None
+
+        max_size : float, optional
+            Maximum length of arrows, by default None
 
         colour_map : str, optional
             Colourmap to use in the plot, case-insensitive. See the
             `colorous documentation <https://docs.rs/colorous/latest/colorous/>`
-            for a list of valid colourmap values, by default "viridis"
+            for a list of valid colourmap values, by default None
 
         layout : dict, optional
             Dictionary with layout specifications for the plot. Nested dictionaries and
@@ -262,7 +274,7 @@ class Plotter2D:
         Returns
         -------
         plotly.graph_objects.Figure
-            Unit vector plot
+            Unit vector plot.
 
         Examples
         --------
@@ -299,17 +311,31 @@ class Plotter2D:
             scaling_mode = "minmax", scaling_args = [0.01, 0.5], layout = layout)
         >>> fig.show()
         """
+        # Unit vector plots are only available for VectorGrids
+        if self._grid_type == "grid":
+            raise ValueError(
+                "Unit vector plots are only available for `VectorGrid`s. "
+                "Please use ensure that your input grid is of type `VectorGrid` "
+                "method instead."
+            )
         # Ensure that the Rust layer is passed valid parameters
         self._validate_input(
             axis,
             selection,
             index,
             scaling_mode=scaling_mode,
-            scaling_args=scaling_args,
+            min_size=min_size,
+            max_size=min_size,
             colour_map=colour_map,
         )
         self._plotter._unit_vector_plot(
-            axis, selection, index, scaling_mode, scaling_args, colour_map=colour_map
+            axis,
+            selection,
+            index=index,
+            scaling_mode=scaling_mode,
+            min_size=min_size,
+            max_size=max_size,
+            colour_map=colour_map,
         )
         unit_vector_plot = self._create_plot(style=style, layout=layout)
 
@@ -320,7 +346,7 @@ class Plotter2D:
         axis: int,
         selection: str = "depth_average",
         index: int = None,
-        colour_map: str = "viridis",
+        colour_map: str = None,
         layout: dict = None,
         style: dict = None,
     ) -> plotly.graph_objects.Figure:
@@ -349,7 +375,7 @@ class Plotter2D:
         colour_map : str, optional
             Colourmap to use in the plot, case-insensitive. See the
             `colorous documentation <https://docs.rs/colorous/latest/colorous/>`
-            for a list of valid colourmap values, by default "viridis"
+            for a list of valid colourmap values, by default None
 
         layout : dict, optional
             Dictionary with layout specifications for the plot. Nested dictionaries and
@@ -365,7 +391,7 @@ class Plotter2D:
         Returns
         -------
         plotly.graph_objects.Figure
-            Heatmap plot
+            Heatmap plot.
 
         Examples
         --------
@@ -408,8 +434,14 @@ class Plotter2D:
             index,
             colour_map=colour_map,
         )
-        self._plotter._scalar_map(self._grid_type, axis, selection, index)
-        scalar_map_plot = self._create_plot()
+        self._plotter._scalar_map(
+            self._grid_type,
+            axis=axis,
+            selection=selection,
+            index=index,
+            colour_map=colour_map,
+        )
+        scalar_map_plot = self._create_plot(style=style, layout=layout)
         return scalar_map_plot
 
     def scalar_contour(
@@ -417,7 +449,7 @@ class Plotter2D:
         axis: int,
         selection: str = "depth_average",
         index: int = None,
-        colour_map: str = "viridis",
+        colour_map: str = None,
         layout: dict = None,
         style: dict = None,
     ) -> plotly.graph_objects.Figure:
@@ -446,7 +478,7 @@ class Plotter2D:
         colour_map : str, optional
             Colourmap to use in the plot, case-insensitive. See the
             `colorous documentation <https://docs.rs/colorous/latest/colorous/>`
-            for a list of valid colourmap values, by default "viridis"
+            for a list of valid colourmap values, by default None
 
         layout : dict, optional
             Dictionary with layout specifications for the plot. Nested dictionaries and
@@ -462,7 +494,7 @@ class Plotter2D:
         Returns
         -------
         plotly.graph_objects.Figure
-            Contour plot
+            Contour plot.
 
         Examples
         --------
@@ -505,7 +537,13 @@ class Plotter2D:
             index,
             colour_map=colour_map,
         )
-        self._plotter._scalar_contour(self._grid_type, axis, selection, index)
+        self._plotter._scalar_contour(
+            self._grid_type,
+            axis=axis,
+            selection=selection,
+            index=index,
+            colour_map=colour_map,
+        )
         scalar_contour_plot = self._create_plot(style=style, layout=layout)
 
         return scalar_contour_plot
@@ -513,7 +551,7 @@ class Plotter2D:
     # TODO do i really need only a single plane or can i do this on the entire grid?
     def parity_plot(
         self,
-        comparison_grid: Grid | VectorGrid,
+        comparison_grid: Grid | RustVectorGrid,
         axis: int,
         selection: str = "depth_average",
         index: int = None,
@@ -546,11 +584,6 @@ class Plotter2D:
             Location of plane along selected `axis` for `selection` = "plane",
             by default None
 
-        colour_map : str, optional
-            Colourmap to use in the plot, case-insensitive. See the
-            `colorous documentation <https://docs.rs/colorous/latest/colorous/>`
-            for a list of valid colourmap values, by default None
-
         layout : dict, optional
             Dictionary with layout specifications for the plot. Nested dictionaries and
              plotly's "magic underscores" are supported. See the
@@ -565,7 +598,7 @@ class Plotter2D:
         Returns
         -------
         plotly.graph_objects.Figure
-            Parity plot
+            Parity plot.
 
         Examples
         --------
@@ -625,26 +658,222 @@ class Plotter2D:
 
         return parity_plot
 
-    # TODO add docstrings
-    # TODO enable kwargs/ dict of figure properties to be passed to plotly
     def parity_map(
-        self, comparison_grid: Grid, axis: int, selection="depth_average", index=None
+        self,
+        comparison_grid: Grid | RustVectorGrid,
+        axis: int,
+        selection: str = "depth_average",
+        index: int = None,
+        colour_map: str = None,
+        layout: dict = None,
+        style: dict = None,
     ) -> plotly.graph_objects.Figure:
+        """
+        Generate a parity map from the VectorGrid/Grid used to create
+        this class instance and an additional VectorGrid/Grid to compare.
+
+        Parameters
+        ----------
+        comparison_grid : Grid | VectorGrid
+            Grid for comparison. Dimensions must be the same as the grid used to create
+            this class instance.
+
+        axis : int
+            Axis which contains the perpendicular plane to be used. A value of 0 means
+            that the yz plane is used, 1 for xz and 2 for yz. For a cylindrical grid,
+            swap (x, y, z) for (r, theta, z) in these definitions.
+
+        selection : str, optional
+            Manner in which the plane is generated ("depth_average" or "plane"). Using
+            "depth_average" will average values along the selected `axis` whereas
+            "plane" simply selects the plane pointed to by the `index` value. Note that
+            an `index` value is *mandatory* if using "plane" for `selection`. By default
+            "depth_average".
+
+        index : int, optional
+            Location of plane along selected `axis` for `selection` = "plane",
+            by default None
+
+        colour_map : str, optional
+            Colourmap to use in the plot, case-insensitive. See the
+            `colorous documentation <https://docs.rs/colorous/latest/colorous/>`
+            for a list of valid colourmap values, by default None
+
+        layout : dict, optional
+            Dictionary with layout specifications for the plot. Nested dictionaries and
+             plotly's "magic underscores" are supported. See the
+             `plotly documentation <https://plotly.com/python/reference/layout/>` for a
+             list of valid layout values, by default None
+
+        style : dict, optional
+            Dictionary with trace specifications for the plot. See the `plotly
+            documentation <https://plotly.com/python/reference/scatter/>` for a
+            list of valid layout values, by default None
+
+        Returns
+        -------
+        plotly.graph_objects.Figure
+            Parity map.
+
+        Examples
+        --------
+
+        Creating a simple plot:
+
+        >>> import up4
+        >>> data = up4.Data("path/to/hdf5/file")
+        >>> comparison_data = up4.Data("path/to/another/hdf5/file")
+        >>> grid_car = up4.Grid(data=data, num_cells=[20, 20, 20])
+        >>> grid_comparison = up4.Grid(data=comparison_data, num_cells=[20, 20, 20])
+        >>> vec_field = data.vectorfield(grid_car)
+        >>> comparison_field = data.vectorfield(grid_comparison)
+        >>> plotter = up4.Plotter2D(vec_field)
+        >>> fig = plotter.parity_map(comparison_field, axis, selection = "depth_average")
+        >>> fig.show()
+
+        Customising the layout:
+
+        >>> import up4
+        >>> data = up4.Data("path/to/hdf5/file")
+        >>> comparison_data = up4.Data("path/to/another/hdf5/file")
+        >>> grid_car = up4.Grid(data=data, num_cells=[20, 20, 20])
+        >>> grid_comparison = up4.Grid(data=comparison_data, num_cells=[20, 20, 20])
+        >>> vec_field = data.vectorfield(grid_car)
+        >>> comparison_field = data.vectorfield(grid_comparison)
+        >>> plotter = up4.Plotter2D(vec_field)
+        >>> layout = dict(
+            height = 800,
+            width = 800,
+            xaxes = dict(
+                title_text = "Measured values"
+            ),
+            yaxes = dict(
+                title_text = "Predicted values"
+            ),
+        )
+        >>> fig = plotter.parity_map(comparison_field, axis, selection = "depth_average")
+        >>> fig.show()
+        """
+        # TODO consider verifying shape matching at this layer
+        # Ensure that the Rust layer is passed valid parameters
+        self._validate_input(
+            axis,
+            selection,
+            index,
+        )
         if self._grid_type == "vector_grid":
             self._plotter._parity_map_from_vector_grid(
                 comparison_grid, axis, selection, index
             )
         else:
             self._plotter._parity_map_from_grid(comparison_grid, axis, selection, index)
-        parity_map = self._create_plot()
+        parity_map = self._create_plot(style=style, layout=layout)
 
         return parity_map
 
-    # TODO add docstrings
-    # TODO enable kwargs/ dict of figure properties to be passed to plotly
     def parity_contour(
-        self, comparison_grid: Grid, axis: int, selection="depth_average", index=None
+        self,
+        comparison_grid: Grid | RustVectorGrid,
+        axis: int,
+        selection: str = "depth_average",
+        index: int = None,
+        colour_map: str = None,
+        layout: dict = None,
+        style: dict = None,
     ) -> plotly.graph_objects.Figure:
+        """
+        Generate a parity contour from the VectorGrid/Grid used to create
+        this class instance and an additional VectorGrid/Grid to compare.
+
+        Parameters
+        ----------
+        comparison_grid : Grid | VectorGrid
+            Grid for comparison. Dimensions must be the same as the grid used to create
+            this class instance.
+
+        axis : int
+            Axis which contains the perpendicular plane to be used. A value of 0 means
+            that the yz plane is used, 1 for xz and 2 for yz. For a cylindrical grid,
+            swap (x, y, z) for (r, theta, z) in these definitions.
+
+        selection : str, optional
+            Manner in which the plane is generated ("depth_average" or "plane"). Using
+            "depth_average" will average values along the selected `axis` whereas
+            "plane" simply selects the plane pointed to by the `index` value. Note that
+            an `index` value is *mandatory* if using "plane" for `selection`. By default
+            "depth_average".
+
+        index : int, optional
+            Location of plane along selected `axis` for `selection` = "plane",
+            by default None
+
+        colour_map : str, optional
+            Colourmap to use in the plot, case-insensitive. See the
+            `colorous documentation <https://docs.rs/colorous/latest/colorous/>`
+            for a list of valid colourmap values, by default None
+
+        layout : dict, optional
+            Dictionary with layout specifications for the plot. Nested dictionaries and
+             plotly's "magic underscores" are supported. See the
+             `plotly documentation <https://plotly.com/python/reference/layout/>` for a
+             list of valid layout values, by default None
+
+        style : dict, optional
+            Dictionary with trace specifications for the plot. See the `plotly
+            documentation <https://plotly.com/python/reference/scatter/>` for a
+            list of valid layout values, by default None
+
+        Returns
+        -------
+        plotly.graph_objects.Figure
+            Parity contour.
+
+        Examples
+        --------
+
+        Creating a simple plot:
+
+        >>> import up4
+        >>> data = up4.Data("path/to/hdf5/file")
+        >>> comparison_data = up4.Data("path/to/another/hdf5/file")
+        >>> grid_car = up4.Grid(data=data, num_cells=[20, 20, 20])
+        >>> grid_comparison = up4.Grid(data=comparison_data, num_cells=[20, 20, 20])
+        >>> vec_field = data.vectorfield(grid_car)
+        >>> comparison_field = data.vectorfield(grid_comparison)
+        >>> plotter = up4.Plotter2D(vec_field)
+        >>> fig = plotter.parity_contour(comparison_field, axis, selection = "depth_average")
+        >>> fig.show()
+
+        Customising the layout:
+
+        >>> import up4
+        >>> data = up4.Data("path/to/hdf5/file")
+        >>> comparison_data = up4.Data("path/to/another/hdf5/file")
+        >>> grid_car = up4.Grid(data=data, num_cells=[20, 20, 20])
+        >>> grid_comparison = up4.Grid(data=comparison_data, num_cells=[20, 20, 20])
+        >>> vec_field = data.vectorfield(grid_car)
+        >>> comparison_field = data.vectorfield(grid_comparison)
+        >>> plotter = up4.Plotter2D(vec_field)
+        >>> layout = dict(
+            height = 800,
+            width = 800,
+            xaxes = dict(
+                title_text = "Measured values"
+            ),
+            yaxes = dict(
+                title_text = "Predicted values"
+            ),
+        )
+        >>> fig = plotter.parity_contour(comparison_field, axis, selection = "depth_average")
+        >>> fig.show()
+        """
+        # TODO consider verifying shape matching at this layer
+        # Ensure that the Rust layer is passed valid parameters
+        self._validate_input(
+            axis,
+            selection,
+            index,
+        )
         if self._grid_type == "vector_grid":
             self._plotter._parity_contour_from_vector_grid(
                 comparison_grid, axis, selection, index
@@ -653,7 +882,7 @@ class Plotter2D:
             self._plotter._parity_contour_from_grid(
                 comparison_grid, axis, selection, index
             )
-        parity_contour = self._create_plot()
+        parity_contour = self._create_plot(style=style, layout=layout)
 
         return parity_contour
 
@@ -663,7 +892,8 @@ class Plotter2D:
         selection: str,
         index: int,
         scaling_mode: str = None,
-        scaling_args: list[float] = None,
+        min_size: float = None,
+        max_size: float = None,
         colour_map: str = None,
     ) -> None:
         """
@@ -697,16 +927,11 @@ class Plotter2D:
             - "full_node": Arrows fill be no longer than the cell size.
             , by default None
 
-        scaling_args : list[float], optional
-            List of required parameters for chosen `scaling_mode`,
-            each requires the following:
-            - "max": 1 value for maximum length
-            - "min": 1 value for minimum length
-            - "minmax": 2 values, the first for miniumum length, and the other for
-                the maximum length
-            - "half_node": 0 values
-            - "full_node": 0 values
-            , by default None
+        min_size : float, optional
+            Minimum length of arrows, by default None
+
+        max_size : float, optional
+            Maximum length of arrows, by default None
 
         colour_map : str, optional
             Colourmap to use in the plot, case-insensitive. See the
@@ -783,27 +1008,23 @@ class Plotter2D:
                 f"Scaling mode value: {scaling_mode} is not valid. Valid values are"
                 ' "min", "max", "minmax", "half_node", "full_node".'
             )
-        if scaling_mode in valid_scaling_mode_values[0:3] and scaling_args is None:
+        if scaling_mode == "min" and min_size is None:
             raise ValueError(
-                f"Scaling mode: {scaling_mode} needs a list of values for"
-                " `scaling_args` supplied."
+                'Using scaling mode: "min" requires a value for `min_size` to be set'
             )
-        if colour_map not in valid_colour_map_values:
+        if scaling_mode == "max" and max_size is None:
+            raise ValueError(
+                'Using scaling mode: "max" requires a value for `max_size` to be set'
+            )
+        if scaling_mode == "minmax" and (min_size is None or max_size is None):
+            raise ValueError(
+                'Using scaling mode: "minmax" requires values for `min_size` and '
+                "`max_size` to be set"
+            )
+        if colour_map is not None and colour_map not in valid_colour_map_values:
             raise ValueError(
                 f"Colourmap value: {colour_map} is not valid. Valid values are"
                 f" {valid_colour_map_values}."
-            )
-
-        # Warn user about unnecessary values
-        if scaling_mode in valid_axis_values[0:2] and len(scaling_args) > 1:
-            raise RuntimeWarning(
-                f"You have passed {len(scaling_args) - 1} more scaling arguments than"
-                " required. Values at positions scaling_args[1:] will be ignored."
-            )
-        if scaling_mode == "minmax" and len(scaling_args) > 2:
-            raise RuntimeWarning(
-                f"You have passed {len(scaling_args) - 2} more scaling arguments than"
-                " required. Values at positions scaling_args[2:] will be ignored."
             )
 
     def _create_plot(self, layout: dict, style: dict) -> plotly.graph_objects.Figure:

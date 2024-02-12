@@ -47,13 +47,11 @@ class TestVtk:
         """Test if the hdf5 file is written and that it is readable"""
         if os.path.exists(os.path.join(location, "fixtures", "drum.hdf5")):
             os.remove(os.path.join(location, "fixtures", "drum.hdf5"))
-        filenames = sorted(
-            [
-                x
-                for x in glob(os.path.join(location, "fixtures", "post", "drum*.vtk"))
-                if not "bound" in x
-            ]
-        )
+        filenames = sorted([
+            x
+            for x in glob(os.path.join(location, "fixtures", "post", "drum*.vtk"))
+            if not "bound" in x
+        ])
         up4.Converter.vtk(
             filenames, 1e-5, os.path.join(location, "fixtures", "drum.hdf5")
         )

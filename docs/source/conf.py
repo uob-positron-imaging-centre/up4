@@ -177,6 +177,7 @@ default_role = "py:obj"
 # a list of builtin themes.
 
 html_theme = "pydata_sphinx_theme"
+html_logo = "_static/logo.jpeg"
 
 version_match = version if "dev" in version else "v" + version
 

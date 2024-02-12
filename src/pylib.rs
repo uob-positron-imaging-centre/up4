@@ -747,5 +747,6 @@ fn upppp_rust(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<PyGrid>()?;
     m.add_class::<PyConverter>()?;
     m.add_class::<PyPlotter2D>()?;
+    m.add_class::<PyVecGrid>()?;
     Ok(())
 }

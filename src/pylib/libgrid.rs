@@ -495,7 +495,7 @@ impl PyGrid {
 /// This grid is generated in the vectorfield function and contains the arrow
 /// directions and size corresponding to the magnitude of the velocity.
 /// It has no constructor in python.
-#[pyclass(name = "VectorGrid")]
+#[pyclass(name = "RustVectorGrid")]
 pub struct PyVecGrid {
     pub grid: vector_grid::VectorGrid,
 }

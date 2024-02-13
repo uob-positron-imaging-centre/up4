@@ -40,7 +40,7 @@ with open("README.md", "r") as f:
 setup(
     name="up4",
     version="0.1.0",
-    author=("Dominik Werner <d.wer2@gmx.de>"),
+    author="Dominik Werner <dxw963@bham.ac.uk>",
     classifiers=[
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Development Status :: 2 - Pre-Alpha",
@@ -56,9 +56,7 @@ setup(
     description="analysing toolset for particle data",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages = find_packages(
-        exclude = ["tests", "*.tests", "*.tests.*", "tests.*"]
-    ),
+    packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
     package_data={"up4": ["py.typed"]},
     rust_extensions=[
         RustExtension("upppp_rust", features=features, binding=Binding.PyO3)

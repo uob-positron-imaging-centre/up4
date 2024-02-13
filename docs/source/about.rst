@@ -1,5 +1,6 @@
+*****
 About
-=====
+*****
 
 Authors
 -------
@@ -10,7 +11,7 @@ Authors
 | | **Dominik Werner**                  | | **Daniel Weston**                    |
 | | PhD Candidate, Chemical Engineering | | EngD Candidate, Chemical Engineering |
 | | University of Birmingham            | | University of Birmingham             |
-| | d.wer2@gmx.de                       | | dtw545@bham.ac.uk                    |
+| | dxw963@bham.ac.uk                   | | dtw545@bham.ac.uk                    |
 +---------------------------------------+----------------------------------------+
 
 This library was developed during our respective doctoral studies, under the supervision of

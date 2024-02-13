@@ -1,228 +1,590 @@
 //! Submodule for export of plotting code to Python.
-
+// TODO break this up into multiple files
 use crate::{
-    comparison_plot::ComparisonPlotter,
     libgrid::{PyGrid, PyVecGrid},
-    scalar_plot::ScalarPlotter,
-    vector_plot::VectorPlotter,
+    parity_contour::ParityContour,
+    parity_map::ParityMap,
+    parity_plot::ParityPlot,
+    plotting::*,
+    quiver::QuiverPlot,
+    scalar_contour::ScalarContour,
+    scalar_map::ScalarMap,
+    unit_vector::UnitVectorPlot,
+    GridFunctions3D, VectorGrid,
 };
-use itertools::izip;
-use plotly::heat_map::Smoothing;
-use plotly::{layout::Axis, Layout, Plot, Trace};
-use pyo3::prelude::*;
+use colorous::Gradient;
 
-/// Class that handles plotting of vector data. This class produces 2D and 3D plots of vector data.
-/// To enable transfer of plotting from Rust to Python, the Rust backend serialises plots into JSON strings
-/// that are then parsed by up4.VectorPlotter.plot to return a plotly.graph_objects.Figure object.
-///
-/// Methods
-/// -------
-/// unit_vector_plot
-///     Create unit vector plot JSON string.
-#[pyclass(name = "VectorPlotter")]
-pub struct PyVectorPlotter {
+use plotly::{contour::Contours, layout::themes::PLOTLY_WHITE, Layout, Plot, Trace};
+use pyo3::{exceptions::PyValueError, prelude::*};
+
+#[pyclass(name = "RustPlotter2D", subclass)]
+pub struct PyPlotter2D {
     plotting_string: String,
-    plotting_data: VectorPlotter,
+    grid: Box<dyn GridFunctions3D>,
 }
 
 #[pymethods]
-impl PyVectorPlotter {
-    /// Create new instance of up4.plotting.VectorPlotter class.
-    ///
-    /// Returns
-    /// -------
-    /// up4.plotting.VectorPlotter
-    ///     Vector plotting class.
-    #[new]
-    fn constructor(vector_grid: &PyVecGrid) -> PyVectorPlotter {
-        let plotter: VectorPlotter = VectorPlotter::new(vector_grid.grid.to_owned());
-        return PyVectorPlotter {
-            plotting_string: String::new(),
-            plotting_data: plotter,
+impl PyPlotter2D {
+    #[staticmethod]
+    fn _from_vector_grid(vector_grid: &PyVecGrid) -> PyPlotter2D {
+        let grid: Box<VectorGrid> = Box::new(vector_grid.grid.to_owned());
+        let plotting_string = String::new();
+
+        PyPlotter2D {
+            plotting_string,
+            grid,
+        }
+    }
+
+    #[staticmethod]
+    fn _from_grid(grid: &PyGrid) -> PyPlotter2D {
+        let grid = grid.grid.to_owned();
+        let plotting_string = String::new();
+
+        PyPlotter2D {
+            plotting_string,
+            grid,
+        }
+    }
+
+    //TODO add scaleratio to the signature of this method
+    // TODO default layout should remove the x and y axis lines
+    #[pyo3(signature = (axis, selection = "depth_average", index = None, scaling_mode = None, min_size = None, max_size = None, colour_map = "viridis"))]
+    fn _quiver_plot(
+        &mut self,
+        axis: usize,
+        selection: &str,
+        index: Option<usize>,
+        scaling_mode: Option<&str>,
+        min_size: Option<f64>,
+        max_size: Option<f64>,
+        colour_map: Option<&str>,
+    ) -> PyResult<()> {
+        // Arguments are checked for validity at the Python layer, so we can relax
+        // checks here.
+        let vector_grid = self
+            .grid
+            .as_any()
+            .downcast_ref::<VectorGrid>()
+            .expect("This method should only be called from data that is a vector grid.")
+            .clone();
+        let quiver_plotter = if selection == "depth_average" {
+            QuiverPlot::from_vector_grid_depth_averaged(vector_grid, axis)
+        } else {
+            QuiverPlot::from_vector_grid_single_plane(vector_grid, axis, index.unwrap())
         };
+        let cmap = self.get_gradient(colour_map);
+        let quiver_traces = match scaling_mode {
+            Some("min") => quiver_plotter
+                .bound_min(min_size.unwrap())
+                .create_quiver_traces(1.0, cmap),
+            Some("max") => quiver_plotter
+                .bound_max(max_size.unwrap())
+                .create_quiver_traces(1.0, cmap),
+            Some("minmax") => quiver_plotter
+                .bound_min_max(min_size.unwrap(), max_size.unwrap())
+                .create_quiver_traces(1.0, cmap),
+            Some("half_node") => {
+                let dx = quiver_plotter.x()[1] - quiver_plotter.x()[0];
+                let dy = quiver_plotter.y()[1] - quiver_plotter.y()[0];
+                quiver_plotter
+                    .bound_half_node(dx, dy)
+                    .create_quiver_traces(1.0, cmap)
+            }
+            Some("full_node") => {
+                let dx = quiver_plotter.x()[1] - quiver_plotter.x()[0];
+                let dy = quiver_plotter.y()[1] - quiver_plotter.y()[0];
+                quiver_plotter
+                    .bound_full_node(dx, dy)
+                    .create_quiver_traces(1.0, cmap)
+            }
+            None => quiver_plotter.create_quiver_traces(1.0, cmap),
+            _ => quiver_plotter.create_quiver_traces(1.0, cmap),
+        };
+        // println!("quiver_traces: {:?}", quiver_traces.len());
+        // for trace in quiver_traces {
+        //     traces.push(trace);
+        // }
+        let template = &*PLOTLY_WHITE;
+        let layout = Layout::new().template(template);
+        let plot: Plot = plot(quiver_traces, layout);
+        let plotting_string = plot.to_json();
+        self.plotting_string = plotting_string;
+
+        Ok(())
     }
 
-    #[getter]
-    fn get_plotting_string(&self) -> PyResult<String> {
-        Ok(self.plotting_string.to_owned())
-    }
+    #[pyo3(signature = (axis, selection = "depth_average", index = None, scaling_mode = "none", min_size = None, max_size = None, colour_map = "viridis"))]
+    fn _unit_vector_plot(
+        &mut self,
+        axis: usize,
+        selection: &str,
+        index: Option<usize>,
+        scaling_mode: Option<&str>,
+        min_size: Option<f64>,
+        max_size: Option<f64>,
+        colour_map: Option<&str>,
+    ) -> PyResult<()> {
+        // Arguments are checked for validity at the Python layer, so we can relax
+        // checks here.
+        let vector_grid = self
+            .grid
+            .as_any()
+            .downcast_ref::<VectorGrid>()
+            .expect("This method should only be called from data that is a vector grid.")
+            .clone();
+        let unit_vector_plotter = if selection == "depth_average" {
+            UnitVectorPlot::from_vector_grid_depth_averaged(vector_grid, axis)
+        } else {
+            UnitVectorPlot::from_vector_grid_single_plane(vector_grid, axis, index.unwrap())
+        };
+        let cmap = self.get_gradient(colour_map);
+        let unit_vector_traces = match scaling_mode {
+            Some("min") => unit_vector_plotter
+                .bound_min(min_size.unwrap())
+                .create_quiver_traces(1.0, cmap),
+            Some("max") => unit_vector_plotter
+                .bound_max(max_size.unwrap())
+                .create_quiver_traces(1.0, cmap),
+            Some("minmax") => unit_vector_plotter
+                .bound_min_max(min_size.unwrap(), max_size.unwrap())
+                .create_quiver_traces(1.0, cmap),
+            Some("half_node") => {
+                let dx = unit_vector_plotter.x()[1] - unit_vector_plotter.x()[0];
+                let dy = unit_vector_plotter.y()[1] - unit_vector_plotter.y()[0];
+                unit_vector_plotter
+                    .bound_half_node(dx, dy)
+                    .create_quiver_traces(1.0, cmap)
+            }
+            Some("full_node") => {
+                let dx = unit_vector_plotter.x()[1] - unit_vector_plotter.x()[0];
+                let dy = unit_vector_plotter.y()[1] - unit_vector_plotter.y()[0];
+                unit_vector_plotter
+                    .bound_full_node(dx, dy)
+                    .create_quiver_traces(1.0, cmap)
+            }
+            // None => unit_vector_plotter.create_quiver_traces(1.0, cmap),
+            _ => unit_vector_plotter.create_quiver_traces(1.0, cmap),
+        };
 
-    /// Create unit vector plot JSON string. The unit vector plot is perpendicular to the provided axis and located at the index value.
-    ///
-    /// Parameters
-    /// ----------
-    /// axis : int
-    ///     Axis that the plane is perpendicular to.
-    /// index : int
-    ///     Index along supplied `axis` to select data from.
-    fn unit_vector_plot(&mut self, axis: usize, index: usize) {
-        let mut traces: Vec<Box<dyn Trace>> = Vec::new();
-        let arrows = self
-            .plotting_data
-            .create_unit_vector_traces(axis, index);
         let layout: Layout = Layout::new();
-        let square: bool = false;
-        let smoothing = Some(Smoothing::False);
-        let xaxis: Option<Axis> = Some(Axis::new().title("x position".into()));
-        let yaxis: Option<Axis> = Some(Axis::new().title("y position".into()));
-        let axes = vec![xaxis, yaxis];
-        let show = false;
-        let (heatmap, layout) = self
-            .plotting_data
-            .create_unit_vector_background(layout, square, axes, smoothing, axis, index);
-        for trace in arrows {
-            traces.push(trace);
-        }
-        traces.push(heatmap);
-        let plot: Plot = self.plotting_data.plot(traces, layout, show);
+        let plot: Plot = plot(unit_vector_traces, layout);
         let plotting_string = plot.to_json();
         self.plotting_string = plotting_string;
+
+        Ok(())
     }
 
-    fn unit_vector_slice_plot(&mut self, axis: usize, range: [usize; 3]) {
+    // BUG something isn't being done correctly as the square axes aren't behaving
+    // TODO remove unwrap
+    #[pyo3(signature = (grid_type, axis, selection = "depth_average", index = None, colour_map = "viridis"))]
+    fn _scalar_map(
+        &mut self,
+        grid_type: &str,
+        axis: usize,
+        selection: &str,
+        index: Option<usize>,
+        colour_map: Option<&str>,
+    ) -> PyResult<()> {
+        // Arguments are checked for validity at the Python layer, so we can relax
+        // checks here.
+        let cmap = self.get_gradient(colour_map);
+        let scalar_plotter = if grid_type == "vector_grid" {
+            let grid = self
+                .grid
+                .as_any()
+                .downcast_ref::<VectorGrid>()
+                .unwrap()
+                .clone();
+            if selection == "depth_average" {
+                ScalarMap::from_vector_grid_depth_averaged(grid, axis)
+            } else {
+                ScalarMap::from_vector_grid_single_plane(grid, axis, index.unwrap())
+            }
+        } else {
+            // type == "grid"
+            let grid = self.grid.clone();
+            if selection == "depth_average" {
+                ScalarMap::from_grid_depth_averaged(grid, axis)
+            } else {
+                ScalarMap::from_grid_single_plane(grid, axis, index.unwrap())
+            }
+        };
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
-        let arrows = self
-            .plotting_data
-            .unit_vector_slice_traces(range, axis, None);
-        let backgrounds = self.plotting_data.unit_vector_slice_background(range, axis);
-        for (arrow, background) in izip!(arrows, backgrounds) {
-            traces.push(arrow);
-            traces.push(background);
+        let heatmap_traces = scalar_plotter.create_scalar_map(cmap);
+        for trace in heatmap_traces {
+            traces.push(trace)
         }
         let layout: Layout = Layout::new();
-        let show: bool = false;
-        let plot: Plot = self.plotting_data.plot(traces, layout, show);
+        let plot: Plot = plot(traces, layout);
         let plotting_string = plot.to_json();
         self.plotting_string = plotting_string;
+
+        Ok(())
     }
 
-    // TODO see if serde deserialise works for enum selection
-    // TODO offer a sliced variant
-    fn quiver_plot(&self) {}
-
-    fn cone_plot(&self) {}
-}
-
-/// Class that handles plotting of scalar data. This class produces 2D and 3D plots of scalar data.
-/// To enable transfer of plotting from Rust to Python, the Rust backend serialises plots into JSON strings
-/// that are then parsed by up4.ScalarPlotter.plot to return a plotly.graph_objects.Figure object.
-///
-/// Methods
-/// -------
-/// scalar_map_plot
-///     Create heatmap plot JSON string.
-#[pyclass(name = "ScalarPlotter")]
-pub struct PyScalarPlotter {
-    plotting_string: String,
-    plotting_data: ScalarPlotter,
-}
-
-#[pymethods]
-impl PyScalarPlotter {
-    /// Create new instance of up4.plotting.ScalarPlotter class.
-    ///
-    /// Returns
-    /// -------
-    /// up4.plotting.ScalarPlotter
-    ///     Scalar plotting class.
-    #[new]
-    fn constructor(scalar_grid: &PyGrid) -> PyScalarPlotter {
-        let plotter: ScalarPlotter = ScalarPlotter::new(scalar_grid.grid.to_owned());
-        return PyScalarPlotter {
-            plotting_string: String::new(),
-            plotting_data: plotter,
+    // BUG something isn't being done correctly as the square axes aren't behaving
+    // TODO do something with sizes because the default is SHITE for the contour plot (too big)
+    // this may mean figuring out some optimal spacing
+    #[pyo3(signature = (grid_type, axis, selection = "depth_average", index = None, colour_map = "viridis", n_contours = 10))]
+    fn _scalar_contour(
+        &mut self,
+        grid_type: &str,
+        axis: usize,
+        selection: &str,
+        index: Option<usize>,
+        colour_map: Option<&str>,
+        n_contours: Option<usize>,
+    ) -> PyResult<()> {
+        // Arguments are checked for validity at the Python layer, so we can relax
+        // checks here.
+        let cmap = self.get_gradient(colour_map);
+        let scalar_plotter = if grid_type == "vector_grid" {
+            let grid = self
+                .grid
+                .as_any()
+                .downcast_ref::<VectorGrid>()
+                .expect("This method should only be called from data that is a vector grid.")
+                .clone();
+            if selection == "depth_average" {
+                ScalarContour::from_vector_grid_depth_averaged(grid, axis)
+            } else {
+                ScalarContour::from_vector_grid_single_plane(grid, axis, index.unwrap())
+            }
+        } else {
+            // type == "grid"
+            let grid = self.grid.clone();
+            if selection == "depth_average" {
+                ScalarContour::from_grid_depth_averaged(grid, axis)
+            } else {
+                ScalarContour::from_grid_single_plane(grid, axis, index.unwrap())
+            }
         };
-    }
-
-    #[getter]
-    fn get_plotting_string(&self) -> PyResult<String> {
-        Ok(self.plotting_string.to_owned())
-    }
-
-    /// Create heatmap plot JSON string. The heatmap plot is perpendicular to the provided axis and located at the index value.
-    ///
-    /// Parameters
-    /// ----------
-    /// axis : int
-    ///     Axis that the plane is perpendicular to.
-    /// index : int
-    ///     Index along supplied `axis` to select data from.
-    fn scalar_map_plot(&mut self, axis: usize, index: usize) {
-        let mut trace = self.plotting_data.scalar_map_plot(axis, index);
-        let traces: Vec<Box<dyn Trace>> = vec![trace.pop().unwrap()];
-        let layout = Layout::new();
-        let show = false;
-        let plot: Plot = self.plotting_data.plot(traces, layout, show);
-        let plotting_string = plot.to_json();
-        self.plotting_string = plotting_string;
-    }
-
-    // TODO offer slices
-    fn scalar_contour_plot(&mut self) {}
-
-    fn volume_plot(&self) {}
-}
-
-/// Class that handles plotting of comparison data. This class produces 2D plots of reference ("the ground truth") data compared against another dataset ("comparison data").
-/// To enable transfer of plotting from Rust to Python, the Rust backend serialises plots into JSON strings
-/// that are then parsed by up4.ComparisonPlotter.plot to return a plotly.graph_objects.Figure object.
-///
-/// Methods
-/// -------
-/// parity_plot
-///     Create parity plot JSON string.
-#[pyclass(name = "ComparisonPlotter")]
-pub struct PyComparisonPlotter {
-    plotting_string: String,
-    plotting_data: ComparisonPlotter,
-}
-
-#[pymethods]
-impl PyComparisonPlotter {
-    /// Create new instance of up4.plotting.ComparisonPlotter class.
-    ///
-    /// Returns
-    /// -------
-    /// up4.plotting.ComparisonPlotter
-    ///     Comparison plotting class.
-    #[new]
-    fn constructor(reference_grid: &PyGrid, comparison_grid: &PyGrid) -> PyComparisonPlotter {
-        let plotter: ComparisonPlotter = ComparisonPlotter::new(
-            reference_grid.grid.to_owned(),
-            comparison_grid.grid.to_owned(),
-        );
-        return PyComparisonPlotter {
-            plotting_string: String::new(),
-            plotting_data: plotter,
-        };
-    }
-
-    #[getter]
-    fn get_plotting_string(&self) -> PyResult<String> {
-        Ok(self.plotting_string.to_owned())
-    }
-
-    /// Create parity plot JSON string. This plots the comparison dataset on the x axis and reference data on the y axis.
-    fn parity_plot(&mut self) {
-        let trace = self.plotting_data.create_parity_traces();
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
-        for trace in trace {
-            traces.push(trace);
+        let contour_traces = scalar_plotter.create_scalar_contour(cmap);
+        for trace in contour_traces {
+            let min = scalar_plotter.min;
+            let max = scalar_plotter.max;
+            traces.push(
+                trace
+                    .contours(
+                        Contours::new()
+                            .start(min)
+                            .end(max)
+                            .size((max - min) / n_contours.unwrap() as f64),
+                    )
+                    .auto_contour(false),
+            );
         }
-        let layout = Layout::new();
-        let show = false;
-        let plot: Plot = self.plotting_data.plot(traces, layout, show);
+        let layout: Layout = Layout::new();
+        let plot: Plot = plot(traces, layout);
         let plotting_string = plot.to_json();
         self.plotting_string = plotting_string;
+
+        Ok(())
     }
 
-    // TODO offer slices
-    fn comparison_map(&self) -> String {
-        String::from("compmap")
+    #[pyo3(signature = (comparison_grid, axis, selection = "depth_average", index = None))]
+    fn _parity_plot_from_vector_grid(
+        &mut self,
+        comparison_grid: &PyVecGrid,
+        axis: usize,
+        selection: &str,
+        index: Option<usize>,
+    ) -> PyResult<()> {
+        let ref_grid = self
+            .grid
+            .as_any()
+            .downcast_ref::<VectorGrid>()
+            .unwrap()
+            .clone();
+        let comp_grid = comparison_grid
+            .grid
+            .as_any()
+            .downcast_ref::<VectorGrid>()
+            .unwrap()
+            .clone();
+        let parity_plotter = if selection == "depth_average" {
+            ParityPlot::from_vector_grids_depth_averaged(ref_grid, comp_grid, axis)
+        } else if selection == "plane" {
+            if let Some(index) = index {
+                ParityPlot::from_vector_grids_single_plane(ref_grid, comp_grid, axis, index)
+            } else {
+                return Err(PyValueError::new_err(
+                    "A valid index is required to select an individual plane.",
+                ));
+            }
+        } else {
+            ParityPlot::from_vector_grids(ref_grid, comp_grid)
+        };
+        let mut traces: Vec<Box<dyn Trace>> = Vec::new();
+        let heatmap_traces = parity_plotter.create_parity_scatter();
+        for trace in heatmap_traces {
+            traces.push(trace)
+        }
+        let layout: Layout = Layout::new();
+        let plot: Plot = plot(traces, layout);
+        let plotting_string = plot.to_json();
+        self.plotting_string = plotting_string;
+
+        Ok(())
     }
 
-    // TODO offer slices
-    fn comparison_contour(&self) -> String {
-        String::from("compcontour")
+    #[pyo3(signature = (comparison_grid, axis, selection = "depth_average", index = None))]
+    fn _parity_plot_from_grid(
+        &mut self,
+        comparison_grid: &PyGrid,
+        axis: usize,
+        selection: &str,
+        index: Option<usize>,
+    ) -> PyResult<()> {
+        let ref_grid = self.grid.clone();
+        let comp_grid = comparison_grid.grid.clone();
+        let parity_plotter = if selection == "depth_average" {
+            ParityPlot::from_grids_depth_averaged(ref_grid, comp_grid, axis)
+        } else if selection == "plane" {
+            if let Some(index) = index {
+                ParityPlot::from_grids_single_plane(ref_grid, comp_grid, axis, index)
+            } else {
+                return Err(PyValueError::new_err(
+                    "A valid index is required to select an individual plane.",
+                ));
+            }
+        } else {
+            ParityPlot::from_grids(ref_grid, comp_grid)
+        };
+        let mut traces: Vec<Box<dyn Trace>> = Vec::new();
+        let heatmap_traces = parity_plotter.create_parity_scatter();
+        for trace in heatmap_traces {
+            traces.push(trace)
+        }
+        let layout: Layout = Layout::new();
+        let plot: Plot = plot(traces, layout);
+        let plotting_string = plot.to_json();
+        self.plotting_string = plotting_string;
+
+        Ok(())
+    }
+
+    #[pyo3(signature = (comparison_grid, axis, selection = "depth_average", index = None))]
+    fn _parity_map_from_vector_grid(
+        &mut self,
+        comparison_grid: &PyVecGrid,
+        axis: usize,
+        selection: &str,
+        index: Option<usize>,
+    ) -> PyResult<()> {
+        let ref_grid = self
+            .grid
+            .as_any()
+            .downcast_ref::<VectorGrid>()
+            .unwrap()
+            .clone();
+        let comp_grid = comparison_grid
+            .grid
+            .as_any()
+            .downcast_ref::<VectorGrid>()
+            .unwrap()
+            .clone();
+        let parity_plotter = if selection == "depth_average" {
+            ParityMap::from_vector_grids_depth_averaged(ref_grid, comp_grid, axis)
+        } else if selection == "plane" {
+            if let Some(index) = index {
+                ParityMap::from_vector_grids_single_plane(ref_grid, comp_grid, axis, index)
+            } else {
+                return Err(PyValueError::new_err(
+                    "A valid index is required to select an individual plane.",
+                ));
+            }
+        } else {
+            return Err(PyValueError::new_err(
+                "Valid selection modes are 'depth_average' and 'plane' only.",
+            ));
+        };
+        let mut traces: Vec<Box<dyn Trace>> = Vec::new();
+        let parity_traces = parity_plotter.create_parity_map();
+        for trace in parity_traces {
+            traces.push(trace)
+        }
+        let layout: Layout = Layout::new();
+        let plot: Plot = plot(traces, layout);
+        let plotting_string = plot.to_json();
+        self.plotting_string = plotting_string;
+
+        Ok(())
+    }
+
+    #[pyo3(signature = (comparison_grid, axis, selection = "depth_average", index = None))]
+    fn _parity_map_from_grid(
+        &mut self,
+        comparison_grid: &PyGrid,
+        axis: usize,
+        selection: &str,
+        index: Option<usize>,
+    ) -> PyResult<()> {
+        let ref_grid = self.grid.clone();
+        let comp_grid = comparison_grid.grid.clone();
+        let parity_plotter = if selection == "depth_average" {
+            ParityMap::from_grids_depth_averaged(ref_grid, comp_grid, axis)
+        } else if selection == "plane" {
+            if let Some(index) = index {
+                ParityMap::from_grids_single_plane(ref_grid, comp_grid, axis, index)
+            } else {
+                return Err(PyValueError::new_err(
+                    "A valid index is required to select an individual plane.",
+                ));
+            }
+        } else {
+            return Err(PyValueError::new_err(
+                "Valid selection modes are 'depth_average' and 'plane' only.",
+            ));
+        };
+        let mut traces: Vec<Box<dyn Trace>> = Vec::new();
+        let parity_traces = parity_plotter.create_parity_map();
+        for trace in parity_traces {
+            traces.push(trace)
+        }
+        let layout: Layout = Layout::new();
+        let plot: Plot = plot(traces, layout);
+        let plotting_string = plot.to_json();
+        self.plotting_string = plotting_string;
+
+        Ok(())
+    }
+
+    #[pyo3(signature = (comparison_grid, axis, selection = "depth_average", index = None))]
+    fn _parity_contour_from_vector_grid(
+        &mut self,
+        comparison_grid: &PyVecGrid,
+        axis: usize,
+        selection: &str,
+        index: Option<usize>,
+    ) -> PyResult<()> {
+        let ref_grid = self
+            .grid
+            .as_any()
+            .downcast_ref::<VectorGrid>()
+            .unwrap()
+            .clone();
+        let comp_grid = comparison_grid
+            .grid
+            .as_any()
+            .downcast_ref::<VectorGrid>()
+            .unwrap()
+            .clone();
+        let parity_plotter = if selection == "depth_average" {
+            ParityContour::from_vector_grids_depth_averaged(ref_grid, comp_grid, axis)
+        } else if selection == "plane" {
+            if let Some(index) = index {
+                ParityContour::from_vector_grids_single_plane(ref_grid, comp_grid, axis, index)
+            } else {
+                return Err(PyValueError::new_err(
+                    "A valid index is required to select an individual plane.",
+                ));
+            }
+        } else {
+            return Err(PyValueError::new_err(
+                "Valid selection modes are 'depth_average' and 'plane' only.",
+            ));
+        };
+        let mut traces: Vec<Box<dyn Trace>> = Vec::new();
+        let parity_traces = parity_plotter.create_parity_contour();
+        for trace in parity_traces {
+            traces.push(trace)
+        }
+        let layout: Layout = Layout::new();
+        let plot: Plot = plot(traces, layout);
+        let plotting_string = plot.to_json();
+        self.plotting_string = plotting_string;
+
+        Ok(())
+    }
+
+    #[pyo3(signature = (comparison_grid, axis, selection = "depth_average", index = None))]
+    fn _parity_contour_from_grid(
+        &mut self,
+        comparison_grid: &PyGrid,
+        axis: usize,
+        selection: &str,
+        index: Option<usize>,
+    ) -> PyResult<()> {
+        let ref_grid = self.grid.clone();
+        let comp_grid = comparison_grid.grid.clone();
+        let parity_plotter = if selection == "depth_average" {
+            ParityContour::from_grids_depth_averaged(ref_grid, comp_grid, axis)
+        } else if selection == "plane" {
+            if let Some(index) = index {
+                ParityContour::from_grids_single_plane(ref_grid, comp_grid, axis, index)
+            } else {
+                return Err(PyValueError::new_err(
+                    "A valid index is required to select an individual plane.",
+                ));
+            }
+        } else {
+            return Err(PyValueError::new_err(
+                "Valid selection modes are 'depth_average' and 'plane' only.",
+            ));
+        };
+        let mut traces: Vec<Box<dyn Trace>> = Vec::new();
+        let heatmap_traces = parity_plotter.create_parity_contour();
+        for trace in heatmap_traces {
+            traces.push(trace)
+        }
+        let layout: Layout = Layout::new();
+        let plot: Plot = plot(traces, layout);
+        let plotting_string = plot.to_json();
+        self.plotting_string = plotting_string;
+
+        Ok(())
+    }
+
+    #[getter]
+    fn get_plotting_string(&self) -> PyResult<String> {
+        Ok(self.plotting_string.to_owned())
+    }
+}
+
+impl PyPlotter2D {
+    fn get_gradient(&self, colour_map: Option<&str>) -> Option<Gradient> {
+        // Once we get reflection, maybe this will look less bad??
+        match colour_map {
+            Some("turbo") => Some(colorous::TURBO),
+            Some("viridis") => Some(colorous::VIRIDIS),
+            Some("inferno") => Some(colorous::INFERNO),
+            Some("spectral") => Some(colorous::SPECTRAL),
+            Some("magma") => Some(colorous::MAGMA),
+            Some("plasma") => Some(colorous::PLASMA),
+            Some("cividis") => Some(colorous::CIVIDIS),
+            Some("warm") => Some(colorous::WARM),
+            Some("cool") => Some(colorous::COOL),
+            Some("cubehelix") => Some(colorous::CUBEHELIX),
+            Some("blue_green") => Some(colorous::BLUE_GREEN),
+            Some("blue_purple") => Some(colorous::BLUE_PURPLE),
+            Some("green_blue") => Some(colorous::GREEN_BLUE),
+            Some("orange_red") => Some(colorous::ORANGE_RED),
+            Some("purple_blue_green") => Some(colorous::PURPLE_BLUE_GREEN),
+            Some("purple_blue") => Some(colorous::PURPLE_BLUE),
+            Some("purple_red") => Some(colorous::PURPLE_RED),
+            Some("red_purple") => Some(colorous::RED_PURPLE),
+            Some("yellow_green_blue") => Some(colorous::YELLOW_GREEN_BLUE),
+            Some("yellow_green") => Some(colorous::YELLOW_GREEN),
+            Some("yellow_orange_brown") => Some(colorous::YELLOW_ORANGE_BROWN),
+            Some("yellow_orange_red") => Some(colorous::YELLOW_ORANGE_RED),
+            Some("blues") => Some(colorous::BLUES),
+            Some("greens") => Some(colorous::GREENS),
+            Some("greys") => Some(colorous::GREYS),
+            Some("oranges") => Some(colorous::ORANGES),
+            Some("purples") => Some(colorous::PURPLES),
+            Some("reds") => Some(colorous::REDS),
+            Some("brown_green") => Some(colorous::BROWN_GREEN),
+            Some("purple_green") => Some(colorous::PURPLE_GREEN),
+            Some("pink_green") => Some(colorous::PINK_GREEN),
+            Some("purple_orange") => Some(colorous::PURPLE_ORANGE),
+            Some("red_blue") => Some(colorous::RED_BLUE),
+            Some("red_grey") => Some(colorous::RED_GREY),
+            Some("red_yellow_blue") => Some(colorous::RED_YELLOW_BLUE),
+            Some("red_yellow_green") => Some(colorous::RED_YELLOW_GREEN),
+            _ => None,
+        }
     }
 }

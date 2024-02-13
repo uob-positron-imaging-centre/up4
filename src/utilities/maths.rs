@@ -15,8 +15,8 @@ pub fn minmax(arr: &Array1<f64>) -> (f64, f64) {
 }
 
 pub fn meshgrid(
-    x: ndarray::Array1<f64>,
-    y: ndarray::Array1<f64>,
+    x: &ndarray::Array1<f64>,
+    y: &ndarray::Array1<f64>,
 ) -> (ndarray::Array2<f64>, ndarray::Array2<f64>) {
     let mut xx = ndarray::Array2::<f64>::zeros((x.len(), y.len()));
     let mut yy = ndarray::Array2::<f64>::zeros((x.len(), y.len()));
@@ -31,9 +31,9 @@ pub fn meshgrid(
 }
 
 pub fn meshgrid3d(
-    x: ndarray::Array1<f64>,
-    y: ndarray::Array1<f64>,
-    z: ndarray::Array1<f64>,
+    x: &ndarray::Array1<f64>,
+    y: &ndarray::Array1<f64>,
+    z: &ndarray::Array1<f64>,
 ) -> (
     ndarray::Array3<f64>,
     ndarray::Array3<f64>,

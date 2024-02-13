@@ -1,7 +1,8 @@
 .. _grid_ref:
-******
-Grids
-******
+
+**************
+Grids Tutorial
+**************
 
 
 Grids are one of the main parts in `up4`. They determine where (spatially) and in which way we want to have a look at the data.
@@ -18,14 +19,14 @@ the simplest way to generate a grid is to use `up4.Grid`.
 Grid Generation
 ===============
 
-Grids, cylindical and cartesian, can be generated in a variity of ways.
+Grids, cylindical and cartesian, can be generated in a variety of ways.
 To offer full flexiility one can generate grids in the following ways:
 
-- with a `up4.Data` object -> uses system dimensions to wrap around the region of interest
+- with an `up4.Data` object -> uses system dimensions to wrap around the region of interest
    - with cell number
    - with cell size
-   - with cell number + x/y/z limitations
-   - with cell size + x/y/z limitations
+   - with cell number + x/y/z limits
+   - with cell size + x/y/z limits
 - given a region of interest and a cell size or cell numbers
 - given x/y/z limitations and a cell size or cell numbers
 
@@ -110,7 +111,7 @@ Here some examples:
     """
 
 All grids can be generated with: `mode = "cylindrical"` to generate a system in
-cylindrical coordinates. Those coordinates are then r, omega, z instead of x,y,z
+cylindrical coordinates. Those coordinates are then r, :math:`\theta`, z instead of x,y,z, in that order.
 
 .. code-block:: python
 

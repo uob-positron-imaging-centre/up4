@@ -35,8 +35,9 @@ impl CylindricalGrid3D {
             Dim::ThreeD(x) => x,
             _ => panic!("Grid3D got limits for other then three dimensions."),
         };
+        const PI: f64 = std::f64::consts::PI;
         // the distance beween two angles is constant therefore the cell size in omega dimension is
-        let ocellsize = (2.0 * 3.14159) / cells[1] as f64;
+        let ocellsize = (2.0 * PI) / cells[1] as f64;
         // height distance is also easy to calculate
         let zcellsize = (lim[2][1] - lim[2][0]) / cells[2] as f64;
         // The radial positions depend on the mode
@@ -46,11 +47,11 @@ impl CylindricalGrid3D {
 
         // positions contain the boundary of the cell
         for cellidy in 0..cells[1] {
-            opositions[cellidy as usize] = -3.14159 + cellidy as f64 * ocellsize + ocellsize;
+            opositions[cellidy] = -PI + cellidy as f64 * ocellsize + ocellsize;
         }
 
         for cellidz in 0..cells[2] {
-            zpositions[cellidz as usize] = cellidz as f64 * zcellsize + zcellsize + lim[2][0];
+            zpositions[cellidz] = cellidz as f64 * zcellsize + zcellsize + lim[2][0];
         }
         // center in cartesian coords!!!
         let center = [
@@ -91,14 +92,14 @@ impl CylindricalGrid3D {
                     // radius of cell before
                 )
                     .sqrt();
-                rpositions[cellidx as usize] = [inner_radius, new]; // inside, outside
+                rpositions[cellidx] = [inner_radius, new]; // inside, outside
                 inner_radius = new;
             }
         }
 
         let lim = [
             [0.0, outer_radius],    // radius
-            [-3.14159, 3.14159],    // omega
+            [-PI, PI],              // omega
             [lim[2][0], lim[2][1]], // height4
         ];
         let rmeanpositions = rpositions
@@ -320,9 +321,7 @@ impl GridFunctions3D for CylindricalGrid3D {
         let mut axis2 = axis2;
         if axis1 > axis2 {
             // swap axis1 and axis2
-            let temp = axis1;
-            axis1 = axis2;
-            axis2 = temp;
+            std::mem::swap(&mut axis1, &mut axis2);
         }
         let axis1 = Axis(axis1);
         let axis2 = Axis(axis2 - 1); // we removed axis1 so axis2 is now one smaller
@@ -354,9 +353,7 @@ impl GridFunctions3D for CylindricalGrid3D {
         let mut axis2 = axis2;
         if axis1 > axis2 {
             // swap axis1 and axis2
-            let temp = axis1;
-            axis1 = axis2;
-            axis2 = temp;
+            std::mem::swap(&mut axis1, &mut axis2);
         }
         let axis1 = Axis(axis1);
         let axis2 = Axis(axis2 - 1);
@@ -495,10 +492,8 @@ impl GridFunctions3D for CylindricalGrid3D {
                             && index.1 < self.data.shape()[1]
                             && index.2 < self.data.shape()[2]
                         {
-                            sum +=
-                                self.data[[index.0 as usize, index.1 as usize, index.2 as usize]];
-                            weight_sum +=
-                                self.weight[[index.0 as usize, index.1 as usize, index.2 as usize]];
+                            sum += self.data[[index.0, index.1, index.2]];
+                            weight_sum += self.weight[[index.0, index.1, index.2]];
                             counter_sum += 1.0;
                         }
                     }
@@ -516,3 +511,4 @@ impl GridFunctions3D for CylindricalGrid3D {
         }
     }
 }
+

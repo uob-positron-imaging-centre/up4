@@ -38,7 +38,7 @@ use pyo3::prelude::*;
 ///     Return the grid as a numpy array
 ///
 ///
-#[pyclass(name = "Grid", subclass)]
+#[pyclass(name = "RustGrid", subclass)]
 pub struct PyGrid {
     pub grid: Box<dyn grid::GridFunctions3D>,
 }
@@ -55,11 +55,11 @@ impl PyGrid {
         }
     }
 
-    /// Create a 3D cartesian grid with limits and spacing from a PyData object
+    /// Create a 3D cartesian grid with limits and spacing from a PyData object.
     ///
     /// Parameters
     /// ----------
-    /// data : PyData
+    /// pydata : PyData
     ///     A PyData object containing the data to be used to generate the grid
     /// cells : List(int)
     ///     A list containing the number of cells in each direction. Must be of length 3
@@ -86,7 +86,7 @@ impl PyGrid {
         }
     }
 
-    /// Create a 3D cartesian grid with limits and spacing provided by user
+    /// Create a 3D cartesian grid with limits and spacing provided by user.
     ///
     /// Parameters
     /// ----------
@@ -116,19 +116,18 @@ impl PyGrid {
                 [limit[4], limit[5]],
             ]),
         ));
-        let grid = PyGrid {
-            grid: grid, //Box::new(grid),
-        };
-        grid
+
+        PyGrid {
+            grid, //Box::new(grid),
+        }
     }
 
-    /// Return the positions of all cells in the grid
-    /// Parameters
+    /// Return the positions of all cells in the grid.
     ///
     /// Returns
     /// -------
-    /// positions : Touple( ndarray )
-    ///    A touple containing the 1D arrays of the x, y and z positions of the cells
+    /// positions : Tuple(np.ndarray)
+    ///    A tuple containing the 1D arrays of the x, y and z positions of the cells
     fn cell_positions<'py>(
         &self,
         _py: Python<'py>,
@@ -140,7 +139,7 @@ impl PyGrid {
         )
     }
 
-    /// Create a 3D cylindrical grid with limits provided by user
+    /// Create a 3D cylindrical grid with limits provided by user.
     ///
     /// Parameters
     /// ----------
@@ -149,9 +148,9 @@ impl PyGrid {
     /// limit : List(float)
     ///     A list containing the limits of the grid in each direction. Must be of length 6
     ///     The order is [rmin, rmax, zmin, zmax, phimin, phimax]
-    /// mode: str, optional
-    ///     The mode of the grid. Can be "volume". Other methods are not implemented yet.
-    ///     Default is "volume" (what a surprise)
+    /// mode : str, optional
+    ///     The mode of the grid. Can be "volume". Other methods are not implemented yet, by default
+    ///     "volume"
     ///
     /// Returns
     /// -------
@@ -175,23 +174,22 @@ impl PyGrid {
             ]),
             mode,
         ));
-        let grid = PyGrid {
-            grid: grid, //Box::new(grid),
-        };
-        grid
+
+        PyGrid {
+            grid, //Box::new(grid),
+        }
     }
 
-    /// Create a 3D cylindrical grid with limits and spacing from a PyData object
+    /// Create a 3D cylindrical grid with limits and spacing from a PyData object.
     ///
     /// Parameters
     /// ----------
-    /// data : PyData
+    /// pydata : PyData
     ///     A PyData object containing the data to be used to generate the grid
     /// cells : List(int)
     ///     A list containing the number of cells in each direction. Must be of length 3
-    /// mode: str, optional
-    ///     The mode of the grid. Can be "volume". Other methods are not implemented yet.
-    ///     Default is "volume" (what a surprise)
+    /// mode : str, optional
+    ///     The mode of the grid. Can be "volume". Other methods are not implemented yet, by default "volume"
     ///
     /// Returns
     /// -------
@@ -216,7 +214,7 @@ impl PyGrid {
         }
     }
 
-    /// Check if the particle is within the grid
+    /// Check if the particle is within the grid.
     ///
     /// Parameters
     /// ----------
@@ -236,8 +234,7 @@ impl PyGrid {
     /// Parameters
     /// ----------
     /// axis : int, optional
-    ///     The axis to plot the grid on
-    ///     Default is 0
+    ///     The axis to plot the grid on, by default 0
     ///
     /// Returns
     /// -------
@@ -275,11 +272,7 @@ impl PyGrid {
         plot.show()
     }
 
-    /// Return the shape of the grid
-    ///
-    /// Parameters
-    /// ----------
-    /// None
+    /// Return the shape of the grid.
     ///
     /// Returns
     /// -------
@@ -289,11 +282,7 @@ impl PyGrid {
         self.grid.get_cells().to_vec()
     }
 
-    /// Return the grid as a numpy array
-    ///
-    /// Parameters
-    /// ----------
-    /// None
+    /// Return the grid as a numpy array.
     ///
     /// Returns
     /// -------
@@ -303,11 +292,7 @@ impl PyGrid {
         self.grid.get_data().to_owned().into_pyarray(_py)
     }
 
-    /// Return the weights of each cell as a numpy array
-    ///
-    /// Parameters
-    /// ----------
-    /// None
+    /// Return the weights of each cell as a numpy array.
     ///
     /// Returns
     /// -------
@@ -317,7 +302,7 @@ impl PyGrid {
         self.grid.get_weights().to_owned().into_pyarray(_py)
     }
 
-    /// Return a slice of the grid as a numpy array
+    /// Return a slice of the grid as a numpy array.
     ///
     /// Parameters
     /// ----------
@@ -332,7 +317,8 @@ impl PyGrid {
             .to_owned()
             .into_pyarray(_py)
     }
-    /// Return a slice of the grid as a numpy array at a given position and axis
+
+    /// Return a slice of the grid as a numpy array at a given position and axis.
     ///
     /// Parameters
     /// ----------
@@ -345,7 +331,8 @@ impl PyGrid {
         self.grid.slice(axis, position).to_owned().into_pyarray(_py)
     }
 
-    /// Collaps the grid along an axis
+    /// Collapse the grid along an axis.
+    ///
     /// This is basically cell based depth averaging
     ///
     /// Parameters
@@ -363,7 +350,7 @@ impl PyGrid {
     }
 
     /// Collaps the grid along an axis
-    /// This is basically cell based depth averaging
+    /// This is basically cell based depth averaging.
     ///
     /// Parameters
     /// ----------
@@ -390,11 +377,7 @@ impl PyGrid {
             .into_pyarray(_py)
     }
 
-    /// Return the x-positions of the grid
-    ///
-    /// Parameters
-    /// ----------
-    /// None
+    /// Return the x-positions of the grid.
     ///
     /// Returns
     /// -------
@@ -405,11 +388,7 @@ impl PyGrid {
         self.grid.get_xpositions().to_owned().into_pyarray(_py)
     }
 
-    /// Return the y-positions of the grid
-    ///
-    /// Parameters
-    /// ----------
-    /// None
+    /// Return the y-positions of the grid.
     ///
     /// Returns
     /// -------
@@ -420,11 +399,7 @@ impl PyGrid {
         self.grid.get_ypositions().to_owned().into_pyarray(_py)
     }
 
-    /// Return the z-positions of the grid
-    ///
-    /// Parameters
-    /// ----------
-    /// None
+    /// Return the z-positions of the grid.
     ///
     /// Returns
     /// -------
@@ -495,7 +470,7 @@ impl PyGrid {
         ))
     }
 
-    /// Return the cell id of a given position
+    /// Return the cell id of a given position.
     ///
     /// Parameters
     /// ----------
@@ -520,7 +495,7 @@ impl PyGrid {
 /// This grid is generated in the vectorfield function and contains the arrow
 /// directions and size corresponding to the magnitude of the velocity.
 /// It has no constructor in python.
-#[pyclass(name = "VectorGrid")]
+#[pyclass(name = "RustVectorGrid")]
 pub struct PyVecGrid {
     pub grid: vector_grid::VectorGrid,
 }

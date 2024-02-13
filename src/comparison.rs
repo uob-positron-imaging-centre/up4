@@ -19,9 +19,9 @@ pub trait Comparison {
         grid: Box<dyn GridFunctions3D>,
     ) -> Comparer {
         Comparer {
-            data: data,
+            data,
             grid: grid.clone(),
-            data2: data2,
+            data2,
             grid2: grid.clone(),
             aligned: false,
         }
@@ -144,7 +144,7 @@ impl Comparison for Comparer {
 }
 
 fn binary_threshold(field: &Array3<f64>, quantile: f64) -> Array3<f64> {
-    if quantile > 1.0 || quantile < 0.0 {
+    if !(0.0..=1.0).contains(&quantile) {
         panic!("Quantile must be between 0 and 1");
     }
     let threshold = field
@@ -180,7 +180,7 @@ fn make_grid(dim: &Array2<f64>, gridtype: &str, cells: [usize; 3]) -> Box<dyn Gr
     } else {
         panic!("Grid type not supported");
     }
-    return grid;
+    grid
 }
 
 impl Comparer {
@@ -205,8 +205,8 @@ impl Comparer {
             max_velocity,
         );
         (
-            field1.get_data().iter().map(|x| *x).collect(),
-            field2.get_data().iter().map(|x| *x).collect(),
+            field1.get_data().iter().copied().collect(),
+            field2.get_data().iter().copied().collect(),
         )
     }
 }

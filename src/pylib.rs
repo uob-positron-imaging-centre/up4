@@ -18,7 +18,9 @@ use libconv::*;
 use libgrid::*;
 use libplot::*;
 
-/// Class that holds the particle data for processing, if you have simulation data, you will *probably*
+/// Class that holds the particle data for processing.
+///
+/// If you have simulation data, you will *probably*
 /// want to use ``Data.from_pdata()`` to instantiate this class as this handles a large number of particles.
 /// For experimental data, ``Data.from_tdata()`` is recommended. However, as the choice ultimately makes no
 /// difference to how you use this library, that choice is down to you!
@@ -53,31 +55,32 @@ use libplot::*;
 ///     Return the mean velocity of all valid particles in the system.
 ///
 /// dispersion:
-///    Return the dispersion of all valid particles in the system for a given time
+///     Return the dispersion of all valid particles in the system for a given time
 ///
 /// histogram:
-///    Return the histogram of all valid particles in the system for a given time
+///     Return the histogram of all valid particles in the system for a given time
 ///
 /// granular_temperature:
-///    Return the granular temperature of all valid particles in the system for a given time
+///     Return the granular temperature of all valid particles in the system for a given time
 ///
 /// lacey_mixing_index:
-///    Return the lacey mixing index for the whole system over a given time
+///     Return the lacey mixing index for the whole system over a given time
 ///
 /// circulation_time:
-///    Return the circulation time for the whole system, returns all times as one large array
+///     Return the circulation time for the whole system, returns all times as one large array
 ///
 /// concentration_field:
-///    Return the concentration field for the whole system
+///     Return the concentration field for the whole system
 ///
 /// homogenity_index:
-///   Return the homogenity index for the whole system, defiuned by two particle species
+///     Return the homogenity index for the whole system, defiuned by two particle species
 ///
 /// msd_field:
 ///     Return the mean square displacement field for the whole system
 ///
 /// msd:
-///    Return the mean square displacement for the whole system over time
+///     Return the mean square displacement for the whole system over time
+///
 #[pyclass(name = "Data")]
 struct PyData {
     data: Box<dyn Manager + Send>,
@@ -86,7 +89,7 @@ struct PyData {
 
 #[pymethods]
 impl PyData {
-    /// Create new i0nstance of up4.Data class. Time or particle oriented formats are parsed automatically.
+    /// Create new instance of up4.Data class. Time or particle oriented formats are parsed automatically.
     ///
     /// Parameters
     /// ----------
@@ -99,21 +102,23 @@ impl PyData {
     ///     Data class.
     #[new]
     fn constructor(filename: &str) -> Self {
-        let file = hdf5::File::open(filename).expect(&format!(
-            "Unable to open file {}. Check if file exists.",
-            filename
-        ));
+        let file = hdf5::File::open(filename)
+            .unwrap_or_else(|_| panic!("Unable to open file {}. Check if file exists.", filename));
         let hdf5type: i32 = file
             .attr("hdf5_up4_type")
-            .expect(&format!(
-                "Can not find attribute \"hdf5_up4_type\" in file {}",
-                filename
-            ))
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Can not find attribute \"hdf5_up4_type\" in file {}",
+                    filename
+                )
+            })
             .read_scalar()
-            .expect(&format!(
-                "Can not read scalar from attribute \"hdf5_up4_type\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Can not read scalar from attribute \"hdf5_up4_type\" in file {}",
+                    filename
+                )
+            });
         file.close().expect("Unable to close file");
         let data;
         if hdf5type == 0x1_i32 {
@@ -251,11 +256,6 @@ impl PyData {
 
     /// Return the time array of the dataset.
     ///
-    /// Parameters
-    /// ----------
-    ///
-    /// None
-    ///
     /// Returns
     /// -------
     ///
@@ -324,7 +324,7 @@ impl PyData {
             max_velocity,
         );
 
-        PyGrid { grid: grid }
+        PyGrid { grid }
     }
 
     /// Return particle information over specified duration.
@@ -369,7 +369,7 @@ impl PyData {
             };
         let grid = self.data.numberfield(grid.grid.clone(), selector);
 
-        PyGrid { grid: grid }
+        PyGrid { grid }
     }
 
     /// Return the occupancy field.
@@ -398,7 +398,7 @@ impl PyData {
             .data
             .occupancyfield(grid.grid.clone(), selector, min_vel);
 
-        PyGrid { grid: grid }
+        PyGrid { grid }
     }
 
     /// Return the mean velocity of all valid particles in the system.
@@ -414,22 +414,23 @@ impl PyData {
                 Some(b) => b,
                 None => panic!("Can not convert PyGrid to Grid1D as "),
             };
-        let mean_velocity = self.data.mean_velocity(selector);
+
         // return
-        mean_velocity
+        self.data.mean_velocity(selector)
     } //End mean_velocity
 
     /// Return the dispersion of the particles in the system.
-    /// See Martin, T. W., J. P. K. Seville, and D. J. Parker. "A general method for quantifying dispersion in multiscale systems using trajectory analysis."
     ///
-    /// parameters
+    /// See [1]_ for further details.
+    ///
+    /// Parameters
     /// ----------
     /// grid : up4.Grid
     ///    Grid class containing the grid layout.
     /// time_for_dispersion : float
     ///   Time for which the dispersion is calculated.
     ///
-    /// returns
+    /// Returns
     /// -------
     /// up4.Grid
     ///   Grid class containing the dispersion field.
@@ -437,6 +438,9 @@ impl PyData {
     /// float
     ///   Mixing efficiency
     ///
+    /// References
+    /// ----------
+    /// .. [1] Martin, T. W., J. P. K. Seville, and D. J. Parker. "A general method for quantifying dispersion in multiscale systems using trajectory analysis."
     fn dispersion<'py>(
         &mut self,
         _py: Python<'py>,
@@ -453,10 +457,11 @@ impl PyData {
             self.data
                 .dispersion(grid.grid.clone(), selector, time_for_dispersion);
 
-        (PyGrid { grid: grid }, mixing_efficiency)
+        (PyGrid { grid }, mixing_efficiency)
     }
 
     /// Calculate a histogram of a specific property in a region of the system.
+    ///
     /// The histogram is calculated for all particles that are valid according to the particleselector.
     /// The histogram is calculated for the region defined by the grid.
     ///
@@ -467,12 +472,11 @@ impl PyData {
     ///     The grid that defines the region of the system.
     ///
     /// property : str
-    ///     The property that is used to calculate the histogram.
-    ///    The following properties are available:
+    ///     The property that is used to calculate the histogram, the following properties are available:
     ///     - 'velocity'
     ///
     /// bins : int
-    ///    The number of bins in the histogram.
+    ///     The number of bins in the histogram.
     ///
     /// Returns
     /// -------
@@ -535,7 +539,7 @@ impl PyData {
             .data
             .granular_temperature_field(grid.grid.clone(), selector, mode);
 
-        PyGrid { grid: grid }
+        PyGrid { grid }
     }
 
     /// Calculate the Lacey mixing index for two particle types in a region of the system for a time period.
@@ -603,9 +607,8 @@ impl PyData {
                 Some(b) => b,
                 None => panic!("Can not convert PyGrid to Grid1D as "),
             };
-        let circulation_time = self.data.circulation_time(selector, axis, position);
 
-        circulation_time
+        self.data.circulation_time(selector, axis, position)
     }
 
     /// Calculate the concentration field of the system
@@ -645,10 +648,10 @@ impl PyData {
             .data
             .concentration_field(grid.grid.clone(), selector, type_a, type_b);
 
-        PyGrid { grid: grid }
+        PyGrid { grid }
     }
 
-    /// Calculate the homogenity index
+    /// Calculate the homogenity index.
     ///
     /// Parameters
     /// ----------
@@ -690,7 +693,7 @@ impl PyData {
             };
         let grid = self.data.msd_field(grid.grid.clone(), selector, time);
 
-        PyGrid { grid: grid }
+        PyGrid { grid }
     }
 
     /// Calculate the mean squared displacement of a particle in a system.
@@ -784,8 +787,7 @@ fn upppp_rust(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<PyData>()?;
     m.add_class::<PyGrid>()?;
     m.add_class::<PyConverter>()?;
-    m.add_class::<PyVectorPlotter>()?;
-    m.add_class::<PyScalarPlotter>()?;
-    m.add_class::<PyComparisonPlotter>()?;
+    m.add_class::<PyPlotter2D>()?;
+    m.add_class::<PyVecGrid>()?;
     Ok(())
 }

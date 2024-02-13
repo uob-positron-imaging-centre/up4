@@ -1,13 +1,10 @@
 Data
 ====
 
-.. currentmodule:: up4 
-.. automodule:: up4 
-
 .. heading
 .. -------
 .. we can do stuff like this too if a class ends up having lots of subclasses
 
-.. autoclass:: Data 
+.. autoclass:: up4.Data 
     :members:
     

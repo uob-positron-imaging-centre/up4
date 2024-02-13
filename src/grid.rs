@@ -24,13 +24,14 @@ use anyhow::Result;
 //pub use grid2dpolar::Grid2DPolar;
 /// Provides a generic way to send ranges to nD-Grid struct.
 ///
-/// Each Dimenion is defined by n - tuples of n*2 numbers to define the range in each dimension
+/// Each Dimension is defined by n - tuples of n*2 numbers to define the range in each dimension
 /// # Example
 ///
 /// ```rust
-/// let range1d = Dim::OneD((0.,10.));    //Define a range between zero and ten.
-/// let range2d = Dim::TwoD((0.,10.),(10.2,18.));
-/// let range3d = Dim::ThreeD((0.,10.),(1.0,2.0),(-5.1,18.2));
+/// use upppp_rust::Dim;
+/// let range1d = Dim::OneD([[0.,10.]]);    //Define a range between zero and ten.
+/// let range2d = Dim::TwoD([[0.,10.],[10.2,18.]]);
+/// let range3d = Dim::ThreeD([[0.,10.],[1.0,2.0],[-5.1,18.2]]);
 /// ```
 ///
 #[derive(Clone)]

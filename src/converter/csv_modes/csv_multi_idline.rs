@@ -5,7 +5,7 @@ use crate::{
 };
 use csv;
 use hdf5::File;
-use indicatif::{ProgressBar, ProgressStyle};
+// use indicatif::{ProgressBar, ProgressStyle};
 use itertools::Itertools;
 use ndarray;
 use ndarray_csv::Array2Reader;
@@ -16,6 +16,8 @@ use crate::converter::convertertools;
 // Maximum amount of failiures in a row available for a process
 const MAX_FAILS: i64 = 500;
 
+//
+#[allow(clippy::too_many_arguments)]
 pub fn csv_multi_idline(
     filename: &str,
     outname: &str,
@@ -78,9 +80,9 @@ pub fn csv_multi_idline(
         let mut particle_data: Vec<ndarray::Array2<f64>> = Vec::new();
 
         // here, data is a vec of all particles, each particle is an array of [t, id, x, y, z, vx, vy, vz]
-        for idx in 0..data.len() {
-            let particle_id = data[idx].slice(ndarray::s![.., 1]).to_vec();
-            let mut temp_data = data[idx].clone();
+        for arr in data {
+            let particle_id = arr.slice(ndarray::s![.., 1]).to_vec();
+            let mut temp_data = arr.clone();
             // sort by time
             temp_data = sort_by_column(temp_data, 0);
             // remove id column because it was not implemented
@@ -88,7 +90,7 @@ pub fn csv_multi_idline(
             if interpolate {
                 temp_data = convertertools::interpolate(temp_data, max_t, max_steps);
             }
-            print!("Data after interpolation: {:?}\n", temp_data);
+            println!("Data after interpolation: {:?}", temp_data);
             if vel {
                 if columns.len() > 5 {
                     panic!(
@@ -108,7 +110,7 @@ pub fn csv_multi_idline(
                     );
                 }
             }
-            print!("Data after velocity calc: {:?}\n", temp_data);
+            println!("Data after velocity calc: {:?}", temp_data);
             // push the current particle data into the vector
             particle_data.push(temp_data);
         }
@@ -125,19 +127,15 @@ pub fn csv_multi_idline(
     let mut mean_counter: usize = 0;
     let mut dimensions: ndarray::Array2<f64> = ndarray::Array2::<f64>::zeros((2, 3)); // [min:[x,y,z],max:[x,y,z]]
     dimensions
-        .slice_mut(ndarray::s![0 as usize, ..])
+        .slice_mut(ndarray::s![0_usize, ..])
         .fill(f64::MAX);
     dimensions
-        .slice_mut(ndarray::s![1 as usize, ..])
+        .slice_mut(ndarray::s![1_usize, ..])
         .fill(f64::MIN);
     //velocity: [x:[min, mean, max],y:[min,mean,max],z:[min,mean,max]]
     let mut velocity: ndarray::Array2<f64> = ndarray::Array2::<f64>::zeros((3, 3));
-    velocity
-        .slice_mut(ndarray::s![.., 0 as usize])
-        .fill(f64::MAX);
-    velocity
-        .slice_mut(ndarray::s![.., 2 as usize])
-        .fill(f64::MIN);
+    velocity.slice_mut(ndarray::s![.., 0_usize]).fill(f64::MAX);
+    velocity.slice_mut(ndarray::s![.., 2_usize]).fill(f64::MIN);
     // vel mag = [min,mean,max]
     let mut velocity_mag: ndarray::Array1<f64> = ndarray::Array1::<f64>::zeros(3);
     velocity_mag[0] = f64::MAX;
@@ -171,7 +169,7 @@ pub fn csv_multi_idline(
         print_debug!("Creating a new group \"particle {}\"", p_id);
         let group = hdf5file
             .create_group(&format!("particle {}", p_id))
-            .expect(&format!("Can not create group particle {}", p_id));
+            .unwrap_or_else(|_| panic!("Can not create group particle {}", p_id));
 
         if data[[0, 6]].is_nan() {
             panic!("Velocity information required")
@@ -269,51 +267,42 @@ pub fn csv_multi_idline(
         builder
             .with_data(&particle_id_array)
             .create("id")
-            .expect(&format!(
-                "Unable to create dataset \"id\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"id\" in file {}", filename));
         let builder = group.new_dataset_builder();
         builder
             .with_data(&particle_radius_array)
             .create("radius")
-            .expect(&format!(
-                "Unable to create dataset \"radius\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"radius\" in file {}", filename));
         let builder = group.new_dataset_builder();
         builder
             .with_data(&ppclouds_array)
             .create("ppcloud")
-            .expect(&format!(
-                "Unable to create dataset \"radius\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"radius\" in file {}", filename));
         let builder = group.new_dataset_builder();
         builder
             .with_data(&particle_type_array)
             .create("particletype")
-            .expect(&format!(
-                "Unable to create dataset \"particletype\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Unable to create dataset \"particletype\" in file {}",
+                    filename
+                )
+            });
 
         let builder = group.new_dataset_builder();
         builder
             .with_data(&vel_array)
             .create("velocity")
-            .expect(&format!(
-                "Unable to create dataset \"velocity\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| {
+                panic!("Unable to create dataset \"velocity\" in file {}", filename)
+            });
         let builder = group.new_dataset_builder();
         builder
             .with_data(&pos_array)
             .create("position")
-            .expect(&format!(
-                "Unable to create dataset \"position\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| {
+                panic!("Unable to create dataset \"position\" in file {}", filename)
+            });
     }
     bar.inc(20);
     velocity_mag[1] /= mean_counter as f64;
@@ -418,7 +407,7 @@ fn sort_by_id(data: ndarray::Array2<f64>) -> (Vec<ndarray::Array2<f64>>, f64, us
         let mut ids_and_steps = ids
             .iter()
             .zip(ids_timesteps.iter())
-            .map(|(a, b)| (*a as usize, *b as usize))
+            .map(|(a, b)| (*a, *b))
             .collect::<Vec<(usize, usize)>>();
         ids_and_steps.sort_by(|a, b| a.0.cmp(&b.0));
 

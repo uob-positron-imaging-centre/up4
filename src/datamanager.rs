@@ -102,6 +102,6 @@ impl GlobalStats {
             }
         }
 
-        return Ok(mid);
+        Ok(mid)
     }
 }

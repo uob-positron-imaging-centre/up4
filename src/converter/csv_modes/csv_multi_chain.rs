@@ -1,3 +1,4 @@
+// use indicatif::{ProgressBar, ProgressStyle, ProgressState};
 use crate::{
     check_signals,
     converter::convertertools::{make_sortlist, sort_by_array},
@@ -5,16 +6,18 @@ use crate::{
 };
 use csv;
 use hdf5::File;
-use indicatif::{ProgressBar, ProgressStyle};
+
 use ndarray;
 use ndarray_csv::Array2Reader;
 use regex::Regex;
+use std::fmt::Write;
 use std::path::Path;
 
 use crate::converter::convertertools;
 // Maximum amount of failiures in a row available for a process
 const MAX_FAILS: i64 = 500;
 
+#[allow(clippy::too_many_arguments)]
 pub fn csv_multi_chain(
     filename: &str,
     outname: &str,
@@ -52,7 +55,7 @@ pub fn csv_multi_chain(
         let mut data: ndarray::ArrayBase<ndarray::OwnedRepr<f64>, ndarray::Dim<[usize; 2]>> = rdr
             .deserialize_array2_dynamic()
             .expect("Unable to extract CSV data to ndarray! \nYour delimiter might be wrong.\n");
-        if columns.len() > 0 {
+        if !columns.is_empty() {
             let mut temp_data = ndarray::Array2::<f64>::from_elem((data.shape()[0], 7), f64::NAN);
             for (i, column) in columns.iter().enumerate() {
                 temp_data
@@ -122,8 +125,7 @@ pub fn csv_multi_chain(
                 if !vel {
                     panic!("Interpolation is activated but velocity computation is not. Currently this will lead to a loss of information. Please activate velocity computation or deactivate interpolation.");
                 }
-                temp_data =
-                    convertertools::interpolate(temp_data, max_duration, max_steps as usize);
+                temp_data = convertertools::interpolate(temp_data, max_duration, max_steps);
             }
             if vel {
                 if columns.len() >= 5 {
@@ -154,19 +156,15 @@ pub fn csv_multi_chain(
     let mut mean_counter: usize = 0;
     let mut dimensions: ndarray::Array2<f64> = ndarray::Array2::<f64>::zeros((2, 3)); // [min:[x,y,z],max:[x,y,z]]
     dimensions
-        .slice_mut(ndarray::s![0 as usize, ..])
+        .slice_mut(ndarray::s![0_usize, ..])
         .fill(f64::MAX);
     dimensions
-        .slice_mut(ndarray::s![1 as usize, ..])
+        .slice_mut(ndarray::s![1_usize, ..])
         .fill(f64::MIN);
     //velocity: [x:[min, mean, max],y:[min,mean,max],z:[min,mean,max]]
     let mut velocity: ndarray::Array2<f64> = ndarray::Array2::<f64>::zeros((3, 3));
-    velocity
-        .slice_mut(ndarray::s![.., 0 as usize])
-        .fill(f64::MAX);
-    velocity
-        .slice_mut(ndarray::s![.., 2 as usize])
-        .fill(f64::MIN);
+    velocity.slice_mut(ndarray::s![.., 0_usize]).fill(f64::MAX);
+    velocity.slice_mut(ndarray::s![.., 2_usize]).fill(f64::MIN);
     // vel mag = [min,mean,max]
     let mut velocity_mag: ndarray::Array1<f64> = ndarray::Array1::<f64>::zeros(3);
     velocity_mag[0] = f64::MAX;
@@ -199,7 +197,7 @@ pub fn csv_multi_chain(
         print_debug!("Creating a new group \"particle {}\"", p_id);
         let group = hdf5file
             .create_group(&format!("particle {}", p_id))
-            .expect(&format!("Can not create group particle {}", p_id));
+            .unwrap_or_else(|_| panic!("Can not create group particle {}", p_id));
 
         if data[[0, 6]].is_nan() {
             panic!("Velocity information required")
@@ -297,51 +295,42 @@ pub fn csv_multi_chain(
         builder
             .with_data(&particle_id_array)
             .create("id")
-            .expect(&format!(
-                "Unable to create dataset \"id\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"id\" in file {}", filename));
         let builder = group.new_dataset_builder();
         builder
             .with_data(&particle_radius_array)
             .create("radius")
-            .expect(&format!(
-                "Unable to create dataset \"radius\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"radius\" in file {}", filename));
         let builder = group.new_dataset_builder();
         builder
             .with_data(&ppclouds_array)
             .create("ppcloud")
-            .expect(&format!(
-                "Unable to create dataset \"radius\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"radius\" in file {}", filename));
         let builder = group.new_dataset_builder();
         builder
             .with_data(&particle_type_array)
             .create("particleid")
-            .expect(&format!(
-                "Unable to create dataset \"particleid\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Unable to create dataset \"particleid\" in file {}",
+                    filename
+                )
+            });
 
         let builder = group.new_dataset_builder();
         builder
             .with_data(&vel_array)
             .create("velocity")
-            .expect(&format!(
-                "Unable to create dataset \"velocity\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| {
+                panic!("Unable to create dataset \"velocity\" in file {}", filename)
+            });
         let builder = group.new_dataset_builder();
         builder
             .with_data(&pos_array)
             .create("position")
-            .expect(&format!(
-                "Unable to create dataset \"position\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| {
+                panic!("Unable to create dataset \"position\" in file {}", filename)
+            });
         bar.finish();
     }
     velocity_mag[1] /= mean_counter as f64;

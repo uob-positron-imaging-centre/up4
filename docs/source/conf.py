@@ -33,17 +33,14 @@
 
 import os
 import sys
+
 _HERE = os.path.dirname(__file__)
-_ROOT_DIR = os.path.abspath(os.path.join(_HERE, '../..'))
-_PACKAGE_DIR = os.path.abspath(os.path.join(_HERE, 'up4'))
-_SUBPACKAGE_DIR = os.path.abspath(os.path.join(_HERE, 'up4/plotting'))
-print(_HERE)
-print(_ROOT_DIR)
+_ROOT_DIR = os.path.abspath(os.path.join(_HERE, "../.."))
+_PACKAGE_DIR = os.path.abspath(os.path.join(_HERE, "up4"))
+_SUBPACKAGE_DIR = os.path.abspath(os.path.join(_HERE, "up4/plotting"))
 sys.path.insert(0, _ROOT_DIR)
 sys.path.insert(0, _PACKAGE_DIR)
 sys.path.insert(0, _SUBPACKAGE_DIR)
-
-import up4
 
 # -- Project information -----------------------------------------------------
 
@@ -79,7 +76,7 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.viewcode",
     "sphinx_copybutton",
-    'sphinx.ext.autosectionlabel',
+    "sphinx.ext.autosectionlabel",
 ]
 # copy python snippets with no hassle
 copybutton_prompt_text = ">>> "
@@ -103,7 +100,25 @@ numpydoc_xref_param_type = True
 numpydoc_xref_ignore = {"optional", "type_without_description", "BadException"}
 
 # Run docstring validation as part of build process
-numpydoc_validation_checks = {"all", "SS06", "PR01", "GL01", "SA01", "EX01", "YD01", "ES01", "GL08", "SS01", "RT01", "GL02", "GL03", "RT02", "RT03", "PR09", "SS05"}
+numpydoc_validation_checks = {
+    "all",
+    "SS06",
+    "PR01",
+    "GL01",
+    "SA01",
+    "EX01",
+    "YD01",
+    "ES01",
+    "GL08",
+    "SS01",
+    "RT01",
+    "GL02",
+    "GL03",
+    "RT02",
+    "RT03",
+    "PR09",
+    "SS05",
+}
 
 autodoc_default_options = {
     "show-inheritance": False,
@@ -164,12 +179,15 @@ default_role = "py:obj"
 html_theme = "pydata_sphinx_theme"
 html_logo = "_static/logo.jpeg"
 
+version_match = version if "dev" in version else "v" + version
+
 html_theme_options = {
     # The URL the GitHub icon points to
     "github_url": "https://github.com/uob-positron-imaging-centre/up4",
     # Show previous and next buttons on each page
     # "show_prev_next": False,
     # Show the navbar and search at the top
+    "navbar_start": ["navbar-logo", "version-switcher"],
     "navbar_end": ["search-field.html", "navbar-icon-links.html", "theme-switcher"],
     # Show `edit this page` button
     "use_edit_page_button": True,
@@ -177,22 +195,24 @@ html_theme_options = {
     # "icon_links": [
     #     {
     #         "name": "PyPI",
-    #         "url": "https://pypi.org/project/pept",
+    #         "url": "https://pypi.org/project/up4",
     #         "icon": "fas fa-cubes",
     #     },
     #     {
     #         "name": "Anaconda",
-    #         "url": "https://anaconda.org/conda-forge/pept",
+    #         "url": "https://anaconda.org/conda-forge/up4",
     #         "icon": "fas fa-arrow-circle-down",
     #     },
     # ],
+    "switcher": dict(json_url="./_static/version.json", version_match=version_match),
 }
 
 html_context = {
     "github_user": "uob-positron-imaging-centre",
     "github_repo": "up4",
     "github_version": "uPPPP",
-    "default_mode" : "auto"
+    "default_mode": "auto",
+    "doc_path": "docs",
 }
 
 html_sidebars = {
@@ -206,7 +226,7 @@ html_last_updated_fmt = "%b %d, %Y"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied

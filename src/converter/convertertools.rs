@@ -22,10 +22,10 @@ pub fn interpolate(
     if !is_sorted(&data.column(0)) {
         panic!("Data is not sorted by time. Please sort the data before interpolation.")
     }
-    let time: ArrayView1<f64> = data.slice(ndarray::s![.., 0 as usize]);
-    let x: ArrayView1<f64> = data.slice(ndarray::s![.., 1 as usize]);
-    let y: ArrayView1<f64> = data.slice(ndarray::s![.., 2 as usize]);
-    let z: ArrayView1<f64> = data.slice(ndarray::s![.., 3 as usize]);
+    let time: ArrayView1<f64> = data.slice(ndarray::s![.., 0_usize]);
+    let x: ArrayView1<f64> = data.slice(ndarray::s![.., 1_usize]);
+    let y: ArrayView1<f64> = data.slice(ndarray::s![.., 2_usize]);
+    let z: ArrayView1<f64> = data.slice(ndarray::s![.., 3_usize]);
 
     let maxtime = max_time;
     let timesteps = steps;
@@ -51,7 +51,7 @@ pub fn interpolate(
             // if the temporal distance between new time and old time is smaller
             // then distance between new time and next time return old timestep
             print_debug!("Real_step:{} time_len {}", real_step, time.len());
-            if !(real_step >= time.len() - 1) {
+            if real_step < time.len() - 1 {
                 let old_time = time[real_step];
                 let new_time = time[real_step + 1];
                 print_debug!("Old time: {} New time: {}", old_time, new_time);
@@ -60,7 +60,7 @@ pub fn interpolate(
                 } else if (time_new - old_time).abs() < (time_new - new_time).abs() {
                 } else {
                     real_step += 1;
-                    if !(real_step >= time.len() - 1) {
+                    if real_step < time.len() - 1 {
                         let old_time = time[real_step];
                         let new_time = time[real_step + 1];
 
@@ -218,9 +218,7 @@ fn interpolate_step(
     pos_old: f64,
     pos_new: f64,
 ) -> f64 {
-    let pos_current =
-        pos_old + ((pos_new - pos_old) / (time_new - time_old)) * (time_current - time_old);
-    pos_current
+    pos_old + ((pos_new - pos_old) / (time_new - time_old)) * (time_current - time_old)
 }
 
 // ndarray sorting by elements in another array
@@ -266,9 +264,10 @@ where
         let two = data[[*b, column]];
         one.partial_cmp(&two).unwrap()
     });
-    for i in 0..indices.len() {
-        new_data.row_mut(i).assign(&data.row(indices[i]));
+    for (i, index) in indices.into_iter().enumerate() {
+        new_data.row_mut(i).assign(&data.row(index));
     }
+
     new_data
 }
 
@@ -281,7 +280,7 @@ where
 
 #[cfg(feature = "blosc")]
 use hdf5::filters::{blosc_get_nthreads, blosc_set_nthreads};
-//// Make a builder for blosc datasets in hdf5 so we dont have to change stuff all the time
+// Make a builder for blosc datasets in hdf5 so we dont have to change stuff all the time
 
 macro_rules! make_dataset_builder {
     ($group:expr) => {{

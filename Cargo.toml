@@ -6,30 +6,32 @@ authors = ["Dominik Werner, Daniel Weston"]
 
 [lib]
 name = "upppp_rust"
-crate-type = ["cdylib","rlib"]
+crate-type = ["cdylib", "rlib"]
 
+# TODO consider using thiserror for error handling
 [dependencies]
-numpy = "0.18"
-hdf5 = {version = "0.8.1"}#, features = ["blosc"]}
-ndarray = "0.15"
-ndarray-stats="0.5.0"
-derive-getters = "0.2.0"
 anyhow = "1.0.69"
-#plotly = "0.6.0"
-plotly = {git="https://github.com/DanW97/plotly.git", features = ["plotly_ndarray"]}
-dyn-clone = "1.0"
-itertools = "0.10.1"
-regex = "1"
-vtkio ="0.6.0"
 colorous = "1.0.5"
-indicatif = "=0.17.0-beta.1"
-csv= "1.1.6"
-ndarray-csv = {version = "0.5.1"}
-polyfit-rs = "0.2.0"
-num-traits="0.2.14"
+csv = "1.1.6"
+derive-getters = "0.2.0"
+dyn-clone = "1.0"
+#hdf5 = { version = "0.8.1" }#, features = ["blosc"]}
+hdf5 = { git = "https://github.com/aldanor/hdf5-rust.git" }
+indicatif = "=0.17.7"
+itertools = "0.10.1"
 natord = "1.0.9"
+ndarray = "0.15.6"
+ndarray-csv = { version = "0.5.1" }
+ndarray-stats = "0.5.0"
+num-traits = "0.2.14"
+numpy = "0.20.0"
+#plotly = "0.8.4"
+plotly = { git = "https://github.com/DanW97/plotly.git"}
+polyfit-rs = "0.2.0"
+pyo3 = { version = "0.20.0", features = ["extension-module"] }
 rayon = "1.5.3"
-pyo3 = { version = "0.18.1", features = ["extension-module"] }
+regex = "1"
+vtkio ={ git = "https://github.com/elrnv/vtkio", branch = "release-0.7" }
 
 [features]
 # Debuging feature to print statements
@@ -39,8 +41,7 @@ uPPPP_debug = []
 uPPPP_warning = []
 python = []
 blosc = []
-#[profile.dev]#
-#opt-level = 0              # Use slightly better optimizations.
+#[profile.dev]##opt-level = 0              # Use slightly better optimizations.
 
 
 [profile.release]

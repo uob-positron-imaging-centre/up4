@@ -105,16 +105,11 @@ impl ParticleSelector {
 impl Selector for ParticleSelector {
     fn is_valid(&self, radius: f64, clouds: f64, density: f64, particleid: usize) -> bool {
         print_debug!("ParticleSelector: Checking if particle is valid.");
-        if !self.is_radius_valid(radius) {
-            return false;
-        } else if !self.is_cloud_valid(clouds) {
-            return false;
-        } else if !self.is_density_valid(density) {
-            return false;
-        } else if !self.is_particleid_valid(particleid) {
-            return false;
-        };
-        true
+
+        self.is_radius_valid(radius)
+            && self.is_cloud_valid(clouds)
+            && self.is_density_valid(density)
+            && self.is_particleid_valid(particleid)
     }
 
     fn timestep_valid(&self, time: f64) -> bool {

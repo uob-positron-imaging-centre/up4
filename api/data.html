@@ -1,15 +1,14 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" data-theme="auto">
+<html lang="en" data-content_root="../" data-theme="auto">
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Data &#8212; up4 v0.1.0 Manual</title>
+    <title>Data &#8212; up4 v0.1.0.dev Manual</title>
   
   
   
@@ -19,33 +18,36 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=365ca57ee442770a23c6"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/clipboard.min.js"></script>
-    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/documentation_options.js?v=d9674d80"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=4ea706d9"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/data';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.2';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = './_static/version.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.1.0.dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -53,7 +55,7 @@
     <link rel="prev" title="Converter" href="converter.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Nov 15, 2023"/>
+    <meta name="docbuild:last-update" content="Feb 12, 2024"/>
   </head>
   
   
@@ -61,10 +63,9 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>
@@ -105,7 +106,7 @@
 </form></div>
   </div>
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
 <div class="bd-header__inner bd-page-width">
   <label class="sidebar-toggle primary-toggle" for="__primary">
     <span class="fa-solid fa-bars"></span>
@@ -115,6 +116,7 @@
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
+
   
 
 <a class="navbar-brand logo" href="../index.html">
@@ -123,10 +125,40 @@
   
   
   
+    
+    
+      
+    
+    
+    <img src="../_static/logo.jpeg" class="logo__image only-light" alt="up4 v0.1.0.dev Manual - Home"/>
+    <script>document.write(`<img src="../_static/logo.jpeg" class="logo__image only-dark" alt="up4 v0.1.0.dev Manual - Home"/>`);</script>
   
-    <p class="title logo__title">up4 v0.1.0 Manual</p>
   
 </a></div>
+    
+      <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
     
   </div>
   
@@ -134,13 +166,8 @@
     
     <div class="me-auto navbar-header-items__center">
       
-        <div class="navbar-item"><nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+        <div class="navbar-item">
+<nav class="navbar-nav">
   <ul class="bd-navbar-elements navbar-nav">
     
                     <li class="nav-item">
@@ -159,7 +186,7 @@
 
                     <li class="nav-item current active">
                       <a class="nav-link nav-internal" href="index.html">
-                        Manual
+                        API Reference
                       </a>
                     </li>
                 
@@ -167,6 +194,13 @@
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../about.html">
                         About
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../contributing.html">
+                        Contributing
                       </a>
                     </li>
                 
@@ -180,6 +214,7 @@
       
         <div class="navbar-item navbar-persistent--container">
           
+
  <script>
  document.write(`
    <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
@@ -227,6 +262,7 @@
 </ul></div>
       
         <div class="navbar-item">
+
 <script>
 document.write(`
   <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
@@ -243,6 +279,7 @@ document.write(`
   
   
     <div class="navbar-persistent--mobile">
+
  <script>
  document.write(`
    <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
@@ -262,10 +299,13 @@ document.write(`
   
 </div>
 
-    </nav>
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
+      
+      
       
       <div class="bd-sidebar-primary bd-sidebar">
         
@@ -276,13 +316,8 @@ document.write(`
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item"><nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          <div class="navbar-item">
+<nav class="navbar-nav">
   <ul class="bd-navbar-elements navbar-nav">
     
                     <li class="nav-item">
@@ -301,7 +336,7 @@ document.write(`
 
                     <li class="nav-item current active">
                       <a class="nav-link nav-internal" href="index.html">
-                        Manual
+                        API Reference
                       </a>
                     </li>
                 
@@ -309,6 +344,13 @@ document.write(`
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../about.html">
                         About
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../contributing.html">
+                        Contributing
                       </a>
                     </li>
                 
@@ -356,6 +398,7 @@ document.write(`
 </ul></div>
         
           <div class="navbar-item">
+
 <script>
 document.write(`
   <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
@@ -371,7 +414,8 @@ document.write(`
   </div>
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
-        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
@@ -417,7 +461,7 @@ document.write(`
       </a>
     </li>
     
-    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Manual</a></li>
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">API Reference</a></li>
     
     <li class="breadcrumb-item active" aria-current="page">Data</li>
   </ul>
@@ -434,13 +478,13 @@ document.write(`
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="data">
-<h1>Data<a class="headerlink" href="#data" title="Permalink to this heading">#</a></h1>
+<h1>Data<a class="headerlink" href="#data" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="up4.Data">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">up4.</span></span><span class="sig-name descname"><span class="pre">Data</span></span><a class="headerlink" href="#up4.Data" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">up4.</span></span><span class="sig-name descname"><span class="pre">Data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Class that holds the particle data for processing.</p>
 <p>If you have simulation data, you will <em>probably</em>
@@ -508,7 +552,7 @@ difference to how you use this library, that choice is down to you!</p>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.circulation_time">
-<span class="sig-name descname"><span class="pre">circulation_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.circulation_time" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">circulation_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.circulation_time" title="Link to this definition">#</a></dt>
 <dd><p>Calculate the circulation time of a particle in a system.
 This algorithm works by setting a single boundary, which the particle has to cross 3 times.</p>
 <dl class="field-list">
@@ -531,7 +575,7 @@ This algorithm works by setting a single boundary, which the particle has to cro
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.concentration_field">
-<span class="sig-name descname"><span class="pre">concentration_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.concentration_field" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">concentration_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.concentration_field" title="Link to this definition">#</a></dt>
 <dd><p>Calculate the concentration field of the system
 The concentration field is calculated by counting the number of particles of type a and b in a region of the system.
 The concentration is calculated by n_a / (n_a + n_b).</p>
@@ -557,7 +601,7 @@ The concentration is calculated by n_a / (n_a + n_b).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.dimensions">
-<span class="sig-name descname"><span class="pre">dimensions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.dimensions" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">dimensions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.dimensions" title="Link to this definition">#</a></dt>
 <dd><p>Return the dimensions of the system as a dictionary.
 The dictionary contains the following keys:
 * <code class="docutils literal notranslate"><span class="pre">xmin</span></code>: Minimum x coordinate.
@@ -570,7 +614,7 @@ The dictionary contains the following keys:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.dispersion">
-<span class="sig-name descname"><span class="pre">dispersion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_for_dispersion</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.dispersion" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">dispersion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_for_dispersion</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.dispersion" title="Link to this definition">#</a></dt>
 <dd><p>Return the dispersion of the particles in the system.</p>
 <p>See <a class="reference internal" href="#rcb038a6d957a-1" id="id1">[1]</a> for further details.</p>
 <dl class="field-list">
@@ -602,7 +646,7 @@ The dictionary contains the following keys:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.extract">
-<span class="sig-name descname"><span class="pre">extract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">particle_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.extract" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">extract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">particle_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestep</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.extract" title="Link to this definition">#</a></dt>
 <dd><p>Return particle information over specified duration.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -624,7 +668,7 @@ The dictionary contains the following keys:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.from_pdata">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_pdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.from_pdata" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_pdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.from_pdata" title="Link to this definition">#</a></dt>
 <dd><p>Create new instance of the up4.Data class. This method assumes a particle oriented hdf5 file.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -644,7 +688,7 @@ The dictionary contains the following keys:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.from_tdata">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_tdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.from_tdata" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_tdata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.from_tdata" title="Link to this definition">#</a></dt>
 <dd><p>Create new instance of the Data class. This method assumes a time oriented hdf5 file.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -664,13 +708,24 @@ The dictionary contains the following keys:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.granular_temperature">
-<span class="sig-name descname"><span class="pre">granular_temperature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.granular_temperature" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">granular_temperature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'xyz'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.granular_temperature" title="Link to this definition">#</a></dt>
 <dd><p>Calculate the granular temperature of the system.
 The granular temperature is defined as the mean fluctuating velocity of the particles.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
 <dt><strong>grid</strong><span class="classifier"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PyGrid</span></code></span></dt><dd><p>The grid that defines the region of the system.</p>
+</dd>
+<dt><strong>mode</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a></span></dt><dd><p>The mode in which the granular temperature is calculated.
+The following modes are available:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>‘xyz’ (default)</p></li>
+<li><p>‘x’</p></li>
+<li><p>‘y’</p></li>
+<li><p>‘z’</p></li>
+</ul>
+</div></blockquote>
 </dd>
 </dl>
 </dd>
@@ -685,7 +740,7 @@ The granular temperature is defined as the mean fluctuating velocity of the part
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.histogram">
-<span class="sig-name descname"><span class="pre">histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">property</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.histogram" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">histogram</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">property</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'velocity'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bins</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.histogram" title="Link to this definition">#</a></dt>
 <dd><p>Calculate a histogram of a specific property in a region of the system.</p>
 <p>The histogram is calculated for all particles that are valid according to the particleselector.
 The histogram is calculated for the region defined by the grid.</p>
@@ -714,7 +769,7 @@ The histogram is calculated for the region defined by the grid.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.homogenity_index">
-<span class="sig-name descname"><span class="pre">homogenity_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_vel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.homogenity_index" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">homogenity_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_vel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.homogenity_index" title="Link to this definition">#</a></dt>
 <dd><p>Calculate the homogenity index.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -728,7 +783,7 @@ The histogram is calculated for the region defined by the grid.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.lacey_mixing_index">
-<span class="sig-name descname"><span class="pre">lacey_mixing_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.lacey_mixing_index" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">lacey_mixing_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.lacey_mixing_index" title="Link to this definition">#</a></dt>
 <dd><p>Calculate the Lacey mixing index for two particle types in a region of the system for a time period.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -754,7 +809,7 @@ The histogram is calculated for the region defined by the grid.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.max_position">
-<span class="sig-name descname"><span class="pre">max_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.max_position" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">max_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.max_position" title="Link to this definition">#</a></dt>
 <dd><p>Return the max position of the system as a array
 The array contains the following values at positions:
 * <code class="docutils literal notranslate"><span class="pre">0</span></code>: Maximum x coordinate.
@@ -764,7 +819,7 @@ The array contains the following values at positions:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.mean_velocity">
-<span class="sig-name descname"><span class="pre">mean_velocity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.mean_velocity" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">mean_velocity</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.mean_velocity" title="Link to this definition">#</a></dt>
 <dd><p>Return the mean velocity of all valid particles in the system.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -778,7 +833,7 @@ The array contains the following values at positions:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.min_position">
-<span class="sig-name descname"><span class="pre">min_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.min_position" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">min_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.min_position" title="Link to this definition">#</a></dt>
 <dd><p>Return the min position of the system as a array
 The array contains the following values at positions:
 * <code class="docutils literal notranslate"><span class="pre">0</span></code>: Minimum x coordinate.
@@ -788,7 +843,7 @@ The array contains the following values at positions:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.msd">
-<span class="sig-name descname"><span class="pre">msd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.msd" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">msd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.msd" title="Link to this definition">#</a></dt>
 <dd><p>Calculate the mean squared displacement of a particle in a system.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -814,7 +869,7 @@ The array contains the following values at positions:
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.msd_field">
-<span class="sig-name descname"><span class="pre">msd_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.msd_field" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">msd_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.msd_field" title="Link to this definition">#</a></dt>
 <dd><p>Calculate the mean squared displacement field of the system.
 The mean squared displacement field is calculated by calculating the mean squared displacement of a particle in a region of the system.
 Each cell element represents the mean squared displacement of all particles in that cell.</p>
@@ -836,13 +891,13 @@ Each cell element represents the mean squared displacement of all particles in t
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.nparticles">
-<span class="sig-name descname"><span class="pre">nparticles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.nparticles" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">nparticles</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.nparticles" title="Link to this definition">#</a></dt>
 <dd><p>Number of particles in the system.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.numberfield">
-<span class="sig-name descname"><span class="pre">numberfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.numberfield" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">numberfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.numberfield" title="Link to this definition">#</a></dt>
 <dd><p>Return the number density field.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -862,7 +917,7 @@ Each cell element represents the mean squared displacement of all particles in t
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.occupancyfield">
-<span class="sig-name descname"><span class="pre">occupancyfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_vel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.occupancyfield" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">occupancyfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_vel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.occupancyfield" title="Link to this definition">#</a></dt>
 <dd><p>Return the occupancy field.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -884,7 +939,7 @@ Each cell element represents the mean squared displacement of all particles in t
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.set_time">
-<span class="sig-name descname"><span class="pre">set_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.set_time" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">set_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">min_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_time</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.set_time" title="Link to this definition">#</a></dt>
 <dd><p>Select the dataset between two different times.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -900,7 +955,7 @@ Each cell element represents the mean squared displacement of all particles in t
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.stats">
-<span class="sig-name descname"><span class="pre">stats</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.stats" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">stats</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.stats" title="Link to this definition">#</a></dt>
 <dd><p>Calculate statistics of the dataset and print to terminal. Currently these are:
 * System dimensions.
 * Maximum time.
@@ -911,7 +966,7 @@ Each cell element represents the mean squared displacement of all particles in t
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.time">
-<span class="sig-name descname"><span class="pre">time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.time" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.time" title="Link to this definition">#</a></dt>
 <dd><p>Return the time array of the dataset.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -924,7 +979,7 @@ Each cell element represents the mean squared displacement of all particles in t
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.vectorfield">
-<span class="sig-name descname"><span class="pre">vectorfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.vectorfield" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">vectorfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.vectorfield" title="Link to this definition">#</a></dt>
 <dd><p>Return velocity data as a vector field.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -944,7 +999,7 @@ Each cell element represents the mean squared displacement of all particles in t
 
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Data.velocityfield">
-<span class="sig-name descname"><span class="pre">velocityfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.velocityfield" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">velocityfield</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">grid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'absolute'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_velocity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000000.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.velocityfield" title="Link to this definition">#</a></dt>
 <dd><p>Return the velocity data as a velocity field of their norms.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -974,7 +1029,7 @@ Each cell element represents the mean squared displacement of all particles in t
               
               
                 <footer class="prev-next-footer">
-                  <!-- Previous / next buttons -->
+                  
 <div class="prev-next-area">
     <a class="left-prev"
        href="converter.html"
@@ -1003,11 +1058,14 @@ Each cell element represents the mean squared displacement of all particles in t
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
   <div class="sidebar-secondary-item">
-  <div class="page-toc tocsection onthispage">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
     <i class="fa-solid fa-list"></i> On this page
   </div>
-  <nav class="bd-toc-nav page-toc">
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#up4.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#up4.Data.circulation_time"><code class="docutils literal notranslate"><span class="pre">Data.circulation_time()</span></code></a></li>
@@ -1040,9 +1098,10 @@ Each cell element represents the mean squared displacement of all particles in t
   </nav></div>
 
   <div class="sidebar-secondary-item">
+
   
   <div class="tocsection editthispage">
-    <a href="https://github.com/uob-positron-imaging-centre/up4/edit/uPPPP/api/data.rst">
+    <a href="https://github.com/uob-positron-imaging-centre/up4/edit/uPPPP/docs/api/data.rst">
       <i class="fa-solid fa-pencil"></i>
       
       
@@ -1055,6 +1114,7 @@ Each cell element represents the mean squared displacement of all particles in t
 </div>
 
   <div class="sidebar-secondary-item">
+
   <div class="tocsection sourcelink">
     <a href="../_sources/api/data.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
@@ -1075,8 +1135,8 @@ Each cell element represents the mean squared displacement of all particles in t
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -1084,6 +1144,7 @@ Each cell element represents the mean squared displacement of all particles in t
     <div class="footer-items__start">
       
         <div class="footer-item">
+
   <p class="copyright">
     
       © Copyright 2022, Dominik Werner and Daniel Weston.
@@ -1093,8 +1154,9 @@ Each cell element represents the mean squared displacement of all particles in t
 </div>
       
         <div class="footer-item">
+
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
     <br/>
   </p>
 </div>
@@ -1105,8 +1167,9 @@ Each cell element represents the mean squared displacement of all particles in t
   
     <div class="footer-items__end">
       
-        <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.3.
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
 </p></div>
       
     </div>

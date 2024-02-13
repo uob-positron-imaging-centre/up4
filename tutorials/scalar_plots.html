@@ -1,0 +1,832 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" data-theme="auto">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Scalar Plots Tutorial &#8212; up4 v0.1.0.dev Manual</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "auto";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
+
+    <script src="../_static/documentation_options.js?v=d9674d80"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=4ea706d9"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/scalar_plots';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.2';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = './_static/version.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.1.0.dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="author" title="About these documents" href="../about.html" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Vector Plots Tutorial" href="vector_plots.html" />
+    <link rel="prev" title="Scalar Fields Tutorial" href="scalar_fields.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+    <meta name="docbuild:last-update" content="Feb 12, 2024"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="auto">
+
+  
+  
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.jpeg" class="logo__image only-light" alt="up4 v0.1.0.dev Manual - Home"/>
+    <script>document.write(`<img src="../_static/logo.jpeg" class="logo__image only-dark" alt="up4 v0.1.0.dev Manual - Home"/>`);</script>
+  
+  
+</a></div>
+    
+      <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="navbar-nav">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        Tutorials
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../about.html">
+                        About
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../contributing.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/uob-positron-imaging-centre/up4" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item">
+<nav class="navbar-nav">
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started.html">
+                        Getting Started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        Tutorials
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api/index.html">
+                        API Reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../about.html">
+                        About
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../contributing.html">
+                        Contributing
+                      </a>
+                    </li>
+                
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/uob-positron-imaging-centre/up4" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Sarted</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="basic_tutorial.html">Basic Tutorial</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Data Preprocessing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="converting.html">Data Conversion Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grid_tutorial.html">Grids Tutorial</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Data Processing</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mixing.html">Mixing Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="conditional_analysis.html">Conditional Analysis Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalar_fields.html">Scalar Fields Tutorial</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Plotting</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Scalar Plots Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vector_plots.html">Vector Plots Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataset_comparison.html">Dataset Comparison Tutorial</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+
+
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="index.html" class="nav-link">Tutorials</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page">Scalar...</li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="scalar-plots-tutorial">
+<span id="scalarplots"></span><h1>Scalar Plots Tutorial<a class="headerlink" href="#scalar-plots-tutorial" title="Link to this heading">#</a></h1>
+<p>Scalar quantities calculated by <code class="docutils literal notranslate"><span class="pre">up4</span></code> can be visualised by the <a class="reference internal" href="../api/plotting.html#up4.Plotter2D" title="up4.Plotter2D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up4.Plotter2D</span></code></a>
+class. For ease of use, this class takes 3D grids as an input, and will
+appropriately depth-average or slice the data for you. The <code class="xref py py-obj docutils literal notranslate"><span class="pre">axis</span></code> argument to
+methods defined in this class refers to which axis the depth-averaging/ slicing
+will happen along (cylindrical equivalents in brackets):</p>
+<ul class="simple">
+<li><p>0: slice along x(r)-axis, the plane for the data is y-z (<span class="math notranslate nohighlight">\(\theta\)</span>-z).</p></li>
+<li><p>1: slice along y(<span class="math notranslate nohighlight">\(\theta\)</span>)-axis, the plane for the data is x-z (r-z).</p></li>
+<li><p>2: slice along z(z)-axis, the plane for the data is x-y (r-<span class="math notranslate nohighlight">\(\theta\)</span>).</p></li>
+</ul>
+<p>Available scalar plotting options are:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../api/plotting.html#up4.Plotter2D.scalar_map" title="up4.Plotter2D.scalar_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up4.Plotter2D.scalar_map</span></code></a></p></li>
+<li><p><a class="reference internal" href="../api/plotting.html#up4.Plotter2D.scalar_contour" title="up4.Plotter2D.scalar_contour"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up4.Plotter2D.scalar_contour</span></code></a></p></li>
+</ul>
+<p>It is possible to use either a 3D scalar field (see <a class="reference internal" href="scalar_fields.html#scalarfield"><span class="std std-ref">tutorial</span></a>) or a
+3D vector field, e.g. the velocity field. In the latter case, <code class="docutils literal notranslate"><span class="pre">up4</span></code> will
+calculate the magnitude of the vector quantity after depth-averaging or slicing.</p>
+<p>In the proceeding sections, we will focus on the visualisation of scalar fields
+from a rotating drum, that rotates about the x-axis. The data for this can be found in
+the <code class="docutils literal notranslate"><span class="pre">tests/fixtures</span></code> directory of <code class="docutils literal notranslate"><span class="pre">up4</span></code>. To avoid unnecessary code repitition,
+each example assumes that above it is the following code block:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">up4</span>
+<span class="n">drum_hdf5_file</span> <span class="o">=</span> <span class="s1">&#39;/path/to/hdf5/file&#39;</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="n">drum_hdf5_file</span><span class="p">)</span>
+<span class="n">grid_car</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Grid</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">num_cells</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Plotting with a cylindrical grid happens in an identical way, but using a Cartesian
+grid for this example maintains the shape for the drum’s free surface so that each plot
+is easier to understand.</p>
+<section id="heat-map">
+<h2>Heat Map<a class="headerlink" href="#heat-map" title="Link to this heading">#</a></h2>
+<p>We can visualise the depth-averaged velocity field, a vector quantity, as a scalar field
+using <a class="reference internal" href="../api/plotting.html#up4.Plotter2D.scalar_map" title="up4.Plotter2D.scalar_map"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up4.Plotter2D.scalar_map</span></code></a>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vel_field</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">vectorfield</span><span class="p">(</span><span class="n">grid_car</span><span class="p">)</span> <span class="c1"># velocity vectorfield</span>
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Plotter2D</span><span class="p">(</span><span class="n">vel_field</span><span class="p">)</span> <span class="c1"># create a Plotter2D instance</span>
+<span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># interested in the y-z plane</span>
+<span class="n">plot_layout</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;y position (m)&quot;</span><span class="p">,</span>
+    <span class="n">yaxis_title</span><span class="o">=</span><span class="s2">&quot;z position (m)&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="c1"># set layout parameters for plot</span>
+<span class="n">plot_style</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">colorbar_title</span><span class="o">=</span><span class="s2">&quot;Velocity (m s&lt;sup&gt;-1&lt;/sup&gt;)&quot;</span>
+<span class="p">)</span> <span class="c1"># style the trace(s) in the plot</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">scalar_map</span><span class="p">(</span>
+    <span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span><span class="p">,</span>
+    <span class="n">selection</span> <span class="o">=</span> <span class="s2">&quot;depth_average&quot;</span><span class="p">,</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="n">plot_layout</span><span class="p">,</span>
+    <span class="n">style</span> <span class="o">=</span> <span class="n">plot_style</span>
+<span class="p">)</span> <span class="c1"># depth-average the vector grid</span>
+</pre></div>
+</div>
+<p>Alternatively, we could view just a slice of the y-z plane:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vel_field</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">vectorfield</span><span class="p">(</span><span class="n">grid_car</span><span class="p">)</span> <span class="c1"># velocity vectorfield</span>
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Plotter2D</span><span class="p">(</span><span class="n">vel_field</span><span class="p">)</span> <span class="c1"># create a Plotter2D instance</span>
+<span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># interested in the y-z plane</span>
+<span class="c1"># select the y-z plane located at index 2, note that index is a required</span>
+<span class="c1"># argument for &quot;plane&quot; selection.</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">scalar_map</span><span class="p">(</span>
+    <span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span><span class="p">,</span>
+    <span class="n">selection</span> <span class="o">=</span> <span class="s2">&quot;plane&quot;</span><span class="p">,</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="n">plot_layout</span><span class="p">,</span>
+    <span class="n">style</span> <span class="o">=</span> <span class="n">plot_style</span>
+<span class="p">)</span> <span class="c1"># reusing formatting defined in the previous example</span>
+</pre></div>
+</div>
+<p>Note that these two examples could be combined into one, as a <a class="reference internal" href="../api/plotting.html#up4.Plotter2D" title="up4.Plotter2D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up4.Plotter2D</span></code></a> instance
+can generate multiple figures based on the input grid provided to it since its plotting
+methods return a <a class="reference external" href="https://plotly.com/python-api-reference/generated/plotly.graph_objects.html#plotly.graph_objects.Figure" title="(in )"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plotly.graph_objects.Figure</span></code></a> instance.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vel_field</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">vectorfield</span><span class="p">(</span><span class="n">grid_car</span><span class="p">)</span> <span class="c1"># velocity vectorfield</span>
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Plotter2D</span><span class="p">(</span><span class="n">vel_field</span><span class="p">)</span> <span class="c1"># create a Plotter2D instance</span>
+<span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># interested in the y-z plane</span>
+    <span class="n">plot_layout</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;y position (m)&quot;</span><span class="p">,</span>
+    <span class="n">yaxis_title</span><span class="o">=</span><span class="s2">&quot;z position (m)&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="c1"># set layout parameters for plot</span>
+<span class="n">plot_style</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">colorbar_title</span><span class="o">=</span><span class="s2">&quot;Velocity (m s&lt;sup&gt;-1&lt;/sup&gt;)&quot;</span>
+<span class="p">)</span> <span class="c1"># style the trace(s) in the plot</span>
+
+<span class="n">depth_fig</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">scalar_map</span><span class="p">(</span>
+    <span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span><span class="p">,</span>
+    <span class="n">selection</span> <span class="o">=</span> <span class="s2">&quot;depth_average&quot;</span><span class="p">,</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="n">plot_layout</span><span class="p">,</span>
+    <span class="n">style</span> <span class="o">=</span> <span class="n">plot_style</span>
+<span class="p">)</span>
+
+<span class="c1"># The same Plotter2D instance as above is used here to generate a different figure</span>
+<span class="c1"># and the formatting can be reused!</span>
+<span class="n">plane_fig</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">scalar_map</span><span class="p">(</span>
+    <span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span><span class="p">,</span>
+    <span class="n">selection</span> <span class="o">=</span> <span class="s2">&quot;plane&quot;</span><span class="p">,</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="n">plot_layout</span><span class="p">,</span>
+    <span class="n">style</span> <span class="o">=</span> <span class="n">plot_style</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="contour">
+<h2>Contour<a class="headerlink" href="#contour" title="Link to this heading">#</a></h2>
+<p>Instead of the velocity field, what if we wanted to understand the quality of mixing
+in a granular process. We can do this by drawing contours of the granular temperature,
+as regions with higher values are better mixed.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">gran_temp_field</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">granular_temperature</span><span class="p">(</span><span class="n">grid_car</span><span class="p">)</span> <span class="c1"># granular temperature field</span>
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Plotter2D</span><span class="p">(</span><span class="n">gran_temp_field</span><span class="p">)</span> <span class="c1"># create a Plotter2D instance</span>
+<span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># interested in the y-z plane</span>
+<span class="n">plot_layout</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;y position (m)&quot;</span><span class="p">,</span>
+    <span class="n">yaxis_title</span><span class="o">=</span><span class="s2">&quot;z position (m)&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="c1"># set layout parameters for plot</span>
+<span class="n">plot_style</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">colorbar_title</span><span class="o">=</span><span class="s2">&quot;Granular Temperature (m&lt;sup&gt;2&lt;/sup&gt; s&lt;sup&gt;-2&lt;/sup&gt;)&quot;</span>
+<span class="p">)</span> <span class="c1"># style the trace(s) in the plot</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">scalar_contour</span><span class="p">(</span>
+    <span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span><span class="p">,</span>
+    <span class="n">selection</span> <span class="o">=</span> <span class="s2">&quot;depth_average&quot;</span><span class="p">,</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="n">plot_layout</span><span class="p">,</span>
+    <span class="n">style</span> <span class="o">=</span> <span class="n">plot_style</span>
+<span class="p">)</span> <span class="c1"># depth-average the vector grid</span>
+</pre></div>
+</div>
+<p>As before, perhaps we may be interested in a specific plane:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">gran_temp_field</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">granular_temperature</span><span class="p">(</span><span class="n">grid_car</span><span class="p">)</span> <span class="c1"># granular temperature field</span>
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Plotter2D</span><span class="p">(</span><span class="n">gran_temp_field</span><span class="p">)</span> <span class="c1"># create a Plotter2D instance</span>
+<span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># interested in the y-z plane</span>
+<span class="c1"># select the y-z plane located at index 2, note that index is a required</span>
+<span class="c1"># argument for &quot;plane&quot; selection.</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">scalar_contour</span><span class="p">(</span>
+    <span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span><span class="p">,</span>
+    <span class="n">selection</span> <span class="o">=</span> <span class="s2">&quot;plane&quot;</span><span class="p">,</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="n">plot_layout</span><span class="p">,</span>
+    <span class="n">style</span> <span class="o">=</span> <span class="n">plot_style</span>
+<span class="p">)</span> <span class="c1"># reusing formatting defined in the previous example</span>
+</pre></div>
+</div>
+<p>Note that the plots discussed in the tutorials for <a class="reference internal" href="vector_plots.html#vectorplots"><span class="std std-ref">vector plotting</span></a>
+can also be used on the dataset used in these
+tutorials, with the same <a class="reference internal" href="../api/plotting.html#up4.Plotter2D" title="up4.Plotter2D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up4.Plotter2D</span></code></a> instance!</p>
+</section>
+<section id="formatting-scalar-plots">
+<h2>Formatting Scalar Plots<a class="headerlink" href="#formatting-scalar-plots" title="Link to this heading">#</a></h2>
+<p>The methods of <a class="reference internal" href="../api/plotting.html#up4.Plotter2D" title="up4.Plotter2D"><code class="xref py py-obj docutils literal notranslate"><span class="pre">up4.Plotter2D</span></code></a> return <a class="reference external" href="https://plotly.com/python-api-reference/generated/plotly.graph_objects.html#plotly.graph_objects.Figure" title="(in )"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plotly.graph_objects.Figure</span></code></a> instances, so you can
+customise your plots to the same level of detail as natively using plotly. Examples of
+this are shown in each code block, where the x- and y-axes have been given
+labels, and the colourbar has been given a title. At the Python level, you can either pass
+dictionaries of <a class="reference external" href="https://plotly.com/python-api-reference/generated/plotly.graph_objects.html#plotly.graph_objects.Layout" title="(in )"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plotly.graph_objects.Layout</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/trace.html#module-trace" title="(in Python v3.12)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trace</span></code></a> style specifications, or
+interact with the returned <a class="reference external" href="https://plotly.com/python-api-reference/generated/plotly.graph_objects.html#plotly.graph_objects.Figure" title="(in )"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plotly.graph_objects.Figure</span></code></a> instance directly.</p>
+<p>The choice to do this is deliberate as the plotly API in Python and Rust is <em>substantially</em>
+different. In Python, it is a fully object-oriented approach with a myriad of optional
+arguments, something that Rust cannot handle ergonomically. In Rust, the plotly API is
+instead following a functional paradigm. Thus, the choice was made that <code class="docutils literal notranslate"><span class="pre">up4</span></code> will instead
+expose the figure in a manner compatible with the language’s API.</p>
+<p>Finally, saving static plotly images to a required dpi is supported in <code class="docutils literal notranslate"><span class="pre">up4</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># create a plot</span>
+<span class="kn">import</span> <span class="nn">up4</span>
+<span class="n">drum_hdf5_file</span> <span class="o">=</span> <span class="s1">&#39;/path/to/hdf5/file&#39;</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="n">drum_hdf5_file</span><span class="p">)</span>
+<span class="n">grid_car</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Grid</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">num_cells</span><span class="o">=</span><span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">])</span>
+
+<span class="n">vel_field</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">vectorfield</span><span class="p">(</span><span class="n">grid_car</span><span class="p">)</span> <span class="c1"># velocity vectorfield</span>
+<span class="n">plotter</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Plotter2D</span><span class="p">(</span><span class="n">vel_field</span><span class="p">)</span> <span class="c1"># create a Plotter2D instance</span>
+<span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># interested in the y-z plane</span>
+<span class="n">plot_layout</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">width</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">800</span><span class="p">,</span>
+    <span class="n">xaxis_title</span><span class="o">=</span><span class="s2">&quot;y position (m)&quot;</span><span class="p">,</span>
+    <span class="n">yaxis_title</span><span class="o">=</span><span class="s2">&quot;z position (m)&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="c1"># set layout parameters for plot</span>
+<span class="n">plot_style</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">colorbar_title</span><span class="o">=</span><span class="s2">&quot;Velocity (m s&lt;sup&gt;-1&lt;/sup&gt;)&quot;</span>
+<span class="p">)</span> <span class="c1"># style the trace(s) in the plot</span>
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plotter</span><span class="o">.</span><span class="n">scalar_map</span><span class="p">(</span>
+    <span class="n">axis</span> <span class="o">=</span> <span class="n">axis</span><span class="p">,</span>
+    <span class="n">selection</span> <span class="o">=</span> <span class="s2">&quot;depth_average&quot;</span><span class="p">,</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="n">plot_layout</span><span class="p">,</span>
+    <span class="n">style</span> <span class="o">=</span> <span class="n">plot_style</span>
+<span class="p">)</span> <span class="c1"># depth-average the vector grid</span>
+
+<span class="c1"># now, save it with a required dpi</span>
+<span class="n">dpi</span> <span class="o">=</span> <span class="mi">600</span> <span class="c1"># typical requirement for many journals</span>
+<span class="n">up4</span><span class="o">.</span><span class="n">save_fig</span><span class="p">(</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">fig</span><span class="p">,</span> <span class="c1"># figure to save</span>
+    <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;velocity_field.png&quot;</span> <span class="c1"># location to save file to</span>
+    <span class="n">dpi</span> <span class="o">=</span> <span class="n">dpi</span><span class="p">,</span> <span class="c1"># image dpi</span>
+    <span class="n">border_width</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span> <span class="c1"># width of paper border (in mm)</span>
+    <span class="n">paper_width</span> <span class="o">=</span> <span class="mi">210</span> <span class="c1"># a4 paper width (in mm)</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="scalar_fields.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Scalar Fields Tutorial</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="vector_plots.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Vector Plots Tutorial</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#heat-map">Heat Map</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contour">Contour</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#formatting-scalar-plots">Formatting Scalar Plots</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
+  
+  <div class="tocsection editthispage">
+    <a href="https://github.com/uob-positron-imaging-centre/up4/edit/uPPPP/docs/tutorials/scalar_plots.rst">
+      <i class="fa-solid fa-pencil"></i>
+      
+      
+        
+          Edit on GitHub
+        
+      
+    </a>
+  </div>
+</div>
+
+  <div class="sidebar-secondary-item">
+
+  <div class="tocsection sourcelink">
+    <a href="../_sources/tutorials/scalar_plots.rst.txt">
+      <i class="fa-solid fa-file-lines"></i> Show Source
+    </a>
+  </div>
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+    <div class="footer-items__start">
+      
+        <div class="footer-item">
+
+  <p class="copyright">
+    
+      © Copyright 2022, Dominik Werner and Daniel Weston.
+      <br/>
+    
+  </p>
+</div>
+      
+        <div class="footer-item">
+
+  <p class="sphinx-version">
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    <br/>
+  </p>
+</div>
+      
+    </div>
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

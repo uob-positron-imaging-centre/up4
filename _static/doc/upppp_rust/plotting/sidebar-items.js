@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["plot"],"mod":["colourmap","plotting_2d"]};
+window.SIDEBAR_ITEMS = {"fn":["plot"],"mod":["plotting_2d"]};

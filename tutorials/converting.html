@@ -1,15 +1,14 @@
 
-
 <!DOCTYPE html>
 
 
-<html lang="en" data-theme="auto">
+<html lang="en" data-content_root="../" data-theme="auto">
 
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Data Conversion Tutorial &#8212; up4 v0.1.0 Manual</title>
+    <title>Data Conversion Tutorial &#8212; up4 v0.1.0.dev Manual</title>
   
   
   
@@ -19,41 +18,44 @@
   </script>
   
   <!-- Loaded before other Sphinx assets -->
-  <link href="../_static/styles/theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
-<link href="../_static/styles/bootstrap.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
-<link href="../_static/styles/pydata-sphinx-theme.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
+  <link href="../_static/styles/theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
 
   
-  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=365ca57ee442770a23c6" rel="stylesheet" />
-  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+  <link href="../_static/vendor/fontawesome/6.5.1/css/all.min.css?digest=8d27b9dea8ad943066ae" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6" />
-<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6" />
-  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=365ca57ee442770a23c6"></script>
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
+  <script src="../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/sphinx_highlight.js"></script>
-    <script src="../_static/clipboard.min.js"></script>
-    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/documentation_options.js?v=d9674d80"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=4ea706d9"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'tutorials/converting';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.2';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = './_static/version.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.1.0.dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
     <link rel="author" title="About these documents" href="../about.html" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Mixing Tutorial" href="mixing.html" />
-    <link rel="prev" title="Grids Tutorial" href="grid_tutorial.html" />
+    <link rel="next" title="Grids Tutorial" href="grid_tutorial.html" />
+    <link rel="prev" title="Basic Tutorial" href="basic_tutorial.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Nov 15, 2023"/>
+    <meta name="docbuild:last-update" content="Feb 12, 2024"/>
   </head>
   
   
@@ -61,10 +63,9 @@
 
   
   
-  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <a id="pst-skip-link" class="skip-link" href="#main-content">Skip to main content</a>
   
   <div id="pst-scroll-pixel-helper"></div>
-
   
   <button type="button" class="btn rounded-pill" id="pst-back-to-top">
     <i class="fa-solid fa-arrow-up"></i>
@@ -105,7 +106,7 @@
 </form></div>
   </div>
   
-    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    <header class="bd-header navbar navbar-expand-lg bd-navbar">
 <div class="bd-header__inner bd-page-width">
   <label class="sidebar-toggle primary-toggle" for="__primary">
     <span class="fa-solid fa-bars"></span>
@@ -115,6 +116,7 @@
   <div class="col-lg-3 navbar-header-items__start">
     
       <div class="navbar-item">
+
   
 
 <a class="navbar-brand logo" href="../index.html">
@@ -123,10 +125,40 @@
   
   
   
+    
+    
+      
+    
+    
+    <img src="../_static/logo.jpeg" class="logo__image only-light" alt="up4 v0.1.0.dev Manual - Home"/>
+    <script>document.write(`<img src="../_static/logo.jpeg" class="logo__image only-dark" alt="up4 v0.1.0.dev Manual - Home"/>`);</script>
   
-    <p class="title logo__title">up4 v0.1.0 Manual</p>
   
 </a></div>
+    
+      <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
     
   </div>
   
@@ -134,13 +166,8 @@
     
     <div class="me-auto navbar-header-items__center">
       
-        <div class="navbar-item"><nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+        <div class="navbar-item">
+<nav class="navbar-nav">
   <ul class="bd-navbar-elements navbar-nav">
     
                     <li class="nav-item">
@@ -159,7 +186,7 @@
 
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../api/index.html">
-                        Manual
+                        API Reference
                       </a>
                     </li>
                 
@@ -167,6 +194,13 @@
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../about.html">
                         About
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../contributing.html">
+                        Contributing
                       </a>
                     </li>
                 
@@ -180,6 +214,7 @@
       
         <div class="navbar-item navbar-persistent--container">
           
+
  <script>
  document.write(`
    <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
@@ -227,6 +262,7 @@
 </ul></div>
       
         <div class="navbar-item">
+
 <script>
 document.write(`
   <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
@@ -243,6 +279,7 @@ document.write(`
   
   
     <div class="navbar-persistent--mobile">
+
  <script>
  document.write(`
    <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
@@ -262,10 +299,13 @@ document.write(`
   
 </div>
 
-    </nav>
+    </header>
   
+
   <div class="bd-container">
     <div class="bd-container__inner bd-page-width">
+      
+      
       
       <div class="bd-sidebar-primary bd-sidebar">
         
@@ -276,13 +316,8 @@ document.write(`
     
       <div class="sidebar-header-items__center">
         
-          <div class="navbar-item"><nav class="navbar-nav">
-  <p class="sidebar-header-items__title"
-     role="heading"
-     aria-level="1"
-     aria-label="Site Navigation">
-    Site Navigation
-  </p>
+          <div class="navbar-item">
+<nav class="navbar-nav">
   <ul class="bd-navbar-elements navbar-nav">
     
                     <li class="nav-item">
@@ -301,7 +336,7 @@ document.write(`
 
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../api/index.html">
-                        Manual
+                        API Reference
                       </a>
                     </li>
                 
@@ -309,6 +344,13 @@ document.write(`
                     <li class="nav-item">
                       <a class="nav-link nav-internal" href="../about.html">
                         About
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../contributing.html">
+                        Contributing
                       </a>
                     </li>
                 
@@ -356,6 +398,7 @@ document.write(`
 </ul></div>
         
           <div class="navbar-item">
+
 <script>
 document.write(`
   <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
@@ -371,15 +414,30 @@ document.write(`
   </div>
   
     <div class="sidebar-primary-items__start sidebar-primary__section">
-        <div class="sidebar-primary-item"><nav class="bd-docs-nav bd-links"
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
-  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1"><a class="reference internal" href="scalar_fields.html">Scalar Fields Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="grid_tutorial.html">Grids Tutorial</a></li>
+  <div class="bd-toc-item navbar-nav"><p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting Sarted</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="basic_tutorial.html">Basic Tutorial</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Data Preprocessing</span></p>
+<ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active"><a class="current reference internal" href="#">Data Conversion Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="grid_tutorial.html">Grids Tutorial</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Data Processing</span></p>
+<ul class="nav bd-sidenav">
 <li class="toctree-l1"><a class="reference internal" href="mixing.html">Mixing Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="conditional_analysis.html">Conditional Analysis Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scalar_fields.html">Scalar Fields Tutorial</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Plotting</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="scalar_plots.html">Scalar Plots Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vector_plots.html">Vector Plots Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dataset_comparison.html">Dataset Comparison Tutorial</a></li>
 </ul>
 </div>
 </nav></div>
@@ -435,12 +493,20 @@ document.write(`
               
                 
 <div id="searchbox"></div>
-                <article class="bd-article" role="main">
+                <article class="bd-article">
                   
   <section id="data-conversion-tutorial">
-<h1>Data Conversion Tutorial<a class="headerlink" href="#data-conversion-tutorial" title="Permalink to this heading">#</a></h1>
+<h1>Data Conversion Tutorial<a class="headerlink" href="#data-conversion-tutorial" title="Link to this heading">#</a></h1>
 <p><code class="docutils literal notranslate"><span class="pre">up4</span></code> is built on the HDF5 data format. To use <code class="docutils literal notranslate"><span class="pre">up4</span></code> we must first convert data to HDF5.
-Up to this point there are two supported conversion functions: csv and vtk.</p>
+Up to this point there are two supported filetypes that we can convert from: csv and vtk.
+Inside the vtk format, this includes both the legacy ASCII format (.vtk) and also the modern, xml-based format (.pvtu).</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Converting vtk files in the modern, xml-based format is currently experimental, no guarantees are made on its correctness at this time.</p>
+</div>
+<section id="csv">
+<h2>CSV<a class="headerlink" href="#csv" title="Link to this heading">#</a></h2>
+<p>CSV files can be converted in the following manner:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">up4</span>
 <span class="n">up4</span><span class="o">.</span><span class="n">Converter</span><span class="o">.</span><span class="n">csv</span><span class="p">(</span>
     <span class="s1">&#39;path/to/data.csv&#39;</span><span class="p">,</span>     <span class="c1"># Path to the csv file</span>
@@ -455,16 +521,29 @@ Up to this point there are two supported conversion functions: csv and vtk.</p>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>It is strongly recommended to interpolate the data. <code class="docutils literal notranslate"><span class="pre">up4</span></code> sometimes relies on the spacing between the data points to be constant.
+<p>It is <code class="xref py py-obj docutils literal notranslate"><span class="pre">strongly</span> <span class="pre">recommended</span></code> to interpolate the data. <code class="docutils literal notranslate"><span class="pre">up4</span></code> sometimes relies on the spacing between the data points to be constant. This also helps to remove the effects of
+sample rate when comparing between datasets accquired by different techniques.
 If the csv contains velocity information you can read it in by simply extending the columns vector from 4 to 7 elements, pointing to t, x, y, z, vx, vy, vz.</p>
-<p>The vtk reader is developed to read legacy .vtk files generated by <a class="reference external" href="https://www.cfdem.com/liggghts-open-source-discrete-element-method-particle-simulation-code">LIGGGHTS</a> simulation software.
-There are two ways to convert vtk files, either with <code class="code docutils literal notranslate"><span class="pre">up4.Converter.vtk</span></code>, which requires a list of filenames as input, or with <code class="code docutils literal notranslate"><span class="pre">up4.Converter.vtk_from_folder</span></code>
+</section>
+<section id="vtk">
+<h2>VTK<a class="headerlink" href="#vtk" title="Link to this heading">#</a></h2>
+<p>The vtk reader is developed to read both legacy .vtk files generated by DEM engines such as
+<a class="reference external" href="https://www.cfdem.com/liggghts-open-source-discrete-element-method-particle-simulation-code">LIGGGHTS</a>
+and modern xml-based .pvtu files generated by other DEM engines such as <a class="reference external" href="https://github.com/lethe-cfd/lethe">Lethe</a>.</p>
+<p>Due to the differences in how the different “generations” of vtk files are laid out,
+the conversion functions are specific to the file extension. A tutorial for each is shown below</p>
+<section id="legacy-vtk">
+<h3>Legacy VTK<a class="headerlink" href="#legacy-vtk" title="Link to this heading">#</a></h3>
+<p>There are two ways to convert vtk files, either with <code class="code docutils literal notranslate"><span class="pre">up4.Converter.vtk</span></code>, which requires a list of filenames as input, or with <code class="code docutils literal notranslate"><span class="pre">up4.Converter.vtk_from_folder</span></code>
 which will read all vtk files in a folder and convert them to hdf5.</p>
-<p>The list of filenames in <code class="code docutils literal notranslate"><span class="pre">up4.Converter.vtk</span></code> must be sorted and without any sub-files generated by LIGGGHTS (any involving boundingBox in the name) and can be generated with the following code:</p>
+<p>The list of filenames in <code class="code docutils literal notranslate"><span class="pre">up4.Converter.vtk</span></code> must be sorted into a <a class="reference external" href="https://en.wikipedia.org/wiki/Natural_sort_order">natural</a> and not
+<a class="reference external" href="https://en.wikipedia.org/wiki/Lexicographic_order">lexicographical</a> order.
+This basically means that the sorting order should consider numbers in a file as numbers
+and not sort on a per-character basis. In the specific case for files generated by LIGGGHTS, the sub-files generated by LIGGGHTS (any involving boundingBox in the name) must also be removed. The code below shows how to do this:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
 <span class="kn">from</span> <span class="nn">natsort</span> <span class="kn">import</span> <span class="n">natsorted</span>
 <span class="n">files</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="s1">&#39;path/to/folder/*.vtk&#39;</span><span class="p">)</span>
-<span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="ow">not</span> <span class="s2">&quot;boundingBox&quot;</span> <span class="ow">in</span> <span class="n">f</span><span class="p">]</span>
+<span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="ow">not</span> <span class="s2">&quot;boundingBox&quot;</span> <span class="ow">in</span> <span class="n">f</span><span class="p">]</span> <span class="c1"># remove LIGGGHTS sub-files</span>
 <span class="n">files</span> <span class="o">=</span> <span class="n">natsorted</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -490,7 +569,45 @@ Read more about regex <a class="reference external" href="https://docs.python.or
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>Short notice on stats: Once you generated your hdf5 file you can read it in using the <code class="code docutils literal notranslate"><span class="pre">up4.Data</span></code> class.
+</section>
+<section id="modern-vtk">
+<h3>Modern VTK<a class="headerlink" href="#modern-vtk" title="Link to this heading">#</a></h3>
+<p>The converter for the modern VTK format uses .pvtu files, which are in of themselves
+containers for groups of .vtu files that comprise of an entire dataset for a given
+timestep. This means that there may be only 1 .vtu file as part of the dataset, or there
+could be more, depending on the simulation size. Regardless, there is a single .pvtu file
+written that will represent the entire system at a given timestep.</p>
+<p>Like with the legacy VTK converter, <code class="docutils literal notranslate"><span class="pre">up4</span></code> can convert either a naturally sorted list of
+files (here with a .pvtu extension), or look inside a folder and extract the necessary files
+itself. Sorting a list of .pvtu files and converting them can be done as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">glob</span> <span class="kn">import</span> <span class="n">glob</span>
+<span class="kn">from</span> <span class="nn">natsort</span> <span class="kn">import</span> <span class="n">natsorted</span>
+<span class="n">files</span> <span class="o">=</span> <span class="n">glob</span><span class="p">(</span><span class="s1">&#39;path/to/folder/*.pvtu&#39;</span><span class="p">)</span>
+<span class="n">files</span> <span class="o">=</span> <span class="n">natsorted</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">up4</span>
+<span class="n">up4</span><span class="o">.</span><span class="n">Converter</span><span class="o">.</span><span class="n">vtu</span><span class="p">(</span>
+    <span class="n">files</span><span class="p">,</span>                 <span class="c1"># Sorted list of filenames</span>
+    <span class="mf">1e-5</span><span class="p">,</span>                  <span class="c1"># timestep of the simulation</span>
+    <span class="s1">&#39;output.hdf5&#39;</span><span class="p">,</span>         <span class="c1"># filename to write</span>
+    <span class="sa">r</span><span class="s2">&quot;(\d+).pvtu&quot;</span><span class="p">,</span>         <span class="c1"># regex to extract the timestep from the filename</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<p>The function <code class="code docutils literal notranslate"><span class="pre">up4.Converter.vtu_from_folder</span></code> is a wrapper around <code class="code docutils literal notranslate"><span class="pre">up4.Converter.vtu</span></code> and can be used as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">up4</span>
+<span class="n">up4</span><span class="o">.</span><span class="n">Converter</span><span class="o">.</span><span class="n">vtu_from_folder</span><span class="p">(</span>
+    <span class="s1">&#39;path/to/folder&#39;</span><span class="p">,</span>       <span class="c1"># Path to the folder containing the vtk files</span>
+    <span class="mf">1e-5</span><span class="p">,</span>                   <span class="c1"># timestep of the simulation</span>
+    <span class="s1">&#39;output.hdf5&#39;</span><span class="p">,</span>          <span class="c1"># filename to write</span>
+    <span class="sa">r</span><span class="s2">&quot;(\d+).pvtu&quot;</span><span class="p">,</span>          <span class="c1"># regex to extract the timestep from the filename</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="dataset-statistics">
+<h3>Dataset Statistics<a class="headerlink" href="#dataset-statistics" title="Link to this heading">#</a></h3>
+<p>Once you have generated your hdf5 file you can read it in using the <code class="code docutils literal notranslate"><span class="pre">up4.Data</span></code> class.
 If you include the class in a normal print function the output may look as following:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">up4</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">up4</span><span class="o">.</span><span class="n">Data</span><span class="p">(</span><span class="s1">&#39;output.hdf5&#39;</span><span class="p">)</span>
@@ -510,6 +627,8 @@ If you include the class in a normal print function the output may look as follo
 </pre></div>
 </div>
 </section>
+</section>
+</section>
 
 
                 </article>
@@ -519,23 +638,23 @@ If you include the class in a normal print function the output may look as follo
               
               
                 <footer class="prev-next-footer">
-                  <!-- Previous / next buttons -->
+                  
 <div class="prev-next-area">
     <a class="left-prev"
-       href="grid_tutorial.html"
+       href="basic_tutorial.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">Grids Tutorial</p>
+        <p class="prev-next-title">Basic Tutorial</p>
       </div>
     </a>
     <a class="right-next"
-       href="mixing.html"
+       href="grid_tutorial.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Mixing Tutorial</p>
+        <p class="prev-next-title">Grids Tutorial</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
@@ -548,10 +667,30 @@ If you include the class in a normal print function the output may look as follo
               
                 <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
 
+
   <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#csv">CSV</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#vtk">VTK</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#legacy-vtk">Legacy VTK</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#modern-vtk">Modern VTK</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dataset-statistics">Dataset Statistics</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item">
+
   
   <div class="tocsection editthispage">
-    <a href="https://github.com/uob-positron-imaging-centre/up4/edit/uPPPP/tutorials/converting.rst">
+    <a href="https://github.com/uob-positron-imaging-centre/up4/edit/uPPPP/docs/tutorials/converting.rst">
       <i class="fa-solid fa-pencil"></i>
       
       
@@ -564,6 +703,7 @@ If you include the class in a normal print function the output may look as follo
 </div>
 
   <div class="sidebar-secondary-item">
+
   <div class="tocsection sourcelink">
     <a href="../_sources/tutorials/converting.rst.txt">
       <i class="fa-solid fa-file-lines"></i> Show Source
@@ -584,8 +724,8 @@ If you include the class in a normal print function the output may look as follo
   </div>
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../_static/scripts/bootstrap.js?digest=365ca57ee442770a23c6"></script>
-<script src="../_static/scripts/pydata-sphinx-theme.js?digest=365ca57ee442770a23c6"></script>
+  <script src="../_static/scripts/bootstrap.js?digest=8d27b9dea8ad943066ae"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae"></script>
 
   <footer class="bd-footer">
 <div class="bd-footer__inner bd-page-width">
@@ -593,6 +733,7 @@ If you include the class in a normal print function the output may look as follo
     <div class="footer-items__start">
       
         <div class="footer-item">
+
   <p class="copyright">
     
       © Copyright 2022, Dominik Werner and Daniel Weston.
@@ -602,8 +743,9 @@ If you include the class in a normal print function the output may look as follo
 </div>
       
         <div class="footer-item">
+
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
     <br/>
   </p>
 </div>
@@ -614,8 +756,9 @@ If you include the class in a normal print function the output may look as follo
   
     <div class="footer-items__end">
       
-        <div class="footer-item"><p class="theme-version">
-  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.14.3.
+        <div class="footer-item">
+<p class="theme-version">
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.15.2.
 </p></div>
       
     </div>

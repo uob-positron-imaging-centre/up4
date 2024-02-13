@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/converter/csv_modes/csv_multi_chain.rs`."><title>csv_multi_chain.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-cb6f1f67f1bcd037.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="upppp_rust" data-themes="" data-resource-suffix="" data-rustdoc-version="1.73.0 (cc66ad468 2023-10-03)" data-channel="1.73.0" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-1596385f77d47ef2.css" data-theme-dark-css="dark-0a43001d3fc2282c.css" data-theme-ayu-css="ayu-fd19013d6ce078bf.css" ><script src="../../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-0795b7d26be81095.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../../static.files/light-1596385f77d47ef2.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../../static.files/dark-0a43001d3fc2282c.css"><link rel="stylesheet" href="../../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../../upppp_rust/index.html"><img class="rust-logo" src="../../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/converter/csv_modes/csv_multi_chain.rs`."><title>csv_multi_chain.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../../" data-static-root-path="../../../../static.files/" data-current-crate="upppp_rust" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../../src-files.js"></script><script defer src="../../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -387,17 +388,21 @@
 <a href="#387" id="387">387</a>
 <a href="#388" id="388">388</a>
 <a href="#389" id="389">389</a>
-</pre></div><pre class="rust"><code><span class="kw">use crate</span>::{
+<a href="#390" id="390">390</a>
+<a href="#391" id="391">391</a>
+</pre></div><pre class="rust"><code><span class="comment">// use indicatif::{ProgressBar, ProgressStyle, ProgressState};
+</span><span class="kw">use crate</span>::{
     check_signals,
     converter::convertertools::{make_sortlist, sort_by_array},
     print_debug, print_warning, setup_bar,
 };
 <span class="kw">use </span>csv;
 <span class="kw">use </span>hdf5::File;
-<span class="kw">use </span>indicatif::{ProgressBar, ProgressStyle};
+
 <span class="kw">use </span>ndarray;
 <span class="kw">use </span>ndarray_csv::Array2Reader;
 <span class="kw">use </span>regex::Regex;
+<span class="kw">use </span>std::fmt::Write;
 <span class="kw">use </span>std::path::Path;
 
 <span class="kw">use </span><span class="kw">crate</span>::converter::convertertools;
@@ -417,12 +422,12 @@
     radius: f64,
 ) {
     <span class="comment">// TODO: CHeck if we can buffer that for big datafiles!
-    </span><span class="kw">let </span>hdf5file = File::create(outname).expect(<span class="string">&quot;Unable to create HDF5 file.&quot;</span>);
+    </span><span class="kw">let </span>hdf5file = File::create(outname).expect(<span class="string">"Unable to create HDF5 file."</span>);
     <span class="comment">// TODO Read this in the readers. check weather
     // the types are correct! 0x1 --&gt; tdata, 0x2 --&gt; pdata
     </span>hdf5file
         .new_attr::&lt;u8&gt;()
-        .create(<span class="string">&quot;hdf5_up4_type&quot;</span>)
+        .create(<span class="string">"hdf5_up4_type"</span>)
         .unwrap()
         .write_scalar(<span class="kw-2">&amp;</span><span class="number">0x2_i32</span>)
         .unwrap();
@@ -432,16 +437,16 @@
         .has_headers(header)
         .delimiter(delimiter.as_bytes()[<span class="number">0</span>])
         .double_quote(<span class="bool-val">false</span>)
-        .escape(<span class="prelude-val">Some</span>(<span class="string">b&#39;\\&#39;</span>))
+        .escape(<span class="prelude-val">Some</span>(<span class="string">b'\\'</span>))
         .flexible(<span class="bool-val">true</span>)
         .comment(<span class="prelude-val">Some</span>(comment.as_bytes()[<span class="number">0</span>]))
         .from_path(filename)
-        .expect(<span class="string">&quot;Unable to open CSV file.&quot;</span>);
-    <span class="macro">print_debug!</span>(<span class="string">&quot;{:?}&quot;</span>, rdr);
+        .expect(<span class="string">"Unable to open CSV file."</span>);
+    <span class="macro">print_debug!</span>(<span class="string">"{:?}"</span>, rdr);
     <span class="kw">let </span>particle_data: Vec&lt;ndarray::Array2&lt;f64&gt;&gt; = {
         <span class="kw">let </span><span class="kw-2">mut </span>data: ndarray::ArrayBase&lt;ndarray::OwnedRepr&lt;f64&gt;, ndarray::Dim&lt;[usize; <span class="number">2</span>]&gt;&gt; = rdr
             .deserialize_array2_dynamic()
-            .expect(<span class="string">&quot;Unable to extract CSV data to ndarray! \nYour delimiter might be wrong.\n&quot;</span>);
+            .expect(<span class="string">"Unable to extract CSV data to ndarray! \nYour delimiter might be wrong.\n"</span>);
         <span class="kw">if </span>!columns.is_empty() {
             <span class="kw">let </span><span class="kw-2">mut </span>temp_data = ndarray::Array2::&lt;f64&gt;::from_elem((data.shape()[<span class="number">0</span>], <span class="number">7</span>), f64::NAN);
             <span class="kw">for </span>(i, column) <span class="kw">in </span>columns.iter().enumerate() {
@@ -451,7 +456,7 @@
             }
             data = temp_data;
         } <span class="kw">else </span>{
-            <span class="macro">panic!</span>(<span class="string">&quot;No csv-columns specified!&quot;</span>);
+            <span class="macro">panic!</span>(<span class="string">"No csv-columns specified!"</span>);
         }
         <span class="comment">// now go thorugh the data and find columns where the previous time is higher then the current
         </span><span class="kw">let </span><span class="kw-2">mut </span>old_time = <span class="number">0.0</span>;
@@ -480,7 +485,7 @@
         <span class="comment">// go through each particle and save its data into a Vector
         </span><span class="kw">for </span>idx <span class="kw">in </span><span class="number">0</span>..particles {
             <span class="kw">if </span>(indx_start[idx + <span class="number">1</span>] - indx_start[idx]) &lt; <span class="number">10 </span>{
-                <span class="macro">print_warning!</span>(<span class="string">&quot;First trajectory has only {} timesteps. This is not enough to calculate the velocity. Skipping this particle.&quot;</span>, indx_start[idx + <span class="number">1</span>] - indx_start[idx]);
+                <span class="macro">print_warning!</span>(<span class="string">"First trajectory has only {} timesteps. This is not enough to calculate the velocity. Skipping this particle."</span>, indx_start[idx + <span class="number">1</span>] - indx_start[idx]);
                 <span class="kw">continue</span>;
             }
             <span class="kw">let </span><span class="kw-2">mut </span>temp_data = ndarray::Array2::&lt;f64&gt;::from_elem(
@@ -510,17 +515,17 @@
                 .assign(<span class="kw-2">&amp;</span>data.slice(<span class="macro">ndarray::s!</span>[indx_start[idx]..indx_start[idx + <span class="number">1</span>], <span class="number">6</span>]));
             <span class="kw">if </span>interpolate {
                 <span class="kw">if </span>!vel {
-                    <span class="macro">panic!</span>(<span class="string">&quot;Interpolation is activated but velocity computation is not. Currently this will lead to a loss of information. Please activate velocity computation or deactivate interpolation.&quot;</span>);
+                    <span class="macro">panic!</span>(<span class="string">"Interpolation is activated but velocity computation is not. Currently this will lead to a loss of information. Please activate velocity computation or deactivate interpolation."</span>);
                 }
                 temp_data = convertertools::interpolate(temp_data, max_duration, max_steps);
             }
             <span class="kw">if </span>vel {
                 <span class="kw">if </span>columns.len() &gt;= <span class="number">5 </span>{
                     <span class="macro">panic!</span>(
-                        <span class="string">&quot;Your columns are specified with more then 4 values and velocity \
+                        <span class="string">"Your columns are specified with more then 4 values and velocity \
                         computation is activated. If you wish to ignore the velocity data \
                         in your current data, only specify 4 columns indexing \
-                        time, x, y, z -position &quot;
+                        time, x, y, z -position "
                     </span>)
                 }
                 <span class="kw">if </span>temp_data.column(<span class="number">0</span>).len() &lt; <span class="number">200000 </span>{
@@ -537,7 +542,7 @@
 
         particle_data
     };
-    <span class="macro">print_debug!</span>(<span class="string">&quot;Constructing data arrays for attributes!&quot;</span>);
+    <span class="macro">print_debug!</span>(<span class="string">"Constructing data arrays for attributes!"</span>);
 
     <span class="comment">//let mut step;
     </span><span class="kw">let </span><span class="kw-2">mut </span>mean_counter: usize = <span class="number">0</span>;
@@ -567,7 +572,7 @@
         <span class="kw">if </span>data_length &gt; timesteps {
             timesteps = data_length;
         }
-        <span class="kw">let </span>bar = <span class="macro">setup_bar!</span>(<span class="string">&quot;Converting&quot;</span>, data_length);
+        <span class="kw">let </span>bar = <span class="macro">setup_bar!</span>(<span class="string">"Converting"</span>, data_length);
         <span class="comment">// Attributes
 
         // arrays that will be saved:
@@ -581,13 +586,13 @@
         <span class="kw">let </span><span class="kw-2">mut </span>failcount = <span class="number">0</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>old_time = <span class="number">0.0</span>; <span class="comment">// TIme of the last falid timestep
 
-        </span><span class="macro">print_debug!</span>(<span class="string">&quot;Creating a new group \&quot;particle {}\&quot;&quot;</span>, p_id);
+        </span><span class="macro">print_debug!</span>(<span class="string">"Creating a new group \"particle {}\""</span>, p_id);
         <span class="kw">let </span>group = hdf5file
-            .create_group(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;particle {}&quot;</span>, p_id))
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Can not create group particle {}&quot;</span>, p_id));
+            .create_group(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">"particle {}"</span>, p_id))
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">"Can not create group particle {}"</span>, p_id));
 
         <span class="kw">if </span>data[[<span class="number">0</span>, <span class="number">6</span>]].is_nan() {
-            <span class="macro">panic!</span>(<span class="string">&quot;Velocity information required&quot;</span>)
+            <span class="macro">panic!</span>(<span class="string">"Velocity information required"</span>)
         }
         <span class="comment">// Go through every line of the csv file
         </span><span class="kw">for </span>(line_id, line) <span class="kw">in </span>data.outer_iter().enumerate() {
@@ -598,10 +603,10 @@
                 </span>failcount += <span class="number">1</span>;
                 <span class="kw">if </span>failcount &gt; MAX_FAILS {
                     <span class="macro">panic!</span>(
-                        <span class="string">&quot;Maximum amount of points that are behind the current \
+                        <span class="string">"Maximum amount of points that are behind the current \
                  time reached. Please Check wether your data contains multiple\
                  trajectories that are sorted in label.
-                 &quot;
+                 "
                     </span>)
                 }
                 <span class="kw">continue</span>;
@@ -624,10 +629,10 @@
             vel_array[[line_id, <span class="number">1</span>]] = v_y;
             vel_array[[line_id, <span class="number">2</span>]] = v_z;
             <span class="kw">let </span>vel: Vec&lt;f64&gt; = <span class="macro">vec!</span>[v_x, v_y, v_z];
-            <span class="macro">print_debug!</span>(<span class="string">&quot;Extracting statistical velocity information&quot;</span>);
+            <span class="macro">print_debug!</span>(<span class="string">"Extracting statistical velocity information"</span>);
 
             <span class="kw">for </span>i <span class="kw">in </span><span class="number">0</span>..<span class="number">3 </span>{
-                <span class="macro">print_debug!</span>(<span class="string">&quot;  i: {}&quot;</span>, i);
+                <span class="macro">print_debug!</span>(<span class="string">"  i: {}"</span>, i);
                 <span class="kw">if </span>vel[i] &lt; velocity[[i, <span class="number">0</span>]] {
                     velocity[[i, <span class="number">0</span>]] = vel[i];
                 } <span class="kw">else if </span>vel[i] &gt; velocity[[i, <span class="number">2</span>]] {
@@ -676,30 +681,30 @@
         </span><span class="kw">let </span>builder = group.new_dataset_builder();
         builder
             .with_data(<span class="kw-2">&amp;</span>time_array)
-            .create(<span class="string">&quot;time&quot;</span>)
-            .expect(<span class="string">&quot;Unable to create dataset \&quot;time\&quot;&quot;</span>);
+            .create(<span class="string">"time"</span>)
+            .expect(<span class="string">"Unable to create dataset \"time\""</span>);
         <span class="kw">let </span>builder = group.new_dataset_builder();
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_id_array)
-            .create(<span class="string">&quot;id&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;id\&quot; in file {}&quot;</span>, filename));
+            .create(<span class="string">"id"</span>)
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">"Unable to create dataset \"id\" in file {}"</span>, filename));
         <span class="kw">let </span>builder = group.new_dataset_builder();
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_radius_array)
-            .create(<span class="string">&quot;radius&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>, filename));
+            .create(<span class="string">"radius"</span>)
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">"Unable to create dataset \"radius\" in file {}"</span>, filename));
         <span class="kw">let </span>builder = group.new_dataset_builder();
         builder
             .with_data(<span class="kw-2">&amp;</span>ppclouds_array)
-            .create(<span class="string">&quot;ppcloud&quot;</span>)
-            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;radius\&quot; in file {}&quot;</span>, filename));
+            .create(<span class="string">"ppcloud"</span>)
+            .unwrap_or_else(|<span class="kw">_</span>| <span class="macro">panic!</span>(<span class="string">"Unable to create dataset \"radius\" in file {}"</span>, filename));
         <span class="kw">let </span>builder = group.new_dataset_builder();
         builder
             .with_data(<span class="kw-2">&amp;</span>particle_type_array)
-            .create(<span class="string">&quot;particleid&quot;</span>)
+            .create(<span class="string">"particleid"</span>)
             .unwrap_or_else(|<span class="kw">_</span>| {
                 <span class="macro">panic!</span>(
-                    <span class="string">&quot;Unable to create dataset \&quot;particleid\&quot; in file {}&quot;</span>,
+                    <span class="string">"Unable to create dataset \"particleid\" in file {}"</span>,
                     filename
                 )
             });
@@ -707,16 +712,16 @@
         <span class="kw">let </span>builder = group.new_dataset_builder();
         builder
             .with_data(<span class="kw-2">&amp;</span>vel_array)
-            .create(<span class="string">&quot;velocity&quot;</span>)
+            .create(<span class="string">"velocity"</span>)
             .unwrap_or_else(|<span class="kw">_</span>| {
-                <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;velocity\&quot; in file {}&quot;</span>, filename)
+                <span class="macro">panic!</span>(<span class="string">"Unable to create dataset \"velocity\" in file {}"</span>, filename)
             });
         <span class="kw">let </span>builder = group.new_dataset_builder();
         builder
             .with_data(<span class="kw-2">&amp;</span>pos_array)
-            .create(<span class="string">&quot;position&quot;</span>)
+            .create(<span class="string">"position"</span>)
             .unwrap_or_else(|<span class="kw">_</span>| {
-                <span class="macro">panic!</span>(<span class="string">&quot;Unable to create dataset \&quot;position\&quot; in file {}&quot;</span>, filename)
+                <span class="macro">panic!</span>(<span class="string">"Unable to create dataset \"position\" in file {}"</span>, filename)
             });
         bar.finish();
     }
@@ -725,55 +730,55 @@
     velocity[[<span class="number">1</span>, <span class="number">1</span>]] /= mean_counter <span class="kw">as </span>f64;
     velocity[[<span class="number">2</span>, <span class="number">1</span>]] /= mean_counter <span class="kw">as </span>f64;
     <span class="macro">print_debug!</span>(
-        <span class="string">&quot;Mean Velocity: \nmagnitude:  {}\nx:  {}\ny:  {}\nz:  {}\n&quot;</span>,
+        <span class="string">"Mean Velocity: \nmagnitude:  {}\nx:  {}\ny:  {}\nz:  {}\n"</span>,
         velocity_mag[<span class="number">1</span>],
         velocity[[<span class="number">0</span>, <span class="number">1</span>]],
         velocity[[<span class="number">1</span>, <span class="number">1</span>]],
         velocity[[<span class="number">2</span>, <span class="number">1</span>]]
     );
-    <span class="macro">print_debug!</span>(<span class="string">&quot;Dimensions: {:?}&quot;</span>, dimensions);
+    <span class="macro">print_debug!</span>(<span class="string">"Dimensions: {:?}"</span>, dimensions);
     hdf5file
         .new_attr_builder()
         .with_data(<span class="kw-2">&amp;</span>dimensions)
-        .create(<span class="string">&quot;dimensions&quot;</span>)
+        .create(<span class="string">"dimensions"</span>)
         .unwrap();
     hdf5file
         .new_attr::&lt;u64&gt;()
-        .create(<span class="string">&quot;particle number&quot;</span>)
+        .create(<span class="string">"particle number"</span>)
         .unwrap()
         .write_scalar(<span class="kw-2">&amp;</span><span class="number">1_usize</span>)
         .unwrap();
     hdf5file
         .new_attr::&lt;u64&gt;()
-        .create(<span class="string">&quot;timesteps&quot;</span>)
+        .create(<span class="string">"timesteps"</span>)
         .unwrap()
         .write_scalar(<span class="kw-2">&amp;</span>timesteps)
         .unwrap();
     hdf5file
         .new_attr::&lt;u64&gt;()
-        .create(<span class="string">&quot;sample rate&quot;</span>)
+        .create(<span class="string">"sample rate"</span>)
         .unwrap()
         .write_scalar(<span class="kw-2">&amp;</span>sample_rate)
         .unwrap();
     hdf5file
         .new_attr_builder()
         .with_data(<span class="kw-2">&amp;</span>time)
-        .create(<span class="string">&quot;time&quot;</span>)
+        .create(<span class="string">"time"</span>)
         .unwrap();
     hdf5file
         .new_attr_builder()
         .with_data(<span class="kw-2">&amp;</span>velocity)
-        .create(<span class="string">&quot;velocity&quot;</span>)
+        .create(<span class="string">"velocity"</span>)
         .unwrap();
     hdf5file
         .new_attr_builder()
         .with_data(<span class="kw-2">&amp;</span>velocity_mag)
-        .create(<span class="string">&quot;velocity magnitude&quot;</span>)
+        .create(<span class="string">"velocity magnitude"</span>)
         .unwrap();
     hdf5file
         .new_dataset_builder()
         .with_data(<span class="kw-2">&amp;</span>time_array)
-        .create(<span class="string">&quot;time array&quot;</span>)
+        .create(<span class="string">"time array"</span>)
         .unwrap();
 }
 </code></pre></div></section></main></body></html>

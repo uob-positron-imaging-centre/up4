@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/functions.rs`."><title>functions.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-cb6f1f67f1bcd037.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="upppp_rust" data-themes="" data-resource-suffix="" data-rustdoc-version="1.73.0 (cc66ad468 2023-10-03)" data-channel="1.73.0" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-1596385f77d47ef2.css" data-theme-dark-css="dark-0a43001d3fc2282c.css" data-theme-ayu-css="ayu-fd19013d6ce078bf.css" ><script src="../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-0795b7d26be81095.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../static.files/light-1596385f77d47ef2.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../static.files/dark-0a43001d3fc2282c.css"><link rel="stylesheet" href="../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../upppp_rust/index.html"><img class="rust-logo" src="../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/functions.rs`."><title>functions.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="upppp_rust" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -847,6 +848,47 @@
 <a href="#847" id="847">847</a>
 <a href="#848" id="848">848</a>
 <a href="#849" id="849">849</a>
+<a href="#850" id="850">850</a>
+<a href="#851" id="851">851</a>
+<a href="#852" id="852">852</a>
+<a href="#853" id="853">853</a>
+<a href="#854" id="854">854</a>
+<a href="#855" id="855">855</a>
+<a href="#856" id="856">856</a>
+<a href="#857" id="857">857</a>
+<a href="#858" id="858">858</a>
+<a href="#859" id="859">859</a>
+<a href="#860" id="860">860</a>
+<a href="#861" id="861">861</a>
+<a href="#862" id="862">862</a>
+<a href="#863" id="863">863</a>
+<a href="#864" id="864">864</a>
+<a href="#865" id="865">865</a>
+<a href="#866" id="866">866</a>
+<a href="#867" id="867">867</a>
+<a href="#868" id="868">868</a>
+<a href="#869" id="869">869</a>
+<a href="#870" id="870">870</a>
+<a href="#871" id="871">871</a>
+<a href="#872" id="872">872</a>
+<a href="#873" id="873">873</a>
+<a href="#874" id="874">874</a>
+<a href="#875" id="875">875</a>
+<a href="#876" id="876">876</a>
+<a href="#877" id="877">877</a>
+<a href="#878" id="878">878</a>
+<a href="#879" id="879">879</a>
+<a href="#880" id="880">880</a>
+<a href="#881" id="881">881</a>
+<a href="#882" id="882">882</a>
+<a href="#883" id="883">883</a>
+<a href="#884" id="884">884</a>
+<a href="#885" id="885">885</a>
+<a href="#886" id="886">886</a>
+<a href="#887" id="887">887</a>
+<a href="#888" id="888">888</a>
+<a href="#889" id="889">889</a>
+<a href="#890" id="890">890</a>
 </pre></div><pre class="rust"><code><span class="kw">pub mod </span>conditional;
 <span class="kw">pub mod </span>extractions;
 <span class="kw">pub mod </span>mixing;
@@ -884,10 +926,10 @@
             <span class="kw">let </span>current_time = <span class="kw-2">*</span>timestep_data.time();
             <span class="comment">// check if timestep is in the timeframe given
             </span><span class="kw">if </span>!selector.timestep_valid(current_time) {
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Timestep {} is not valid&quot;</span>, timestep);
+                <span class="macro">print_debug!</span>(<span class="string">"Timestep {} is not valid"</span>, timestep);
                 <span class="kw">continue</span>;
             }
-            <span class="macro">print_debug!</span>(<span class="string">&quot;Timestep {} is valid&quot;</span>, timestep);
+            <span class="macro">print_debug!</span>(<span class="string">"Timestep {} is valid"</span>, timestep);
             <span class="kw">let </span>positions = timestep_data.position();
             <span class="kw">let </span>velocities = timestep_data.velocity();
             <span class="kw">let </span>particle_ids = timestep_data.particleid();
@@ -898,7 +940,7 @@
             <span class="comment">// loop over all particles in this timestep, calculate the velocity vector and add it to the
             // vectorfield array
             </span><span class="macro">print_debug!</span>(
-                <span class="string">&quot;velocityfield: looping over particles form 0 to {}&quot;</span>,
+                <span class="string">"velocityfield: looping over particles form 0 to {}"</span>,
                 particles
             );
             <span class="kw">for </span>particle <span class="kw">in </span><span class="number">0</span>..particles {
@@ -908,20 +950,20 @@
                     density[particle],
                     particle_ids[particle] <span class="kw">as </span>usize,
                 ) {
-                    <span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is not valid&quot;</span>, particle);
+                    <span class="macro">print_debug!</span>(<span class="string">"Particle {} is not valid"</span>, particle);
                     <span class="kw">continue</span>;
                 }
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is valid&quot;</span>, particle);
+                <span class="macro">print_debug!</span>(<span class="string">"Particle {} is valid"</span>, particle);
                 <span class="kw">let </span>position = positions[particle];
                 <span class="kw">if </span>position[<span class="number">0</span>].is_nan() || position[<span class="number">1</span>].is_nan() || position[<span class="number">2</span>].is_nan() {
-                    <span class="macro">print_debug!</span>(<span class="string">&quot;Position is NaN&quot;</span>);
+                    <span class="macro">print_debug!</span>(<span class="string">"Position is NaN"</span>);
                     <span class="kw">continue</span>;
                 }
                 <span class="kw">let </span>velocity = velocities.slice(<span class="macro">s!</span>[particle, ..]).to_owned();
                 <span class="comment">//reset the position. the lowest value should be at 0,0,0
                 </span><span class="kw">if </span>!vectorgrid.is_inside(position) {
                     <span class="comment">// the particle is out of the field of view
-                    </span><span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is out of FoV&quot;</span>, particle);
+                    </span><span class="macro">print_debug!</span>(<span class="string">"Particle {} is out of FoV"</span>, particle);
                     <span class="kw">continue</span>;
                 }
                 <span class="kw">let </span>velocity = vectorgrid.velocity_calculation(position, velocity);
@@ -947,7 +989,7 @@
         <span class="comment">//read the number of timesteps inside this hdf5file
         </span><span class="kw">type </span>FnPointer = <span class="kw">fn</span>(Array1&lt;f64&gt;) -&gt; f64;
         <span class="kw">let </span>velocity_calc: FnPointer;
-        <span class="kw">if </span>mode == <span class="string">&quot;absolute&quot; </span>{
+        <span class="kw">if </span>mode == <span class="string">"absolute" </span>{
             <span class="kw">fn </span>velocity_calculation(velocity: Array1&lt;f64&gt;) -&gt; f64 {
                 <span class="kw">let </span>vx: f64 = velocity[<span class="number">0</span>];
                 <span class="kw">let </span>vy: f64 = velocity[<span class="number">1</span>];
@@ -956,40 +998,64 @@
                 (vx.powi(<span class="number">2</span>) + vy.powi(<span class="number">2</span>) + vz.powi(<span class="number">2</span>)).sqrt()
             }
             velocity_calc = velocity_calculation;
-        } <span class="kw">else if </span>mode == <span class="string">&quot;x&quot; </span>{
+        } <span class="kw">else if </span>mode == <span class="string">"x" </span>|| mode == <span class="string">"r" </span>{
             <span class="kw">fn </span>velocity_calculation(velocity: Array1&lt;f64&gt;) -&gt; f64 {
-                velocity[<span class="number">2</span>]
+                velocity[<span class="number">0</span>]
             }
             velocity_calc = velocity_calculation;
-        } <span class="kw">else if </span>mode == <span class="string">&quot;y&quot; </span>{
+        } <span class="kw">else if </span>mode == <span class="string">"y" </span>|| mode == <span class="string">"theta" </span>{
             <span class="kw">fn </span>velocity_calculation(velocity: Array1&lt;f64&gt;) -&gt; f64 {
                 velocity[<span class="number">1</span>]
             }
             velocity_calc = velocity_calculation;
-        } <span class="kw">else if </span>mode == <span class="string">&quot;z&quot; </span>{
+        } <span class="kw">else if </span>mode == <span class="string">"xy" </span>{
+            <span class="kw">fn </span>velocity_calculation(velocity: Array1&lt;f64&gt;) -&gt; f64 {
+                <span class="kw">let </span>vx: f64 = velocity[<span class="number">0</span>];
+                <span class="kw">let </span>vy: f64 = velocity[<span class="number">1</span>];
+                <span class="kw">let </span>abs_vel = (vx.powi(<span class="number">2</span>) + vy.powi(<span class="number">2</span>)).sqrt();
+                abs_vel
+            }
+            velocity_calc = velocity_calculation;
+        } <span class="kw">else if </span>mode == <span class="string">"xz" </span>{
+            <span class="kw">fn </span>velocity_calculation(velocity: Array1&lt;f64&gt;) -&gt; f64 {
+                <span class="kw">let </span>vx: f64 = velocity[<span class="number">0</span>];
+                <span class="kw">let </span>vz: f64 = velocity[<span class="number">2</span>];
+                <span class="kw">let </span>abs_vel = (vx.powi(<span class="number">2</span>) + vz.powi(<span class="number">2</span>)).sqrt();
+                abs_vel
+            }
+            velocity_calc = velocity_calculation;
+        } <span class="kw">else if </span>mode == <span class="string">"yz" </span>{
+            <span class="kw">fn </span>velocity_calculation(velocity: Array1&lt;f64&gt;) -&gt; f64 {
+                <span class="kw">let </span>vy: f64 = velocity[<span class="number">1</span>];
+                <span class="kw">let </span>vz: f64 = velocity[<span class="number">2</span>];
+                <span class="kw">let </span>abs_vel = (vy.powi(<span class="number">2</span>) + vz.powi(<span class="number">2</span>)).sqrt();
+                abs_vel
+            }
+            velocity_calc = velocity_calculation;
+        } <span class="kw">else if </span>mode == <span class="string">"z" </span>{
             <span class="kw">fn </span>velocity_calculation(velocity: Array1&lt;f64&gt;) -&gt; f64 {
                 velocity[<span class="number">2</span>]
             }
             velocity_calc = velocity_calculation;
         } <span class="kw">else </span>{
             <span class="macro">panic!</span>(
-                <span class="string">&quot;Mode {} is not valid. Valid modes are: \&quot;absolute\&quot;, \&quot;x\&quot;, \&quot;y\&quot;, \&quot;z\&quot;&quot;</span>,
+                <span class="string">"Mode {} is not valid. Valid modes are: \"absolute\", \"x\" \"r\", \"y\", \"theta\" \"z\""</span>,
                 mode
             );
         }
         <span class="kw">let </span>global_stats = <span class="self">self</span>.global_stats();
         <span class="kw">let </span>timesteps: <span class="kw-2">&amp;</span>usize = global_stats.timesteps();
         <span class="kw">let </span><span class="kw-2">mut </span>velocity_grid = grid.new_zeros();
-        <span class="macro">print_debug!</span>(<span class="string">&quot;velocityfield: Initiation over, entering time loop&quot;</span>);
+        <span class="macro">print_debug!</span>(<span class="string">"velocityfield: Initiation over, entering time loop"</span>);
         <span class="kw">for </span>timestep <span class="kw">in </span><span class="number">0</span>..timesteps - <span class="number">1 </span>{
             <span class="kw">let </span>timestep_data = <span class="self">self</span>.get_timestep(timestep);
             <span class="kw">let </span>current_time = <span class="kw-2">*</span>timestep_data.time();
             <span class="comment">// check if timestep is in the timeframe given
             </span><span class="kw">if </span>!selector.timestep_valid(current_time) {
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Timestep {} is not valid&quot;</span>, timestep);
+                <span class="macro">print_debug!</span>(<span class="string">"Timestep {} is not valid"</span>, timestep);
                 <span class="kw">continue</span>;
             }
-            <span class="macro">print_debug!</span>(<span class="string">&quot;Timestep {} is valid&quot;</span>, timestep);
+            <span class="macro">print_debug!</span>(<span class="string">"Timestep {} is valid"</span>, timestep);
             <span class="kw">let </span>positions = timestep_data.position();
             <span class="kw">let </span>velocities = timestep_data.velocity();
             <span class="kw">let </span>particle_ids = timestep_data.particleid();
@@ -1000,7 +1066,7 @@
             <span class="comment">// loop over all particles in this timestep, calculate the velocity vector and add it to the
             // vectorfield array
             </span><span class="macro">print_debug!</span>(
-                <span class="string">&quot;velocityfield: looping over particles form 0 to {}&quot;</span>,
+                <span class="string">"velocityfield: looping over particles form 0 to {}"</span>,
                 particles
             );
             <span class="kw">for </span>particle <span class="kw">in </span><span class="number">0</span>..particles {
@@ -1010,13 +1076,13 @@
                     density[particle],
                     particle_ids[particle] <span class="kw">as </span>usize,
                 ) {
-                    <span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is not valid&quot;</span>, particle);
+                    <span class="macro">print_debug!</span>(<span class="string">"Particle {} is not valid"</span>, particle);
                     <span class="kw">continue</span>;
                 }
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is valid&quot;</span>, particle);
+                <span class="macro">print_debug!</span>(<span class="string">"Particle {} is valid"</span>, particle);
                 <span class="kw">let </span>position = positions[particle];
                 <span class="kw">if </span>position[<span class="number">0</span>].is_nan() || position[<span class="number">1</span>].is_nan() || position[<span class="number">2</span>].is_nan() {
-                    <span class="macro">print_debug!</span>(<span class="string">&quot;Position is NaN&quot;</span>);
+                    <span class="macro">print_debug!</span>(<span class="string">"Position is NaN"</span>);
                     <span class="kw">continue</span>;
                 }
                 <span class="kw">let </span>velocity = velocities.slice(<span class="macro">s!</span>[particle, ..]).to_owned();
@@ -1026,23 +1092,23 @@
                 </span><span class="kw">let </span>abs_vel = velocity_calc(velocity);
 
                 <span class="kw">if </span>abs_vel.is_nan() {
-                    <span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} has no velocity&quot;</span>, particle);
+                    <span class="macro">print_debug!</span>(<span class="string">"Particle {} has no velocity"</span>, particle);
                     <span class="kw">continue</span>;
                 }
 
                 <span class="kw">if </span>!grid.is_inside(position) {
                     <span class="comment">// the particle is out of the field of view
-                    </span><span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is out of FoV&quot;</span>, particle);
+                    </span><span class="macro">print_debug!</span>(<span class="string">"Particle {} is out of FoV"</span>, particle);
                     <span class="kw">continue</span>;
                 }
                 <span class="kw">if </span>abs_vel &lt; min_vel || abs_vel &gt; max_vel {
-                    <span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is out of range&quot;</span>, particle);
+                    <span class="macro">print_debug!</span>(<span class="string">"Particle {} is out of range"</span>, particle);
                     <span class="kw">continue</span>;
                 }
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is in the grid&quot;</span>, particle);
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Cell ids: {:?}&quot;</span>, grid.cell_id(position));
+                <span class="macro">print_debug!</span>(<span class="string">"Particle {} is in the grid"</span>, particle);
+                <span class="macro">print_debug!</span>(<span class="string">"Cell ids: {:?}"</span>, grid.cell_id(position));
                 <span class="macro">print_debug!</span>(
-                    <span class="string">&quot;Grid Positions \n{:?},\n{:?},\n{:?}&quot;</span>,
+                    <span class="string">"Grid Positions \n{:?},\n{:?},\n{:?}"</span>,
                     grid.get_xpositions(),
                     grid.get_ypositions(),
                     grid.get_zpositions()
@@ -1065,16 +1131,16 @@
         </span><span class="kw">let </span>global_stats = <span class="self">self</span>.global_stats();
         <span class="kw">let </span>timesteps: <span class="kw-2">&amp;</span>usize = global_stats.timesteps();
         <span class="kw">let </span><span class="kw-2">mut </span>number_grid = grid.new_zeros();
-        <span class="macro">print_debug!</span>(<span class="string">&quot;velocityfield: Initiation over, entering time loop&quot;</span>);
+        <span class="macro">print_debug!</span>(<span class="string">"velocityfield: Initiation over, entering time loop"</span>);
         <span class="kw">for </span>timestep <span class="kw">in </span><span class="number">0</span>..timesteps - <span class="number">1 </span>{
             <span class="kw">let </span>timestep_data = <span class="self">self</span>.get_timestep(timestep);
             <span class="kw">let </span>current_time = <span class="kw-2">*</span>timestep_data.time();
             <span class="comment">// check if timestep is in the timeframe given
             </span><span class="kw">if </span>!selector.timestep_valid(current_time) {
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Timestep {} is not valid&quot;</span>, timestep);
+                <span class="macro">print_debug!</span>(<span class="string">"Timestep {} is not valid"</span>, timestep);
                 <span class="kw">continue</span>;
             }
-            <span class="macro">print_debug!</span>(<span class="string">&quot;Timestep {} is valid&quot;</span>, timestep);
+            <span class="macro">print_debug!</span>(<span class="string">"Timestep {} is valid"</span>, timestep);
             <span class="kw">let </span>positions = timestep_data.position();
 
             <span class="kw">let </span>particle_ids = timestep_data.particleid();
@@ -1085,7 +1151,7 @@
             <span class="comment">// loop over all particles in this timestep, calculate the velocity vector and add it to the
             // vectorfield array
             </span><span class="macro">print_debug!</span>(
-                <span class="string">&quot;velocityfield: looping over particles form 0 to {}&quot;</span>,
+                <span class="string">"velocityfield: looping over particles form 0 to {}"</span>,
                 particles
             );
 
@@ -1096,22 +1162,22 @@
                     density[particle],
                     particle_ids[particle] <span class="kw">as </span>usize,
                 ) {
-                    <span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is not valid&quot;</span>, particle);
+                    <span class="macro">print_debug!</span>(<span class="string">"Particle {} is not valid"</span>, particle);
                     <span class="kw">continue</span>;
                 }
 
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is valid&quot;</span>, particle);
+                <span class="macro">print_debug!</span>(<span class="string">"Particle {} is valid"</span>, particle);
                 <span class="kw">let </span>position = positions[particle];
 
                 <span class="kw">if </span>!grid.is_inside(position) {
                     <span class="comment">// the particle is out of the field of view
-                    </span><span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is out of FoV&quot;</span>, particle);
+                    </span><span class="macro">print_debug!</span>(<span class="string">"Particle {} is out of FoV"</span>, particle);
                     <span class="kw">continue</span>;
                 }
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is in the grid&quot;</span>, particle);
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Cell ids: {:?}&quot;</span>, grid.cell_id(position));
+                <span class="macro">print_debug!</span>(<span class="string">"Particle {} is in the grid"</span>, particle);
+                <span class="macro">print_debug!</span>(<span class="string">"Cell ids: {:?}"</span>, grid.cell_id(position));
                 <span class="macro">print_debug!</span>(
-                    <span class="string">&quot;Grid Positions \n{:?},\n{:?},\n{:?}&quot;</span>,
+                    <span class="string">"Grid Positions \n{:?},\n{:?},\n{:?}"</span>,
                     grid.get_xpositions(),
                     grid.get_ypositions(),
                     grid.get_zpositions()
@@ -1147,10 +1213,10 @@
             <span class="kw">let </span>next_time = <span class="kw-2">*</span>next_timestep_data.time();
             <span class="comment">// check if timestep is in the timeframe given
             </span><span class="kw">if </span>!selector.timestep_valid(current_time) {
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Timestep {} is not valid&quot;</span>, timestep);
+                <span class="macro">print_debug!</span>(<span class="string">"Timestep {} is not valid"</span>, timestep);
                 <span class="kw">continue</span>;
             }
-            <span class="macro">print_debug!</span>(<span class="string">&quot;Timestep {} is valid&quot;</span>, timestep);
+            <span class="macro">print_debug!</span>(<span class="string">"Timestep {} is valid"</span>, timestep);
             <span class="kw">let </span>positions = timestep_data.position();
             <span class="kw">let </span>next_positions = next_timestep_data.position();
             <span class="kw">let </span>velocities = timestep_data.velocity();
@@ -1162,7 +1228,7 @@
             <span class="comment">// loop over all particles in this timestep, calculate the velocity vector and add it to the
             // vectorfield array
             </span><span class="macro">print_debug!</span>(
-                <span class="string">&quot;velocityfield: looping over particles form 0 to {}&quot;</span>,
+                <span class="string">"velocityfield: looping over particles form 0 to {}"</span>,
                 particles
             );
 
@@ -1173,21 +1239,21 @@
                     density[particle],
                     particle_ids[particle] <span class="kw">as </span>usize,
                 ) {
-                    <span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is not valid&quot;</span>, particle);
+                    <span class="macro">print_debug!</span>(<span class="string">"Particle {} is not valid"</span>, particle);
                     <span class="kw">continue</span>;
                 }
 
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is valid&quot;</span>, particle);
+                <span class="macro">print_debug!</span>(<span class="string">"Particle {} is valid"</span>, particle);
                 <span class="kw">let </span>position = positions[particle];
                 <span class="kw">if </span>!grid.is_inside(position) {
                     <span class="comment">// the particle is out of the field of view
-                    </span><span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is out of FoV&quot;</span>, particle);
+                    </span><span class="macro">print_debug!</span>(<span class="string">"Particle {} is out of FoV"</span>, particle);
                     <span class="kw">continue</span>;
                 }
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is in the grid&quot;</span>, particle);
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Cell ids: {:?}&quot;</span>, grid.cell_id(position));
+                <span class="macro">print_debug!</span>(<span class="string">"Particle {} is in the grid"</span>, particle);
+                <span class="macro">print_debug!</span>(<span class="string">"Cell ids: {:?}"</span>, grid.cell_id(position));
                 <span class="macro">print_debug!</span>(
-                    <span class="string">&quot;Grid Positions \n{:?},\n{:?},\n{:?}&quot;</span>,
+                    <span class="string">"Grid Positions \n{:?},\n{:?},\n{:?}"</span>,
                     grid.get_xpositions(),
                     grid.get_ypositions(),
                     grid.get_zpositions()
@@ -1204,12 +1270,12 @@
                 <span class="comment">//here bug already
                 </span><span class="kw">let </span>time_spent = next_time - current_time;
                 <span class="kw">if </span>time_spent &lt; <span class="number">0.0 </span>{
-                    <span class="macro">print_warning!</span>(<span class="string">&quot;Occupyfield: timestep is negative&quot;</span>);
+                    <span class="macro">print_warning!</span>(<span class="string">"Occupyfield: timestep is negative"</span>);
                     <span class="kw">continue</span>;
                 }
                 <span class="comment">//TODO BUG this is not valit code. we must check which particle is at which position
                 </span><span class="kw">if </span>next_positions.len() &lt;= particle {
-                    <span class="macro">print_warning!</span>(<span class="string">&quot;Occupyfield: next timestep has less particles&quot;</span>);
+                    <span class="macro">print_warning!</span>(<span class="string">"Occupyfield: next timestep has less particles"</span>);
                     <span class="kw">continue</span>;
                 }
                 occupancy_grid.add_trajectory_value(position, next_positions[particle], time_spent);
@@ -1229,7 +1295,7 @@
     /// Calculate the mean velocity of all particles.
     ///’’’
     ///mean_velocity = data.mean_velocity_showcase(particleselector)
-    ///&#39;&#39;&#39;
+    ///'''
     </span><span class="kw">fn </span>mean_velocity_showcase(<span class="kw-2">&amp;mut </span><span class="self">self</span>, selector: <span class="kw-2">&amp;</span>ParticleSelector) -&gt; f64 {
         <span class="kw">let </span>global_stats = <span class="self">self</span>.global_stats();
         <span class="kw">let </span>timesteps = global_stats.timesteps();
@@ -1260,7 +1326,7 @@
     }
 
     <span class="doccomment">/// Return the dispersion of the particles in the system.
-    /// See Martin, T. W., J. P. K. Seville, and D. J. Parker. &quot;A general method for quantifying dispersion in multiscale systems using trajectory analysis.&quot;
+    /// See Martin, T. W., J. P. K. Seville, and D. J. Parker. "A general method for quantifying dispersion in multiscale systems using trajectory analysis."
     ///
     /// parameters
     /// ----------
@@ -1297,7 +1363,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>sum_z = grid.get_data().clone();
         <span class="kw">let </span><span class="kw-2">mut </span>num_counts = grid.get_data().clone();
         <span class="kw">let </span><span class="kw-2">mut </span>dispersion_grid = grid.new_zeros();
-        <span class="macro">print_debug!</span>(<span class="string">&quot;Dispersion: Initiation over, entering time loop&quot;</span>);
+        <span class="macro">print_debug!</span>(<span class="string">"Dispersion: Initiation over, entering time loop"</span>);
 
         <span class="kw">let </span><span class="kw-2">mut </span>next_timestep;
         <span class="kw">for </span>timestep <span class="kw">in </span><span class="number">0</span>..timesteps - <span class="number">1 </span>{
@@ -1305,10 +1371,10 @@
             <span class="kw">let </span>current_time = <span class="kw-2">*</span>timestep_data.time();
             <span class="comment">// check if timestep is in the timeframe given
             </span><span class="kw">if </span>!selector.timestep_valid(current_time) {
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Timestep {} is not valid&quot;</span>, timestep);
+                <span class="macro">print_debug!</span>(<span class="string">"Timestep {} is not valid"</span>, timestep);
                 <span class="kw">continue</span>;
             }
-            <span class="macro">print_debug!</span>(<span class="string">&quot;Timestep {} is valid&quot;</span>, timestep);
+            <span class="macro">print_debug!</span>(<span class="string">"Timestep {} is valid"</span>, timestep);
             <span class="kw">let </span>positions = timestep_data.position();
 
             <span class="kw">let </span>particle_ids = timestep_data.particleid();
@@ -1316,28 +1382,33 @@
             <span class="kw">let </span>clouds = timestep_data.clouds();
             <span class="kw">let </span>density = timestep_data.density();
             <span class="kw">let </span>particles = positions.len();
-            <span class="macro">print_debug!</span>(<span class="string">&quot;Dispersion: looping over particles form 0 to {}&quot;</span>, particles);
+            <span class="macro">print_debug!</span>(<span class="string">"Dispersion: looping over particles form 0 to {}"</span>, particles);
             next_timestep = <span class="kw">match </span>global_stats
                 .timestep_at_seconds_closest(current_time + time_for_dispersion)
             {
                 <span class="prelude-val">Ok</span>(x) =&gt; x,
                 <span class="prelude-val">Err</span>(s) =&gt; {
                     <span class="macro">print_warning!</span>(
-                        <span class="string">&quot;Dispersion: No timestep found for time {}, \n error: {}&quot;</span>,
+                        <span class="string">"Dispersion: No timestep found for time {}, \n error: {}"</span>,
                         current_time + time_for_dispersion,
                         s
                     );
                     <span class="kw">continue</span>;
                 }
             };
+            <span class="comment">//println!("This timestep is {}", timestep);
+            //println!("Dt is {}", time_for_dispersion);
+            //println!("Next timestep is {}", next_timestep);
+            //println!("Current time is {}", current_time);
 
-            <span class="comment">//   global_stats.timestep_at_seconds(current_time + time_for_dispersion);
+            //   global_stats.timestep_at_seconds(current_time + time_for_dispersion);
 
-            </span><span class="macro">print_debug!</span>(<span class="string">&quot;Next timestep is {}&quot;</span>, next_timestep);
+            </span><span class="macro">print_debug!</span>(<span class="string">"Next timestep is {}"</span>, next_timestep);
             <span class="kw">let </span>timestep_future = <span class="self">self</span>.get_timestep_buffer(next_timestep, <span class="number">0</span>);
-            <span class="macro">print_debug!</span>(<span class="string">&quot;extracting position&quot;</span>);
+            <span class="comment">//println!("Next time is {}", *timestep_future.time());
+            </span><span class="macro">print_debug!</span>(<span class="string">"extracting position"</span>);
             <span class="kw">let </span>position_future = timestep_future.position();
-            <span class="macro">print_debug!</span>(<span class="string">&quot;Starting particle loop&quot;</span>);
+            <span class="macro">print_debug!</span>(<span class="string">"Starting particle loop"</span>);
 
             <span class="kw">for </span>particle <span class="kw">in </span><span class="number">0</span>..particles {
                 <span class="kw">if </span>!selector.is_valid(
@@ -1346,19 +1417,19 @@
                     density[particle],
                     particle_ids[particle] <span class="kw">as </span>usize,
                 ) {
-                    <span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is not valid&quot;</span>, particle);
+                    <span class="macro">print_debug!</span>(<span class="string">"Particle {} is not valid"</span>, particle);
                     <span class="kw">continue</span>;
                 }
                 <span class="kw">if </span>!grid.is_inside(positions[particle]) {
                     <span class="comment">// the particle is out of the field of view
-                    </span><span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is out of FoV&quot;</span>, particle);
+                    </span><span class="macro">print_debug!</span>(<span class="string">"Particle {} is out of FoV"</span>, particle);
                     <span class="kw">continue</span>;
                 }
                 <span class="kw">let </span>cell_id = <span class="kw">match </span>grid.cell_id(positions[particle]) {
                     <span class="prelude-val">Ok</span>(x) =&gt; x,
                     <span class="prelude-val">Err</span>(s) =&gt; {
                         <span class="macro">print_warning!</span>(
-                            <span class="string">&quot;Dispersion: Error getting cell id for particle {}, \n error: {}&quot;</span>,
+                            <span class="string">"Dispersion: Error getting cell id for particle {}, \n error: {}"</span>,
                             particle,
                             s
                         );
@@ -1378,13 +1449,13 @@
 
             <span class="comment">// for loop over all 3 dimensions to get to each cell
         </span>}
-        <span class="macro">print_debug!</span>(<span class="string">&quot;Dispersion: looping over all cells&quot;</span>);
+        <span class="macro">print_debug!</span>(<span class="string">"Dispersion: looping over all cells"</span>);
         <span class="kw">let </span>cells = grid.get_cells();
         <span class="kw">for </span>x <span class="kw">in </span><span class="number">0</span>..cells[<span class="number">0</span>] {
             <span class="kw">for </span>y <span class="kw">in </span><span class="number">0</span>..cells[<span class="number">1</span>] {
                 <span class="kw">for </span>z <span class="kw">in </span><span class="number">0</span>..cells[<span class="number">2</span>] {
                     <span class="kw">let </span>n = num_counts[[x, y, z]];
-                    <span class="macro">print_debug!</span>(<span class="string">&quot;Dispersion: cell {:?} has {} particles&quot;</span>, [x, y, z], n);
+                    <span class="macro">print_debug!</span>(<span class="string">"Dispersion: cell {:?} has {} particles"</span>, [x, y, z], n);
                     <span class="kw">if </span>n &gt; <span class="number">1.0 </span>{
                         <span class="kw">let </span>dispersion_x = squared_sum_x[[x, y, z]] / n
                             - sum_x[[x, y, z]] * sum_x[[x, y, z]] / n / n;
@@ -1415,7 +1486,7 @@
     /// Calculate the mean velocity of all particles.
     ///’’’
     ///mean_velocity = data.mean_velocity_showcase(particleselector)
-    ///&#39;&#39;&#39;
+    ///'''
     </span><span class="kw">fn </span>grid_test(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _selector: <span class="kw-2">&amp;</span>ParticleSelector, _grid: Box&lt;<span class="kw">dyn </span>GridFunctions3D&gt;) -&gt; f64 {
         <span class="macro">unimplemented!</span>()
     } <span class="comment">//end mean velocity
@@ -1427,7 +1498,7 @@
     /// Calculate the mean velocity of all particles.
     ///’’’
     ///mean_velocity = data.mean_velocity(particleselector)
-    ///&#39;&#39;&#39;
+    ///'''
     </span><span class="kw">fn </span>mean_velocity(<span class="kw-2">&amp;mut </span><span class="self">self</span>, _selector: <span class="kw-2">&amp;</span>ParticleSelector) -&gt; f64 {
         <span class="kw">let </span>global_stats = <span class="self">self</span>.global_stats();
         global_stats.velocity_mag()[<span class="number">1</span>]
@@ -1448,7 +1519,7 @@
     /// property : str
     ///     The property that is used to calculate the histogram.
     ///    The following properties are available:
-    ///     - &#39;velocity&#39;
+    ///     - 'velocity'
     ///
     /// bins : int
     ///    The number of bins in the histogram.
@@ -1469,10 +1540,10 @@
         max_limit: f64,
         bins: usize,
     ) -&gt; (Array1&lt;f64&gt;, Array1&lt;f64&gt;) {
-        <span class="kw">let </span>property_list = <span class="macro">vec!</span>[<span class="string">&quot;velocity&quot;</span>];
+        <span class="kw">let </span>property_list = <span class="macro">vec!</span>[<span class="string">"velocity"</span>];
         <span class="kw">if </span>!property_list.contains(<span class="kw-2">&amp;</span>property) {
             <span class="macro">panic!</span>(
-                <span class="string">&quot;Property {} is not available. Available properties are: {:?}&quot;</span>,
+                <span class="string">"Property {} is not available. Available properties are: {:?}"</span>,
                 property, property_list
             );
         }
@@ -1484,7 +1555,7 @@
         <span class="comment">// make bin edges
 
         </span><span class="kw">let </span><span class="kw-2">mut </span>bin_edges = ndarray::Array1::&lt;f64&gt;::zeros(bins + <span class="number">1</span>);
-        <span class="kw">if </span>property == <span class="string">&quot;velocity&quot; </span>{
+        <span class="kw">if </span>property == <span class="string">"velocity" </span>{
             <span class="kw">let </span>velocity_mag = global_stats.velocity_mag();
             <span class="kw">let </span>min = velocity_mag[<span class="number">0</span>];
             <span class="kw">let </span>max = <span class="kw">if </span>max_limit == <span class="number">0.0 </span>{
@@ -1499,20 +1570,20 @@
             bin_edges[bins] = max;
         } <span class="kw">else </span>{
             <span class="macro">panic!</span>(
-                <span class="string">&quot;Property {} is not available. Available properties are: {:?}&quot;</span>,
+                <span class="string">"Property {} is not available. Available properties are: {:?}"</span>,
                 property, property_list
             );
         }
-        <span class="macro">print_debug!</span>(<span class="string">&quot;velocityfield: Initiation over, entering time loop&quot;</span>);
+        <span class="macro">print_debug!</span>(<span class="string">"velocityfield: Initiation over, entering time loop"</span>);
         <span class="kw">for </span>timestep <span class="kw">in </span><span class="number">0</span>..timesteps - <span class="number">1 </span>{
             <span class="kw">let </span>timestep_data = <span class="self">self</span>.get_timestep(timestep);
             <span class="kw">let </span>current_time = <span class="kw-2">*</span>timestep_data.time();
             <span class="comment">// check if timestep is in the timeframe given
             </span><span class="kw">if </span>!selector.timestep_valid(current_time) {
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Timestep {} is not valid&quot;</span>, timestep);
+                <span class="macro">print_debug!</span>(<span class="string">"Timestep {} is not valid"</span>, timestep);
                 <span class="kw">continue</span>;
             }
-            <span class="macro">print_debug!</span>(<span class="string">&quot;Timestep {} is valid&quot;</span>, timestep);
+            <span class="macro">print_debug!</span>(<span class="string">"Timestep {} is valid"</span>, timestep);
             <span class="kw">let </span>positions = timestep_data.position();
             <span class="kw">let </span>velocities = timestep_data.velocity();
             <span class="kw">let </span>particle_ids = timestep_data.particleid();
@@ -1527,11 +1598,11 @@
                     density[particle],
                     particle_ids[particle] <span class="kw">as </span>usize,
                 ) {
-                    <span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is not valid&quot;</span>, particle);
+                    <span class="macro">print_debug!</span>(<span class="string">"Particle {} is not valid"</span>, particle);
                     <span class="kw">continue</span>;
                 }
 
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is valid&quot;</span>, particle);
+                <span class="macro">print_debug!</span>(<span class="string">"Particle {} is valid"</span>, particle);
                 <span class="kw">let </span>position = positions[particle];
                 <span class="kw">if </span>!grid.is_inside(position) {
                     <span class="kw">continue</span>;
@@ -1575,6 +1646,7 @@
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         grid: Box&lt;<span class="kw">dyn </span>GridFunctions3D&gt;,
         selector: <span class="kw-2">&amp;</span>ParticleSelector,
+        mode: <span class="kw-2">&amp;</span>str,
     ) -&gt; Box&lt;<span class="kw">dyn </span>GridFunctions3D&gt; {
         <span class="comment">//read the number of timesteps inside this hdf5file
         </span><span class="kw">let </span>global_stats = <span class="self">self</span>.global_stats();
@@ -1589,16 +1661,16 @@
         <span class="kw">let </span><span class="kw-2">mut </span>sum_z = grid.get_data().clone();
         <span class="kw">let </span><span class="kw-2">mut </span>num_counts = grid.get_data().clone();
         <span class="kw">let </span><span class="kw-2">mut </span>grantemp = grid.new_zeros();
-        <span class="macro">print_debug!</span>(<span class="string">&quot;velocityfield: Initiation over, entering time loop&quot;</span>);
+        <span class="macro">print_debug!</span>(<span class="string">"velocityfield: Initiation over, entering time loop"</span>);
         <span class="kw">for </span>timestep <span class="kw">in </span><span class="number">0</span>..timesteps - <span class="number">1 </span>{
             <span class="kw">let </span>timestep_data = <span class="self">self</span>.get_timestep(timestep);
             <span class="kw">let </span>current_time = <span class="kw-2">*</span>timestep_data.time();
             <span class="comment">// check if timestep is in the timeframe given
             </span><span class="kw">if </span>!selector.timestep_valid(current_time) {
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Timestep {} is not valid&quot;</span>, timestep);
+                <span class="macro">print_debug!</span>(<span class="string">"Timestep {} is not valid"</span>, timestep);
                 <span class="kw">continue</span>;
             }
-            <span class="macro">print_debug!</span>(<span class="string">&quot;Timestep {} is valid&quot;</span>, timestep);
+            <span class="macro">print_debug!</span>(<span class="string">"Timestep {} is valid"</span>, timestep);
             <span class="kw">let </span>positions = timestep_data.position();
             <span class="kw">let </span>velocities = timestep_data.velocity();
             <span class="kw">let </span>particle_ids = timestep_data.particleid();
@@ -1609,7 +1681,7 @@
             <span class="comment">// loop over all particles in this timestep, calculate the velocity vector and add it to the
             // vectorfield array
             </span><span class="macro">print_debug!</span>(
-                <span class="string">&quot;velocityfield: looping over particles form 0 to {}&quot;</span>,
+                <span class="string">"velocityfield: looping over particles form 0 to {}"</span>,
                 particles
             );
 
@@ -1620,21 +1692,21 @@
                     density[particle],
                     particle_ids[particle] <span class="kw">as </span>usize,
                 ) {
-                    <span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is not valid&quot;</span>, particle);
+                    <span class="macro">print_debug!</span>(<span class="string">"Particle {} is not valid"</span>, particle);
                     <span class="kw">continue</span>;
                 }
 
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is valid&quot;</span>, particle);
+                <span class="macro">print_debug!</span>(<span class="string">"Particle {} is valid"</span>, particle);
                 <span class="kw">let </span>position = positions[particle];
                 <span class="kw">if </span>!grid.is_inside(position) {
                     <span class="comment">// the particle is out of the field of view
-                    </span><span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is out of FoV&quot;</span>, particle);
+                    </span><span class="macro">print_debug!</span>(<span class="string">"Particle {} is out of FoV"</span>, particle);
                     <span class="kw">continue</span>;
                 }
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Particle {} is in the grid&quot;</span>, particle);
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Cell ids: {:?}&quot;</span>, grid.cell_id(position));
+                <span class="macro">print_debug!</span>(<span class="string">"Particle {} is in the grid"</span>, particle);
+                <span class="macro">print_debug!</span>(<span class="string">"Cell ids: {:?}"</span>, grid.cell_id(position));
                 <span class="macro">print_debug!</span>(
-                    <span class="string">&quot;Grid Positions \n{:?},\n{:?},\n{:?}&quot;</span>,
+                    <span class="string">"Grid Positions \n{:?},\n{:?},\n{:?}"</span>,
                     grid.get_xpositions(),
                     grid.get_ypositions(),
                     grid.get_zpositions()
@@ -1659,9 +1731,20 @@
         <span class="kw">let </span>fluct_x = <span class="kw-2">&amp;</span>squared_sum_x - <span class="kw-2">&amp;</span>sum_x * <span class="kw-2">&amp;</span>sum_x / <span class="kw-2">&amp;</span>num_counts;
         <span class="kw">let </span>fluct_y = <span class="kw-2">&amp;</span>squared_sum_y - <span class="kw-2">&amp;</span>sum_y * <span class="kw-2">&amp;</span>sum_y / <span class="kw-2">&amp;</span>num_counts;
         <span class="kw">let </span>fluct_z = <span class="kw-2">&amp;</span>squared_sum_z - <span class="kw-2">&amp;</span>sum_z * <span class="kw-2">&amp;</span>sum_z / <span class="kw-2">&amp;</span>num_counts;
-        <span class="kw">let </span><span class="kw-2">mut </span>temp = <span class="kw-2">&amp;</span>fluct_x + <span class="kw-2">&amp;</span>fluct_y + <span class="kw-2">&amp;</span>fluct_z;
+        <span class="kw">let </span><span class="kw-2">mut </span>temp;
+
+        <span class="kw">if </span>mode == <span class="string">"x" </span>{
+            temp = fluct_x;
+        } <span class="kw">else if </span>mode == <span class="string">"y" </span>{
+            temp = fluct_y;
+        } <span class="kw">else if </span>mode == <span class="string">"z" </span>{
+            temp = fluct_z;
+        } <span class="kw">else if </span>mode == <span class="string">"xyz" </span>{
+            temp = (<span class="kw-2">&amp;</span>fluct_x + <span class="kw-2">&amp;</span>fluct_y + <span class="kw-2">&amp;</span>fluct_z) / <span class="number">3.0</span>;
+        } <span class="kw">else </span>{
+            <span class="macro">panic!</span>(<span class="string">"Mode {} is not supported"</span>, mode);
+        }
         temp /= <span class="kw-2">&amp;</span>num_counts;
-        temp /= <span class="number">3.0</span>;
         temp.mapv_inplace(|x| x.sqrt());
         grantemp.set_data(temp);
         grantemp.set_weights(num_counts);

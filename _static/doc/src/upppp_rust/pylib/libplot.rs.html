@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/pylib/libplot.rs`."><title>libplot.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-cb6f1f67f1bcd037.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="upppp_rust" data-themes="" data-resource-suffix="" data-rustdoc-version="1.73.0 (cc66ad468 2023-10-03)" data-channel="1.73.0" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-1596385f77d47ef2.css" data-theme-dark-css="dark-0a43001d3fc2282c.css" data-theme-ayu-css="ayu-fd19013d6ce078bf.css" ><script src="../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-0795b7d26be81095.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-1596385f77d47ef2.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-0a43001d3fc2282c.css"><link rel="stylesheet" href="../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../upppp_rust/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/pylib/libplot.rs`."><title>libplot.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="upppp_rust" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -588,48 +589,26 @@
 <a href="#588" id="588">588</a>
 <a href="#589" id="589">589</a>
 <a href="#590" id="590">590</a>
-<a href="#591" id="591">591</a>
-<a href="#592" id="592">592</a>
-<a href="#593" id="593">593</a>
-<a href="#594" id="594">594</a>
-<a href="#595" id="595">595</a>
-<a href="#596" id="596">596</a>
-<a href="#597" id="597">597</a>
-<a href="#598" id="598">598</a>
-<a href="#599" id="599">599</a>
-<a href="#600" id="600">600</a>
-<a href="#601" id="601">601</a>
-<a href="#602" id="602">602</a>
-<a href="#603" id="603">603</a>
-<a href="#604" id="604">604</a>
-<a href="#605" id="605">605</a>
-<a href="#606" id="606">606</a>
-<a href="#607" id="607">607</a>
-<a href="#608" id="608">608</a>
-<a href="#609" id="609">609</a>
-<a href="#610" id="610">610</a>
-<a href="#611" id="611">611</a>
-<a href="#612" id="612">612</a>
-<a href="#613" id="613">613</a>
-<a href="#614" id="614">614</a>
-<a href="#615" id="615">615</a>
-<a href="#616" id="616">616</a>
-<a href="#617" id="617">617</a>
-<a href="#618" id="618">618</a>
-<a href="#619" id="619">619</a>
-<a href="#620" id="620">620</a>
-<a href="#621" id="621">621</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Submodule for export of plotting code to Python.
-
+</span><span class="comment">// TODO break this up into multiple files
 </span><span class="kw">use crate</span>::{
     libgrid::{PyGrid, PyVecGrid},
+    parity_contour::ParityContour,
+    parity_map::ParityMap,
+    parity_plot::ParityPlot,
     plotting::<span class="kw-2">*</span>,
+    quiver::QuiverPlot,
+    scalar_contour::ScalarContour,
+    scalar_map::ScalarMap,
+    unit_vector::UnitVectorPlot,
     GridFunctions3D, VectorGrid,
 };
-<span class="kw">use </span>plotly::{Layout, Plot, Trace};
+<span class="kw">use </span>colorous::Gradient;
+
+<span class="kw">use </span>plotly::{contour::Contours, layout::themes::PLOTLY_WHITE, Layout, Plot, Trace};
 <span class="kw">use </span>pyo3::{exceptions::PyValueError, prelude::<span class="kw-2">*</span>};
 
-<span class="attr">#[pyclass(name = <span class="string">&quot;RustPlotter2D&quot;</span>, subclass)]
+<span class="attr">#[pyclass(name = <span class="string">"RustPlotter2D"</span>, subclass)]
 </span><span class="kw">pub struct </span>PyPlotter2D {
     plotting_string: String,
     grid: Box&lt;<span class="kw">dyn </span>GridFunctions3D&gt;,
@@ -659,252 +638,171 @@
         }
     }
 
-    <span class="attr">#[pyo3(signature = (axis, selection = <span class="string">&quot;depth_average&quot;</span>, index = <span class="prelude-val">None</span>, scaling_mode = <span class="string">&quot;none&quot;</span>, scaling_args = <span class="prelude-val">None</span>))]
+    <span class="comment">//TODO add scaleratio to the signature of this method
+    // TODO default layout should remove the x and y axis lines
+    </span><span class="attr">#[pyo3(signature = (axis, selection = <span class="string">"depth_average"</span>, index = <span class="prelude-val">None</span>, scaling_mode = <span class="prelude-val">None</span>, min_size = <span class="prelude-val">None</span>, max_size = <span class="prelude-val">None</span>, colour_map = <span class="string">"viridis"</span>))]
     </span><span class="kw">fn </span>_quiver_plot(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         axis: usize,
         selection: <span class="kw-2">&amp;</span>str,
         index: <span class="prelude-ty">Option</span>&lt;usize&gt;,
-        scaling_mode: <span class="kw-2">&amp;</span>str,
-        scaling_args: <span class="prelude-ty">Option</span>&lt;Vec&lt;f64&gt;&gt;,
+        scaling_mode: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
+        min_size: <span class="prelude-ty">Option</span>&lt;f64&gt;,
+        max_size: <span class="prelude-ty">Option</span>&lt;f64&gt;,
+        colour_map: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
     ) -&gt; PyResult&lt;()&gt; {
-        <span class="kw">let </span>vector_grid = <span class="self">self
+        <span class="comment">// Arguments are checked for validity at the Python layer, so we can relax
+        // checks here.
+        </span><span class="kw">let </span>vector_grid = <span class="self">self
             </span>.grid
             .as_any()
             .downcast_ref::&lt;VectorGrid&gt;()
-            .unwrap()
+            .expect(<span class="string">"This method should only be called from data that is a vector grid."</span>)
             .clone();
-        <span class="kw">let </span>quiver_plotter = <span class="kw">if </span>selection == <span class="string">&quot;depth_average&quot; </span>{
+        <span class="kw">let </span>quiver_plotter = <span class="kw">if </span>selection == <span class="string">"depth_average" </span>{
             QuiverPlot::from_vector_grid_depth_averaged(vector_grid, axis)
-        } <span class="kw">else if </span>selection == <span class="string">&quot;plane&quot; </span>{
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(index) = index {
-                QuiverPlot::from_vector_grid_single_plane(vector_grid, axis, index)
-            } <span class="kw">else </span>{
-                <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                    <span class="string">&quot;A valid index is required to select an individual plane.&quot;</span>,
-                ));
-            }
         } <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                <span class="string">&quot;Valid selection modes are &#39;depth_average&#39; and &#39;plane&#39; only.&quot;</span>,
-            ));
+            QuiverPlot::from_vector_grid_single_plane(vector_grid, axis, index.unwrap())
         };
-        <span class="kw">let </span>len = quiver_plotter.x().len();
-        <span class="kw">let </span><span class="kw-2">mut </span>traces: Vec&lt;Box&lt;<span class="kw">dyn </span>Trace&gt;&gt; = Vec::with_capacity(len);
-        <span class="kw">let </span>quiver_traces = <span class="kw">if </span>scaling_mode == <span class="string">&quot;none&quot; </span>{
-            quiver_plotter.create_quiver_traces()
-        } <span class="kw">else if </span>scaling_mode == <span class="string">&quot;min&quot; </span>{
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(scaling_args) = scaling_args {
+        <span class="kw">let </span>cmap = <span class="self">self</span>.get_gradient(colour_map);
+        <span class="kw">let </span>quiver_traces = <span class="kw">match </span>scaling_mode {
+            <span class="prelude-val">Some</span>(<span class="string">"min"</span>) =&gt; quiver_plotter
+                .bound_min(min_size.unwrap())
+                .create_quiver_traces(<span class="number">1.0</span>, cmap),
+            <span class="prelude-val">Some</span>(<span class="string">"max"</span>) =&gt; quiver_plotter
+                .bound_max(max_size.unwrap())
+                .create_quiver_traces(<span class="number">1.0</span>, cmap),
+            <span class="prelude-val">Some</span>(<span class="string">"minmax"</span>) =&gt; quiver_plotter
+                .bound_min_max(min_size.unwrap(), max_size.unwrap())
+                .create_quiver_traces(<span class="number">1.0</span>, cmap),
+            <span class="prelude-val">Some</span>(<span class="string">"half_node"</span>) =&gt; {
+                <span class="kw">let </span>dx = quiver_plotter.x()[<span class="number">1</span>] - quiver_plotter.x()[<span class="number">0</span>];
+                <span class="kw">let </span>dy = quiver_plotter.y()[<span class="number">1</span>] - quiver_plotter.y()[<span class="number">0</span>];
                 quiver_plotter
-                    .bound_min(scaling_args[<span class="number">0</span>])
-                    .create_quiver_traces()
-            } <span class="kw">else </span>{
-                <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                    <span class="string">&quot;A valid scaling argument is required.&quot;</span>,
-                ));
+                    .bound_half_node(dx, dy)
+                    .create_quiver_traces(<span class="number">1.0</span>, cmap)
             }
-        } <span class="kw">else if </span>scaling_mode == <span class="string">&quot;max&quot; </span>{
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(scaling_args) = scaling_args {
+            <span class="prelude-val">Some</span>(<span class="string">"full_node"</span>) =&gt; {
+                <span class="kw">let </span>dx = quiver_plotter.x()[<span class="number">1</span>] - quiver_plotter.x()[<span class="number">0</span>];
+                <span class="kw">let </span>dy = quiver_plotter.y()[<span class="number">1</span>] - quiver_plotter.y()[<span class="number">0</span>];
                 quiver_plotter
-                    .bound_max(scaling_args[<span class="number">0</span>])
-                    .create_quiver_traces()
-            } <span class="kw">else </span>{
-                <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                    <span class="string">&quot;A valid scaling argument is required.&quot;</span>,
-                ));
+                    .bound_full_node(dx, dy)
+                    .create_quiver_traces(<span class="number">1.0</span>, cmap)
             }
-        } <span class="kw">else if </span>scaling_mode == <span class="string">&quot;minmax&quot; </span>{
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(scaling_args) = scaling_args {
-                <span class="kw">let </span>scaling_vector = scaling_args;
-                <span class="kw">if </span>scaling_vector.len() &lt; <span class="number">2 </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                        <span class="string">&quot;Min-max scaling requires 2 arguments.&quot;</span>,
-                    ));
-                }
-                quiver_plotter
-                    .bound_min_max(scaling_vector[<span class="number">0</span>], scaling_vector[<span class="number">1</span>])
-                    .create_quiver_traces()
-            } <span class="kw">else </span>{
-                <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                    <span class="string">&quot;A valid scaling argument is required.&quot;</span>,
-                ));
-            }
-        } <span class="kw">else if </span>scaling_mode == <span class="string">&quot;half_node&quot; </span>{
-            <span class="kw">let </span>dx = quiver_plotter.x()[<span class="number">1</span>] - quiver_plotter.x()[<span class="number">0</span>];
-            <span class="kw">let </span>dy = quiver_plotter.y()[<span class="number">1</span>] - quiver_plotter.y()[<span class="number">0</span>];
-            quiver_plotter
-                .bound_half_node(dx, dy)
-                .create_quiver_traces()
-        } <span class="kw">else if </span>scaling_mode == <span class="string">&quot;full_node&quot; </span>{
-            <span class="kw">let </span>dx = quiver_plotter.x()[<span class="number">1</span>] - quiver_plotter.x()[<span class="number">0</span>];
-            <span class="kw">let </span>dy = quiver_plotter.y()[<span class="number">1</span>] - quiver_plotter.y()[<span class="number">0</span>];
-            quiver_plotter
-                .bound_full_node(dx, dy)
-                .create_quiver_traces()
-        } <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(<span class="string">&quot;Invalid scaling mode provided, valid types are: &#39;none&#39;, &#39;min&#39;, &#39;max&#39;, &#39;minmax&#39;, &#39;half_node&#39;, &#39;full_node&#39;.&quot;</span>));
+            <span class="prelude-val">None </span>=&gt; quiver_plotter.create_quiver_traces(<span class="number">1.0</span>, cmap),
+            <span class="kw">_ </span>=&gt; quiver_plotter.create_quiver_traces(<span class="number">1.0</span>, cmap),
         };
-        <span class="kw">for </span>trace <span class="kw">in </span>quiver_traces {
-            traces.push(trace)
-        }
-        <span class="kw">let </span>layout: Layout = Layout::new();
-        <span class="kw">let </span>plot: Plot = plot(traces, layout);
+        <span class="comment">// println!("quiver_traces: {:?}", quiver_traces.len());
+        // for trace in quiver_traces {
+        //     traces.push(trace);
+        // }
+        </span><span class="kw">let </span>template = <span class="kw-2">&amp;*</span>PLOTLY_WHITE;
+        <span class="kw">let </span>layout = Layout::new().template(template);
+        <span class="kw">let </span>plot: Plot = plot(quiver_traces, layout);
         <span class="kw">let </span>plotting_string = plot.to_json();
         <span class="self">self</span>.plotting_string = plotting_string;
 
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="attr">#[pyo3(signature = (axis, selection = <span class="string">&quot;depth_average&quot;</span>, index = <span class="prelude-val">None</span>, scaling_mode = <span class="string">&quot;none&quot;</span>, scaling_args = <span class="prelude-val">None</span>))]
+    <span class="attr">#[pyo3(signature = (axis, selection = <span class="string">"depth_average"</span>, index = <span class="prelude-val">None</span>, scaling_mode = <span class="string">"none"</span>, min_size = <span class="prelude-val">None</span>, max_size = <span class="prelude-val">None</span>, colour_map = <span class="string">"viridis"</span>))]
     </span><span class="kw">fn </span>_unit_vector_plot(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         axis: usize,
         selection: <span class="kw-2">&amp;</span>str,
         index: <span class="prelude-ty">Option</span>&lt;usize&gt;,
-        scaling_mode: <span class="kw-2">&amp;</span>str,
-        scaling_args: <span class="prelude-ty">Option</span>&lt;Vec&lt;f64&gt;&gt;,
+        scaling_mode: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
+        min_size: <span class="prelude-ty">Option</span>&lt;f64&gt;,
+        max_size: <span class="prelude-ty">Option</span>&lt;f64&gt;,
+        colour_map: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
     ) -&gt; PyResult&lt;()&gt; {
-        <span class="kw">let </span>vector_grid = <span class="self">self
+        <span class="comment">// Arguments are checked for validity at the Python layer, so we can relax
+        // checks here.
+        </span><span class="kw">let </span>vector_grid = <span class="self">self
             </span>.grid
             .as_any()
             .downcast_ref::&lt;VectorGrid&gt;()
-            .unwrap()
+            .expect(<span class="string">"This method should only be called from data that is a vector grid."</span>)
             .clone();
-        <span class="kw">let </span>unit_vector_plotter = <span class="kw">if </span>selection == <span class="string">&quot;depth_average&quot; </span>{
+        <span class="kw">let </span>unit_vector_plotter = <span class="kw">if </span>selection == <span class="string">"depth_average" </span>{
             UnitVectorPlot::from_vector_grid_depth_averaged(vector_grid, axis)
-        } <span class="kw">else if </span>selection == <span class="string">&quot;plane&quot; </span>{
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(index) = index {
-                UnitVectorPlot::from_vector_grid_single_plane(vector_grid, axis, index)
-            } <span class="kw">else </span>{
-                <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                    <span class="string">&quot;A valid index is required to select an individual plane.&quot;</span>,
-                ));
-            }
         } <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                <span class="string">&quot;Valid selection modes are &#39;depth_average&#39; and &#39;plane&#39; only.&quot;</span>,
-            ));
+            UnitVectorPlot::from_vector_grid_single_plane(vector_grid, axis, index.unwrap())
         };
-        <span class="kw">let </span>len = unit_vector_plotter.x().len();
-        <span class="kw">let </span><span class="kw-2">mut </span>traces: Vec&lt;Box&lt;<span class="kw">dyn </span>Trace&gt;&gt; = Vec::with_capacity(len);
-        <span class="kw">let </span>unit_vector_traces = <span class="kw">if </span>scaling_mode == <span class="string">&quot;none&quot; </span>{
-            unit_vector_plotter.create_quiver_traces()
-        } <span class="kw">else if </span>scaling_mode == <span class="string">&quot;min&quot; </span>{
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(scaling_args) = scaling_args {
+        <span class="kw">let </span>cmap = <span class="self">self</span>.get_gradient(colour_map);
+        <span class="kw">let </span>unit_vector_traces = <span class="kw">match </span>scaling_mode {
+            <span class="prelude-val">Some</span>(<span class="string">"min"</span>) =&gt; unit_vector_plotter
+                .bound_min(min_size.unwrap())
+                .create_quiver_traces(<span class="number">1.0</span>, cmap),
+            <span class="prelude-val">Some</span>(<span class="string">"max"</span>) =&gt; unit_vector_plotter
+                .bound_max(max_size.unwrap())
+                .create_quiver_traces(<span class="number">1.0</span>, cmap),
+            <span class="prelude-val">Some</span>(<span class="string">"minmax"</span>) =&gt; unit_vector_plotter
+                .bound_min_max(min_size.unwrap(), max_size.unwrap())
+                .create_quiver_traces(<span class="number">1.0</span>, cmap),
+            <span class="prelude-val">Some</span>(<span class="string">"half_node"</span>) =&gt; {
+                <span class="kw">let </span>dx = unit_vector_plotter.x()[<span class="number">1</span>] - unit_vector_plotter.x()[<span class="number">0</span>];
+                <span class="kw">let </span>dy = unit_vector_plotter.y()[<span class="number">1</span>] - unit_vector_plotter.y()[<span class="number">0</span>];
                 unit_vector_plotter
-                    .bound_min(scaling_args[<span class="number">0</span>])
-                    .create_quiver_traces()
-            } <span class="kw">else </span>{
-                <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                    <span class="string">&quot;A valid scaling argument is required.&quot;</span>,
-                ));
+                    .bound_half_node(dx, dy)
+                    .create_quiver_traces(<span class="number">1.0</span>, cmap)
             }
-        } <span class="kw">else if </span>scaling_mode == <span class="string">&quot;max&quot; </span>{
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(scaling_args) = scaling_args {
+            <span class="prelude-val">Some</span>(<span class="string">"full_node"</span>) =&gt; {
+                <span class="kw">let </span>dx = unit_vector_plotter.x()[<span class="number">1</span>] - unit_vector_plotter.x()[<span class="number">0</span>];
+                <span class="kw">let </span>dy = unit_vector_plotter.y()[<span class="number">1</span>] - unit_vector_plotter.y()[<span class="number">0</span>];
                 unit_vector_plotter
-                    .bound_max(scaling_args[<span class="number">0</span>])
-                    .create_quiver_traces()
-            } <span class="kw">else </span>{
-                <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                    <span class="string">&quot;A valid scaling argument is required.&quot;</span>,
-                ));
+                    .bound_full_node(dx, dy)
+                    .create_quiver_traces(<span class="number">1.0</span>, cmap)
             }
-        } <span class="kw">else if </span>scaling_mode == <span class="string">&quot;minmax&quot; </span>{
-            <span class="kw">if let </span><span class="prelude-val">Some</span>(scaling_args) = scaling_args {
-                <span class="kw">let </span>scaling_vector = scaling_args;
-                <span class="kw">if </span>scaling_vector.len() &lt; <span class="number">2 </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                        <span class="string">&quot;Min-max scaling requires 2 arguments.&quot;</span>,
-                    ));
-                }
-                unit_vector_plotter
-                    .bound_min_max(scaling_vector[<span class="number">0</span>], scaling_vector[<span class="number">1</span>])
-                    .create_quiver_traces()
-            } <span class="kw">else </span>{
-                <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                    <span class="string">&quot;A valid scaling argument is required.&quot;</span>,
-                ));
-            }
-        } <span class="kw">else if </span>scaling_mode == <span class="string">&quot;half_node&quot; </span>{
-            <span class="kw">let </span>dx = unit_vector_plotter.x()[<span class="number">1</span>] - unit_vector_plotter.x()[<span class="number">0</span>];
-            <span class="kw">let </span>dy = unit_vector_plotter.y()[<span class="number">1</span>] - unit_vector_plotter.y()[<span class="number">0</span>];
-            unit_vector_plotter
-                .bound_half_node(dx, dy)
-                .create_quiver_traces()
-        } <span class="kw">else if </span>scaling_mode == <span class="string">&quot;full_node&quot; </span>{
-            <span class="kw">let </span>dx = unit_vector_plotter.x()[<span class="number">1</span>] - unit_vector_plotter.x()[<span class="number">0</span>];
-            <span class="kw">let </span>dy = unit_vector_plotter.y()[<span class="number">1</span>] - unit_vector_plotter.y()[<span class="number">0</span>];
-            unit_vector_plotter
-                .bound_full_node(dx, dy)
-                .create_quiver_traces()
-        } <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(<span class="string">&quot;Invalid scaling mode provided, valid types are: &#39;none&#39;, &#39;min&#39;, &#39;max&#39;, &#39;minmax&#39;, &#39;half_node&#39;, &#39;full_node&#39;.&quot;</span>));
+            <span class="comment">// None =&gt; unit_vector_plotter.create_quiver_traces(1.0, cmap),
+            </span><span class="kw">_ </span>=&gt; unit_vector_plotter.create_quiver_traces(<span class="number">1.0</span>, cmap),
         };
-        <span class="kw">for </span>trace <span class="kw">in </span>unit_vector_traces {
-            traces.push(trace)
-        }
+
         <span class="kw">let </span>layout: Layout = Layout::new();
-        <span class="kw">let </span>plot: Plot = plot(traces, layout);
+        <span class="kw">let </span>plot: Plot = plot(unit_vector_traces, layout);
         <span class="kw">let </span>plotting_string = plot.to_json();
         <span class="self">self</span>.plotting_string = plotting_string;
 
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="comment">// BUG something isn&#39;t being done correctly as the square axes aren&#39;t behaving
-    </span><span class="attr">#[pyo3(signature = (grid_type, axis, selection = <span class="string">&quot;depth_average&quot;</span>, index = <span class="prelude-val">None</span>))]
+    <span class="comment">// BUG something isn't being done correctly as the square axes aren't behaving
+    // TODO remove unwrap
+    </span><span class="attr">#[pyo3(signature = (grid_type, axis, selection = <span class="string">"depth_average"</span>, index = <span class="prelude-val">None</span>, colour_map = <span class="string">"viridis"</span>))]
     </span><span class="kw">fn </span>_scalar_map(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         grid_type: <span class="kw-2">&amp;</span>str,
         axis: usize,
         selection: <span class="kw-2">&amp;</span>str,
         index: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+        colour_map: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
     ) -&gt; PyResult&lt;()&gt; {
-        <span class="kw">let </span>scalar_plotter = <span class="kw">if </span>grid_type == <span class="string">&quot;vector_grid&quot; </span>{
+        <span class="comment">// Arguments are checked for validity at the Python layer, so we can relax
+        // checks here.
+        </span><span class="kw">let </span>cmap = <span class="self">self</span>.get_gradient(colour_map);
+        <span class="kw">let </span>scalar_plotter = <span class="kw">if </span>grid_type == <span class="string">"vector_grid" </span>{
             <span class="kw">let </span>grid = <span class="self">self
                 </span>.grid
                 .as_any()
                 .downcast_ref::&lt;VectorGrid&gt;()
                 .unwrap()
                 .clone();
-            <span class="kw">if </span>selection == <span class="string">&quot;depth_average&quot; </span>{
+            <span class="kw">if </span>selection == <span class="string">"depth_average" </span>{
                 ScalarMap::from_vector_grid_depth_averaged(grid, axis)
-            } <span class="kw">else if </span>selection == <span class="string">&quot;plane&quot; </span>{
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(index) = index {
-                    ScalarMap::from_vector_grid_single_plane(grid, axis, index)
-                } <span class="kw">else </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                        <span class="string">&quot;A valid index is required to select an individual plane.&quot;</span>,
-                    ));
-                }
             } <span class="kw">else </span>{
-                <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                    <span class="string">&quot;Valid selection modes are &#39;depth_average&#39; and &#39;plane&#39; only.&quot;</span>,
-                ));
-            }
-        } <span class="kw">else if </span>grid_type == <span class="string">&quot;grid&quot; </span>{
-            <span class="kw">let </span>grid = <span class="self">self</span>.grid.clone();
-            <span class="kw">if </span>selection == <span class="string">&quot;depth_average&quot; </span>{
-                ScalarMap::from_grid_depth_averaged(grid, axis)
-            } <span class="kw">else if </span>selection == <span class="string">&quot;plane&quot; </span>{
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(index) = index {
-                    ScalarMap::from_grid_single_plane(grid, axis, index)
-                } <span class="kw">else </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                        <span class="string">&quot;A valid index is required to select an individual plane.&quot;</span>,
-                    ));
-                }
-            } <span class="kw">else </span>{
-                <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                    <span class="string">&quot;Valid selection modes are &#39;depth_average&#39; and &#39;plane&#39; only.&quot;</span>,
-                ));
+                ScalarMap::from_vector_grid_single_plane(grid, axis, index.unwrap())
             }
         } <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(<span class="string">&quot;Valid grid types are &#39;vector_grid&#39; and &#39;grid&#39; only. This was set implicitly
-                        by the Plotter2D class and you shouldn&#39;t be seeing this error. Please contact the developers.&quot;</span>));
+            <span class="comment">// type == "grid"
+            </span><span class="kw">let </span>grid = <span class="self">self</span>.grid.clone();
+            <span class="kw">if </span>selection == <span class="string">"depth_average" </span>{
+                ScalarMap::from_grid_depth_averaged(grid, axis)
+            } <span class="kw">else </span>{
+                ScalarMap::from_grid_single_plane(grid, axis, index.unwrap())
+            }
         };
         <span class="kw">let </span><span class="kw-2">mut </span>traces: Vec&lt;Box&lt;<span class="kw">dyn </span>Trace&gt;&gt; = Vec::new();
-        <span class="kw">let </span>heatmap_traces = scalar_plotter.create_scalar_map();
+        <span class="kw">let </span>heatmap_traces = scalar_plotter.create_scalar_map(cmap);
         <span class="kw">for </span>trace <span class="kw">in </span>heatmap_traces {
             traces.push(trace)
         }
@@ -916,62 +814,58 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="comment">// BUG something isn&#39;t being done correctly as the square axes aren&#39;t behaving
-    </span><span class="attr">#[pyo3(signature = (grid_type, axis, selection = <span class="string">&quot;depth_average&quot;</span>, index = <span class="prelude-val">None</span>))]
+    <span class="comment">// BUG something isn't being done correctly as the square axes aren't behaving
+    // TODO do something with sizes because the default is SHITE for the contour plot (too big)
+    // this may mean figuring out some optimal spacing
+    </span><span class="attr">#[pyo3(signature = (grid_type, axis, selection = <span class="string">"depth_average"</span>, index = <span class="prelude-val">None</span>, colour_map = <span class="string">"viridis"</span>, n_contours = <span class="number">10</span>))]
     </span><span class="kw">fn </span>_scalar_contour(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         grid_type: <span class="kw-2">&amp;</span>str,
         axis: usize,
         selection: <span class="kw-2">&amp;</span>str,
         index: <span class="prelude-ty">Option</span>&lt;usize&gt;,
+        colour_map: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;,
+        n_contours: <span class="prelude-ty">Option</span>&lt;usize&gt;,
     ) -&gt; PyResult&lt;()&gt; {
-        <span class="kw">let </span>scalar_plotter = <span class="kw">if </span>grid_type == <span class="string">&quot;vector_grid&quot; </span>{
+        <span class="comment">// Arguments are checked for validity at the Python layer, so we can relax
+        // checks here.
+        </span><span class="kw">let </span>cmap = <span class="self">self</span>.get_gradient(colour_map);
+        <span class="kw">let </span>scalar_plotter = <span class="kw">if </span>grid_type == <span class="string">"vector_grid" </span>{
             <span class="kw">let </span>grid = <span class="self">self
                 </span>.grid
                 .as_any()
                 .downcast_ref::&lt;VectorGrid&gt;()
-                .unwrap()
+                .expect(<span class="string">"This method should only be called from data that is a vector grid."</span>)
                 .clone();
-            <span class="kw">if </span>selection == <span class="string">&quot;depth_average&quot; </span>{
+            <span class="kw">if </span>selection == <span class="string">"depth_average" </span>{
                 ScalarContour::from_vector_grid_depth_averaged(grid, axis)
-            } <span class="kw">else if </span>selection == <span class="string">&quot;plane&quot; </span>{
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(index) = index {
-                    ScalarContour::from_vector_grid_single_plane(grid, axis, index)
-                } <span class="kw">else </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                        <span class="string">&quot;A valid index is required to select an individual plane.&quot;</span>,
-                    ));
-                }
             } <span class="kw">else </span>{
-                <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                    <span class="string">&quot;Valid selection modes are &#39;depth_average&#39; and &#39;plane&#39; only.&quot;</span>,
-                ));
-            }
-        } <span class="kw">else if </span>grid_type == <span class="string">&quot;grid&quot; </span>{
-            <span class="kw">let </span>grid = <span class="self">self</span>.grid.clone();
-            <span class="kw">if </span>selection == <span class="string">&quot;depth_average&quot; </span>{
-                ScalarContour::from_grid_depth_averaged(grid, axis)
-            } <span class="kw">else if </span>selection == <span class="string">&quot;plane&quot; </span>{
-                <span class="kw">if let </span><span class="prelude-val">Some</span>(index) = index {
-                    ScalarContour::from_grid_single_plane(grid, axis, index)
-                } <span class="kw">else </span>{
-                    <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                        <span class="string">&quot;A valid index is required to select an individual plane.&quot;</span>,
-                    ));
-                }
-            } <span class="kw">else </span>{
-                <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                    <span class="string">&quot;Valid selection modes are &#39;depth_average&#39; and &#39;plane&#39; only.&quot;</span>,
-                ));
+                ScalarContour::from_vector_grid_single_plane(grid, axis, index.unwrap())
             }
         } <span class="kw">else </span>{
-            <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(<span class="string">&quot;Valid grid types are &#39;vector_grid&#39; and &#39;grid&#39; only. This was set implicitly
-                        by the Plotter2D class and you shouldn&#39;t be seeing this error. Please contact the developers.&quot;</span>));
+            <span class="comment">// type == "grid"
+            </span><span class="kw">let </span>grid = <span class="self">self</span>.grid.clone();
+            <span class="kw">if </span>selection == <span class="string">"depth_average" </span>{
+                ScalarContour::from_grid_depth_averaged(grid, axis)
+            } <span class="kw">else </span>{
+                ScalarContour::from_grid_single_plane(grid, axis, index.unwrap())
+            }
         };
         <span class="kw">let </span><span class="kw-2">mut </span>traces: Vec&lt;Box&lt;<span class="kw">dyn </span>Trace&gt;&gt; = Vec::new();
-        <span class="kw">let </span>contour_traces = scalar_plotter.create_scalar_contour();
+        <span class="kw">let </span>contour_traces = scalar_plotter.create_scalar_contour(cmap);
         <span class="kw">for </span>trace <span class="kw">in </span>contour_traces {
-            traces.push(trace)
+            <span class="kw">let </span>min = scalar_plotter.min;
+            <span class="kw">let </span>max = scalar_plotter.max;
+            traces.push(
+                trace
+                    .contours(
+                        Contours::new()
+                            .start(min)
+                            .end(max)
+                            .size((max - min) / n_contours.unwrap() <span class="kw">as </span>f64),
+                    )
+                    .auto_contour(<span class="bool-val">false</span>),
+            );
         }
         <span class="kw">let </span>layout: Layout = Layout::new();
         <span class="kw">let </span>plot: Plot = plot(traces, layout);
@@ -981,7 +875,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="attr">#[pyo3(signature = (comparison_grid, axis, selection = <span class="string">&quot;depth_average&quot;</span>, index = <span class="prelude-val">None</span>))]
+    <span class="attr">#[pyo3(signature = (comparison_grid, axis, selection = <span class="string">"depth_average"</span>, index = <span class="prelude-val">None</span>))]
     </span><span class="kw">fn </span>_parity_plot_from_vector_grid(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         comparison_grid: <span class="kw-2">&amp;</span>PyVecGrid,
@@ -1001,14 +895,14 @@
             .downcast_ref::&lt;VectorGrid&gt;()
             .unwrap()
             .clone();
-        <span class="kw">let </span>parity_plotter = <span class="kw">if </span>selection == <span class="string">&quot;depth_average&quot; </span>{
+        <span class="kw">let </span>parity_plotter = <span class="kw">if </span>selection == <span class="string">"depth_average" </span>{
             ParityPlot::from_vector_grids_depth_averaged(ref_grid, comp_grid, axis)
-        } <span class="kw">else if </span>selection == <span class="string">&quot;plane&quot; </span>{
+        } <span class="kw">else if </span>selection == <span class="string">"plane" </span>{
             <span class="kw">if let </span><span class="prelude-val">Some</span>(index) = index {
                 ParityPlot::from_vector_grids_single_plane(ref_grid, comp_grid, axis, index)
             } <span class="kw">else </span>{
                 <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                    <span class="string">&quot;A valid index is required to select an individual plane.&quot;</span>,
+                    <span class="string">"A valid index is required to select an individual plane."</span>,
                 ));
             }
         } <span class="kw">else </span>{
@@ -1027,7 +921,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="attr">#[pyo3(signature = (comparison_grid, axis, selection = <span class="string">&quot;depth_average&quot;</span>, index = <span class="prelude-val">None</span>))]
+    <span class="attr">#[pyo3(signature = (comparison_grid, axis, selection = <span class="string">"depth_average"</span>, index = <span class="prelude-val">None</span>))]
     </span><span class="kw">fn </span>_parity_plot_from_grid(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         comparison_grid: <span class="kw-2">&amp;</span>PyGrid,
@@ -1037,14 +931,14 @@
     ) -&gt; PyResult&lt;()&gt; {
         <span class="kw">let </span>ref_grid = <span class="self">self</span>.grid.clone();
         <span class="kw">let </span>comp_grid = comparison_grid.grid.clone();
-        <span class="kw">let </span>parity_plotter = <span class="kw">if </span>selection == <span class="string">&quot;depth_average&quot; </span>{
+        <span class="kw">let </span>parity_plotter = <span class="kw">if </span>selection == <span class="string">"depth_average" </span>{
             ParityPlot::from_grids_depth_averaged(ref_grid, comp_grid, axis)
-        } <span class="kw">else if </span>selection == <span class="string">&quot;plane&quot; </span>{
+        } <span class="kw">else if </span>selection == <span class="string">"plane" </span>{
             <span class="kw">if let </span><span class="prelude-val">Some</span>(index) = index {
                 ParityPlot::from_grids_single_plane(ref_grid, comp_grid, axis, index)
             } <span class="kw">else </span>{
                 <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                    <span class="string">&quot;A valid index is required to select an individual plane.&quot;</span>,
+                    <span class="string">"A valid index is required to select an individual plane."</span>,
                 ));
             }
         } <span class="kw">else </span>{
@@ -1063,7 +957,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="attr">#[pyo3(signature = (comparison_grid, axis, selection = <span class="string">&quot;depth_average&quot;</span>, index = <span class="prelude-val">None</span>))]
+    <span class="attr">#[pyo3(signature = (comparison_grid, axis, selection = <span class="string">"depth_average"</span>, index = <span class="prelude-val">None</span>))]
     </span><span class="kw">fn </span>_parity_map_from_vector_grid(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         comparison_grid: <span class="kw-2">&amp;</span>PyVecGrid,
@@ -1083,19 +977,19 @@
             .downcast_ref::&lt;VectorGrid&gt;()
             .unwrap()
             .clone();
-        <span class="kw">let </span>parity_plotter = <span class="kw">if </span>selection == <span class="string">&quot;depth_average&quot; </span>{
+        <span class="kw">let </span>parity_plotter = <span class="kw">if </span>selection == <span class="string">"depth_average" </span>{
             ParityMap::from_vector_grids_depth_averaged(ref_grid, comp_grid, axis)
-        } <span class="kw">else if </span>selection == <span class="string">&quot;plane&quot; </span>{
+        } <span class="kw">else if </span>selection == <span class="string">"plane" </span>{
             <span class="kw">if let </span><span class="prelude-val">Some</span>(index) = index {
                 ParityMap::from_vector_grids_single_plane(ref_grid, comp_grid, axis, index)
             } <span class="kw">else </span>{
                 <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                    <span class="string">&quot;A valid index is required to select an individual plane.&quot;</span>,
+                    <span class="string">"A valid index is required to select an individual plane."</span>,
                 ));
             }
         } <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                <span class="string">&quot;Valid selection modes are &#39;depth_average&#39; and &#39;plane&#39; only.&quot;</span>,
+                <span class="string">"Valid selection modes are 'depth_average' and 'plane' only."</span>,
             ));
         };
         <span class="kw">let </span><span class="kw-2">mut </span>traces: Vec&lt;Box&lt;<span class="kw">dyn </span>Trace&gt;&gt; = Vec::new();
@@ -1111,7 +1005,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="attr">#[pyo3(signature = (comparison_grid, axis, selection = <span class="string">&quot;depth_average&quot;</span>, index = <span class="prelude-val">None</span>))]
+    <span class="attr">#[pyo3(signature = (comparison_grid, axis, selection = <span class="string">"depth_average"</span>, index = <span class="prelude-val">None</span>))]
     </span><span class="kw">fn </span>_parity_map_from_grid(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         comparison_grid: <span class="kw-2">&amp;</span>PyGrid,
@@ -1121,19 +1015,19 @@
     ) -&gt; PyResult&lt;()&gt; {
         <span class="kw">let </span>ref_grid = <span class="self">self</span>.grid.clone();
         <span class="kw">let </span>comp_grid = comparison_grid.grid.clone();
-        <span class="kw">let </span>parity_plotter = <span class="kw">if </span>selection == <span class="string">&quot;depth_average&quot; </span>{
+        <span class="kw">let </span>parity_plotter = <span class="kw">if </span>selection == <span class="string">"depth_average" </span>{
             ParityMap::from_grids_depth_averaged(ref_grid, comp_grid, axis)
-        } <span class="kw">else if </span>selection == <span class="string">&quot;plane&quot; </span>{
+        } <span class="kw">else if </span>selection == <span class="string">"plane" </span>{
             <span class="kw">if let </span><span class="prelude-val">Some</span>(index) = index {
                 ParityMap::from_grids_single_plane(ref_grid, comp_grid, axis, index)
             } <span class="kw">else </span>{
                 <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                    <span class="string">&quot;A valid index is required to select an individual plane.&quot;</span>,
+                    <span class="string">"A valid index is required to select an individual plane."</span>,
                 ));
             }
         } <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                <span class="string">&quot;Valid selection modes are &#39;depth_average&#39; and &#39;plane&#39; only.&quot;</span>,
+                <span class="string">"Valid selection modes are 'depth_average' and 'plane' only."</span>,
             ));
         };
         <span class="kw">let </span><span class="kw-2">mut </span>traces: Vec&lt;Box&lt;<span class="kw">dyn </span>Trace&gt;&gt; = Vec::new();
@@ -1149,7 +1043,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="attr">#[pyo3(signature = (comparison_grid, axis, selection = <span class="string">&quot;depth_average&quot;</span>, index = <span class="prelude-val">None</span>))]
+    <span class="attr">#[pyo3(signature = (comparison_grid, axis, selection = <span class="string">"depth_average"</span>, index = <span class="prelude-val">None</span>))]
     </span><span class="kw">fn </span>_parity_contour_from_vector_grid(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         comparison_grid: <span class="kw-2">&amp;</span>PyVecGrid,
@@ -1169,19 +1063,19 @@
             .downcast_ref::&lt;VectorGrid&gt;()
             .unwrap()
             .clone();
-        <span class="kw">let </span>parity_plotter = <span class="kw">if </span>selection == <span class="string">&quot;depth_average&quot; </span>{
+        <span class="kw">let </span>parity_plotter = <span class="kw">if </span>selection == <span class="string">"depth_average" </span>{
             ParityContour::from_vector_grids_depth_averaged(ref_grid, comp_grid, axis)
-        } <span class="kw">else if </span>selection == <span class="string">&quot;plane&quot; </span>{
+        } <span class="kw">else if </span>selection == <span class="string">"plane" </span>{
             <span class="kw">if let </span><span class="prelude-val">Some</span>(index) = index {
                 ParityContour::from_vector_grids_single_plane(ref_grid, comp_grid, axis, index)
             } <span class="kw">else </span>{
                 <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                    <span class="string">&quot;A valid index is required to select an individual plane.&quot;</span>,
+                    <span class="string">"A valid index is required to select an individual plane."</span>,
                 ));
             }
         } <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                <span class="string">&quot;Valid selection modes are &#39;depth_average&#39; and &#39;plane&#39; only.&quot;</span>,
+                <span class="string">"Valid selection modes are 'depth_average' and 'plane' only."</span>,
             ));
         };
         <span class="kw">let </span><span class="kw-2">mut </span>traces: Vec&lt;Box&lt;<span class="kw">dyn </span>Trace&gt;&gt; = Vec::new();
@@ -1197,7 +1091,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="attr">#[pyo3(signature = (comparison_grid, axis, selection = <span class="string">&quot;depth_average&quot;</span>, index = <span class="prelude-val">None</span>))]
+    <span class="attr">#[pyo3(signature = (comparison_grid, axis, selection = <span class="string">"depth_average"</span>, index = <span class="prelude-val">None</span>))]
     </span><span class="kw">fn </span>_parity_contour_from_grid(
         <span class="kw-2">&amp;mut </span><span class="self">self</span>,
         comparison_grid: <span class="kw-2">&amp;</span>PyGrid,
@@ -1207,19 +1101,19 @@
     ) -&gt; PyResult&lt;()&gt; {
         <span class="kw">let </span>ref_grid = <span class="self">self</span>.grid.clone();
         <span class="kw">let </span>comp_grid = comparison_grid.grid.clone();
-        <span class="kw">let </span>parity_plotter = <span class="kw">if </span>selection == <span class="string">&quot;depth_average&quot; </span>{
+        <span class="kw">let </span>parity_plotter = <span class="kw">if </span>selection == <span class="string">"depth_average" </span>{
             ParityContour::from_grids_depth_averaged(ref_grid, comp_grid, axis)
-        } <span class="kw">else if </span>selection == <span class="string">&quot;plane&quot; </span>{
+        } <span class="kw">else if </span>selection == <span class="string">"plane" </span>{
             <span class="kw">if let </span><span class="prelude-val">Some</span>(index) = index {
                 ParityContour::from_grids_single_plane(ref_grid, comp_grid, axis, index)
             } <span class="kw">else </span>{
                 <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                    <span class="string">&quot;A valid index is required to select an individual plane.&quot;</span>,
+                    <span class="string">"A valid index is required to select an individual plane."</span>,
                 ));
             }
         } <span class="kw">else </span>{
             <span class="kw">return </span><span class="prelude-val">Err</span>(PyValueError::new_err(
-                <span class="string">&quot;Valid selection modes are &#39;depth_average&#39; and &#39;plane&#39; only.&quot;</span>,
+                <span class="string">"Valid selection modes are 'depth_average' and 'plane' only."</span>,
             ));
         };
         <span class="kw">let </span><span class="kw-2">mut </span>traces: Vec&lt;Box&lt;<span class="kw">dyn </span>Trace&gt;&gt; = Vec::new();
@@ -1238,6 +1132,51 @@
     <span class="attr">#[getter]
     </span><span class="kw">fn </span>get_plotting_string(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; PyResult&lt;String&gt; {
         <span class="prelude-val">Ok</span>(<span class="self">self</span>.plotting_string.to_owned())
+    }
+}
+
+<span class="kw">impl </span>PyPlotter2D {
+    <span class="kw">fn </span>get_gradient(<span class="kw-2">&amp;</span><span class="self">self</span>, colour_map: <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span>str&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;Gradient&gt; {
+        <span class="comment">// Once we get reflection, maybe this will look less bad??
+        </span><span class="kw">match </span>colour_map {
+            <span class="prelude-val">Some</span>(<span class="string">"turbo"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::TURBO),
+            <span class="prelude-val">Some</span>(<span class="string">"viridis"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::VIRIDIS),
+            <span class="prelude-val">Some</span>(<span class="string">"inferno"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::INFERNO),
+            <span class="prelude-val">Some</span>(<span class="string">"spectral"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::SPECTRAL),
+            <span class="prelude-val">Some</span>(<span class="string">"magma"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::MAGMA),
+            <span class="prelude-val">Some</span>(<span class="string">"plasma"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::PLASMA),
+            <span class="prelude-val">Some</span>(<span class="string">"cividis"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::CIVIDIS),
+            <span class="prelude-val">Some</span>(<span class="string">"warm"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::WARM),
+            <span class="prelude-val">Some</span>(<span class="string">"cool"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::COOL),
+            <span class="prelude-val">Some</span>(<span class="string">"cubehelix"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::CUBEHELIX),
+            <span class="prelude-val">Some</span>(<span class="string">"blue_green"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::BLUE_GREEN),
+            <span class="prelude-val">Some</span>(<span class="string">"blue_purple"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::BLUE_PURPLE),
+            <span class="prelude-val">Some</span>(<span class="string">"green_blue"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::GREEN_BLUE),
+            <span class="prelude-val">Some</span>(<span class="string">"orange_red"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::ORANGE_RED),
+            <span class="prelude-val">Some</span>(<span class="string">"purple_blue_green"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::PURPLE_BLUE_GREEN),
+            <span class="prelude-val">Some</span>(<span class="string">"purple_blue"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::PURPLE_BLUE),
+            <span class="prelude-val">Some</span>(<span class="string">"purple_red"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::PURPLE_RED),
+            <span class="prelude-val">Some</span>(<span class="string">"red_purple"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::RED_PURPLE),
+            <span class="prelude-val">Some</span>(<span class="string">"yellow_green_blue"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::YELLOW_GREEN_BLUE),
+            <span class="prelude-val">Some</span>(<span class="string">"yellow_green"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::YELLOW_GREEN),
+            <span class="prelude-val">Some</span>(<span class="string">"yellow_orange_brown"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::YELLOW_ORANGE_BROWN),
+            <span class="prelude-val">Some</span>(<span class="string">"yellow_orange_red"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::YELLOW_ORANGE_RED),
+            <span class="prelude-val">Some</span>(<span class="string">"blues"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::BLUES),
+            <span class="prelude-val">Some</span>(<span class="string">"greens"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::GREENS),
+            <span class="prelude-val">Some</span>(<span class="string">"greys"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::GREYS),
+            <span class="prelude-val">Some</span>(<span class="string">"oranges"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::ORANGES),
+            <span class="prelude-val">Some</span>(<span class="string">"purples"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::PURPLES),
+            <span class="prelude-val">Some</span>(<span class="string">"reds"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::REDS),
+            <span class="prelude-val">Some</span>(<span class="string">"brown_green"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::BROWN_GREEN),
+            <span class="prelude-val">Some</span>(<span class="string">"purple_green"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::PURPLE_GREEN),
+            <span class="prelude-val">Some</span>(<span class="string">"pink_green"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::PINK_GREEN),
+            <span class="prelude-val">Some</span>(<span class="string">"purple_orange"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::PURPLE_ORANGE),
+            <span class="prelude-val">Some</span>(<span class="string">"red_blue"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::RED_BLUE),
+            <span class="prelude-val">Some</span>(<span class="string">"red_grey"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::RED_GREY),
+            <span class="prelude-val">Some</span>(<span class="string">"red_yellow_blue"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::RED_YELLOW_BLUE),
+            <span class="prelude-val">Some</span>(<span class="string">"red_yellow_green"</span>) =&gt; <span class="prelude-val">Some</span>(colorous::RED_YELLOW_GREEN),
+            <span class="kw">_ </span>=&gt; <span class="prelude-val">None</span>,
+        }
     }
 }
 </code></pre></div></section></main></body></html>

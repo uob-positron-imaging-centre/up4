@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/converter/convertertools.rs`."><title>convertertools.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Bold-a2c9cd1067f8b328.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-cb6f1f67f1bcd037.css" id="mainThemeStyle"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="upppp_rust" data-themes="" data-resource-suffix="" data-rustdoc-version="1.73.0 (cc66ad468 2023-10-03)" data-channel="1.73.0" data-search-js="search-6dfdfced5eff6596.js" data-settings-js="settings-de11bff964e9d4e5.js" data-settings-css="settings-8c76f75bfb6bd192.css" data-theme-light-css="light-1596385f77d47ef2.css" data-theme-dark-css="dark-0a43001d3fc2282c.css" data-theme-ayu-css="ayu-fd19013d6ce078bf.css" ><script src="../../../static.files/storage-db41da1a38ea3cb8.js"></script><script defer src="../../../static.files/src-script-3280b574d94e47b4.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-0795b7d26be81095.js"></script><noscript><link rel="stylesheet" media="(prefers-color-scheme:light)" href="../../../static.files/light-1596385f77d47ef2.css"><link rel="stylesheet" media="(prefers-color-scheme:dark)" href="../../../static.files/dark-0a43001d3fc2282c.css"><link rel="stylesheet" href="../../../static.files/noscript-cffde32267a19fd6.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><main><nav class="sub"><a class="sub-logo-container" href="../../../upppp_rust/index.html"><img class="rust-logo" src="../../../static.files/rust-logo-151179464ae7ed46.svg" alt="logo"></a><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><a href="../../../help.html">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/converter/convertertools.rs`."><title>convertertools.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../../static.files/rustdoc-ac92e1bbe349e143.css"><meta name="rustdoc-vars" data-root-path="../../../" data-static-root-path="../../../static.files/" data-current-crate="upppp_rust" data-themes="" data-resource-suffix="" data-rustdoc-version="1.76.0 (07dca489a 2024-02-04)" data-channel="1.76.0" data-search-js="search-2b6ce74ff89ae146.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../../static.files/storage-f2adc0d6ca4d09fb.js"></script><script defer src="../../../static.files/src-script-39ed315d46fb705f.js"></script><script defer src="../../../src-files.js"></script><script defer src="../../../static.files/main-305769736d49e732.js"></script><noscript><link rel="stylesheet" href="../../../static.files/noscript-feafe1bb7466e4bd.css"></noscript><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"></nav><div class="sidebar-resizer"></div>
+    <main><nav class="sub"><form class="search-form"><span></span><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -309,13 +310,13 @@
     <span class="comment">// TODO implement different types of interpolation
     //let bar = ProgressBar::new(data.column(0).len() as u64);
     /*bar.set_style(ProgressStyle::default_bar()
-    .template(&quot;{spinner:.green} Interpolation [{elapsed_precise}] [{wide_bar:.cyan/blue}] {percent}% {per_sec} ({eta})&quot;)
-    .with_key(&quot;eta&quot;, |state| format!(&quot;Time left: {:.1}s&quot;, state.eta().as_secs_f64()))
-    .with_key(&quot;per_sec&quot;, |state| format!(&quot;{:.1} steps/s&quot;, state.per_sec()))
-    .progress_chars(&quot;#&gt;-&quot;));*/
-    //let bar = setup_bar!(&quot;Interpolate&quot;, data.column(0).len());
+    .template("{spinner:.green} Interpolation [{elapsed_precise}] [{wide_bar:.cyan/blue}] {percent}% {per_sec} ({eta})")
+    .with_key("eta", |state| format!("Time left: {:.1}s", state.eta().as_secs_f64()))
+    .with_key("per_sec", |state| format!("{:.1} steps/s", state.per_sec()))
+    .progress_chars("#&gt;-"));*/
+    //let bar = setup_bar!("Interpolate", data.column(0).len());
     </span><span class="kw">if </span>!is_sorted(<span class="kw-2">&amp;</span>data.column(<span class="number">0</span>)) {
-        <span class="macro">panic!</span>(<span class="string">&quot;Data is not sorted by time. Please sort the data before interpolation.&quot;</span>)
+        <span class="macro">panic!</span>(<span class="string">"Data is not sorted by time. Please sort the data before interpolation."</span>)
     }
     <span class="kw">let </span>time: ArrayView1&lt;f64&gt; = data.slice(<span class="macro">ndarray::s!</span>[.., <span class="number">0_usize</span>]);
     <span class="kw">let </span>x: ArrayView1&lt;f64&gt; = data.slice(<span class="macro">ndarray::s!</span>[.., <span class="number">1_usize</span>]);
@@ -345,11 +346,11 @@
         </span>real_step = {
             <span class="comment">// if the temporal distance between new time and old time is smaller
             // then distance between new time and next time return old timestep
-            </span><span class="macro">print_debug!</span>(<span class="string">&quot;Real_step:{} time_len {}&quot;</span>, real_step, time.len());
+            </span><span class="macro">print_debug!</span>(<span class="string">"Real_step:{} time_len {}"</span>, real_step, time.len());
             <span class="kw">if </span>real_step &lt; time.len() - <span class="number">1 </span>{
                 <span class="kw">let </span>old_time = time[real_step];
                 <span class="kw">let </span>new_time = time[real_step + <span class="number">1</span>];
-                <span class="macro">print_debug!</span>(<span class="string">&quot;Old time: {} New time: {}&quot;</span>, old_time, new_time);
+                <span class="macro">print_debug!</span>(<span class="string">"Old time: {} New time: {}"</span>, old_time, new_time);
                 <span class="kw">if </span>new_time &lt; old_time {
                     real_step += <span class="number">1</span>;
                 } <span class="kw">else if </span>(time_new - old_time).abs() &lt; (time_new - new_time).abs() {
@@ -368,7 +369,7 @@
             }
             real_step
         };
-        <span class="macro">print_debug!</span>(<span class="string">&quot;Interpolate:  step: {}, real_step: {}, time_new: {}, time[real_step]: {}, time[real_step+1]: {}&quot;</span>, step, real_step, time_new, time[real_step], time[real_step+<span class="number">1</span>]);
+        <span class="macro">print_debug!</span>(<span class="string">"Interpolate:  step: {}, real_step: {}, time_new: {}, time[real_step]: {}, time[real_step+1]: {}"</span>, step, real_step, time_new, time[real_step], time[real_step+<span class="number">1</span>]);
 
         <span class="kw">if </span>real_step &gt;= data.shape()[<span class="number">0</span>] - <span class="number">1 </span>{
             interp_data[[step, <span class="number">0</span>]] = time_new;
@@ -425,39 +426,39 @@
 ) -&gt; ndarray::Array2&lt;f64&gt; {
     <span class="kw">if </span>sampling_steps % <span class="number">2 </span>== <span class="number">0 </span>{
         <span class="macro">panic!</span>(
-            <span class="string">&quot;Sampling_steps must be a uneven number. not {}&quot;</span>,
+            <span class="string">"Sampling_steps must be a uneven number. not {}"</span>,
             sampling_steps
         )
     }
     <span class="kw">let </span><span class="kw-2">mut </span>new_data =
         ndarray::Array2::&lt;f64&gt;::zeros((data.column(<span class="number">0</span>).len() - (sampling_steps - <span class="number">1</span>), <span class="number">7</span>));
 
-    <span class="comment">//let bar = setup_bar!(&quot;Velocity Calc&quot;, new_data.column(0).len());
+    <span class="comment">//let bar = setup_bar!("Velocity Calc", new_data.column(0).len());
     </span><span class="kw">for </span>id <span class="kw">in </span>(sampling_steps - <span class="number">1</span>) / <span class="number">2</span>..data.column(<span class="number">0</span>).len() - (sampling_steps - <span class="number">1</span>) / <span class="number">2 </span>{
-        <span class="comment">//println!(&quot;ID: {}&quot;, id);
-        //println!(&quot;sampling_steps: {}&quot;, sampling_steps);
-        //println!(&quot;{}&quot;, id - (sampling_steps - 1) / 2);
-        //println!(&quot;{}&quot;, id + (sampling_steps - 1) / 2);
+        <span class="comment">//println!("ID: {}", id);
+        //println!("sampling_steps: {}", sampling_steps);
+        //println!("{}", id - (sampling_steps - 1) / 2);
+        //println!("{}", id + (sampling_steps - 1) / 2);
         </span><span class="kw">let </span>datasegment = data.slice(<span class="macro">ndarray::s!</span>[
             id - (sampling_steps - <span class="number">1</span>) / <span class="number">2</span>..id + (sampling_steps - <span class="number">1</span>) / <span class="number">2 </span>+ <span class="number">1</span>,
             ..
         ]);
         <span class="kw">let </span>time = datasegment.column(<span class="number">0</span>).to_owned();
         <span class="kw">let </span>time = (<span class="kw-2">&amp;</span>time - time[<span class="number">0</span>]).to_vec();
-        <span class="comment">//println!(&quot;Time len: {}&quot;, time.len());
-        //println!(&quot;Time: {:?}&quot;, time);
+        <span class="comment">//println!("Time len: {}", time.len());
+        //println!("Time: {:?}", time);
 
         // fit a cur:?ve using polyfit-rs
         // do this for each dimension
         </span><span class="kw">let </span>param_x: Vec&lt;f64&gt; =
             polyfit_rs::polyfit_rs::polyfit(<span class="kw-2">&amp;</span>time, <span class="kw-2">&amp;</span>datasegment.column(<span class="number">1</span>).to_vec(), degree)
-                .expect(<span class="string">&quot;Error while fitting polynom to data in x-direction&quot;</span>);
+                .expect(<span class="string">"Error while fitting polynom to data in x-direction"</span>);
         <span class="kw">let </span>param_y: Vec&lt;f64&gt; =
             polyfit_rs::polyfit_rs::polyfit(<span class="kw-2">&amp;</span>time, <span class="kw-2">&amp;</span>datasegment.column(<span class="number">2</span>).to_vec(), degree)
-                .expect(<span class="string">&quot;Error while fitting polynom to data in y-direction&quot;</span>);
+                .expect(<span class="string">"Error while fitting polynom to data in y-direction"</span>);
         <span class="kw">let </span>param_z: Vec&lt;f64&gt; =
             polyfit_rs::polyfit_rs::polyfit(<span class="kw-2">&amp;</span>time, <span class="kw-2">&amp;</span>datasegment.column(<span class="number">3</span>).to_vec(), degree)
-                .expect(<span class="string">&quot;Error while fitting polynom to data in z-direction&quot;</span>);
+                .expect(<span class="string">"Error while fitting polynom to data in z-direction"</span>);
 
         <span class="comment">// Calculation of the velocities
         // location for the velocities is the middlepoint of the polynom
@@ -489,9 +490,9 @@
         new_data[[id - (sampling_steps - <span class="number">1</span>) / <span class="number">2</span>, <span class="number">4</span>]] = vx;
         new_data[[id - (sampling_steps - <span class="number">1</span>) / <span class="number">2</span>, <span class="number">5</span>]] = vy;
         new_data[[id - (sampling_steps - <span class="number">1</span>) / <span class="number">2</span>, <span class="number">6</span>]] = vz;
-        <span class="macro">print_debug!</span>(<span class="string">&quot;Vel: {},{},{}&quot;</span>, vx, vy, vz);
+        <span class="macro">print_debug!</span>(<span class="string">"Vel: {},{},{}"</span>, vx, vy, vz);
         <span class="macro">print_debug!</span>(
-            <span class="string">&quot;T: {:?} Pos:{:?},{:?},{:?}&quot;</span>,
+            <span class="string">"T: {:?} Pos:{:?},{:?},{:?}"</span>,
             data[[id, <span class="number">0</span>]],
             data[[id, <span class="number">1</span>]],
             data[[id, <span class="number">2</span>]],
@@ -521,7 +522,7 @@
 <span class="kw">where
     </span>T: std::cmp::PartialOrd + Clone + Copy,
 {
-    <span class="macro">print_debug!</span>(<span class="string">&quot;      Sorting data&quot;</span>);
+    <span class="macro">print_debug!</span>(<span class="string">"      Sorting data"</span>);
 
     <span class="kw">let </span><span class="kw-2">mut </span>array_sorted = Vec::new();
     <span class="kw">if </span>data.len() == idx.len() {
@@ -536,7 +537,7 @@
         }
     }
 
-    <span class="macro">print_debug!</span>(<span class="string">&quot;      Done&quot;</span>);
+    <span class="macro">print_debug!</span>(<span class="string">"      Done"</span>);
     array_sorted
 }
 
@@ -573,14 +574,14 @@
     data.into_iter().tuple_windows().all(|(a, b)| a &lt;= b)
 }
 
-<span class="attr">#[cfg(feature = <span class="string">&quot;blosc&quot;</span>)]
+<span class="attr">#[cfg(feature = <span class="string">"blosc"</span>)]
 </span><span class="kw">use </span>hdf5::filters::{blosc_get_nthreads, blosc_set_nthreads};
-<span class="comment">//// Make a builder for blosc datasets in hdf5 so we dont have to change stuff all the time
+<span class="comment">// Make a builder for blosc datasets in hdf5 so we dont have to change stuff all the time
 
 </span><span class="macro">macro_rules! </span>make_dataset_builder {
     (<span class="macro-nonterminal">$group</span>:expr) =&gt; {{
         <span class="kw">let </span>builder = <span class="macro-nonterminal">$group</span>.new_dataset_builder();
-        <span class="attr">#[cfg(feature = <span class="string">&quot;blosc&quot;</span>)]
+        <span class="attr">#[cfg(feature = <span class="string">"blosc"</span>)]
         </span><span class="kw">let </span>builder = builder.blosc_zstd(BLOSC_COMPRESSION, BLOSC_SHUFFLE);
         <span class="comment">// return builder
         </span>builder

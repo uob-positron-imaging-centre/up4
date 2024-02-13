@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"upppp_rust":[["impl PyClassNewTextSignature&lt;<a class=\"struct\" href=\"upppp_rust/pylib/libgrid/struct.PyGrid.html\" title=\"struct upppp_rust::pylib::libgrid::PyGrid\">PyGrid</a>&gt; for PyClassImplCollector&lt;<a class=\"struct\" href=\"upppp_rust/pylib/libgrid/struct.PyGrid.html\" title=\"struct upppp_rust::pylib::libgrid::PyGrid\">PyGrid</a>&gt;"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

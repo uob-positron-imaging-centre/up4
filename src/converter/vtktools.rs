@@ -4,7 +4,7 @@ where
     T: vtkio::model::Scalar,
 {
     let vtk_file =
-        Vtk::import(&filename).unwrap_or_else(|_| panic!("Failed to load file: {:?}", filename));
+        Vtk::import(filename).unwrap_or_else(|_| panic!("Failed to load file: {:?}", filename));
     let pieces = if let DataSet::PolyData { pieces, .. } = vtk_file.data {
         pieces
     } else {
@@ -37,7 +37,7 @@ where
     T: vtkio::model::Scalar,
 {
     let vtk_file =
-        Vtk::import(&filename).unwrap_or_else(|_| panic!("Failed to load file: {:?}", filename));
+        Vtk::import(filename).unwrap_or_else(|_| panic!("Failed to load file: {:?}", filename));
     let pieces = if let DataSet::PolyData { pieces, .. } = &vtk_file.data {
         pieces
     } else {

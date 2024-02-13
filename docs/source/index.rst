@@ -1,7 +1,7 @@
 ..
    File   : index.rst
    License:
-   Author : Dominik Werner <d.wer2@gmx.de>, Daniel Weston <dtw545@bham.ac.uk>
+   Author : Dominik Werner <dxw963@bham.ac.uk>, Daniel Weston <dtw545@bham.ac.uk>
    Date   : 05.01.2021
 
 =======================================================================
@@ -20,20 +20,22 @@ Fear not, this is *precisely* the aim of up4, the Universal Post Processor for P
 .. |CI| image::  https://github.com/uob-positron-imaging-centre/up4/actions/workflows/main.yaml/badge.svg
    :target: https://github.com/uob-positron-imaging-centre/up4/actions/workflows/main.yaml
 
-Indices and tables
-==================
+Documentation
+=============
 .. toctree::
-   :caption: Documentation
    :maxdepth: 2
 
    getting_started
    tutorials/index
    api/index
 
+Information
+===========
 .. toctree::
    :maxdepth: 2
 
    about
+   contributing
 
 Pages
 

@@ -97,7 +97,7 @@ pub fn velocity_polynom_parallel(
 }
 
 fn to_array2<T: Copy>(source: Vec<ndarray::Array1<T>>) -> ndarray::Array2<T> {
-    if source.len() == 0 {
+    if source.is_empty() {
         panic!("Source is empty");
     }
     let width = source.len();

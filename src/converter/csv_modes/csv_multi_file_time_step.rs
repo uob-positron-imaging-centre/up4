@@ -5,7 +5,7 @@ use crate::{
 };
 use csv;
 use hdf5::File;
-use indicatif::{ProgressBar, ProgressStyle};
+// use indicatif::{ProgressBar, ProgressStyle, ProgressState};
 use itertools::Itertools;
 use ndarray;
 use ndarray_csv::Array2Reader;
@@ -16,7 +16,9 @@ use crate::converter::convertertools;
 // Maximum amount of failiures in a row available for a process
 const MAX_FAILS: i64 = 500;
 
-pub fn csv_multi_file_time_sep(
+// number of arguments is necessary to properly read csv files.
+#[allow(clippy::too_many_arguments)]
+pub fn csv_multi_file_time_step(
     filenames: Vec<&str>,
     outname: &str,
     columns: Vec<i64>,
@@ -45,7 +47,6 @@ pub fn csv_multi_file_time_sep(
         .write_scalar(&0x1_i32)
         .unwrap();
 
-    let mut step = 0;
     let bar = setup_bar!("Vtk Read Data", filenames.len() as u64);
     // Attributes
     print_debug!("Constructing data arrays for attributes!");
@@ -71,7 +72,7 @@ pub fn csv_multi_file_time_sep(
     for (id, filename) in filenames.iter().enumerate() {
         let group = hdf5file
             .create_group(&format!("timestep {}", id))
-            .expect(&format!("Can not create group timestep {}", id));
+            .unwrap_or_else(|_| panic!("Can not create group timestep {}", id));
         let current_time = time_[id];
         if current_time > time[1] {
             time[1] = current_time;
@@ -119,37 +120,30 @@ pub fn csv_multi_file_time_sep(
         builder
             .with_data(&particle_id)
             .create("id")
-            .expect(&format!(
-                "Unable to create dataset \"id\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"id\" in file {}", filename));
         //TODO: add a dict to that to read in other columns!
         let builder = group.new_dataset_builder();
         let zero_array = vec![0.0; particle_id.len()];
         builder
             .with_data(&zero_array)
             .create("radius")
-            .expect(&format!(
-                "Unable to create dataset \"radius\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"radius\" in file {}", filename));
 
         let builder = group.new_dataset_builder();
         builder
             .with_data(&zero_array)
             .create("ppcloud")
-            .expect(&format!(
-                "Unable to create dataset \"radius\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| panic!("Unable to create dataset \"radius\" in file {}", filename));
         let builder = group.new_dataset_builder();
         builder
             .with_data(&zero_array)
             .create("particletype")
-            .expect(&format!(
-                "Unable to create dataset \"particletype\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| {
+                panic!(
+                    "Unable to create dataset \"particletype\" in file {}",
+                    filename
+                )
+            });
 
         let particle_velocity: ndarray::Array2<f64> = timestep_data
             .slice(ndarray::s![.., 5usize..8usize])
@@ -182,10 +176,9 @@ pub fn csv_multi_file_time_sep(
         builder
             .with_data(&particle_velocity)
             .create("velocity")
-            .expect(&format!(
-                "Unable to create dataset \"velocity\" in file {}",
-                filename
-            ));
+            .unwrap_or_else(|_| {
+                panic!("Unable to create dataset \"velocity\" in file {}", filename)
+            });
         print_debug!("New: {:?}", particle_positions);
         for pos in particle_positions.axis_iter(ndarray::Axis(0)) {
             for i in 0..3 {
@@ -200,11 +193,9 @@ pub fn csv_multi_file_time_sep(
         builder
             .with_data(&particle_positions)
             .create("position")
-            .expect(&format!(
-                "Unable to create dataset \"position\" in file {}",
-                filename
-            ));
-        step += 1;
+            .unwrap_or_else(|_| {
+                panic!("Unable to create dataset \"position\" in file {}", filename)
+            });
         mean_counter += particle_id.len();
         nparticles = particle_id.len() as u64;
         sample_rate = current_time - old_time;
@@ -319,7 +310,7 @@ fn sort_by_id(data: ndarray::Array2<f64>) -> (Vec<ndarray::Array2<f64>>, f64, us
         let mut ids_and_steps = ids
             .iter()
             .zip(ids_timesteps.iter())
-            .map(|(a, b)| (*a as usize, *b as usize))
+            .map(|(a, b)| (*a, *b))
             .collect::<Vec<(usize, usize)>>();
         ids_and_steps.sort_by(|a, b| a.0.cmp(&b.0));
 

@@ -1,0 +1,13 @@
+[
+    {
+        "name": "dev",
+        "version": "latest",
+        "url": "https://uob-positron-imaging-centre.github.io/up4/latest"
+    },
+
+    {
+        "name": "0.1.0",
+        "version": "v0.1.0",
+        "url": "https://uob-positron-imaging-centre.github.io/up4/v0.1.0"
+    }
+]

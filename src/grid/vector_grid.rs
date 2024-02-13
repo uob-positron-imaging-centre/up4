@@ -14,16 +14,14 @@ pub struct VectorGrid {
 
 impl VectorGrid {
     pub fn new(grid: Box<dyn GridFunctions3D>) -> Self {
-        let cyl_grid;
-        if grid.is_cylindrical() {
-            cyl_grid = grid
-                .as_any()
+        let cyl_grid = if grid.is_cylindrical() {
+            grid.as_any()
                 .downcast_ref::<CylindricalGrid3D>()
                 .unwrap()
-                .clone();
+                .clone()
         } else {
-            cyl_grid = CylindricalGrid3D::default();
-        }
+            CylindricalGrid3D::default()
+        };
         VectorGrid {
             data: [grid.clone(), grid.clone(), grid.clone()],
             cyl_grid,

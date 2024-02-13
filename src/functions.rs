@@ -103,16 +103,16 @@ pub trait Granular: DataManager {
                 let vx: f64 = velocity[0];
                 let vy: f64 = velocity[1];
                 let vz: f64 = velocity[2];
-                let abs_vel = (vx.powi(2) + vy.powi(2) + vz.powi(2)).sqrt();
-                abs_vel
+
+                (vx.powi(2) + vy.powi(2) + vz.powi(2)).sqrt()
             }
             velocity_calc = velocity_calculation;
-        } else if mode == "x" {
+        } else if mode == "x" || mode == "r" {
             fn velocity_calculation(velocity: Array1<f64>) -> f64 {
-                velocity[2]
+                velocity[0]
             }
             velocity_calc = velocity_calculation;
-        } else if mode == "y" {
+        } else if mode == "y" || mode == "theta" {
             fn velocity_calculation(velocity: Array1<f64>) -> f64 {
                 velocity[1]
             }
@@ -148,7 +148,7 @@ pub trait Granular: DataManager {
             velocity_calc = velocity_calculation;
         } else {
             panic!(
-                "Mode {} is not valid. Valid modes are: \"absolute\", \"x\", \"y\", \"z\"",
+                "Mode {} is not valid. Valid modes are: \"absolute\", \"x\" \"r\", \"y\", \"theta\" \"z\"",
                 mode
             );
         }
@@ -667,12 +667,11 @@ pub trait Granular: DataManager {
         if property == "velocity" {
             let velocity_mag = global_stats.velocity_mag();
             let min = velocity_mag[0];
-            let max;
-            if max_limit == 0.0 {
-                max = velocity_mag[2];
+            let max = if max_limit == 0.0 {
+                velocity_mag[2]
             } else {
-                max = max_limit;
-            }
+                max_limit
+            };
             let bin_width = (max - min) / (bins as f64);
             for i in 0..bins {
                 bin_edges[i] = min + i as f64 * bin_width;
@@ -878,7 +877,7 @@ pub trait Granular: DataManager {
             if value.is_nan() {
                 continue;
             }
-            ih += (value - &mean) * (value - &mean);
+            ih += (value - mean) * (value - mean);
         }
         ih /= field.len() as f64;
         ih.sqrt()

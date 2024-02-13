@@ -1,24 +1,6 @@
 Plotting
 ========
 
-.. currentmodule:: up4.plotting 
-.. automodule:: up4.plotting
+.. autoclass:: up4.Plotter2D
 
-Vector Plotting
----------------
-
-.. autoclass:: VectorPlotter
-    :members:
-    
-Scalar Plotting
----------------
-
-.. autoclass:: ScalarPlotter
-    :members:
-    
-Comparison Plotting
--------------------
-
-.. autoclass:: ComparisonPlotter
-    :members:
-    
+.. autofunction:: up4.save_fig

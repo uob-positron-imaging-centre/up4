@@ -6,8 +6,11 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   pull_request:
-    branches: [ uPPPP ]
-
+    paths-ignore:
+      - 'docs/**'
+  #push:
+  #  paths-ignore:
+  #    - 'docs/**'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -37,14 +40,16 @@ jobs:
         run: |
           if [[ ! -z $INSTALL_MINICONDA ]]; then source .github/workflows/install_miniconda.sh; fi
       - name: Install conda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
           python-version: "${{ matrix.python-version }}"
           channels: "conda-forge,anaconda"
           activate-environment: testenv
       - name: Install mamba
-        run:
+        run: |
+          # hdf5 version 1.14 not currently supported yet so we restrict hdf5 to 1.13 at most
+          echo "hdf5<=1.13" > $CONDA_PREFIX/conda-meta/pinned
           conda install -y -c ${{matrix.channel}} mamba
       - name: Install HDF5 (${{matrix.version}}${{matrix.mpi && '-' || ''}}${{matrix.mpi}})
         run: |

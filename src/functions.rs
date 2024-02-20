@@ -30,7 +30,7 @@ pub trait Granular: DataManager {
         let global_stats = self.global_stats();
         let timesteps: &usize = global_stats.timesteps();
         let mut vectorgrid = VectorGrid::new(gridbox);
-        for timestep in 0..timesteps - 1 {
+        for timestep in 0..=timesteps - 1 {
             let timestep_data = self.get_timestep(timestep);
             let current_time = *timestep_data.time();
             // check if timestep is in the timeframe given
@@ -156,7 +156,7 @@ pub trait Granular: DataManager {
         let timesteps: &usize = global_stats.timesteps();
         let mut velocity_grid = grid.new_zeros();
         print_debug!("velocityfield: Initiation over, entering time loop");
-        for timestep in 0..timesteps - 1 {
+        for timestep in 0..=timesteps - 1 {
             let timestep_data = self.get_timestep(timestep);
             let current_time = *timestep_data.time();
             // check if timestep is in the timeframe given
@@ -241,7 +241,7 @@ pub trait Granular: DataManager {
         let timesteps: &usize = global_stats.timesteps();
         let mut number_grid = grid.new_zeros();
         print_debug!("velocityfield: Initiation over, entering time loop");
-        for timestep in 0..timesteps - 1 {
+        for timestep in 0..=timesteps - 1 {
             let timestep_data = self.get_timestep(timestep);
             let current_time = *timestep_data.time();
             // check if timestep is in the timeframe given
@@ -410,7 +410,7 @@ pub trait Granular: DataManager {
         let timesteps = global_stats.timesteps();
         let mut mean_velocity = 0.0;
         let mut num_counts = 0.0;
-        for timestep in 0..timesteps - 1 {
+        for timestep in 0..=timesteps - 1 {
             let timestep_data = self.get_timestep(timestep);
             let current_time = *timestep_data.time();
             // check if timestep is in the timeframe given
@@ -475,7 +475,7 @@ pub trait Granular: DataManager {
         print_debug!("Dispersion: Initiation over, entering time loop");
 
         let mut next_timestep;
-        for timestep in 0..timesteps - 1 {
+        for timestep in 0..=timesteps - 1 {
             let timestep_data = self.get_timestep(timestep).clone();
             let current_time = *timestep_data.time();
             // check if timestep is in the timeframe given
@@ -684,7 +684,7 @@ pub trait Granular: DataManager {
             );
         }
         print_debug!("velocityfield: Initiation over, entering time loop");
-        for timestep in 0..timesteps - 1 {
+        for timestep in 0..=timesteps - 1 {
             let timestep_data = self.get_timestep(timestep);
             let current_time = *timestep_data.time();
             // check if timestep is in the timeframe given
@@ -771,7 +771,7 @@ pub trait Granular: DataManager {
         let mut num_counts = grid.get_data().clone();
         let mut grantemp = grid.new_zeros();
         print_debug!("velocityfield: Initiation over, entering time loop");
-        for timestep in 0..timesteps - 1 {
+        for timestep in 0..=timesteps - 1 {
             let timestep_data = self.get_timestep(timestep);
             let current_time = *timestep_data.time();
             // check if timestep is in the timeframe given

@@ -121,24 +121,24 @@ pub trait Granular: DataManager {
             fn velocity_calculation(velocity: Array1<f64>) -> f64 {
                 let vx: f64 = velocity[0];
                 let vy: f64 = velocity[1];
-                let abs_vel = (vx.powi(2) + vy.powi(2)).sqrt();
-                abs_vel
+                
+                (vx.powi(2) + vy.powi(2)).sqrt()
             }
             velocity_calc = velocity_calculation;
         } else if mode == "xz" {
             fn velocity_calculation(velocity: Array1<f64>) -> f64 {
                 let vx: f64 = velocity[0];
                 let vz: f64 = velocity[2];
-                let abs_vel = (vx.powi(2) + vz.powi(2)).sqrt();
-                abs_vel
+                
+                (vx.powi(2) + vz.powi(2)).sqrt()
             }
             velocity_calc = velocity_calculation;
         } else if mode == "yz" {
             fn velocity_calculation(velocity: Array1<f64>) -> f64 {
                 let vy: f64 = velocity[1];
                 let vz: f64 = velocity[2];
-                let abs_vel = (vy.powi(2) + vz.powi(2)).sqrt();
-                abs_vel
+                
+                (vy.powi(2) + vz.powi(2)).sqrt()
             }
             velocity_calc = velocity_calculation;
         } else if mode == "z" {

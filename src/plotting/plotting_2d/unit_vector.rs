@@ -9,7 +9,7 @@ use itertools::izip;
 use ndarray::{Array1, Array2, Zip};
 use ndarray_stats::QuantileExt;
 use plotly::common::{ColorScale, ColorScaleElement, Fill, Line};
-use plotly::traces::heat_map;
+
 use plotly::{color::NamedColor, common::Mode};
 use plotly::{HeatMap, Scatter, Trace};
 
@@ -117,12 +117,13 @@ impl UnitVectorPlot {
 
     // BUG arrowheads are not drawn properly in method from plotly.py
     // need to reconsider how the arrows are drawn to do this properly
-    fn create_arrows(&self) -> Vec<Arrow> {
+    fn create_arrows(&self, scale_ratio: f64) -> Vec<Arrow> {
         // angle between arrows
         const ANGLE: f64 = PI / 9.0;
         // default scale in plotly's quiver plot is 0.3
         const SCALE_FACTOR: f64 = 0.3;
         let arrow_length = &self.norm * SCALE_FACTOR;
+        let u = &self.u * scale_ratio;
         let mut barb_angles = Array2::zeros(self.u.dim());
         Zip::from(&mut barb_angles)
             .and(&self.v)
@@ -147,7 +148,7 @@ impl UnitVectorPlot {
         let seg_2_x: Array2<f64> = &arrow_length * &cos_angle_2;
         let seg_2_y: Array2<f64> = &arrow_length * &sin_angle_2;
 
-        let end_x: Array2<f64> = &x + &self.u;
+        let end_x: Array2<f64> = &x + &u;
         let end_y: Array2<f64> = &y + &self.v;
 
         //set coordinates of the arrow
@@ -171,7 +172,7 @@ impl UnitVectorPlot {
         scale_ratio: f64,
         colourmap: Option<Gradient>,
     ) -> Vec<Box<dyn Trace>> {
-        let arrows = self.create_arrows();
+        let arrows = self.create_arrows(scale_ratio);
         let mut traces = Vec::<Box<dyn Trace>>::with_capacity(arrows.len() + 1);
         for arrow in arrows {
             let xs = vec![
@@ -216,14 +217,14 @@ impl UnitVectorPlot {
         //     }
         //     z.push(inner_vec);
         // }
-        let heatmap = HeatMap::new(
+        
+
+        HeatMap::new(
             x.into_raw_vec(),
             y.into_raw_vec(),
             self.true_norm.to_owned().into_raw_vec(),
         )
-        .color_scale(ColorScale::Vector(cmap));
-
-        heatmap
+        .color_scale(ColorScale::Vector(cmap))
     }
 
     fn get_colour_map(&self, colourmap: Option<Gradient>) -> Vec<ColorScaleElement> {

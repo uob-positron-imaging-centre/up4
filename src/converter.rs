@@ -93,7 +93,7 @@ pub fn vtk(
 
     let mut mean_counter: usize = 0;
     for (id, filename) in filenames.iter().enumerate() {
-        print_debug!("Creating a new group \"timestep {}\"", step);
+        print_debug!("Creating a new group \"timestep {}\"", id);
         let group = hdf5file
             .create_group(&format!("timestep {}", id))
             .unwrap_or_else(|_| panic!("Can not create group timestep {}", id));
@@ -409,7 +409,7 @@ pub fn vtu(
 
     let mut mean_counter: usize = 0;
     for (id, filename) in filenames.iter().enumerate() {
-        print_debug!("Creating a new group \"timestep {}\"", step);
+        print_debug!("Creating a new group \"timestep {}\"", id);
         let group = hdf5file
             .create_group(&format!("timestep {}", id))
             .unwrap_or_else(|_| panic!("Can not create group timestep {}", id));

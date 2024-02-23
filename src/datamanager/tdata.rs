@@ -3,6 +3,7 @@
 //! Implementation of reading + buffering functions.
 
 use super::{DataManager, GlobalStats, Manager, Timestep};
+use itertools::Chunk;
 use pyo3::prelude::*;
 extern crate ndarray;
 use crate::particleselector::Selector;
@@ -13,7 +14,7 @@ use crate::{print_debug, print_warning};
 use hdf5::filters::blosc_set_nthreads;
 use ndarray::prelude::*;
 use std::time::Instant;
-const BUFFERSIZE: usize = 100;
+const BUFFERSIZE: usize = 20000000;
 #[pyclass]
 pub struct TData {
     // A data managing system for HDF5 files in the
@@ -891,17 +892,13 @@ impl DataManager for TData {
         );
         if timestep > self.range.1 - 1 {
             self.update((timestep, timestep + self.buffersize));
-        } else if &self.range.1 == self.global_stats_.timesteps() && timestep < self.range.0 {
-            self.update((0, BUFFERSIZE));
+        } else if  timestep < self.range.0 {
+            let chunk = (timestep as f64 / BUFFERSIZE as f64).floor() as usize;
+            self.update((chunk * BUFFERSIZE, (chunk + 1) * BUFFERSIZE));
         }
-        // If a timestep below the current range is requested, read in single timestep
-        if timestep < self.range.0 {
-            self.single_data = self.read_single(timestep);
-            &self.single_data
-        } else {
-            // use mem::swap to swap it with a option(None)
-            &self.buffer[timestep - self.range.0]
-        }
+        
+        &self.buffer[timestep - self.range.0]
+        
     }
 
     fn global_stats(&self) -> GlobalStats {
@@ -1136,13 +1133,13 @@ impl DataManager for TData {
             Minimum velocity {:.2} m/s \nMaximum Velocity {:.2} m/s\n",
             dim[[0, 0]],
             dim[[1, 0]],
-            dim[[0, 0]] - dim[[1, 0]],
+            dim[[1, 0]] - dim[[0, 0]],
             dim[[0, 1]],
             dim[[1, 1]],
-            dim[[0, 1]] - dim[[1, 1]],
+            dim[[1, 1]] - dim[[0, 1]],
             dim[[0, 2]],
             dim[[1, 2]],
-            dim[[0, 2]] - dim[[1, 2]],
+            dim[[1, 2]] - dim[[0, 2]],
             time,
             part_num,
             timesteps,

@@ -70,3 +70,31 @@ macro_rules! setup_bar {
         bar
     }};
 }
+
+
+// mean function for ndarrays but not counting in nans
+pub fn nan_mean(arr: &ndarray::Array3<f64>) -> f64 {
+    let mut sum = 0.0;
+    let mut count = 0;
+    for i in arr.iter() {
+        if !i.is_nan() {
+            sum += i;
+            count += 1;
+        }
+    }
+    sum / count as f64
+}
+
+// std function for ndarrays but not counting in nans
+pub fn nan_std(arr: &ndarray::Array3<f64>) -> f64 {
+    let mean = nan_mean(arr);
+    let mut sum = 0.0;
+    let mut count = 0;
+    for i in arr.iter() {
+        if !i.is_nan() {
+            sum += (i - mean).powi(2);
+            count += 1;
+        }
+    }
+    (sum / count as f64).sqrt()
+}

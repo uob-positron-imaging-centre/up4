@@ -1,6 +1,7 @@
 extern crate ndarray;
 use super::{CellId, Dim, GridFunctions3D, Position, ThreeD};
 use crate::{print_debug, print_warning};
+use crate::utilities::{nan_mean, nan_std};
 use derive_getters::Getters;
 use ndarray::{prelude::*, RemoveAxis};
 use ndarray_stats::QuantileExt;
@@ -141,8 +142,8 @@ impl std::fmt::Debug for CylindricalGrid3D {
             self.limits[0],
             self.limits[1],
             self.limits[2],
-            self.data.mean().expect("Unable to calculate mean of data"),
-            self.data.std(1.),
+            nan_mean(&self.data),
+            nan_std(&self.data),
             self.data.min_skipnan(),
             self.data.max_skipnan()
         )
@@ -160,8 +161,8 @@ impl std::fmt::Display for CylindricalGrid3D {
             self.limits[0],
             self.limits[1],
             self.limits[2],
-            self.data.mean().expect("Unable to calculate mean of data"),
-            self.data.std(1.),
+            nan_mean(&self.data),
+            nan_std(&self.data),
             self.data.min_skipnan(),
             self.data.max_skipnan()
         )

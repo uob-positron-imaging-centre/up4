@@ -518,7 +518,7 @@
 }
 
 <span class="comment">// ndarray sorting by elements in another array
-</span><span class="kw">pub fn </span>sort_by_array&lt;T&gt;(data: Vec&lt;T&gt;, idx: <span class="kw-2">&amp;</span>Vec&lt;usize&gt;) -&gt; Vec&lt;T&gt;
+</span><span class="kw">pub fn </span>sort_by_array&lt;T&gt;(data: Vec&lt;T&gt;, idx: <span class="kw-2">&amp;</span>[usize]) -&gt; Vec&lt;T&gt;
 <span class="kw">where
     </span>T: std::cmp::PartialOrd + Clone + Copy,
 {
@@ -541,7 +541,7 @@
     array_sorted
 }
 
-<span class="kw">pub fn </span>make_sortlist(particle_ids: <span class="kw-2">&amp;</span>Vec&lt;u64&gt;) -&gt; Vec&lt;usize&gt; {
+<span class="kw">pub fn </span>make_sortlist(particle_ids: <span class="kw-2">&amp;</span>[u64]) -&gt; Vec&lt;usize&gt; {
     <span class="comment">// make vec with length of particle_ids
     // thanks to that stackoverflow....
     </span><span class="kw">let </span><span class="kw-2">mut </span>indices = (<span class="number">0</span>..particle_ids.len()).collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;();

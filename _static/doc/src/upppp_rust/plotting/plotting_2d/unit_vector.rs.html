@@ -343,6 +343,7 @@
 <a href="#342" id="342">342</a>
 <a href="#343" id="343">343</a>
 <a href="#344" id="344">344</a>
+<a href="#345" id="345">345</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::f64::consts::PI;
 
 <span class="kw">use </span><span class="kw">crate</span>::plotting_2d::Arrow;
@@ -354,7 +355,7 @@
 <span class="kw">use </span>ndarray::{Array1, Array2, Zip};
 <span class="kw">use </span>ndarray_stats::QuantileExt;
 <span class="kw">use </span>plotly::common::{ColorScale, ColorScaleElement, Fill, Line};
-<span class="kw">use </span>plotly::traces::heat_map;
+
 <span class="kw">use </span>plotly::{color::NamedColor, common::Mode};
 <span class="kw">use </span>plotly::{HeatMap, Scatter, Trace};
 
@@ -462,12 +463,13 @@
 
     <span class="comment">// BUG arrowheads are not drawn properly in method from plotly.py
     // need to reconsider how the arrows are drawn to do this properly
-    </span><span class="kw">fn </span>create_arrows(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;Arrow&gt; {
+    </span><span class="kw">fn </span>create_arrows(<span class="kw-2">&amp;</span><span class="self">self</span>, scale_ratio: f64) -&gt; Vec&lt;Arrow&gt; {
         <span class="comment">// angle between arrows
         </span><span class="kw">const </span>ANGLE: f64 = PI / <span class="number">9.0</span>;
         <span class="comment">// default scale in plotly's quiver plot is 0.3
         </span><span class="kw">const </span>SCALE_FACTOR: f64 = <span class="number">0.3</span>;
         <span class="kw">let </span>arrow_length = <span class="kw-2">&amp;</span><span class="self">self</span>.norm * SCALE_FACTOR;
+        <span class="kw">let </span>u = <span class="kw-2">&amp;</span><span class="self">self</span>.u * scale_ratio;
         <span class="kw">let </span><span class="kw-2">mut </span>barb_angles = Array2::zeros(<span class="self">self</span>.u.dim());
         Zip::from(<span class="kw-2">&amp;mut </span>barb_angles)
             .and(<span class="kw-2">&amp;</span><span class="self">self</span>.v)
@@ -492,7 +494,7 @@
         <span class="kw">let </span>seg_2_x: Array2&lt;f64&gt; = <span class="kw-2">&amp;</span>arrow_length * <span class="kw-2">&amp;</span>cos_angle_2;
         <span class="kw">let </span>seg_2_y: Array2&lt;f64&gt; = <span class="kw-2">&amp;</span>arrow_length * <span class="kw-2">&amp;</span>sin_angle_2;
 
-        <span class="kw">let </span>end_x: Array2&lt;f64&gt; = <span class="kw-2">&amp;</span>x + <span class="kw-2">&amp;</span><span class="self">self</span>.u;
+        <span class="kw">let </span>end_x: Array2&lt;f64&gt; = <span class="kw-2">&amp;</span>x + <span class="kw-2">&amp;</span>u;
         <span class="kw">let </span>end_y: Array2&lt;f64&gt; = <span class="kw-2">&amp;</span>y + <span class="kw-2">&amp;</span><span class="self">self</span>.v;
 
         <span class="comment">//set coordinates of the arrow
@@ -516,7 +518,7 @@
         scale_ratio: f64,
         colourmap: <span class="prelude-ty">Option</span>&lt;Gradient&gt;,
     ) -&gt; Vec&lt;Box&lt;<span class="kw">dyn </span>Trace&gt;&gt; {
-        <span class="kw">let </span>arrows = <span class="self">self</span>.create_arrows();
+        <span class="kw">let </span>arrows = <span class="self">self</span>.create_arrows(scale_ratio);
         <span class="kw">let </span><span class="kw-2">mut </span>traces = Vec::&lt;Box&lt;<span class="kw">dyn </span>Trace&gt;&gt;::with_capacity(arrows.len() + <span class="number">1</span>);
         <span class="kw">for </span>arrow <span class="kw">in </span>arrows {
             <span class="kw">let </span>xs = <span class="macro">vec!</span>[
@@ -561,14 +563,14 @@
         //     }
         //     z.push(inner_vec);
         // }
-        </span><span class="kw">let </span>heatmap = HeatMap::new(
+        
+
+        </span>HeatMap::new(
             x.into_raw_vec(),
             y.into_raw_vec(),
             <span class="self">self</span>.true_norm.to_owned().into_raw_vec(),
         )
-        .color_scale(ColorScale::Vector(cmap));
-
-        heatmap
+        .color_scale(ColorScale::Vector(cmap))
     }
 
     <span class="kw">fn </span>get_colour_map(<span class="kw-2">&amp;</span><span class="self">self</span>, colourmap: <span class="prelude-ty">Option</span>&lt;Gradient&gt;) -&gt; Vec&lt;ColorScaleElement&gt; {
@@ -640,7 +642,7 @@
         Zip::from(<span class="kw-2">&amp;mut </span>scale_factor)
             .and(<span class="kw-2">&amp;</span><span class="self">self</span>.norm)
             .for_each(|sf, <span class="kw-2">&amp;</span>n| {
-                <span class="kw-2">*</span>sf = <span class="kw">if </span>n &gt; min {
+                <span class="kw-2">*</span>sf = <span class="kw">if </span>n &gt; max {
                     max / n
                 } <span class="kw">else if </span>n &lt; min {
                     min / n

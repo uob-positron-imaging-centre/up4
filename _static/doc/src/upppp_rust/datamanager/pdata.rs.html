@@ -1220,9 +1220,6 @@
 <a href="#1219" id="1219">1219</a>
 <a href="#1220" id="1220">1220</a>
 <a href="#1221" id="1221">1221</a>
-<a href="#1222" id="1222">1222</a>
-<a href="#1223" id="1223">1223</a>
-<a href="#1224" id="1224">1224</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Particle based HDF5 dataset manager
 //!
 //! Implementation of reading + buffering functions.
@@ -1238,7 +1235,7 @@
 </span><span class="kw">use </span>hdf5::filters::blosc_set_nthreads;
 <span class="kw">use </span>ndarray::prelude::<span class="kw-2">*</span>;
 <span class="kw">use </span>std::time::Instant;
-<span class="kw">const </span>BUFFERSIZE: usize = <span class="number">2000000</span>;
+<span class="kw">const </span>BUFFERSIZE: usize = <span class="number">20000000</span>;
 
 <span class="comment">//#[pyclass]
 </span><span class="kw">pub struct </span>PData {
@@ -2139,17 +2136,14 @@
         );
         <span class="kw">if </span>timestep &gt; <span class="self">self</span>.range.<span class="number">1 </span>- <span class="number">1 </span>{
             <span class="self">self</span>.update((timestep, timestep + <span class="self">self</span>.buffersize));
-        } <span class="kw">else if </span><span class="self">self</span>.range.<span class="number">1 </span>== <span class="self">self</span>.global_stats_.ntimesteps &amp;&amp; timestep &lt; <span class="self">self</span>.range.<span class="number">0 </span>{
-            <span class="self">self</span>.update((<span class="number">0</span>, BUFFERSIZE));
+        } <span class="kw">else if  </span>timestep &lt; <span class="self">self</span>.range.<span class="number">0 </span>{
+            <span class="kw">let </span>chunck = ((timestep <span class="kw">as </span>f64) / (BUFFERSIZE <span class="kw">as </span>f64)).floor() <span class="kw">as </span>usize;
+            <span class="self">self</span>.update((chunck * BUFFERSIZE, (chunck + <span class="number">1</span>) * BUFFERSIZE));
         }
-        <span class="comment">// If a timestep below the current range is requested, read in single timestep
-        </span><span class="kw">if </span>timestep &lt; <span class="self">self</span>.range.<span class="number">0 </span>{
-            <span class="self">self</span>.single_data = <span class="self">self</span>.read_single(timestep);
-            <span class="kw-2">&amp;</span><span class="self">self</span>.single_data
-        } <span class="kw">else </span>{
-            <span class="comment">// use mem::swap to swap it with a option(None)
-            </span><span class="kw-2">&amp;</span><span class="self">self</span>.buffer[timestep - <span class="self">self</span>.range.<span class="number">0</span>]
-        }
+        
+        <span class="kw-2">&amp;</span><span class="self">self</span>.buffer[timestep - <span class="self">self</span>.range.<span class="number">0</span>]
+
+     
     }
 
     <span class="kw">fn </span>global_stats(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; GlobalStats {
@@ -2378,13 +2372,13 @@
             Minimum velocity {:.2} m/s \nMaximum Velocity {:.2} m/s\n"</span>,
             dim[[<span class="number">0</span>, <span class="number">0</span>]],
             dim[[<span class="number">1</span>, <span class="number">0</span>]],
-            dim[[<span class="number">0</span>, <span class="number">0</span>]] - dim[[<span class="number">1</span>, <span class="number">0</span>]],
+            dim[[<span class="number">1</span>, <span class="number">0</span>]] - dim[[<span class="number">0</span>, <span class="number">0</span>]],
             dim[[<span class="number">0</span>, <span class="number">1</span>]],
             dim[[<span class="number">1</span>, <span class="number">1</span>]],
-            dim[[<span class="number">0</span>, <span class="number">1</span>]] - dim[[<span class="number">1</span>, <span class="number">1</span>]],
+            dim[[<span class="number">1</span>, <span class="number">1</span>]] - dim[[<span class="number">0</span>, <span class="number">1</span>]],
             dim[[<span class="number">0</span>, <span class="number">2</span>]],
             dim[[<span class="number">1</span>, <span class="number">2</span>]],
-            dim[[<span class="number">0</span>, <span class="number">2</span>]] - dim[[<span class="number">1</span>, <span class="number">2</span>]],
+            dim[[<span class="number">1</span>, <span class="number">2</span>]] - dim[[<span class="number">0</span>, <span class="number">2</span>]],
             time,
             part_num,
             timesteps,

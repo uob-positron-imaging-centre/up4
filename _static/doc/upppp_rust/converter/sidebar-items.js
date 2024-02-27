@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["csv_converter","csv_multi_converter","csv_multi_file_time_step","vtk","vtk_from_folder","vtu","vtu_from_folder"],"mod":["csv_multi_file_time_step"]};
+window.SIDEBAR_ITEMS = {"enum":["VTKType"],"fn":["csv_converter","csv_multi_converter","csv_multi_file_time_step"],"mod":["csv_multi_file_time_step"],"struct":["LegacyVTKConverter","XMLVTKConverter"]};

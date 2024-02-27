@@ -872,7 +872,7 @@
         Zip::from(<span class="kw-2">&amp;mut </span>scale_factor)
             .and(<span class="kw-2">&amp;</span><span class="self">self</span>.norm)
             .for_each(|sf, <span class="kw-2">&amp;</span>n| {
-                <span class="kw-2">*</span>sf = <span class="kw">if </span>n &gt; min {
+                <span class="kw-2">*</span>sf = <span class="kw">if </span>n &gt; max {
                     max / n
                 } <span class="kw">else if </span>n &lt; min {
                     min / n

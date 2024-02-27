@@ -921,7 +921,7 @@
         <span class="kw">let </span>global_stats = <span class="self">self</span>.global_stats();
         <span class="kw">let </span>timesteps: <span class="kw-2">&amp;</span>usize = global_stats.timesteps();
         <span class="kw">let </span><span class="kw-2">mut </span>vectorgrid = VectorGrid::new(gridbox);
-        <span class="kw">for </span>timestep <span class="kw">in </span><span class="number">0</span>..timesteps - <span class="number">1 </span>{
+        <span class="kw">for </span>timestep <span class="kw">in </span><span class="number">0</span>..=timesteps - <span class="number">1 </span>{
             <span class="kw">let </span>timestep_data = <span class="self">self</span>.get_timestep(timestep);
             <span class="kw">let </span>current_time = <span class="kw-2">*</span>timestep_data.time();
             <span class="comment">// check if timestep is in the timeframe given
@@ -1012,24 +1012,24 @@
             <span class="kw">fn </span>velocity_calculation(velocity: Array1&lt;f64&gt;) -&gt; f64 {
                 <span class="kw">let </span>vx: f64 = velocity[<span class="number">0</span>];
                 <span class="kw">let </span>vy: f64 = velocity[<span class="number">1</span>];
-                <span class="kw">let </span>abs_vel = (vx.powi(<span class="number">2</span>) + vy.powi(<span class="number">2</span>)).sqrt();
-                abs_vel
+                
+                (vx.powi(<span class="number">2</span>) + vy.powi(<span class="number">2</span>)).sqrt()
             }
             velocity_calc = velocity_calculation;
         } <span class="kw">else if </span>mode == <span class="string">"xz" </span>{
             <span class="kw">fn </span>velocity_calculation(velocity: Array1&lt;f64&gt;) -&gt; f64 {
                 <span class="kw">let </span>vx: f64 = velocity[<span class="number">0</span>];
                 <span class="kw">let </span>vz: f64 = velocity[<span class="number">2</span>];
-                <span class="kw">let </span>abs_vel = (vx.powi(<span class="number">2</span>) + vz.powi(<span class="number">2</span>)).sqrt();
-                abs_vel
+                
+                (vx.powi(<span class="number">2</span>) + vz.powi(<span class="number">2</span>)).sqrt()
             }
             velocity_calc = velocity_calculation;
         } <span class="kw">else if </span>mode == <span class="string">"yz" </span>{
             <span class="kw">fn </span>velocity_calculation(velocity: Array1&lt;f64&gt;) -&gt; f64 {
                 <span class="kw">let </span>vy: f64 = velocity[<span class="number">1</span>];
                 <span class="kw">let </span>vz: f64 = velocity[<span class="number">2</span>];
-                <span class="kw">let </span>abs_vel = (vy.powi(<span class="number">2</span>) + vz.powi(<span class="number">2</span>)).sqrt();
-                abs_vel
+                
+                (vy.powi(<span class="number">2</span>) + vz.powi(<span class="number">2</span>)).sqrt()
             }
             velocity_calc = velocity_calculation;
         } <span class="kw">else if </span>mode == <span class="string">"z" </span>{
@@ -1047,7 +1047,7 @@
         <span class="kw">let </span>timesteps: <span class="kw-2">&amp;</span>usize = global_stats.timesteps();
         <span class="kw">let </span><span class="kw-2">mut </span>velocity_grid = grid.new_zeros();
         <span class="macro">print_debug!</span>(<span class="string">"velocityfield: Initiation over, entering time loop"</span>);
-        <span class="kw">for </span>timestep <span class="kw">in </span><span class="number">0</span>..timesteps - <span class="number">1 </span>{
+        <span class="kw">for </span>timestep <span class="kw">in </span><span class="number">0</span>..=timesteps - <span class="number">1 </span>{
             <span class="kw">let </span>timestep_data = <span class="self">self</span>.get_timestep(timestep);
             <span class="kw">let </span>current_time = <span class="kw-2">*</span>timestep_data.time();
             <span class="comment">// check if timestep is in the timeframe given
@@ -1132,7 +1132,7 @@
         <span class="kw">let </span>timesteps: <span class="kw-2">&amp;</span>usize = global_stats.timesteps();
         <span class="kw">let </span><span class="kw-2">mut </span>number_grid = grid.new_zeros();
         <span class="macro">print_debug!</span>(<span class="string">"velocityfield: Initiation over, entering time loop"</span>);
-        <span class="kw">for </span>timestep <span class="kw">in </span><span class="number">0</span>..timesteps - <span class="number">1 </span>{
+        <span class="kw">for </span>timestep <span class="kw">in </span><span class="number">0</span>..=timesteps - <span class="number">1 </span>{
             <span class="kw">let </span>timestep_data = <span class="self">self</span>.get_timestep(timestep);
             <span class="kw">let </span>current_time = <span class="kw-2">*</span>timestep_data.time();
             <span class="comment">// check if timestep is in the timeframe given
@@ -1301,7 +1301,7 @@
         <span class="kw">let </span>timesteps = global_stats.timesteps();
         <span class="kw">let </span><span class="kw-2">mut </span>mean_velocity = <span class="number">0.0</span>;
         <span class="kw">let </span><span class="kw-2">mut </span>num_counts = <span class="number">0.0</span>;
-        <span class="kw">for </span>timestep <span class="kw">in </span><span class="number">0</span>..timesteps - <span class="number">1 </span>{
+        <span class="kw">for </span>timestep <span class="kw">in </span><span class="number">0</span>..=timesteps - <span class="number">1 </span>{
             <span class="kw">let </span>timestep_data = <span class="self">self</span>.get_timestep(timestep);
             <span class="kw">let </span>current_time = <span class="kw-2">*</span>timestep_data.time();
             <span class="comment">// check if timestep is in the timeframe given
@@ -1366,7 +1366,7 @@
         <span class="macro">print_debug!</span>(<span class="string">"Dispersion: Initiation over, entering time loop"</span>);
 
         <span class="kw">let </span><span class="kw-2">mut </span>next_timestep;
-        <span class="kw">for </span>timestep <span class="kw">in </span><span class="number">0</span>..timesteps - <span class="number">1 </span>{
+        <span class="kw">for </span>timestep <span class="kw">in </span><span class="number">0</span>..=timesteps - <span class="number">1 </span>{
             <span class="kw">let </span>timestep_data = <span class="self">self</span>.get_timestep(timestep).clone();
             <span class="kw">let </span>current_time = <span class="kw-2">*</span>timestep_data.time();
             <span class="comment">// check if timestep is in the timeframe given
@@ -1575,7 +1575,7 @@
             );
         }
         <span class="macro">print_debug!</span>(<span class="string">"velocityfield: Initiation over, entering time loop"</span>);
-        <span class="kw">for </span>timestep <span class="kw">in </span><span class="number">0</span>..timesteps - <span class="number">1 </span>{
+        <span class="kw">for </span>timestep <span class="kw">in </span><span class="number">0</span>..=timesteps - <span class="number">1 </span>{
             <span class="kw">let </span>timestep_data = <span class="self">self</span>.get_timestep(timestep);
             <span class="kw">let </span>current_time = <span class="kw-2">*</span>timestep_data.time();
             <span class="comment">// check if timestep is in the timeframe given
@@ -1662,7 +1662,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>num_counts = grid.get_data().clone();
         <span class="kw">let </span><span class="kw-2">mut </span>grantemp = grid.new_zeros();
         <span class="macro">print_debug!</span>(<span class="string">"velocityfield: Initiation over, entering time loop"</span>);
-        <span class="kw">for </span>timestep <span class="kw">in </span><span class="number">0</span>..timesteps - <span class="number">1 </span>{
+        <span class="kw">for </span>timestep <span class="kw">in </span><span class="number">0</span>..=timesteps - <span class="number">1 </span>{
             <span class="kw">let </span>timestep_data = <span class="self">self</span>.get_timestep(timestep);
             <span class="kw">let </span>current_time = <span class="kw-2">*</span>timestep_data.time();
             <span class="comment">// check if timestep is in the timeframe given

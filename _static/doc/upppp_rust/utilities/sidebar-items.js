@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"mod":["maths"]};
+window.SIDEBAR_ITEMS = {"fn":["nan_mean","nan_std"],"mod":["maths"]};

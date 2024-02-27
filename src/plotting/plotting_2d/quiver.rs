@@ -280,7 +280,7 @@ impl QuiverPlot {
         Zip::from(&mut scale_factor)
             .and(&self.norm)
             .for_each(|sf, &n| {
-                *sf = if n > min {
+                *sf = if n > max {
                     max / n
                 } else if n < min {
                     min / n

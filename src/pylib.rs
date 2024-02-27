@@ -1,5 +1,6 @@
 //! Create Python bindings for crate.
 
+use ndarray::Array0;
 use pyo3::prelude::*;
 use pyo3::types::IntoPyDict;
 extern crate ndarray;
@@ -17,6 +18,15 @@ use crate::datamanager::{Manager, PData, TData};
 use libconv::*;
 use libgrid::*;
 use libplot::*;
+
+
+// pyO3 helper:
+#[derive(FromPyObject)]
+enum SliceIntOrVec<'a> {
+    Slice(&'a pyo3::types::PySlice),
+    Int(isize),
+    Vec(Vec<isize>),
+}
 
 /// Class that holds the particle data for processing.
 ///
@@ -781,6 +791,115 @@ impl PyData {
     fn __repr__(&self) -> PyResult<String> {
         Ok(self.data.info().expect("Could not get info"))
     }
+
+    fn __getitem__(&mut self, idx: SliceIntOrVec, py: Python) -> PyResult<PyObject> {
+        match idx{
+            SliceIntOrVec::Int(index) =>{
+            let _idx;
+            if index < 0 {
+                _idx = *self.data.global_stats().timesteps() as isize + index;
+            } else {
+                _idx = index;
+            }
+            // Single index
+            let timestep = self.data.get_timestep(_idx as usize);
+            // make it an array
+            let position = timestep.position().to_owned();
+            let velocity = timestep.velocity().to_owned();
+            // concatenate the arrays: position has 3 
+            let mut result = ndarray::Array2::<f64>::zeros(
+                    (position.len(), 7) 
+                );
+            let particle_id = timestep.particleid().to_owned();
+            // concatenate the arrays: position has 3 
+            for i in 0..position.len() {
+                let id = particle_id[i];
+                let p_x  = position[i][0];
+                let p_y  = position[i][1];
+                let p_z  = position[i][2];
+                let v_x:f64  = velocity[[i,0]];
+                let v_y:f64  = velocity[[i,1]];
+                let v_z:f64  = velocity[[i,2]];
+                let x  = ndarray::array![id as f64, p_x, p_y, p_z, v_x, v_y, v_z];
+                result.row_mut(i).assign(&x);
+            }
+
+            Ok(result.into_pyarray(py).to_object(py))
+        },
+        SliceIntOrVec::Vec(indices) =>{
+            // Fancy indexing with a list of indices
+            // return multiple timesteps as a 3D array
+            let mut result = ndarray::Array3::<f64>::zeros(
+                [indices.len(), *self.data.global_stats().nparticles(), 7]
+            );
+            for (i, index) in indices.iter().enumerate() {
+                let  _idx;
+                if index < &0 {
+                    _idx = *self.data.global_stats().timesteps() as isize + index;
+                } else {
+                    _idx = *index;
+                }
+                let timestep = self.data.get_timestep(_idx as usize);
+                // make it an array
+                let position = timestep.position().to_owned();
+                let velocity = timestep.velocity().to_owned();
+                let particle_id = timestep.particleid().to_owned();
+                // concatenate the arrays: position has 3 
+                for j in 0..position.len() {
+                    let id = particle_id[j];
+                    let p_x:f64  = position[j][0];
+                    let p_y:f64  = position[j][1];
+                    let p_z:f64  = position[j][2];
+                    let v_x:f64  = velocity[[j,0]];
+                    let v_y:f64  = velocity[[j,1]];
+                    let v_z:f64  = velocity[[j,2]];
+                    let x  = ndarray::array![id as f64, p_x, p_y, p_z, v_x, v_y, v_z];
+                    result.slice_mut(ndarray::s![i, j, ..]).assign(&x);
+                }
+            }
+            Ok(result.into_pyarray(py).to_object(py))
+            // next: SLICE
+        },
+        SliceIntOrVec::Slice(slice) =>{
+            let indices = slice.indices(*self.data.global_stats().timesteps() as i64).expect(
+                "Could not get indices"
+            );
+            let start = indices.start;
+            let stop = indices.stop;
+            let step = indices.step;
+            let mut result = ndarray::Array3::<f64>::zeros(
+                [((stop - start) / step) as usize, *self.data.global_stats().nparticles(), 7]
+            );
+            for (i, index) in (start..stop).step_by(step as usize).enumerate() {
+                let timestep = self.data.get_timestep(index as usize);
+                // make it an array
+                let position = timestep.position().to_owned();
+                let velocity = timestep.velocity().to_owned();
+                let particle_id = timestep.particleid().to_owned();
+                // concatenate the arrays: position has 3 
+                for j in 0..position.len() {
+                    let id = particle_id[j];
+                    let p_x:f64  = position[j][0];
+                    let p_y:f64  = position[j][1];
+                    let p_z:f64  = position[j][2];
+                    let v_x:f64  = velocity[[j,0]];
+                    let v_y:f64  = velocity[[j,1]];
+                    let v_z:f64  = velocity[[j,2]];
+                    let x  = ndarray::array![id as f64, p_x, p_y, p_z, v_x, v_y, v_z];
+                    result.slice_mut(ndarray::s![i, j, ..]).assign(&x);
+                }
+            }
+            Ok(result.into_pyarray(py).to_object(py))
+        },
+        _ => Err(pyo3::exceptions::PyIndexError::new_err("Index must be an integer or a list of integers"))
+        }
+    }
+    
+    fn __len__(&self) -> usize {
+        self.data.global_stats().timesteps().to_owned()
+    }
+
+
 }
 
 /// A Python module implemented in Rust. The name of this function must match

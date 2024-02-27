@@ -24,7 +24,7 @@ impl PyConverter {
     ///
     /// Parameters
     /// ----------
-    /// filenames : List(str)
+    /// filenames : list[str]
     ///     List of VTK files to convert, the list must be ordered by time and filenames must contain the timestep.
     ///
     /// timestep : float
@@ -34,17 +34,141 @@ impl PyConverter {
     ///     Name of the output HDF5 file.
     ///
     /// filter : str, optional
-    ///     Regex Filter to apply to the data in order to extract the time for each file, by default r"(\d+).vtk"
+    ///     Regex Filter to apply to the data in order to extract the time for each file, by default r"(\d+).vtk".
+    ///     `up4` dispatches the correct converter based on the filter extension.
     ///
-    #[pyo3(signature = (filenames, timestep, outname, filter = "(\\d+).vtk"))]
+    /// velocity_field_name : str, optional
+    ///     Name of the velocity field in the vtk files, by default "v".
+    ///
+    /// radius_field_name : str, optional
+    ///     Name of the radius field in the vtk files, by default "radius".
+    ///
+    /// id_field_name : str, optional
+    ///     Name of the id field in the vtk files, by default "id".
+    ///
+    /// type_field_name : str, optional
+    ///     Name of the type field in the vtk files, by default "type".
+    ///
+    /// diameter_field_name : str, optional
+    ///     Name of the diameter field in the vtk files, by default None.
+    ///
+    /// Returns
+    /// -------
+    /// None
+    ///
+    /// Examples
+    /// --------
+    /// Convert legacy VTK files to HDF5
+    ///
+    /// 
+    /// >>> from up4 import Converter
+    /// >>> 
+    /// >>> Converter.vtk(
+    /// >>>     filenames=["file1.vtk", "file2.vtk"],
+    /// >>>     timestep=1e-5,
+    /// >>>     outname="output.hdf5",
+    /// >>>     filter=r"(\d+).vtk",
+    /// >>>     velocity_field_name="v",
+    /// >>>     radius_field_name="radius",
+    /// >>>     id_field_name="id",
+    /// >>>     type_field_name="type",
+    /// >>>     diameter_field_name=None,
+    /// >>> )
+    /// 
+    /// Convert XML VTK (unstructured grid format) files to HDF5
+    ///
+    /// 
+    /// >>> from up4 import Converter
+    /// >>> 
+    /// >>> Converter.vtk(
+    /// >>>     filenames=["file1.vtu", "file2.vtu"],
+    /// >>>     timestep=1e-5,
+    /// >>>     outname="output.hdf5",
+    /// >>>     filter=r"(\d+).vtu",
+    /// >>>     velocity_field_name="v",
+    /// >>>     id_field_name="id",
+    /// >>>     type_field_name="type",
+    /// >>>     diameter_field_name="diameter",
+    /// >>> )
+    /// 
+    #[pyo3(signature = (filenames, timestep, outname, filter = "(\\d+).vtk", 
+        velocity_field_name = "v", radius_field_name = "radius", 
+        id_field_name = "id", type_field_name = "type", diameter_field_name = None))]
     #[staticmethod]
     fn vtk(
         filenames: Vec<&str>,
         timestep: f64,
         outname: &str,
         filter: &str, // example r"vtk_(\d+).vtk"
+        velocity_field_name: &str,
+        radius_field_name: &str,
+        id_field_name: &str,
+        type_field_name: &str,
+        diameter_field_name: Option<&str>,
     ) {
-        vtk(filenames, timestep, outname, filter);
+        // Check filter extension to decide on how to proceed
+        if filter.contains(".vtk")
+        // legacy files to convert - defaults to LIGGGHTS naming
+        {
+            // If a diameter field is present, use the LegacyVTKConverter with diameter field.
+            let converter = match diameter_field_name {
+                Some(diameter_field_name) => LegacyVTKConverter::new()
+                    .add_diameter_field(diameter_field_name)
+                    .add_id_field(id_field_name)
+                    .add_type_field(type_field_name)
+                    .add_velocity_field(velocity_field_name),
+                None => LegacyVTKConverter::new()
+                    .add_id_field(id_field_name)
+                    .add_radius_field(radius_field_name)
+                    .add_type_field(type_field_name)
+                    .add_velocity_field(velocity_field_name),
+            };
+            converter.write_hdf5_from_files(filenames, timestep, outname, filter);
+        } else if filter.contains(".vtu")
+        // xml files to convert
+        {
+            let vtk_file_type = VTKType::UnstructuredGrid;
+            match diameter_field_name {
+                Some(diameter_field_name) => {
+                    let converter = XMLVTKConverter::new(vtk_file_type)
+                        .add_diameter_field(diameter_field_name)
+                        .add_id_field(id_field_name)
+                        .add_type_field(type_field_name)
+                        .add_velocity_field(velocity_field_name);
+                    converter.write_hdf5_from_files(filenames, timestep, outname, filter);
+                }
+                None => {
+                    let converter = XMLVTKConverter::new(vtk_file_type)
+                        .add_id_field(id_field_name)
+                        .add_radius_field(radius_field_name)
+                        .add_type_field(type_field_name)
+                        .add_velocity_field(velocity_field_name);
+                    converter.write_hdf5_from_files(filenames, timestep, outname, filter);
+                }
+            }
+        } else if filter.contains(".vtp")
+        // xml files to convert
+        {
+            let vtk_file_type = VTKType::PolyData;
+            match diameter_field_name {
+                Some(diameter_field_name) => {
+                    let converter = XMLVTKConverter::new(vtk_file_type)
+                        .add_diameter_field(diameter_field_name)
+                        .add_id_field(id_field_name)
+                        .add_type_field(type_field_name)
+                        .add_velocity_field(velocity_field_name);
+                    converter.write_hdf5_from_files(filenames, timestep, outname, filter);
+                }
+                None => {
+                    let converter = XMLVTKConverter::new(vtk_file_type)
+                        .add_id_field(id_field_name)
+                        .add_radius_field(radius_field_name)
+                        .add_type_field(type_field_name)
+                        .add_velocity_field(velocity_field_name);
+                    converter.write_hdf5_from_files(filenames, timestep, outname, filter);
+                }
+            }
+        }
     }
 
     /// Convert all VTK files in a folder to a HDF5 file.
@@ -64,19 +188,136 @@ impl PyConverter {
     /// filter : str, optional
     ///     Regex Filter to apply to the data in order to extract the time for each file, by default r"(\d+).vtk"
     ///
+    /// velocity_field_name : str, optional
+    ///     Name of the velocity field in the vtk files, by default "v"
+    ///
+    /// radius_field_name : str, optional
+    ///     Name of the radius field in the vtk files, by default "radius"
+    ///
+    /// id_field_name : str, optional
+    ///     Name of the id field in the vtk files, by default "id"
+    ///
+    /// type_field_name : str, optional
+    ///     Name of the type field in the vtk files, by default "type"
+    ///
+    /// diameter_field_name : str, optional
+    ///     Name of the diameter field in the vtk files, by default None
+    ///
     /// Returns
     /// -------
     /// None
     ///
-    #[pyo3(signature = (folder, timestep, outname, filter = r"(\d+).vtk"))]
+    /// Examples
+    /// --------
+    /// Convert legacy VTK files to HDF5
+    /// 
+    /// >>> from up4 import Converter
+    /// >>> 
+    /// >>> Converter.vtk_from_folder(
+    /// >>>     folder="folder",
+    /// >>>     timestep=1e-5,
+    /// >>>     outname="output.hdf5",
+    /// >>>     filter=r"(\d+).vtk",
+    /// >>>     velocity_field_name="v",
+    /// >>>     radius_field_name="radius",
+    /// >>>     id_field_name="id",
+    /// >>>     type_field_name="type",
+    /// >>>     diameter_field_name=None,
+    /// >>> )
+    /// 
+    /// Convert XML VTK (unstructured grid format) files to HDF5
+    /// 
+    /// >>> from up4 import Converter
+    /// >>> 
+    /// >>> Converter.vtk_from_folder(
+    /// >>>     folder="folder",
+    /// >>>     timestep=1e-5,
+    /// >>>     outname="output.hdf5",
+    /// >>>     filter=r"(\d+).vtu",
+    /// >>>     velocity_field_name="v",
+    /// >>>     id_field_name="id",
+    /// >>>     type_field_name="type",
+    /// >>>     diameter_field_name="diameter",
+    /// >>> )
+    /// 
+    #[pyo3(signature = (folder, timestep, outname, filter = "(\\d+).vtk", 
+    velocity_field_name = "v", radius_field_name = "radius", 
+    id_field_name = "id", type_field_name = "type", diameter_field_name = None))]
     #[staticmethod]
     fn vtk_from_folder(
         folder: &str,
         timestep: f64,
         outname: &str,
         filter: &str, // example r"vtk_(\d+).vtk"
+        velocity_field_name: &str,
+        radius_field_name: &str,
+        id_field_name: &str,
+        type_field_name: &str,
+        diameter_field_name: Option<&str>,
     ) {
-        vtk_from_folder(folder, timestep, outname, filter);
+        // Check filter extension to decide on how to proceed
+        if filter.contains(".vtk")
+        // legacy files to convert - defaults to LIGGGHTS naming
+        {
+            // If a diameter field is present, use the LegacyVTKConverter with diameter field.
+            let converter = match diameter_field_name {
+                Some(diameter_field_name) => LegacyVTKConverter::new()
+                    .add_diameter_field(diameter_field_name)
+                    .add_id_field(id_field_name)
+                    .add_type_field(type_field_name)
+                    .add_velocity_field(velocity_field_name),
+                None => LegacyVTKConverter::new()
+                    .add_id_field(id_field_name)
+                    .add_radius_field(radius_field_name)
+                    .add_type_field(type_field_name)
+                    .add_velocity_field(velocity_field_name),
+            };
+            converter.write_hdf5_from_folder(folder, timestep, outname, filter);
+        } else if filter.contains(".vtu")
+        // xml files to convert
+        {
+            let vtk_file_type = VTKType::UnstructuredGrid;
+            match diameter_field_name {
+                Some(diameter_field_name) => {
+                    let converter = XMLVTKConverter::new(vtk_file_type)
+                        .add_diameter_field(diameter_field_name)
+                        .add_id_field(id_field_name)
+                        .add_type_field(type_field_name)
+                        .add_velocity_field(velocity_field_name);
+                    converter.write_hdf5_from_folder(folder, timestep, outname, filter);
+                }
+                None => {
+                    let converter = XMLVTKConverter::new(vtk_file_type)
+                        .add_id_field(id_field_name)
+                        .add_radius_field(radius_field_name)
+                        .add_type_field(type_field_name)
+                        .add_velocity_field(velocity_field_name);
+                    converter.write_hdf5_from_folder(folder, timestep, outname, filter);
+                }
+            }
+        } else if filter.contains(".vtp")
+        // xml files to convert
+        {
+            let vtk_file_type = VTKType::PolyData;
+            match diameter_field_name {
+                Some(diameter_field_name) => {
+                    let converter = XMLVTKConverter::new(vtk_file_type)
+                        .add_diameter_field(diameter_field_name)
+                        .add_id_field(id_field_name)
+                        .add_type_field(type_field_name)
+                        .add_velocity_field(velocity_field_name);
+                    converter.write_hdf5_from_folder(folder, timestep, outname, filter);
+                }
+                None => {
+                    let converter = XMLVTKConverter::new(vtk_file_type)
+                        .add_id_field(id_field_name)
+                        .add_radius_field(radius_field_name)
+                        .add_type_field(type_field_name)
+                        .add_velocity_field(velocity_field_name);
+                    converter.write_hdf5_from_folder(folder, timestep, outname, filter);
+                }
+            }
+        }
     }
 
     // TODO ensure this doesn't get accidentally swept up into doctests
@@ -90,7 +331,7 @@ impl PyConverter {
     /// outname : str
     ///    Name of the output HDF5 file
     ///
-    /// columns : List(int), optional
+    /// columns : list[int], optional
     ///     List of columns to convert containing t,x,y,z,(optional vx,vy,vz), by default [0,1,2,3]
     ///
     /// delimiter : str, optional
@@ -185,7 +426,7 @@ impl PyConverter {
     /// outname : str
     ///     Name of the output HDF5 file
     ///
-    /// columns : List(int), optional
+    /// columns : list[int], optional
     ///     List of columns to convert containing t,x,y,z, (optional vx,vy,vz), by default [0,1,2,3]
     ///
     /// header : bool, optional
@@ -206,7 +447,7 @@ impl PyConverter {
     /// method : str, optional
     ///     Method to use to convert the CSV file. Can be one of the following:
     ///
-    ///     - `chain`: The particles are chained in the file, i.e. the first particle 
+    ///     - `chain`: The particles are chained in the file, i.e. the first particle
     ///         is followed by the second, the second by the third, etc.
     ///         all particles are stored in one file
     ///     -  id_line: This algorithm sorts the particles by their id column and
@@ -283,7 +524,7 @@ impl PyConverter {
     /// outname : str
     ///     Name of the output HDF5 file
     ///
-    /// columns : List(int), optional
+    /// columns : list[int], optional
     ///     List of columns to convert containing pid,x,y,z,(optional vx,vy,vz)
     ///     Default: [0,1,2,3]
     ///

@@ -188,8 +188,9 @@ html_theme_options = {
     # "show_prev_next": False,
     # Show the navbar and search at the top
     "navbar_start": ["navbar-logo", "version-switcher"],
-    "navbar_end": ["search-field.html", "navbar-icon-links.html", "theme-switcher"],
+    "navbar_end": ["navbar-icon-links", "theme-switcher"],
     # Show `edit this page` button
+    # "navbar_persistent": ["theme-switcher"],
     "use_edit_page_button": True,
     # Links to external sources
     # "icon_links": [

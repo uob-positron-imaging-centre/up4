@@ -518,14 +518,18 @@ impl PyData {
     /// mode : str
     ///    The mode in which the granular temperature is calculated.
     ///    The following modes are available:
-    ///     - 'xyz' (default)
-    ///     - 'x'
-    ///     - 'y'
-    ///     - 'z'
+    ///
+    ///    - 'xyz'
+    ///    - 'x'
+    ///    - 'y'
+    ///    - 'z'
+    ///
+    ///    , by default 'xyz'
     ///
     /// Returns
     /// -------
-    /// granular_temperature : PyGrid
+    ///
+    /// PyGrid
     ///     The granular temperature of the system.
     #[pyo3(signature = (grid, mode = "xyz"))]
     fn granular_temperature<'py>(&mut self, _py: Python<'py>, grid: &PyGrid, mode: &str) -> PyGrid {

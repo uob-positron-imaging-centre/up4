@@ -222,7 +222,7 @@ fn interpolate_step(
 }
 
 // ndarray sorting by elements in another array
-pub fn sort_by_array<T>(data: Vec<T>, idx: &Vec<usize>) -> Vec<T>
+pub fn sort_by_array<T>(data: Vec<T>, idx: &[usize]) -> Vec<T>
 where
     T: std::cmp::PartialOrd + Clone + Copy,
 {
@@ -245,7 +245,7 @@ where
     array_sorted
 }
 
-pub fn make_sortlist(particle_ids: &Vec<u64>) -> Vec<usize> {
+pub fn make_sortlist(particle_ids: &[u64]) -> Vec<usize> {
     // make vec with length of particle_ids
     // thanks to that stackoverflow....
     let mut indices = (0..particle_ids.len()).collect::<Vec<_>>();

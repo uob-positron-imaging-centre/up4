@@ -5,6 +5,7 @@ use ndarray_stats::QuantileExt;
 use numpy::{IntoPyArray, PyArray1, PyArray2, PyArray3};
 use plotly::{HeatMap, Plot};
 use pyo3::prelude::*;
+use crate::utilities::{nan_mean, nan_std};
 
 /// A class containing all information for a 3D grid wrapping your system
 ///
@@ -442,11 +443,8 @@ impl PyGrid {
             self.grid.get_limits()[0],
             self.grid.get_limits()[1],
             self.grid.get_limits()[2],
-            self.grid
-                .get_data()
-                .mean()
-                .expect("Unable to calculate mean of data"),
-            self.grid.get_data().std(1.),
+            nan_mean(self.grid.get_data()), 
+            nan_std(self.grid.get_data()),
             self.grid.get_data().min_skipnan(),
             self.grid.get_data().max_skipnan()
         ))
@@ -460,11 +458,8 @@ impl PyGrid {
             self.grid.get_limits()[0],
             self.grid.get_limits()[1],
             self.grid.get_limits()[2],
-            self.grid
-                .get_data()
-                .mean()
-                .expect("Unable to calculate mean of data"),
-            self.grid.get_data().std(1.),
+            nan_mean(self.grid.get_data()), 
+            nan_std(self.grid.get_data()),
             self.grid.get_data().min_skipnan(),
             self.grid.get_data().max_skipnan()
         ))

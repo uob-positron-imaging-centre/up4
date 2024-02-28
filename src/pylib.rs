@@ -79,6 +79,9 @@ enum SliceIntOrVec<'a> {
 /// circulation_time:
 ///     Return the circulation time for the whole system, returns all times as one large array
 ///
+/// circulation_time_two_boundary:
+///     Return the circulation time for the whole system determined using two bounaries, returns all times as one large array
+///
 /// concentration_field:
 ///     Return the concentration field for the whole system
 ///
@@ -623,6 +626,35 @@ impl PyData {
             };
 
         self.data.circulation_time(selector, axis, position)
+    }
+
+    /// Calculate the circulation time of a particle in a system.
+    /// This algorithm works by setting two boundaries, which the particle has to cross 5 times in total.
+    ///
+    /// Parameters
+    /// ----------
+    /// position : tuple[float, float]
+    ///     The positions of the boundaries.
+    ///
+    /// axis : int
+    ///     The axis along which the boundary is set. Default 0.
+    ///
+    /// Returns
+    /// -------
+    /// list[tuple]
+    ///     The start and end times for each circulation
+    ///
+    // TODO: also return the poarticle ID that did the circulation
+    #[pyo3(signature = (position, axis = 0))]
+    fn circulation_time_two_boundary<'py>(&mut self, _py: Python<'py>, position: (f64,f64), axis: usize) -> Vec<(f64,f64)> {
+        print_debug!("Starting Circulation Time function");
+        let selector: &ParticleSelector =
+            match self.selector.as_any().downcast_ref::<ParticleSelector>() {
+                Some(b) => b,
+                None => panic!("Can not convert PyGrid to Grid1D as "),
+            };
+
+        self.data.circulation_time_two_boundary(selector, axis, position)
     }
 
     /// Calculate the concentration field of the system

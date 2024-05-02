@@ -36,7 +36,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
     <script src="../_static/documentation_options.js?v=a19210d0"></script>
-    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../_static/copybutton.js?v=4ea706d9"></script>
@@ -475,16 +475,19 @@ difference to how you use this library, that choice is down to you!</p>
 <tr class="row-even"><td><p><strong>circulation_time:</strong></p></td>
 <td><p>Return the circulation time for the whole system, returns all times as one large array</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>concentration_field:</strong></p></td>
+<tr class="row-odd"><td><p><strong>circulation_time_two_boundary:</strong></p></td>
+<td><p>Return the circulation time for the whole system determined using two bounaries, returns all times as one large array</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>concentration_field:</strong></p></td>
 <td><p>Return the concentration field for the whole system</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>homogenity_index:</strong></p></td>
+<tr class="row-odd"><td><p><strong>homogenity_index:</strong></p></td>
 <td><p>Return the homogenity index for the whole system, defiuned by two particle species</p></td>
 </tr>
-<tr class="row-odd"><td><p><strong>msd_field:</strong></p></td>
+<tr class="row-even"><td><p><strong>msd_field:</strong></p></td>
 <td><p>Return the mean square displacement field for the whole system</p></td>
 </tr>
-<tr class="row-even"><td><p><strong>msd:</strong></p></td>
+<tr class="row-odd"><td><p><strong>msd:</strong></p></td>
 <td><p>Return the mean square displacement for the whole system over time</p></td>
 </tr>
 </tbody>
@@ -506,6 +509,29 @@ This algorithm works by setting a single boundary, which the particle has to cro
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
 <dt><strong>circulation_time</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="docutils literal notranslate"><span class="pre">list</span></code></a></span></dt><dd><p>The circulation time of the particle.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="up4.Data.circulation_time_two_boundary">
+<span class="sig-name descname"><span class="pre">circulation_time_two_boundary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Data.circulation_time_two_boundary" title="Link to this definition">#</a></dt>
+<dd><p>Calculate the circulation time of a particle in a system.
+This algorithm works by setting two boundaries, which the particle has to cross 5 times in total.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>position</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><code class="docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="docutils literal notranslate"><span class="pre">float</span></code></a>]</span></dt><dd><p>The positions of the boundaries.</p>
+</dd>
+<dt><strong>axis</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="docutils literal notranslate"><span class="pre">int</span></code></a></span></dt><dd><p>The axis along which the boundary is set. Default 0.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><dl class="simple">
+<dt><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.12)"><code class="docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.12)"><code class="docutils literal notranslate"><span class="pre">tuple</span></code></a>]</dt><dd><p>The start and end times for each circulation</p>
 </dd>
 </dl>
 </dd>
@@ -598,7 +624,7 @@ The dictionary contains the following keys:
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl class="simple">
-<dt><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.0.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>2D numpy array with shape (timestep[1] - timestep[0]) X 7. Where in each row is the current time, particle position and its velocity components.</p>
+<dt><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></dt><dd><p>2D numpy array with shape (timestep[1] - timestep[0]) X 7. Where in each row is the current time, particle position and its velocity components.</p>
 </dd>
 </dl>
 </dd>
@@ -696,9 +722,9 @@ The histogram is calculated for the region defined by the grid.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
-<dt><strong>histogram</strong><span class="classifier"><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.0.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>The histogram.</p>
+<dt><strong>histogram</strong><span class="classifier"><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>The histogram.</p>
 </dd>
-<dt><strong>bin_edges</strong><span class="classifier"><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.0.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>The bin edges.</p>
+<dt><strong>bin_edges</strong><span class="classifier"><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>The bin edges.</p>
 </dd>
 </dl>
 </dd>
@@ -736,9 +762,9 @@ The histogram is calculated for the region defined by the grid.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
-<dt><strong>time</strong><span class="classifier"><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.0.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>The time of the mixing index.</p>
+<dt><strong>time</strong><span class="classifier"><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>The time of the mixing index.</p>
 </dd>
-<dt><strong>mixing_index</strong><span class="classifier"><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.0.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>The mixing index.</p>
+<dt><strong>mixing_index</strong><span class="classifier"><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></span></dt><dd><p>The mixing index.</p>
 </dd>
 </dl>
 </dd>
@@ -796,9 +822,9 @@ The array contains the following values at positions:
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><dl>
-<dt><strong>msd</strong><span class="classifier"><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.0.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></dt><dd><p>The mean squared displacement of the particle.</p>
+<dt><strong>msd</strong><span class="classifier"><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></dt><dd><p>The mean squared displacement of the particle.</p>
 </dd>
-<dt><strong>time</strong><span class="classifier"><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.0.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></dt><dd><p>The time at which the MSD was calculated.</p>
+<dt><strong>time</strong><span class="classifier"><a class="reference external" href="https://numpy.org/devdocs/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v2.1.dev0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ndarray</span></code></a></span></dt><dd><p>The time at which the MSD was calculated.</p>
 </dd>
 </dl>
 </dd>
@@ -1008,6 +1034,7 @@ Each cell element represents the mean squared displacement of all particles in t
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#up4.Data"><code class="docutils literal notranslate"><span class="pre">Data</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#up4.Data.circulation_time"><code class="docutils literal notranslate"><span class="pre">Data.circulation_time()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#up4.Data.circulation_time_two_boundary"><code class="docutils literal notranslate"><span class="pre">Data.circulation_time_two_boundary()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#up4.Data.concentration_field"><code class="docutils literal notranslate"><span class="pre">Data.concentration_field()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#up4.Data.dimensions"><code class="docutils literal notranslate"><span class="pre">Data.dimensions()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#up4.Data.dispersion"><code class="docutils literal notranslate"><span class="pre">Data.dispersion()</span></code></a></li>
@@ -1091,7 +1118,7 @@ Each cell element represents the mean squared displacement of all particles in t
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>

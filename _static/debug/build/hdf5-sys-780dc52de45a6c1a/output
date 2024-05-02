@@ -1,0 +1,113 @@
+Setting HDF5 root from environment variable:
+    HDF5_DIR = "/usr/share/miniconda/envs/testenv"
+Custom HDF5_DIR provided; rpath can be set via:
+    RUSTFLAGS="-C link-args=-Wl,-rpath,/usr/share/miniconda/envs/testenv/lib"
+Parsing HDF5 config from:
+    "/usr/share/miniconda/envs/testenv/include/H5pubconf.h"
+Looking for HDF5 library binary...
+Adding extra link paths (ld)...
+    /usr/local/lib/x86_64-linux-gnu
+    /lib/x86_64-linux-gnu
+    /usr/lib/x86_64-linux-gnu
+    /usr/lib/x86_64-linux-gnu64
+    /usr/local/lib64
+    /lib64
+    /usr/lib64
+    /usr/local/lib
+    /lib
+    /usr/lib
+    /usr/x86_64-linux-gnu/lib64
+    /usr/x86_64-linux-gnu/lib
+Attempting to load: "/usr/share/miniconda/envs/testenv/lib/libhdf5.so"
+    => runtime version = 1.12.2
+HDF5 library runtime version matches headers.
+Config {
+    inc_dir: "/usr/share/miniconda/envs/testenv/include",
+    link_paths: [
+        "/usr/share/miniconda/envs/testenv/lib",
+        "/usr/share/miniconda/envs/testenv/bin",
+    ],
+    header: Header {
+        have_stdbool_h: true,
+        have_direct: true,
+        have_parallel: true,
+        have_threadsafe: true,
+        have_no_deprecated: false,
+        have_filter_deflate: true,
+        version: 1.12.2,
+    },
+}
+cargo:rustc-link-lib=dylib=hdf5
+cargo:rustc-link-search=native=/usr/share/miniconda/envs/testenv/lib
+cargo:rustc-link-search=native=/usr/share/miniconda/envs/testenv/bin
+cargo:rerun-if-env-changed=HDF5_DIR
+cargo:rerun-if-env-changed=HDF5_VERSION
+cargo:include=/usr/share/miniconda/envs/testenv/include
+cargo:library=hdf5
+cargo:rustc-cfg=feature="1.8.5"
+cargo:version_1_8_5=1
+cargo:rustc-cfg=feature="1.8.6"
+cargo:version_1_8_6=1
+cargo:rustc-cfg=feature="1.8.7"
+cargo:version_1_8_7=1
+cargo:rustc-cfg=feature="1.8.8"
+cargo:version_1_8_8=1
+cargo:rustc-cfg=feature="1.8.9"
+cargo:version_1_8_9=1
+cargo:rustc-cfg=feature="1.8.10"
+cargo:version_1_8_10=1
+cargo:rustc-cfg=feature="1.8.11"
+cargo:version_1_8_11=1
+cargo:rustc-cfg=feature="1.8.12"
+cargo:version_1_8_12=1
+cargo:rustc-cfg=feature="1.8.13"
+cargo:version_1_8_13=1
+cargo:rustc-cfg=feature="1.8.14"
+cargo:version_1_8_14=1
+cargo:rustc-cfg=feature="1.8.15"
+cargo:version_1_8_15=1
+cargo:rustc-cfg=feature="1.8.16"
+cargo:version_1_8_16=1
+cargo:rustc-cfg=feature="1.8.17"
+cargo:version_1_8_17=1
+cargo:rustc-cfg=feature="1.8.18"
+cargo:version_1_8_18=1
+cargo:rustc-cfg=feature="1.8.19"
+cargo:version_1_8_19=1
+cargo:rustc-cfg=feature="1.8.20"
+cargo:version_1_8_20=1
+cargo:rustc-cfg=feature="1.8.21"
+cargo:version_1_8_21=1
+cargo:rustc-cfg=feature="1.10.0"
+cargo:version_1_10_0=1
+cargo:rustc-cfg=feature="1.10.1"
+cargo:version_1_10_1=1
+cargo:rustc-cfg=feature="1.10.2"
+cargo:version_1_10_2=1
+cargo:rustc-cfg=feature="1.10.3"
+cargo:version_1_10_3=1
+cargo:rustc-cfg=feature="1.10.4"
+cargo:version_1_10_4=1
+cargo:rustc-cfg=feature="1.10.5"
+cargo:version_1_10_5=1
+cargo:rustc-cfg=feature="1.10.6"
+cargo:version_1_10_6=1
+cargo:rustc-cfg=feature="1.10.7"
+cargo:version_1_10_7=1
+cargo:rustc-cfg=feature="1.10.8"
+cargo:version_1_10_8=1
+cargo:rustc-cfg=feature="1.12.0"
+cargo:version_1_12_0=1
+cargo:rustc-cfg=feature="1.12.1"
+cargo:version_1_12_1=1
+cargo:rustc-cfg=feature="1.12.2"
+cargo:version_1_12_2=1
+cargo:rustc-cfg=have_stdbool_h
+cargo:rustc-cfg=feature="have-direct"
+cargo:have_direct=1
+cargo:rustc-cfg=feature="have-parallel"
+cargo:have_parallel=1
+cargo:rustc-cfg=feature="have-threadsafe"
+cargo:have_threadsafe=1
+cargo:rustc-cfg=feature="have-filter-deflate"
+cargo:have_filter_deflate=1

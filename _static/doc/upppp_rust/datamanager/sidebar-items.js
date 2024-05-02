@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["pdata","tdata"],"struct":["GlobalStats","Timestep"],"trait":["DataManager","Manager"]};

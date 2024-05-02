@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"type":["CellId","OneD","Position","ThreeD","TwoD"]};

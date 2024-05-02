@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["flatten_2d","flatten_3d","meshgrid","meshgrid3d","minmax"]};

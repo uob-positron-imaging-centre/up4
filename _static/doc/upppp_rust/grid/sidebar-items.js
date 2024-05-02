@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Dim"],"mod":["cartesian_grid","cylindrical_grid","vector_grid"],"struct":["Grid"],"trait":["GridFunctions3D"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["parity_contour","parity_map","parity_plot","quiver","scalar_contour","scalar_map","unit_vector"]};

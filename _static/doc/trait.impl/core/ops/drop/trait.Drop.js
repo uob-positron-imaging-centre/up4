@@ -1,0 +1,3 @@
+(function() {var implementors = {
+"upppp_rust":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.77.2/core/ops/drop/trait.Drop.html\" title=\"trait core::ops::drop::Drop\">Drop</a> for <a class=\"struct\" href=\"upppp_rust/datamanager/pdata/struct.PData.html\" title=\"struct upppp_rust::datamanager::pdata::PData\">PData</a>"],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.77.2/core/ops/drop/trait.Drop.html\" title=\"trait core::ops::drop::Drop\">Drop</a> for <a class=\"struct\" href=\"upppp_rust/datamanager/tdata/struct.TData.html\" title=\"struct upppp_rust::datamanager::tdata::TData\">TData</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -1,0 +1,4 @@
+var srcIndex = new Map(JSON.parse('[\
+["upppp_rust",["",[["converter",[["convertertools",[],["velocity_paralell.rs"]],["csv_modes",[],["csv_multi_chain.rs","csv_multi_file_time_step.rs","csv_multi_idline.rs"]]],["convertertools.rs","csv_modes.rs","legacytools.rs","xmltools.rs"]],["datamanager",[],["pdata.rs","tdata.rs","utilities.rs"]],["functions",[],["conditional.rs","extractions.rs","mixing.rs"]],["grid",[],["cartesian_grid.rs","cylindrical_grid.rs","vector_grid.rs"]],["plotting",[["plotting_2d",[],["parity_contour.rs","parity_map.rs","parity_plot.rs","quiver.rs","scalar_contour.rs","scalar_map.rs","unit_vector.rs"]]],["plotting_2d.rs"]],["pylib",[],["libcomp.rs","libconv.rs","libgrid.rs","libplot.rs"]],["utilities",[],["maths.rs"]]],["comparison.rs","converter.rs","datamanager.rs","functions.rs","grid.rs","lib.rs","particleselector.rs","plotting.rs","pylib.rs","types.rs","utilities.rs"]]]\
+]'));
+createSrcSidebar();

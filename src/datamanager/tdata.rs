@@ -14,7 +14,7 @@ use crate::{print_debug, print_warning};
 use hdf5::filters::blosc_set_nthreads;
 use ndarray::prelude::*;
 use std::time::Instant;
-const BUFFERSIZE: usize = 20000000;
+const BUFFERSIZE: usize = 20000;
 #[pyclass]
 pub struct TData {
     // A data managing system for HDF5 files in the
@@ -892,13 +892,12 @@ impl DataManager for TData {
         );
         if timestep > self.range.1 - 1 {
             self.update((timestep, timestep + self.buffersize));
-        } else if  timestep < self.range.0 {
+        } else if timestep < self.range.0 {
             let chunk = (timestep as f64 / BUFFERSIZE as f64).floor() as usize;
             self.update((chunk * BUFFERSIZE, (chunk + 1) * BUFFERSIZE));
         }
-        
+
         &self.buffer[timestep - self.range.0]
-        
     }
 
     fn global_stats(&self) -> GlobalStats {

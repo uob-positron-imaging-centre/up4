@@ -3,74 +3,101 @@
 # File:     test.py
 # Date:     20.11.21
 
-"""
- Testing for uPPPP
- this skript tests given functions and returns its speed and
- if it failed or not
-"""
 import up4
 import numpy as np
-import os
 from glob import glob
 import pytest
-from natsort import natsorted as sorted
+from natsort import natsorted
+import os
 
-location = os.path.dirname(os.path.abspath(__file__))
+destination = os.path.join(os.path.dirname(__file__), "data")
+
+
 # add your function to this command list
 
 
 @pytest.fixture
 def data(request):
-    """Returns a instance of pdata with the experiment test data in fixtures/"""
+    """Returns a instance of pdata with the experiment test data in data/"""
     if request.param == "exp":
-        folder = os.path.join(location, "fixtures", "1p5u_HD1_glass.hdf5")
+        folder = os.path.join(destination, "csvs", "1p5u_HD1_glass.hdf5")
         return up4.Data(folder)
     elif request.param == "exp2":
-        folder = os.path.join(location, "fixtures", "26mbq_day2.hdf5")
+        folder = os.path.join(destination, "csvs", "26mbq_day2.hdf5")
         return up4.Data(folder)
     elif request.param == "sim":
-        folder = os.path.join(location, "fixtures", "drum.hdf5")
+        folder = os.path.join(destination, "vtk", "rotating-drum", "drum.hdf5")
+        return up4.Data(folder)
+    elif request.param == "sim2":
+        folder = os.path.join(destination, "vtu", "rotating-drum", "drum.hdf5")
         return up4.Data(folder)
 
 
 @pytest.fixture
 def grid(request):
-    """Returns a instance of pdata with the experiment test data in fixtures/"""
+    """Returns a instance of pdata with the experiment test data in data/"""
     if request.param == "cylidrical":
         return up4.Grid.cylindrical3d_from_data
     elif request.param == "cartesian":
         return up4.Grid.cartesian3d_from_data
 
 
+@pytest.fixture
+def extension(request):
+    """Returns a instance of pdata with the experiment test data in data/"""
+    if request.param == "vtk":
+        return "vtk"
+    elif request.param == "vtu":
+        return "vtu"
+
+
+@pytest.mark.parametrize("extension", ["vtk", "vtu"], indirect=True)
 class TestVtk:
-    def test_generated(self):
+    def test_generated(self, extension):
         """Test if the hdf5 file is written and that it is readable"""
-        if os.path.exists(os.path.join(location, "fixtures", "drum.hdf5")):
-            os.remove(os.path.join(location, "fixtures", "drum.hdf5"))
-        filenames = sorted([
-            x
-            for x in glob(os.path.join(location, "fixtures", "post", "drum*.vtk"))
-            if not "bound" in x
-        ])
+        if os.path.exists(
+            hdf5_dir := os.path.join(destination, extension, "rotating-drum", "drum.hdf5")
+        ):
+            os.remove(hdf5_dir)
+        filenames = natsorted(
+            [
+                x
+                for x in glob(
+                    os.path.join(destination, extension, "rotating-drum", "drum*")
+                )
+                if "bound" not in x
+            ]
+        )
+        print(filenames)
         up4.Converter.vtk(
-            filenames, 1e-5, os.path.join(location, "fixtures", "drum.hdf5")
+            filenames,
+            1e-5,
+            hdf5_dir,
+            filter=rf"(\d+).{extension}",
         )
         try:
-            up4.Data.from_tdata(os.path.join(location, "fixtures", "drum.hdf5"))
+            up4.Data.from_tdata(
+                hdf5_dir
+            )
         except Exception as e:
             pytest.fail(e)
 
-    def test_generated_folder(self):
+    def test_generated_folder(self, extension):
         """Test if the hdf5 file is written and that it is readable"""
-        if os.path.exists(os.path.join(location, "fixtures", "drum.hdf5")):
-            os.remove(os.path.join(location, "fixtures", "drum.hdf5"))
+        if os.path.exists(
+            hdf5_file := os.path.join(destination, extension, "rotating-drum", "drum.hdf5")
+        ):
+            os.remove(hdf5_file)
         up4.Converter.vtk_from_folder(
-            os.path.join(location, "fixtures", "post"),
+            os.path.join(destination, extension, "rotating-drum"),
             1e-5,
-            os.path.join(location, "fixtures", "drum.hdf5"),
+            hdf5_file,
+            filter=rf"(\d+).{extension}",
         )
         try:
-            up4.Data.from_tdata(os.path.join(location, "fixtures", "drum.hdf5"))
+            up4.Data.from_tdata(
+                hdf5_file
+            )
         except Exception as e:
             pytest.fail(e)
 
@@ -78,11 +105,11 @@ class TestVtk:
 class TestCSV:
     def test_one(self):
         """Test if the csv file is written and that it is readable"""
-        file = os.path.join(location, "fixtures", "1p5u_HD1_glass.hdf5")
+        file = os.path.join(destination, "csvs", "1p5u_HD1_glass.hdf5")
         if os.path.exists(file):
             os.remove(file)
         up4.Converter.csv(
-            os.path.join(location, "fixtures", "csvs", "1p5u_HD1_glass.csv"),
+            os.path.join(destination, "csvs", "1p5u_HD1_glass.csv"),
             file,
             columns=[0, 1, 3, 2],
             delimiter=" ",
@@ -97,11 +124,11 @@ class TestCSV:
 
     def test_two(self):
         """Test if the csv file is written and that it is readable"""
-        file = os.path.join(location, "fixtures", "26mbq_day2.hdf5")
+        file = os.path.join(destination, "csvs", "26mbq_day2.hdf5")
         if os.path.exists(file):
             os.remove(file)
         up4.Converter.csv(
-            os.path.join(location, "fixtures", "csvs", "26mbq_day2.csv"),
+            os.path.join(destination, "csvs", "26mbq_day2.csv"),
             file,
             columns=[0, 1, 3, 2],
             delimiter=" ",
@@ -115,7 +142,7 @@ class TestCSV:
             pytest.fail(e)
 
 
-@pytest.mark.parametrize("data", ["exp2", "sim"], indirect=True)
+@pytest.mark.parametrize("data", ["exp2", "sim", "sim2"], indirect=True)
 @pytest.mark.parametrize("grid", ["cylidrical", "cartesian"], indirect=True)
 class TestFields:
     def test_velocityfield(self, data, grid):
@@ -155,10 +182,13 @@ class TestFields:
 
 
 @pytest.mark.parametrize("grid", ["cylidrical", "cartesian"], indirect=True)
+@pytest.mark.parametrize("extension", ["vtk", "vtu"], indirect=True)
 class TestGrid:
-    def test_slice(self, grid):
+    def test_slice(self, grid, extension):
         grid = grid(
-            up4.Data.from_tdata(os.path.join(location, "fixtures", "drum.hdf5")),
+            up4.Data.from_tdata(
+                os.path.join(destination, extension, "rotating-drum", "drum.hdf5")
+            ),
             cells=[10, 9, 8],
         )
         slice_yz = grid.slice(0, 5)
@@ -168,8 +198,10 @@ class TestGrid:
         slice_xy = grid.slice(2, 5)
         assert slice_xy.shape == (10, 9)
 
-    def test_vector_slice(self, grid):
-        data = up4.Data.from_tdata(os.path.join(location, "fixtures", "drum.hdf5"))
+    def test_vector_slice(self, grid, extension):
+        data = up4.Data.from_tdata(
+            os.path.join(destination, extension, "rotating-drum", "drum.hdf5")
+        )
         grid = grid(data, cells=[10, 9, 8])
         vector_grid = data.vectorfield(grid)
         slice_yz_1, slice_yz_2, slice_yz_3 = vector_grid.slice(0, 5)
@@ -185,8 +217,10 @@ class TestGrid:
         assert slice_xy_2.shape == (10, 9)
         assert slice_xy_3.shape == (10, 9)
 
-    def test_grid_generation(self, grid):
-        data = up4.Data.from_tdata(os.path.join(location, "fixtures", "drum.hdf5"))
+    def test_grid_generation(self, grid, extension):
+        data = up4.Data.from_tdata(
+            os.path.join(destination, extension, "rotating-drum", "drum.hdf5")
+        )
         if grid.__name__.startswith("cartesian"):
             grid = up4.Grid(data, num_cells=[10, 9, 8])
             assert grid.shape() == [10, 9, 8]
@@ -208,7 +242,7 @@ class TestGrid:
             assert grid.shape() == [10, 9, 8]
 
 
-@pytest.mark.parametrize("data", ["exp2", "sim"], indirect=True)
+@pytest.mark.parametrize("data", ["exp2", "sim", "sim2"], indirect=True)
 @pytest.mark.parametrize("grid", ["cylidrical", "cartesian"], indirect=True)
 class TestFunctions:
     def histogram(self, data, grid):
@@ -217,7 +251,7 @@ class TestFunctions:
         assert len(bins) == 11
 
 
-@pytest.mark.parametrize("data", ["sim"], indirect=True)
+@pytest.mark.parametrize("data", ["sim", "sim2"], indirect=True)
 @pytest.mark.parametrize("grid", ["cylidrical", "cartesian"], indirect=True)
 class TestMixing:
     def test_lacey(self, data, grid):
@@ -226,7 +260,7 @@ class TestMixing:
         assert mixing[0] >= 0  # think of a better test here
 
 
-@pytest.mark.parametrize("data", ["sim", "exp2"], indirect=True)
+@pytest.mark.parametrize("data", ["sim", "sim2", "exp2"], indirect=True)
 class TestConditional:
     def test_circulation(self, data):
         xmin, xmax = data.min_position()[0], data.max_position()[0]

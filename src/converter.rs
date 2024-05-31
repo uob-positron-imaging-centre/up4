@@ -31,6 +31,7 @@ const BLOSC_SHUFFLE: bool = true;
 const BLOSC_COMPRESSION: u8 = 9;
 // Chunk size for blosc filter
 
+
 /// Convert a single trajectory csv file to Hdf5
 // The number of arguments is necessary for proper csv reading.
 #[allow(clippy::too_many_arguments)]
@@ -52,7 +53,7 @@ pub fn csv_converter(
 
     // TODO: CHeck if we can buffer that for big datafiles!
     let hdf5file = File::create(outname).expect("Unable to create HDF5 file.");
-    // TODO Read this in the readers. check weather
+    // TODO Read this in the readers. check if
     // the types are correct! 0x1 --> tdata, 0x2 --> pdata
     hdf5file
         .new_attr::<u8>()
@@ -64,7 +65,7 @@ pub fn csv_converter(
     let threads = blosc_get_nthreads();
     #[cfg(feature = "blosc")]
     println!(
-        "Using {} threads for blosc compression. (Not working currently",
+        "Using {} threads for blosc compression. (Not working currently)",
         threads
     );
     #[cfg(feature = "blosc")]
@@ -75,17 +76,18 @@ pub fn csv_converter(
         .delimiter(delimiter.as_bytes()[0])
         .double_quote(false)
         .escape(Some(b'\\'))
-        .flexible(true)
+        .flexible(false)
         .comment(Some(comment.as_bytes()[0]))
         .from_path(filename)
         .expect("Unable to open CSV file.");
-    print_debug!("{:?}", rdr);
     let data: Array2<f64> = {
         let mut data: ArrayBase<OwnedRepr<f64>, Dim<[usize; 2]>> = rdr
             .deserialize_array2_dynamic()
             .expect("Unable to extract CSV data to ndarray! \nYour delimiter might be wrong.\n");
+
         // slice the read array to only get the colums requested
         if !columns.is_empty() {
+            
             let mut temp_data = Array2::<f64>::from_elem((data.shape()[0], 7), f64::NAN);
             for (i, column) in columns.iter().enumerate() {
                 temp_data
@@ -136,6 +138,7 @@ pub fn csv_converter(
             }
         }
         data
+        
     };
     print_debug!("Data: {:?}", data);
     print_debug!("Data shape: {:?}", data.shape());
@@ -183,12 +186,15 @@ pub fn csv_converter(
         panic!("Velocity information required")
     }
     // Go through every line of the csv file
+    let mut total_failcount = 0;
     for (line_id, line) in data.outer_iter().enumerate() {
         let current_time = line[0];
+        
         if current_time <= old_time {
             // The particle went back in time
             // This is not possible and must be ignored.
             failcount += 1;
+            total_failcount += 1;
             if failcount > MAX_FAILS {
                 panic!(
                     "Maximum amount of points that are behind the current \
@@ -199,7 +205,7 @@ pub fn csv_converter(
             }
             continue;
         }
-        time_array[line_id] = current_time;
+        time_array[line_id - total_failcount] = current_time;
         // resetfailcount. we only dont allow them do be in a row!
         failcount = 0;
         old_time = current_time;
@@ -207,15 +213,15 @@ pub fn csv_converter(
         let pos_y = line[2];
         let pos_z = line[3];
         let pos = array![pos_x, pos_y, pos_z];
-        pos_array[[line_id, 0]] = pos_x;
-        pos_array[[line_id, 1]] = pos_y;
-        pos_array[[line_id, 2]] = pos_z;
+        pos_array[[line_id - total_failcount, 0]] = pos_x;
+        pos_array[[line_id - total_failcount, 1]] = pos_y;
+        pos_array[[line_id - total_failcount, 2]] = pos_z;
         let v_x = line[4];
         let v_y = line[5];
         let v_z = line[6];
-        vel_array[[line_id, 0]] = v_x;
-        vel_array[[line_id, 1]] = v_y;
-        vel_array[[line_id, 2]] = v_z;
+        vel_array[[line_id - total_failcount, 0]] = v_x;
+        vel_array[[line_id - total_failcount, 1]] = v_y;
+        vel_array[[line_id - total_failcount, 2]] = v_z;
         let vel: Vec<f64> = vec![v_x, v_y, v_z];
         print_debug!("Extracting statistical velocity information");
 
@@ -265,7 +271,13 @@ pub fn csv_converter(
             check_signals!();
         }
     } // end filename forloop
-      // write data into HDF5 file
+    // write data into HDF5 file
+    // now we need to remove the last total_failcount elements from the arrays
+    let time_array = time_array.slice(s![ ..time_array.len() - total_failcount]);
+    let pos_array = pos_array.slice(s![ ..pos_array.shape()[0] - total_failcount, ..]);
+    let vel_array = vel_array.slice(s![ ..vel_array.shape()[0] - total_failcount, ..]);
+    let timesteps = time_array.len();
+    
     let builder = make_dataset_builder!(group);
     builder
         .with_data(&time_array)
@@ -527,7 +539,7 @@ impl XMLVTKConverter {
         let mut out_vec: Vec<&str> = Vec::new();
         for filename_ in filenames.iter() {
             let filename = filename_.to_str().unwrap();
-            if filename.ends_with(".vtu") && !filename.contains("boundingBox") {
+            if filename.ends_with(".vtk") && !filename.contains("boundingBox") {
                 print_debug!("\t Found file: {}", filename);
             } else {
                 print_debug!("\t Ignoring file: {}", filename);

@@ -13,7 +13,7 @@ crate-type = ["cdylib", "rlib"]
 anyhow = "1.0.69"
 colorous = "1.0.5"
 csv = "1.1.6"
-derive-getters = "0.2.0"
+derive-getters = "0.4.0"
 dyn-clone = "1.0"
 #hdf5 = { version = "0.8.1" }#, features = ["blosc"]}
 hdf5 = { git = "https://github.com/aldanor/hdf5-rust.git" }

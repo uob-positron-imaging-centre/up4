@@ -24,7 +24,7 @@ ndarray = "0.15.6"
 ndarray-csv = { version = "0.5.1" }
 ndarray-stats = "0.5.0"
 num-traits = "0.2.14"
-numpy = "0.20.0"
+numpy = "0.21.0"
 #plotly = "0.8.4"
 plotly = { git = "https://github.com/DanW97/plotly.git"}
 polyfit-rs = "0.2.0"

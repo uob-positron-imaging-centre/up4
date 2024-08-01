@@ -537,9 +537,13 @@ impl XMLVTKConverter {
                 panic!("Unable to convert files in directory {}", system_foldername)
             });
         let mut out_vec: Vec<&str> = Vec::new();
+        let extension = match self.file_type {
+            VTKType::PolyData => ".vtp",
+            VTKType::UnstructuredGrid => ".vtu",
+        };
         for filename_ in filenames.iter() {
             let filename = filename_.to_str().unwrap();
-            if filename.ends_with(".vtk") && !filename.contains("boundingBox") {
+            if filename.ends_with(extension) && !filename.contains("boundingBox") {
                 print_debug!("\t Found file: {}", filename);
             } else {
                 print_debug!("\t Ignoring file: {}", filename);

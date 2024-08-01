@@ -1,6 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/converter.rs`."><title>converter.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceSerif4-Regular-46f98efaafac5295.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Regular-018c141bf0843ffd.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/FiraSans-Medium-8f9a781e4970d388.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2"><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-5bc39a1768837dd0.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="upppp_rust" data-themes="" data-resource-suffix="" data-rustdoc-version="1.77.2 (25ef9e3d8 2024-04-09)" data-channel="1.77.2" data-search-js="search-dd67cee4cfa65049.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-4c98445ec4002617.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-48f368f3872407c8.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-04d5337699b92874.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-16x16-8b506e7a72182f1c.png"><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title">
-            <h2>Files</h2></div></nav><div class="sidebar-resizer"></div>
-    <main><nav class="sub"><form class="search-form"><span></span><div id="sidebar-button" tabindex="-1"><a href="../../upppp_rust/all.html" title="show sidebar"></a></div><input class="search-input" name="search" aria-label="Run search in the documentation" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" tabindex="-1"><a href="../../help.html" title="help">?</a></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../static.files/wheel-7b819b6101059cd0.svg"></a></div></form></nav><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `src/converter.rs`."><title>converter.rs - source</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-46f98efaafac5295.ttf.woff2,FiraSans-Regular-018c141bf0843ffd.woff2,FiraSans-Medium-8f9a781e4970d388.woff2,SourceCodePro-Regular-562dcc5011b6de7d.ttf.woff2,SourceCodePro-Semibold-d899c5a5c4aeb14a.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-76eba96aa4d2e634.css"><link rel="stylesheet" href="../../static.files/rustdoc-dd39b87e5fcfba68.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="upppp_rust" data-themes="" data-resource-suffix="" data-rustdoc-version="1.80.0 (051478957 2024-07-21)" data-channel="1.80.0" data-search-js="search-d52510db62a78183.js" data-settings-js="settings-4313503d2e1961c2.js" ><script src="../../static.files/storage-118b08c4c78b968e.js"></script><script defer src="../../static.files/src-script-e66d777a5a92e9b2.js"></script><script defer src="../../src-files.js"></script><script defer src="../../static.files/main-20a3ad099b048cf2.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-df360f571f6edeae.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-422f7d1d52889060.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-2c020d218678b618.svg"></head><body class="rustdoc src"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="src-sidebar-title"><h2>Files</h2></div></nav><div class="sidebar-resizer"></div><main><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="example-wrap"><div data-nosnippet><pre class="src-line-numbers"><a href="#1" id="1">1</a>
 <a href="#2" id="2">2</a>
 <a href="#3" id="3">3</a>
 <a href="#4" id="4">4</a>
@@ -1269,6 +1267,22 @@
 <a href="#1267" id="1267">1267</a>
 <a href="#1268" id="1268">1268</a>
 <a href="#1269" id="1269">1269</a>
+<a href="#1270" id="1270">1270</a>
+<a href="#1271" id="1271">1271</a>
+<a href="#1272" id="1272">1272</a>
+<a href="#1273" id="1273">1273</a>
+<a href="#1274" id="1274">1274</a>
+<a href="#1275" id="1275">1275</a>
+<a href="#1276" id="1276">1276</a>
+<a href="#1277" id="1277">1277</a>
+<a href="#1278" id="1278">1278</a>
+<a href="#1279" id="1279">1279</a>
+<a href="#1280" id="1280">1280</a>
+<a href="#1281" id="1281">1281</a>
+<a href="#1282" id="1282">1282</a>
+<a href="#1283" id="1283">1283</a>
+<a href="#1284" id="1284">1284</a>
+<a href="#1285" id="1285">1285</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! This file provides functionalities to convert data to HDF5 file format
 //!
 //!
@@ -1302,6 +1316,7 @@
 </span><span class="kw">const </span>BLOSC_COMPRESSION: u8 = <span class="number">9</span>;
 <span class="comment">// Chunk size for blosc filter
 
+
 </span><span class="doccomment">/// Convert a single trajectory csv file to Hdf5
 </span><span class="comment">// The number of arguments is necessary for proper csv reading.
 </span><span class="attr">#[allow(clippy::too_many_arguments)]
@@ -1323,7 +1338,7 @@
 
     <span class="comment">// TODO: CHeck if we can buffer that for big datafiles!
     </span><span class="kw">let </span>hdf5file = File::create(outname).expect(<span class="string">"Unable to create HDF5 file."</span>);
-    <span class="comment">// TODO Read this in the readers. check weather
+    <span class="comment">// TODO Read this in the readers. check if
     // the types are correct! 0x1 --&gt; tdata, 0x2 --&gt; pdata
     </span>hdf5file
         .new_attr::&lt;u8&gt;()
@@ -1335,7 +1350,7 @@
     </span><span class="kw">let </span>threads = blosc_get_nthreads();
     <span class="attr">#[cfg(feature = <span class="string">"blosc"</span>)]
     </span><span class="macro">println!</span>(
-        <span class="string">"Using {} threads for blosc compression. (Not working currently"</span>,
+        <span class="string">"Using {} threads for blosc compression. (Not working currently)"</span>,
         threads
     );
     <span class="attr">#[cfg(feature = <span class="string">"blosc"</span>)]
@@ -1346,17 +1361,18 @@
         .delimiter(delimiter.as_bytes()[<span class="number">0</span>])
         .double_quote(<span class="bool-val">false</span>)
         .escape(<span class="prelude-val">Some</span>(<span class="string">b'\\'</span>))
-        .flexible(<span class="bool-val">true</span>)
+        .flexible(<span class="bool-val">false</span>)
         .comment(<span class="prelude-val">Some</span>(comment.as_bytes()[<span class="number">0</span>]))
         .from_path(filename)
         .expect(<span class="string">"Unable to open CSV file."</span>);
-    <span class="macro">print_debug!</span>(<span class="string">"{:?}"</span>, rdr);
     <span class="kw">let </span>data: Array2&lt;f64&gt; = {
         <span class="kw">let </span><span class="kw-2">mut </span>data: ArrayBase&lt;OwnedRepr&lt;f64&gt;, Dim&lt;[usize; <span class="number">2</span>]&gt;&gt; = rdr
             .deserialize_array2_dynamic()
             .expect(<span class="string">"Unable to extract CSV data to ndarray! \nYour delimiter might be wrong.\n"</span>);
+
         <span class="comment">// slice the read array to only get the colums requested
         </span><span class="kw">if </span>!columns.is_empty() {
+            
             <span class="kw">let </span><span class="kw-2">mut </span>temp_data = Array2::&lt;f64&gt;::from_elem((data.shape()[<span class="number">0</span>], <span class="number">7</span>), f64::NAN);
             <span class="kw">for </span>(i, column) <span class="kw">in </span>columns.iter().enumerate() {
                 temp_data
@@ -1407,6 +1423,7 @@
             }
         }
         data
+        
     };
     <span class="macro">print_debug!</span>(<span class="string">"Data: {:?}"</span>, data);
     <span class="macro">print_debug!</span>(<span class="string">"Data shape: {:?}"</span>, data.shape());
@@ -1454,12 +1471,15 @@
         <span class="macro">panic!</span>(<span class="string">"Velocity information required"</span>)
     }
     <span class="comment">// Go through every line of the csv file
-    </span><span class="kw">for </span>(line_id, line) <span class="kw">in </span>data.outer_iter().enumerate() {
+    </span><span class="kw">let </span><span class="kw-2">mut </span>total_failcount = <span class="number">0</span>;
+    <span class="kw">for </span>(line_id, line) <span class="kw">in </span>data.outer_iter().enumerate() {
         <span class="kw">let </span>current_time = line[<span class="number">0</span>];
+        
         <span class="kw">if </span>current_time &lt;= old_time {
             <span class="comment">// The particle went back in time
             // This is not possible and must be ignored.
             </span>failcount += <span class="number">1</span>;
+            total_failcount += <span class="number">1</span>;
             <span class="kw">if </span>failcount &gt; MAX_FAILS {
                 <span class="macro">panic!</span>(
                     <span class="string">"Maximum amount of points that are behind the current \
@@ -1470,7 +1490,7 @@
             }
             <span class="kw">continue</span>;
         }
-        time_array[line_id] = current_time;
+        time_array[line_id - total_failcount] = current_time;
         <span class="comment">// resetfailcount. we only dont allow them do be in a row!
         </span>failcount = <span class="number">0</span>;
         old_time = current_time;
@@ -1478,15 +1498,15 @@
         <span class="kw">let </span>pos_y = line[<span class="number">2</span>];
         <span class="kw">let </span>pos_z = line[<span class="number">3</span>];
         <span class="kw">let </span>pos = <span class="macro">array!</span>[pos_x, pos_y, pos_z];
-        pos_array[[line_id, <span class="number">0</span>]] = pos_x;
-        pos_array[[line_id, <span class="number">1</span>]] = pos_y;
-        pos_array[[line_id, <span class="number">2</span>]] = pos_z;
+        pos_array[[line_id - total_failcount, <span class="number">0</span>]] = pos_x;
+        pos_array[[line_id - total_failcount, <span class="number">1</span>]] = pos_y;
+        pos_array[[line_id - total_failcount, <span class="number">2</span>]] = pos_z;
         <span class="kw">let </span>v_x = line[<span class="number">4</span>];
         <span class="kw">let </span>v_y = line[<span class="number">5</span>];
         <span class="kw">let </span>v_z = line[<span class="number">6</span>];
-        vel_array[[line_id, <span class="number">0</span>]] = v_x;
-        vel_array[[line_id, <span class="number">1</span>]] = v_y;
-        vel_array[[line_id, <span class="number">2</span>]] = v_z;
+        vel_array[[line_id - total_failcount, <span class="number">0</span>]] = v_x;
+        vel_array[[line_id - total_failcount, <span class="number">1</span>]] = v_y;
+        vel_array[[line_id - total_failcount, <span class="number">2</span>]] = v_z;
         <span class="kw">let </span>vel: Vec&lt;f64&gt; = <span class="macro">vec!</span>[v_x, v_y, v_z];
         <span class="macro">print_debug!</span>(<span class="string">"Extracting statistical velocity information"</span>);
 
@@ -1536,8 +1556,14 @@
             <span class="macro">check_signals!</span>();
         }
     } <span class="comment">// end filename forloop
-      // write data into HDF5 file
-    </span><span class="kw">let </span>builder = <span class="macro">make_dataset_builder!</span>(group);
+    // write data into HDF5 file
+    // now we need to remove the last total_failcount elements from the arrays
+    </span><span class="kw">let </span>time_array = time_array.slice(<span class="macro">s!</span>[ ..time_array.len() - total_failcount]);
+    <span class="kw">let </span>pos_array = pos_array.slice(<span class="macro">s!</span>[ ..pos_array.shape()[<span class="number">0</span>] - total_failcount, ..]);
+    <span class="kw">let </span>vel_array = vel_array.slice(<span class="macro">s!</span>[ ..vel_array.shape()[<span class="number">0</span>] - total_failcount, ..]);
+    <span class="kw">let </span>timesteps = time_array.len();
+    
+    <span class="kw">let </span>builder = <span class="macro">make_dataset_builder!</span>(group);
     builder
         .with_data(<span class="kw-2">&amp;</span>time_array)
         .create(<span class="string">"time"</span>)
@@ -1796,9 +1822,13 @@
                 <span class="macro">panic!</span>(<span class="string">"Unable to convert files in directory {}"</span>, system_foldername)
             });
         <span class="kw">let </span><span class="kw-2">mut </span>out_vec: Vec&lt;<span class="kw-2">&amp;</span>str&gt; = Vec::new();
+        <span class="kw">let </span>extension = <span class="kw">match </span><span class="self">self</span>.file_type {
+            VTKType::PolyData =&gt; <span class="string">".vtp"</span>,
+            VTKType::UnstructuredGrid =&gt; <span class="string">".vtu"</span>,
+        };
         <span class="kw">for </span>filename_ <span class="kw">in </span>filenames.iter() {
             <span class="kw">let </span>filename = filename_.to_str().unwrap();
-            <span class="kw">if </span>filename.ends_with(<span class="string">".vtu"</span>) &amp;&amp; !filename.contains(<span class="string">"boundingBox"</span>) {
+            <span class="kw">if </span>filename.ends_with(extension) &amp;&amp; !filename.contains(<span class="string">"boundingBox"</span>) {
                 <span class="macro">print_debug!</span>(<span class="string">"\t Found file: {}"</span>, filename);
             } <span class="kw">else </span>{
                 <span class="macro">print_debug!</span>(<span class="string">"\t Ignoring file: {}"</span>, filename);

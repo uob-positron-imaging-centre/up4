@@ -6,3 +6,4 @@ vtk>=9.1.0
 natsort
 pytest
 pytest-html
+requests

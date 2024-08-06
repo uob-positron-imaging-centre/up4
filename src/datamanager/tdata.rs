@@ -3,7 +3,6 @@
 //! Implementation of reading + buffering functions.
 
 use super::{DataManager, GlobalStats, Manager, Timestep};
-use itertools::Chunk;
 use pyo3::prelude::*;
 extern crate ndarray;
 use crate::particleselector::Selector;

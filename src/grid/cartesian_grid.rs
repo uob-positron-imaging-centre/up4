@@ -1,7 +1,7 @@
 extern crate ndarray;
 use super::{CellId, Dim, GridFunctions3D, Position, ThreeD};
-use crate::{print_debug, print_warning};
 use crate::utilities::{nan_mean, nan_std};
+use crate::{print_debug, print_warning};
 use derive_getters::Getters;
 use itertools::Itertools;
 use ndarray::{prelude::*, RemoveAxis};
@@ -218,7 +218,7 @@ impl GridFunctions3D for CartesianGrid3D {
         let mut distances = distances
             .iter()
             .sorted_by(|a, b| a.partial_cmp(b).unwrap())
-            .map(f64::clone)
+            .copied()
             .collect::<Vec<f64>>();
         let whole_distance = distances.iter().sum::<f64>();
         let mut weights = distances

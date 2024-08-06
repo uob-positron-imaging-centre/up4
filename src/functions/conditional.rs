@@ -77,7 +77,7 @@ pub trait Conditional: DataManager {
                 }
             }
 
-            old_timestep = timestep_data.to_owned();
+            timestep_data.clone_into(&mut old_timestep);
             check_signals!()
         }
         circulation_time
@@ -87,8 +87,8 @@ pub trait Conditional: DataManager {
         &mut self,
         selector: &ParticleSelector,
         axis: usize,
-        boundary_position: (f64,f64),
-    ) -> Vec<(f64,f64)> {
+        boundary_position: (f64, f64),
+    ) -> Vec<(f64, f64)> {
         //read the number of timesteps inside this hdf5file
 
         let global_stats = self.global_stats();
@@ -102,13 +102,16 @@ pub trait Conditional: DataManager {
         let particle_number = global_stats.nparticles();
         let timesteps: &usize = global_stats.timesteps();
         print_debug!("velocityfield: Initiation over, entering time loop");
-        let mut circulation_time = Vec::<(f64,f64)>::new();
+        let mut circulation_time = Vec::<(f64, f64)>::new();
         let mut start_flag_array = Array1::<usize>::zeros(particle_number + 1);
         let mut mid_flag_array = Array1::<usize>::zeros(particle_number + 1);
         let mut time_flag_array = Array1::<f64>::zeros(particle_number + 1);
         let mut mid_time_flag_array = Array1::<f64>::zeros(particle_number + 1);
-     
+
         let mut old_timestep = self.get_timestep(0).to_owned();
+        // Clippy is generating a false positive here, I think.
+        // TODO confirm whether this is the case or not.
+        #[allow(unused_variables)]
         let mut count = 0;
         for timestep in 1..timesteps - 1 {
             let timestep_data = self.get_timestep(timestep);
@@ -154,7 +157,7 @@ pub trait Conditional: DataManager {
                 if pos > boundary_position.1 && old_pos < boundary_position.1 {
                     count += 1;
                     //println!("particle inside upper ");
-    
+
                     // if particle before was below
                     if start_flag_array[particle] == 2 {
                         // say " particle was in the other region"
@@ -179,7 +182,7 @@ pub trait Conditional: DataManager {
                         start_flag_array[particle] = 1;
                     } else if start_flag_array[particle] == 1 && mid_flag_array[particle] == 1 {
                         // end of one circulation
-                        circulation_time.push((time_flag_array[particle],current_time));
+                        circulation_time.push((time_flag_array[particle], current_time));
                         //if current_time - time_flag_array[particle] <= 0.0 {println!("Out of higher")};
                         // restart the run
                         mid_flag_array[particle] = 0;
@@ -191,7 +194,7 @@ pub trait Conditional: DataManager {
                     }
                     continue;
                 }
-    
+
                 //println!("Middle_check done");
                 ///// same vor lower border
                 // particle crosses into low border
@@ -218,7 +221,7 @@ pub trait Conditional: DataManager {
                         start_flag_array[particle] = 2;
                     } else if start_flag_array[particle] == 2 && mid_flag_array[particle] == 1 {
                         // end of one circulation
-                        circulation_time.push((time_flag_array[particle],current_time));
+                        circulation_time.push((time_flag_array[particle], current_time));
                         // restart the run
                         //if current_time - time_flag_array[particle] <= 0.0 {println!("Out of lower")};
                         mid_flag_array[particle] = 0;
@@ -232,10 +235,9 @@ pub trait Conditional: DataManager {
                 //println!("check done");
             } // end particle for loop
 
-            old_timestep = timestep_data.to_owned();
+            timestep_data.clone_into(&mut old_timestep);
             check_signals!()
         }
         circulation_time
     }
-
 }

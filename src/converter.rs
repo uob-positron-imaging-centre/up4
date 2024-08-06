@@ -31,7 +31,6 @@ const BLOSC_SHUFFLE: bool = true;
 const BLOSC_COMPRESSION: u8 = 9;
 // Chunk size for blosc filter
 
-
 /// Convert a single trajectory csv file to Hdf5
 // The number of arguments is necessary for proper csv reading.
 #[allow(clippy::too_many_arguments)]
@@ -87,7 +86,6 @@ pub fn csv_converter(
 
         // slice the read array to only get the colums requested
         if !columns.is_empty() {
-            
             let mut temp_data = Array2::<f64>::from_elem((data.shape()[0], 7), f64::NAN);
             for (i, column) in columns.iter().enumerate() {
                 temp_data
@@ -138,7 +136,6 @@ pub fn csv_converter(
             }
         }
         data
-        
     };
     print_debug!("Data: {:?}", data);
     print_debug!("Data shape: {:?}", data.shape());
@@ -161,7 +158,7 @@ pub fn csv_converter(
     let mut vel_array = Array2::<f64>::zeros((data_length, 3));
     let mut pos_array = Array2::<f64>::zeros((data_length, 3));
     // ######### arrays for Attributes:
-    let timesteps: usize = data_length;
+    // let timesteps: usize = data_length;
     let mut time: Array1<f64> = Array1::<f64>::zeros(2);
     let mut sample_rate: f64 = 0.0;
     //velocity: [x:[min, mean, max],y:[min,mean,max],z:[min,mean,max]]
@@ -189,7 +186,7 @@ pub fn csv_converter(
     let mut total_failcount = 0;
     for (line_id, line) in data.outer_iter().enumerate() {
         let current_time = line[0];
-        
+
         if current_time <= old_time {
             // The particle went back in time
             // This is not possible and must be ignored.
@@ -271,13 +268,13 @@ pub fn csv_converter(
             check_signals!();
         }
     } // end filename forloop
-    // write data into HDF5 file
-    // now we need to remove the last total_failcount elements from the arrays
-    let time_array = time_array.slice(s![ ..time_array.len() - total_failcount]);
-    let pos_array = pos_array.slice(s![ ..pos_array.shape()[0] - total_failcount, ..]);
-    let vel_array = vel_array.slice(s![ ..vel_array.shape()[0] - total_failcount, ..]);
+      // write data into HDF5 file
+      // now we need to remove the last total_failcount elements from the arrays
+    let time_array = time_array.slice(s![..time_array.len() - total_failcount]);
+    let pos_array = pos_array.slice(s![..pos_array.shape()[0] - total_failcount, ..]);
+    let vel_array = vel_array.slice(s![..vel_array.shape()[0] - total_failcount, ..]);
     let timesteps = time_array.len();
-    
+
     let builder = make_dataset_builder!(group);
     builder
         .with_data(&time_array)
@@ -536,7 +533,7 @@ impl XMLVTKConverter {
             .unwrap_or_else(|_| {
                 panic!("Unable to convert files in directory {}", system_foldername)
             });
-        let mut out_vec: Vec<&str> = Vec::new();
+        let mut out_vec: Vec<String> = Vec::new();
         let extension = match self.file_type {
             VTKType::PolyData => ".vtp",
             VTKType::UnstructuredGrid => ".vtu",
@@ -550,7 +547,7 @@ impl XMLVTKConverter {
                 continue;
             }
             // append out vec
-            out_vec.push(filename);
+            out_vec.push(filename.to_string());
         }
         // sort the filenames
         out_vec.sort_unstable_by(|a, b| natord::compare(a, b));
@@ -559,7 +556,7 @@ impl XMLVTKConverter {
             panic!("No files to convert");
         }
 
-        self.write_hdf5_from_files(out_vec, timestep, outname, filter);
+        self.write_hdf5_from_files(&out_vec, timestep, outname, filter);
     }
 
     /// Convert modern, xml-based vtk files into a HDF5 file
@@ -588,7 +585,7 @@ impl XMLVTKConverter {
     /// ```
     pub fn write_hdf5_from_files(
         self,
-        filenames: Vec<&str>,
+        filenames: &[String],
         timestep: f64,
         outname: &str,
         filter: &str,
@@ -969,7 +966,7 @@ impl LegacyVTKConverter {
             .unwrap_or_else(|_| {
                 panic!("Unable to convert files in directory {}", system_foldername)
             });
-        let mut out_vec: Vec<&str> = Vec::new();
+        let mut out_vec: Vec<String> = Vec::new();
         for filename_ in filenames.iter() {
             let filename = filename_.to_str().unwrap();
             if filename.ends_with(".vtk") && !filename.contains("boundingBox") {
@@ -979,7 +976,7 @@ impl LegacyVTKConverter {
                 continue;
             }
             // append out vec
-            out_vec.push(filename);
+            out_vec.push(filename.to_string());
         }
         // sort the filenames
         out_vec.sort_unstable_by(|a, b| natord::compare(a, b));
@@ -987,7 +984,7 @@ impl LegacyVTKConverter {
         if out_vec.is_empty() {
             panic!("No files to convert");
         }
-        self.write_hdf5_from_files(out_vec, timestep, outname, filter);
+        self.write_hdf5_from_files(&out_vec, timestep, outname, filter);
     }
 
     /// Convert legacy vtk files into a HDF5 file
@@ -1015,7 +1012,7 @@ impl LegacyVTKConverter {
     /// ```
     pub fn write_hdf5_from_files(
         self,
-        filenames: Vec<&str>,
+        filenames: &[String],
         timestep: f64,
         outname: &str,
         filter: &str, // example r"vtk_(\d+).vtk"

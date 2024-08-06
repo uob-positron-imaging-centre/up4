@@ -371,7 +371,7 @@
 <span class="comment">// number of arguments is necessary to properly read csv files.
 </span><span class="attr">#[allow(clippy::too_many_arguments)]
 </span><span class="kw">pub fn </span>csv_multi_file_time_step(
-    filenames: Vec&lt;<span class="kw-2">&amp;</span>str&gt;,
+    filenames: <span class="kw-2">&amp;</span>[String],
     outname: <span class="kw-2">&amp;</span>str,
     columns: Vec&lt;i64&gt;,
     time_: Vec&lt;f64&gt;,

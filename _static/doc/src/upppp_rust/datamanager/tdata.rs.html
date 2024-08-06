@@ -1200,13 +1200,11 @@
 <a href="#1200" id="1200">1200</a>
 <a href="#1201" id="1201">1201</a>
 <a href="#1202" id="1202">1202</a>
-<a href="#1203" id="1203">1203</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Timestep based HDF5 dataset manager
 //!
 //! Implementation of reading + buffering functions.
 
 </span><span class="kw">use super</span>::{DataManager, GlobalStats, Manager, Timestep};
-<span class="kw">use </span>itertools::Chunk;
 <span class="kw">use </span>pyo3::prelude::<span class="kw-2">*</span>;
 <span class="kw">extern crate </span>ndarray;
 <span class="kw">use </span><span class="kw">crate</span>::particleselector::Selector;

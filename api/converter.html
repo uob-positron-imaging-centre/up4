@@ -443,7 +443,8 @@ document.write(`
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Converter.csv">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">csv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delimiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">','</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'#'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sampling_steps</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">9</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Converter.csv" title="Link to this definition">#</a></dt>
-<dd><p>Convert CSV file to a HDF5 file.</p>
+<dd><p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>ignore
+Convert CSV file to a HDF5 file.</p>
 <dl class="field-list">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><dl>
@@ -480,7 +481,8 @@ document.write(`
 <dl class="py method">
 <dt class="sig sig-object py" id="up4.Converter.csv_multi">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">csv_multi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columns</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">...</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delimiter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'&quot;,&quot;'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'&quot;#&quot;'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interpolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'&quot;id_line&quot;'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#up4.Converter.csv_multi" title="Link to this definition">#</a></dt>
-<dd><p>Convert CSV file containing multiple particles into a HDF5 file.</p>
+<dd><p><a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a>ignore
+Convert CSV file containing multiple particles into a HDF5 file.</p>
 <p>There can be different ways how this is achieved, therefore the function
 takes an argument called <code class="xref py py-obj docutils literal notranslate"><span class="pre">method</span></code> which can be one of the following:</p>
 <ul class="simple">
@@ -521,13 +523,13 @@ contact the developers.</p>
 <dt><strong>method</strong><span class="classifier"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="docutils literal notranslate"><span class="pre">str</span></code></a>, optional</span></dt><dd><p>Method to use to convert the CSV file. Can be one of the following:</p>
 <ul class="simple">
 <li><dl class="simple">
-<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">chain</span></code>: The particles are chained in the file, i.e. the first particle</dt><dd><p>is followed by the second, the second by the third, etc.
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">chain`</span></code>: The particles are chained in the file, i.e. the first particle</dt><dd><p>is followed by the second, the second by the third, etc.
 all particles are stored in one file</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt>id_line: This algorithm sorts the particles by their id column and</dt><dd><p>their time column. The <code class="xref py py-obj docutils literal notranslate"><span class="pre">columns</span></code> argument must contain the
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">id_line`</span></code>: This algorithm sorts the particles by their id column and</dt><dd><p>their time column. The <code class="xref py py-obj docutils literal notranslate"><span class="pre">columns</span></code> argument must contain the
 id column as the first element.</p>
 </dd>
 </dl>
@@ -630,7 +632,7 @@ Default: False</p>
 <p class="rubric">Examples</p>
 <p>Convert legacy VTK files to HDF5</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">up4</span> <span class="kn">import</span> <span class="n">Converter</span>
-<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Converter</span><span class="o">.</span><span class="n">vtk</span><span class="p">(</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">filenames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;file1.vtk&quot;</span><span class="p">,</span> <span class="s2">&quot;file2.vtk&quot;</span><span class="p">],</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">timestep</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span>
@@ -646,7 +648,7 @@ Default: False</p>
 </div>
 <p>Convert XML VTK (unstructured grid format) files to HDF5</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">up4</span> <span class="kn">import</span> <span class="n">Converter</span>
-<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Converter</span><span class="o">.</span><span class="n">vtk</span><span class="p">(</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">filenames</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;file1.vtu&quot;</span><span class="p">,</span> <span class="s2">&quot;file2.vtu&quot;</span><span class="p">],</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">timestep</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span>
@@ -698,7 +700,7 @@ Folder must only contain one type of vtk files</p>
 <p class="rubric">Examples</p>
 <p>Convert legacy VTK files to HDF5</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">up4</span> <span class="kn">import</span> <span class="n">Converter</span>
-<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Converter</span><span class="o">.</span><span class="n">vtk_from_folder</span><span class="p">(</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">folder</span><span class="o">=</span><span class="s2">&quot;folder&quot;</span><span class="p">,</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">timestep</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span>
@@ -714,7 +716,7 @@ Folder must only contain one type of vtk files</p>
 </div>
 <p>Convert XML VTK (unstructured grid format) files to HDF5</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">up4</span> <span class="kn">import</span> <span class="n">Converter</span>
-<span class="gp">&gt;&gt;&gt; </span>
+<span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Converter</span><span class="o">.</span><span class="n">vtk_from_folder</span><span class="p">(</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">folder</span><span class="o">=</span><span class="s2">&quot;folder&quot;</span><span class="p">,</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">timestep</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">,</span>

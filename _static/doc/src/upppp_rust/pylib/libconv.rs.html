@@ -592,6 +592,8 @@
 <a href="#592" id="592">592</a>
 <a href="#593" id="593">593</a>
 <a href="#594" id="594">594</a>
+<a href="#595" id="595">595</a>
+<a href="#596" id="596">596</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! This file provides coupling of functions to convert data to HDF5 file format
 //! Functions are taken from base::converter.rs
 </span><span class="kw">use </span><span class="kw">crate</span>::converter::{<span class="self">self</span>, <span class="kw-2">*</span>};
@@ -654,9 +656,9 @@
     /// --------
     /// Convert legacy VTK files to HDF5
     ///
-    /// 
+    ///
     /// &gt;&gt;&gt; from up4 import Converter
-    /// &gt;&gt;&gt; 
+    /// &gt;&gt;&gt;
     /// &gt;&gt;&gt; Converter.vtk(
     /// &gt;&gt;&gt;     filenames=["file1.vtk", "file2.vtk"],
     /// &gt;&gt;&gt;     timestep=1e-5,
@@ -668,12 +670,12 @@
     /// &gt;&gt;&gt;     type_field_name="type",
     /// &gt;&gt;&gt;     diameter_field_name=None,
     /// &gt;&gt;&gt; )
-    /// 
+    ///
     /// Convert XML VTK (unstructured grid format) files to HDF5
     ///
-    /// 
+    ///
     /// &gt;&gt;&gt; from up4 import Converter
-    /// &gt;&gt;&gt; 
+    /// &gt;&gt;&gt;
     /// &gt;&gt;&gt; Converter.vtk(
     /// &gt;&gt;&gt;     filenames=["file1.vtu", "file2.vtu"],
     /// &gt;&gt;&gt;     timestep=1e-5,
@@ -684,13 +686,13 @@
     /// &gt;&gt;&gt;     type_field_name="type",
     /// &gt;&gt;&gt;     diameter_field_name="diameter",
     /// &gt;&gt;&gt; )
-    /// 
+    ///
     </span><span class="attr">#[pyo3(signature = (filenames, timestep, outname, filter = <span class="string">"(\\d+).vtk"</span>, 
         velocity_field_name = <span class="string">"v"</span>, radius_field_name = <span class="string">"radius"</span>, 
         id_field_name = <span class="string">"id"</span>, type_field_name = <span class="string">"type"</span>, diameter_field_name = <span class="prelude-val">None</span>))]
     #[staticmethod]
     </span><span class="kw">fn </span>vtk(
-        filenames: Vec&lt;<span class="kw-2">&amp;</span>str&gt;,
+        filenames: Vec&lt;String&gt;,
         timestep: f64,
         outname: <span class="kw-2">&amp;</span>str,
         filter: <span class="kw-2">&amp;</span>str, <span class="comment">// example r"vtk_(\d+).vtk"
@@ -717,7 +719,7 @@
                     .add_type_field(type_field_name)
                     .add_velocity_field(velocity_field_name),
             };
-            converter.write_hdf5_from_files(filenames, timestep, outname, filter);
+            converter.write_hdf5_from_files(<span class="kw-2">&amp;</span>filenames, timestep, outname, filter);
         } <span class="kw">else if </span>filter.contains(<span class="string">".vtu"</span>)
         <span class="comment">// xml files to convert
         </span>{
@@ -729,7 +731,7 @@
                         .add_id_field(id_field_name)
                         .add_type_field(type_field_name)
                         .add_velocity_field(velocity_field_name);
-                    converter.write_hdf5_from_files(filenames, timestep, outname, filter);
+                    converter.write_hdf5_from_files(<span class="kw-2">&amp;</span>filenames, timestep, outname, filter);
                 }
                 <span class="prelude-val">None </span>=&gt; {
                     <span class="kw">let </span>converter = XMLVTKConverter::new(vtk_file_type)
@@ -737,7 +739,7 @@
                         .add_radius_field(radius_field_name)
                         .add_type_field(type_field_name)
                         .add_velocity_field(velocity_field_name);
-                    converter.write_hdf5_from_files(filenames, timestep, outname, filter);
+                    converter.write_hdf5_from_files(<span class="kw-2">&amp;</span>filenames, timestep, outname, filter);
                 }
             }
         } <span class="kw">else if </span>filter.contains(<span class="string">".vtp"</span>)
@@ -751,7 +753,7 @@
                         .add_id_field(id_field_name)
                         .add_type_field(type_field_name)
                         .add_velocity_field(velocity_field_name);
-                    converter.write_hdf5_from_files(filenames, timestep, outname, filter);
+                    converter.write_hdf5_from_files(<span class="kw-2">&amp;</span>filenames, timestep, outname, filter);
                 }
                 <span class="prelude-val">None </span>=&gt; {
                     <span class="kw">let </span>converter = XMLVTKConverter::new(vtk_file_type)
@@ -759,7 +761,7 @@
                         .add_radius_field(radius_field_name)
                         .add_type_field(type_field_name)
                         .add_velocity_field(velocity_field_name);
-                    converter.write_hdf5_from_files(filenames, timestep, outname, filter);
+                    converter.write_hdf5_from_files(<span class="kw-2">&amp;</span>filenames, timestep, outname, filter);
                 }
             }
         }
@@ -804,9 +806,9 @@
     /// Examples
     /// --------
     /// Convert legacy VTK files to HDF5
-    /// 
+    ///
     /// &gt;&gt;&gt; from up4 import Converter
-    /// &gt;&gt;&gt; 
+    /// &gt;&gt;&gt;
     /// &gt;&gt;&gt; Converter.vtk_from_folder(
     /// &gt;&gt;&gt;     folder="folder",
     /// &gt;&gt;&gt;     timestep=1e-5,
@@ -818,11 +820,11 @@
     /// &gt;&gt;&gt;     type_field_name="type",
     /// &gt;&gt;&gt;     diameter_field_name=None,
     /// &gt;&gt;&gt; )
-    /// 
+    ///
     /// Convert XML VTK (unstructured grid format) files to HDF5
-    /// 
+    ///
     /// &gt;&gt;&gt; from up4 import Converter
-    /// &gt;&gt;&gt; 
+    /// &gt;&gt;&gt;
     /// &gt;&gt;&gt; Converter.vtk_from_folder(
     /// &gt;&gt;&gt;     folder="folder",
     /// &gt;&gt;&gt;     timestep=1e-5,
@@ -833,7 +835,7 @@
     /// &gt;&gt;&gt;     type_field_name="type",
     /// &gt;&gt;&gt;     diameter_field_name="diameter",
     /// &gt;&gt;&gt; )
-    /// 
+    ///
     </span><span class="attr">#[pyo3(signature = (folder, timestep, outname, filter = <span class="string">"(\\d+).vtk"</span>, 
     velocity_field_name = <span class="string">"v"</span>, radius_field_name = <span class="string">"radius"</span>, 
     id_field_name = <span class="string">"id"</span>, type_field_name = <span class="string">"type"</span>, diameter_field_name = <span class="prelude-val">None</span>))]
@@ -914,8 +916,9 @@
         }
     }
 
-    <span class="comment">// TODO ensure this doesn't get accidentally swept up into doctests
-    </span><span class="doccomment">/// Convert CSV file to a HDF5 file.
+    <span class="comment">// This docstring is for Python, and isn't valid Rust
+    </span><span class="doccomment">/// ```ignore
+    /// Convert CSV file to a HDF5 file.
     ///
     /// Parameters
     /// ----------
@@ -996,8 +999,9 @@
         )
     }
 
-    <span class="comment">// TODO ensure this doesn't get accidentally swept up into doctests
-    </span><span class="doccomment">/// Convert CSV file containing multiple particles into a HDF5 file.
+    <span class="comment">// This docstring is for Python, and isn't valid Rust
+    </span><span class="doccomment">/// ```ignore
+    /// Convert CSV file containing multiple particles into a HDF5 file.
     ///
     /// There can be different ways how this is achieved, therefore the function
     /// takes an argument called `method` which can be one of the following:
@@ -1041,10 +1045,10 @@
     /// method : str, optional
     ///     Method to use to convert the CSV file. Can be one of the following:
     ///
-    ///     - `chain`: The particles are chained in the file, i.e. the first particle
+    ///     - `chain``: The particles are chained in the file, i.e. the first particle
     ///         is followed by the second, the second by the third, etc.
     ///         all particles are stored in one file
-    ///     -  id_line: This algorithm sorts the particles by their id column and
+    ///     -  `id_line``: This algorithm sorts the particles by their id column and
     ///         their time column. The `columns` argument must contain the
     ///         id column as the first element.
     ///
@@ -1156,7 +1160,7 @@
     </span>))]
     <span class="attr">#[staticmethod]
     </span><span class="kw">fn </span>csv_multi_files(
-        filenames: Vec&lt;<span class="kw-2">&amp;</span>str&gt;,
+        filenames: Vec&lt;String&gt;,
         outname: <span class="kw-2">&amp;</span>str,
         times: Vec&lt;f64&gt;,
         columns: Vec&lt;i64&gt;,
@@ -1172,7 +1176,7 @@
         //    "Multi CSV reader is not implemented yet. This feature comes in future!",
         //));
         </span>converter::csv_multi_file_time_step(
-            filenames,
+            <span class="kw-2">&amp;</span>filenames,
             outname,
             columns,
             times,

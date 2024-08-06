@@ -632,14 +632,76 @@
 <a href="#632" id="632">632</a>
 <a href="#633" id="633">633</a>
 <a href="#634" id="634">634</a>
+<a href="#635" id="635">635</a>
+<a href="#636" id="636">636</a>
+<a href="#637" id="637">637</a>
+<a href="#638" id="638">638</a>
+<a href="#639" id="639">639</a>
+<a href="#640" id="640">640</a>
+<a href="#641" id="641">641</a>
+<a href="#642" id="642">642</a>
+<a href="#643" id="643">643</a>
+<a href="#644" id="644">644</a>
+<a href="#645" id="645">645</a>
+<a href="#646" id="646">646</a>
+<a href="#647" id="647">647</a>
+<a href="#648" id="648">648</a>
+<a href="#649" id="649">649</a>
+<a href="#650" id="650">650</a>
+<a href="#651" id="651">651</a>
+<a href="#652" id="652">652</a>
+<a href="#653" id="653">653</a>
+<a href="#654" id="654">654</a>
+<a href="#655" id="655">655</a>
+<a href="#656" id="656">656</a>
+<a href="#657" id="657">657</a>
+<a href="#658" id="658">658</a>
+<a href="#659" id="659">659</a>
+<a href="#660" id="660">660</a>
+<a href="#661" id="661">661</a>
+<a href="#662" id="662">662</a>
+<a href="#663" id="663">663</a>
+<a href="#664" id="664">664</a>
+<a href="#665" id="665">665</a>
+<a href="#666" id="666">666</a>
+<a href="#667" id="667">667</a>
+<a href="#668" id="668">668</a>
+<a href="#669" id="669">669</a>
+<a href="#670" id="670">670</a>
+<a href="#671" id="671">671</a>
+<a href="#672" id="672">672</a>
+<a href="#673" id="673">673</a>
+<a href="#674" id="674">674</a>
+<a href="#675" id="675">675</a>
+<a href="#676" id="676">676</a>
+<a href="#677" id="677">677</a>
+<a href="#678" id="678">678</a>
+<a href="#679" id="679">679</a>
+<a href="#680" id="680">680</a>
+<a href="#681" id="681">681</a>
+<a href="#682" id="682">682</a>
+<a href="#683" id="683">683</a>
+<a href="#684" id="684">684</a>
+<a href="#685" id="685">685</a>
+<a href="#686" id="686">686</a>
+<a href="#687" id="687">687</a>
+<a href="#688" id="688">688</a>
+<a href="#689" id="689">689</a>
+<a href="#690" id="690">690</a>
+<a href="#691" id="691">691</a>
+<a href="#692" id="692">692</a>
+<a href="#693" id="693">693</a>
+<a href="#694" id="694">694</a>
+<a href="#695" id="695">695</a>
+<a href="#696" id="696">696</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">super</span>::PyData;
 <span class="kw">use </span><span class="kw">crate</span>::grid;
 <span class="kw">use </span><span class="kw">crate</span>::grid::<span class="kw-2">*</span>;
+<span class="kw">use </span><span class="kw">crate</span>::utilities::{nan_mean, nan_std};
 <span class="kw">use </span>ndarray_stats::QuantileExt;
 <span class="kw">use </span>numpy::{IntoPyArray, PyArray1, PyArray2, PyArray3};
 <span class="kw">use </span>plotly::{HeatMap, Plot};
 <span class="kw">use </span>pyo3::prelude::<span class="kw-2">*</span>;
-<span class="kw">use </span><span class="kw">crate</span>::utilities::{nan_mean, nan_std};
 
 <span class="doccomment">/// A class containing all information for a 3D grid wrapping your system
 ///
@@ -763,14 +825,28 @@
     /// -------
     /// positions : Tuple(np.ndarray)
     ///    A tuple containing the 1D arrays of the x, y and z positions of the cells
+    </span><span class="attr">#[allow(clippy::type_complexity)]
     </span><span class="kw">fn </span>cell_positions&lt;<span class="lifetime">'py</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         _py: Python&lt;<span class="lifetime">'py</span>&gt;,
-    ) -&gt; (<span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray1&lt;f64&gt;, <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray1&lt;f64&gt;, <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray1&lt;f64&gt;) {
+    ) -&gt; (
+        Bound&lt;<span class="lifetime">'py</span>, PyArray1&lt;f64&gt;&gt;,
+        Bound&lt;<span class="lifetime">'py</span>, PyArray1&lt;f64&gt;&gt;,
+        Bound&lt;<span class="lifetime">'py</span>, PyArray1&lt;f64&gt;&gt;,
+    ) {
         (
-            <span class="self">self</span>.grid.get_xpositions().to_owned().into_pyarray(_py),
-            <span class="self">self</span>.grid.get_ypositions().to_owned().into_pyarray(_py),
-            <span class="self">self</span>.grid.get_zpositions().to_owned().into_pyarray(_py),
+            <span class="self">self</span>.grid
+                .get_xpositions()
+                .to_owned()
+                .into_pyarray_bound(_py),
+            <span class="self">self</span>.grid
+                .get_ypositions()
+                .to_owned()
+                .into_pyarray_bound(_py),
+            <span class="self">self</span>.grid
+                .get_zpositions()
+                .to_owned()
+                .into_pyarray_bound(_py),
         )
     }
 
@@ -923,8 +999,8 @@
     /// -------
     /// grid : ndarray
     ///     A numpy array containing the grid-data with the same shape as grid
-    </span><span class="kw">fn </span>to_numpy&lt;<span class="lifetime">'py</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, _py: Python&lt;<span class="lifetime">'py</span>&gt;) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray3&lt;f64&gt; {
-        <span class="self">self</span>.grid.get_data().to_owned().into_pyarray(_py)
+    </span><span class="kw">fn </span>to_numpy&lt;<span class="lifetime">'py</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, _py: Python&lt;<span class="lifetime">'py</span>&gt;) -&gt; Bound&lt;<span class="lifetime">'py</span>, PyArray3&lt;f64&gt;&gt; {
+        <span class="self">self</span>.grid.get_data().to_owned().into_pyarray_bound(_py)
     }
 
     <span class="doccomment">/// Return the weights of each cell as a numpy array.
@@ -933,8 +1009,8 @@
     /// -------
     /// weights : ndarray
     ///    A numpy array containing the weights of each cell with the same shape as grid
-    </span><span class="kw">fn </span>weights_to_numpy&lt;<span class="lifetime">'py</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, _py: Python&lt;<span class="lifetime">'py</span>&gt;) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray3&lt;f64&gt; {
-        <span class="self">self</span>.grid.get_weights().to_owned().into_pyarray(_py)
+    </span><span class="kw">fn </span>weights_to_numpy&lt;<span class="lifetime">'py</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, _py: Python&lt;<span class="lifetime">'py</span>&gt;) -&gt; Bound&lt;<span class="lifetime">'py</span>, PyArray3&lt;f64&gt;&gt; {
+        <span class="self">self</span>.grid.get_weights().to_owned().into_pyarray_bound(_py)
     }
 
     <span class="doccomment">/// Return a slice of the grid as a numpy array.
@@ -946,11 +1022,11 @@
     /// index : int
     ///     The index of the slice
     </span><span class="attr">#[pyo3(signature = (axis, index))]
-    </span><span class="kw">fn </span>slice&lt;<span class="lifetime">'py</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, _py: Python&lt;<span class="lifetime">'py</span>&gt;, axis: usize, index: usize) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray2&lt;f64&gt; {
+    </span><span class="kw">fn </span>slice&lt;<span class="lifetime">'py</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, _py: Python&lt;<span class="lifetime">'py</span>&gt;, axis: usize, index: usize) -&gt; Bound&lt;<span class="lifetime">'py</span>, PyArray2&lt;f64&gt;&gt; {
         <span class="self">self</span>.grid
             .slice_idx(axis, index)
             .to_owned()
-            .into_pyarray(_py)
+            .into_pyarray_bound(_py)
     }
 
     <span class="doccomment">/// Return a slice of the grid as a numpy array at a given position and axis.
@@ -962,8 +1038,16 @@
     /// position : f64
     ///     The position of the slice
     </span><span class="attr">#[pyo3(signature = (axis, position))]
-    </span><span class="kw">fn </span>slice_pos&lt;<span class="lifetime">'py</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, _py: Python&lt;<span class="lifetime">'py</span>&gt;, axis: usize, position: f64) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray2&lt;f64&gt; {
-        <span class="self">self</span>.grid.slice(axis, position).to_owned().into_pyarray(_py)
+    </span><span class="kw">fn </span>slice_pos&lt;<span class="lifetime">'py</span>&gt;(
+        <span class="kw-2">&amp;</span><span class="self">self</span>,
+        _py: Python&lt;<span class="lifetime">'py</span>&gt;,
+        axis: usize,
+        position: f64,
+    ) -&gt; Bound&lt;<span class="lifetime">'py</span>, PyArray2&lt;f64&gt;&gt; {
+        <span class="self">self</span>.grid
+            .slice(axis, position)
+            .to_owned()
+            .into_pyarray_bound(_py)
     }
 
     <span class="doccomment">/// Collapse the grid along an axis.
@@ -980,8 +1064,8 @@
     /// grid : ndarray
     ///     A numpy array containing the collapsed grid
     ///
-    </span><span class="kw">fn </span>collapse&lt;<span class="lifetime">'py</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, _py: Python&lt;<span class="lifetime">'py</span>&gt;, axis: usize) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray2&lt;f64&gt; {
-        <span class="self">self</span>.grid.collapse(axis).to_owned().into_pyarray(_py)
+    </span><span class="kw">fn </span>collapse&lt;<span class="lifetime">'py</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, _py: Python&lt;<span class="lifetime">'py</span>&gt;, axis: usize) -&gt; Bound&lt;<span class="lifetime">'py</span>, PyArray2&lt;f64&gt;&gt; {
+        <span class="self">self</span>.grid.collapse(axis).to_owned().into_pyarray_bound(_py)
     }
 
     <span class="doccomment">/// Collaps the grid along an axis
@@ -1005,11 +1089,11 @@
         _py: Python&lt;<span class="lifetime">'py</span>&gt;,
         axis1: usize,
         axis2: usize,
-    ) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray1&lt;f64&gt; {
+    ) -&gt; Bound&lt;<span class="lifetime">'py</span>, PyArray1&lt;f64&gt;&gt; {
         <span class="self">self</span>.grid
             .collapse_two(axis1, axis2)
             .to_owned()
-            .into_pyarray(_py)
+            .into_pyarray_bound(_py)
     }
 
     <span class="doccomment">/// Return the x-positions of the grid.
@@ -1019,8 +1103,11 @@
     ///
     /// x : ndarray
     ///     A numpy array containing the x-positions of the grid
-    </span><span class="kw">fn </span>xpositions&lt;<span class="lifetime">'py</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, _py: Python&lt;<span class="lifetime">'py</span>&gt;) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray1&lt;f64&gt; {
-        <span class="self">self</span>.grid.get_xpositions().to_owned().into_pyarray(_py)
+    </span><span class="kw">fn </span>xpositions&lt;<span class="lifetime">'py</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, _py: Python&lt;<span class="lifetime">'py</span>&gt;) -&gt; Bound&lt;<span class="lifetime">'py</span>, PyArray1&lt;f64&gt;&gt; {
+        <span class="self">self</span>.grid
+            .get_xpositions()
+            .to_owned()
+            .into_pyarray_bound(_py)
     }
 
     <span class="doccomment">/// Return the y-positions of the grid.
@@ -1030,8 +1117,11 @@
     ///
     /// y : ndarray
     ///     A numpy array containing the y-positions of the grid
-    </span><span class="kw">fn </span>ypositions&lt;<span class="lifetime">'py</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, _py: Python&lt;<span class="lifetime">'py</span>&gt;) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray1&lt;f64&gt; {
-        <span class="self">self</span>.grid.get_ypositions().to_owned().into_pyarray(_py)
+    </span><span class="kw">fn </span>ypositions&lt;<span class="lifetime">'py</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, _py: Python&lt;<span class="lifetime">'py</span>&gt;) -&gt; Bound&lt;<span class="lifetime">'py</span>, PyArray1&lt;f64&gt;&gt; {
+        <span class="self">self</span>.grid
+            .get_ypositions()
+            .to_owned()
+            .into_pyarray_bound(_py)
     }
 
     <span class="doccomment">/// Return the z-positions of the grid.
@@ -1041,8 +1131,11 @@
     ///
     /// z : ndarray
     ///     A numpy array containing the z-positions of the grid
-    </span><span class="kw">fn </span>zpositions&lt;<span class="lifetime">'py</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, _py: Python&lt;<span class="lifetime">'py</span>&gt;) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray1&lt;f64&gt; {
-        <span class="self">self</span>.grid.get_zpositions().to_owned().into_pyarray(_py)
+    </span><span class="kw">fn </span>zpositions&lt;<span class="lifetime">'py</span>&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, _py: Python&lt;<span class="lifetime">'py</span>&gt;) -&gt; Bound&lt;<span class="lifetime">'py</span>, PyArray1&lt;f64&gt;&gt; {
+        <span class="self">self</span>.grid
+            .get_zpositions()
+            .to_owned()
+            .into_pyarray_bound(_py)
     }
 
     <span class="doccomment">/// Detect outliers and remove them depending on the mode
@@ -1077,7 +1170,7 @@
             <span class="self">self</span>.grid.get_limits()[<span class="number">0</span>],
             <span class="self">self</span>.grid.get_limits()[<span class="number">1</span>],
             <span class="self">self</span>.grid.get_limits()[<span class="number">2</span>],
-            nan_mean(<span class="self">self</span>.grid.get_data()), 
+            nan_mean(<span class="self">self</span>.grid.get_data()),
             nan_std(<span class="self">self</span>.grid.get_data()),
             <span class="self">self</span>.grid.get_data().min_skipnan(),
             <span class="self">self</span>.grid.get_data().max_skipnan()
@@ -1092,7 +1185,7 @@
             <span class="self">self</span>.grid.get_limits()[<span class="number">0</span>],
             <span class="self">self</span>.grid.get_limits()[<span class="number">1</span>],
             <span class="self">self</span>.grid.get_limits()[<span class="number">2</span>],
-            nan_mean(<span class="self">self</span>.grid.get_data()), 
+            nan_mean(<span class="self">self</span>.grid.get_data()),
             nan_std(<span class="self">self</span>.grid.get_data()),
             <span class="self">self</span>.grid.get_data().min_skipnan(),
             <span class="self">self</span>.grid.get_data().max_skipnan()
@@ -1131,101 +1224,132 @@
 
 <span class="attr">#[pymethods]
 </span><span class="kw">impl </span>PyVecGrid {
-    <span class="kw">fn </span>to_numpy&lt;<span class="lifetime">'py</span>&gt;(
+    <span class="attr">#[allow(clippy::type_complexity)]
+    </span><span class="kw">fn </span>to_numpy&lt;<span class="lifetime">'py</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         _py: Python&lt;<span class="lifetime">'py</span>&gt;,
-    ) -&gt; (<span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray3&lt;f64&gt;, <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray3&lt;f64&gt;, <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray3&lt;f64&gt;) {
+    ) -&gt; (
+        Bound&lt;<span class="lifetime">'py</span>, PyArray3&lt;f64&gt;&gt;,
+        Bound&lt;<span class="lifetime">'py</span>, PyArray3&lt;f64&gt;&gt;,
+        Bound&lt;<span class="lifetime">'py</span>, PyArray3&lt;f64&gt;&gt;,
+    ) {
         (
-            <span class="self">self</span>.grid.data[<span class="number">0</span>].get_data().to_owned().into_pyarray(_py),
-            <span class="self">self</span>.grid.data[<span class="number">1</span>].get_data().to_owned().into_pyarray(_py),
-            <span class="self">self</span>.grid.data[<span class="number">2</span>].get_data().to_owned().into_pyarray(_py),
+            <span class="self">self</span>.grid.data[<span class="number">0</span>]
+                .get_data()
+                .to_owned()
+                .into_pyarray_bound(_py),
+            <span class="self">self</span>.grid.data[<span class="number">1</span>]
+                .get_data()
+                .to_owned()
+                .into_pyarray_bound(_py),
+            <span class="self">self</span>.grid.data[<span class="number">2</span>]
+                .get_data()
+                .to_owned()
+                .into_pyarray_bound(_py),
         )
     }
-    <span class="kw">fn </span>cell_positions&lt;<span class="lifetime">'py</span>&gt;(
+    <span class="attr">#[allow(clippy::type_complexity)]
+    </span><span class="kw">fn </span>cell_positions&lt;<span class="lifetime">'py</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         _py: Python&lt;<span class="lifetime">'py</span>&gt;,
-    ) -&gt; (<span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray1&lt;f64&gt;, <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray1&lt;f64&gt;, <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray1&lt;f64&gt;) {
+    ) -&gt; (
+        Bound&lt;<span class="lifetime">'py</span>, PyArray1&lt;f64&gt;&gt;,
+        Bound&lt;<span class="lifetime">'py</span>, PyArray1&lt;f64&gt;&gt;,
+        Bound&lt;<span class="lifetime">'py</span>, PyArray1&lt;f64&gt;&gt;,
+    ) {
         (
             <span class="self">self</span>.grid.data[<span class="number">0</span>]
                 .get_xpositions()
                 .to_owned()
-                .into_pyarray(_py),
+                .into_pyarray_bound(_py),
             <span class="self">self</span>.grid.data[<span class="number">0</span>]
                 .get_ypositions()
                 .to_owned()
-                .into_pyarray(_py),
+                .into_pyarray_bound(_py),
             <span class="self">self</span>.grid.data[<span class="number">0</span>]
                 .get_zpositions()
                 .to_owned()
-                .into_pyarray(_py),
+                .into_pyarray_bound(_py),
         )
     }
     <span class="kw">fn </span>shape(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Vec&lt;usize&gt; {
         <span class="self">self</span>.grid.data[<span class="number">0</span>].get_cells().to_vec()
     }
-
-    <span class="kw">fn </span>slice&lt;<span class="lifetime">'py</span>&gt;(
+    <span class="attr">#[allow(clippy::type_complexity)]
+    </span><span class="kw">fn </span>slice&lt;<span class="lifetime">'py</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         _py: Python&lt;<span class="lifetime">'py</span>&gt;,
         axis: usize,
         index: usize,
-    ) -&gt; (<span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray2&lt;f64&gt;, <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray2&lt;f64&gt;, <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray2&lt;f64&gt;) {
+    ) -&gt; (
+        Bound&lt;<span class="lifetime">'py</span>, PyArray2&lt;f64&gt;&gt;,
+        Bound&lt;<span class="lifetime">'py</span>, PyArray2&lt;f64&gt;&gt;,
+        Bound&lt;<span class="lifetime">'py</span>, PyArray2&lt;f64&gt;&gt;,
+    ) {
         (
             <span class="self">self</span>.grid.data[<span class="number">0</span>]
                 .slice_idx(axis, index)
                 .to_owned()
-                .into_pyarray(_py),
+                .into_pyarray_bound(_py),
             <span class="self">self</span>.grid.data[<span class="number">1</span>]
                 .slice_idx(axis, index)
                 .to_owned()
-                .into_pyarray(_py),
+                .into_pyarray_bound(_py),
             <span class="self">self</span>.grid.data[<span class="number">2</span>]
                 .slice_idx(axis, index)
                 .to_owned()
-                .into_pyarray(_py),
+                .into_pyarray_bound(_py),
         )
     }
-
-    <span class="kw">fn </span>slice_pos&lt;<span class="lifetime">'py</span>&gt;(
+    <span class="attr">#[allow(clippy::type_complexity)]
+    </span><span class="kw">fn </span>slice_pos&lt;<span class="lifetime">'py</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         _py: Python&lt;<span class="lifetime">'py</span>&gt;,
         axis: usize,
         position: f64,
-    ) -&gt; (<span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray2&lt;f64&gt;, <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray2&lt;f64&gt;, <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray2&lt;f64&gt;) {
+    ) -&gt; (
+        Bound&lt;<span class="lifetime">'py</span>, PyArray2&lt;f64&gt;&gt;,
+        Bound&lt;<span class="lifetime">'py</span>, PyArray2&lt;f64&gt;&gt;,
+        Bound&lt;<span class="lifetime">'py</span>, PyArray2&lt;f64&gt;&gt;,
+    ) {
         (
             <span class="self">self</span>.grid.data[<span class="number">0</span>]
                 .slice(axis, position)
                 .to_owned()
-                .into_pyarray(_py),
+                .into_pyarray_bound(_py),
             <span class="self">self</span>.grid.data[<span class="number">1</span>]
                 .slice(axis, position)
                 .to_owned()
-                .into_pyarray(_py),
+                .into_pyarray_bound(_py),
             <span class="self">self</span>.grid.data[<span class="number">2</span>]
                 .slice(axis, position)
                 .to_owned()
-                .into_pyarray(_py),
+                .into_pyarray_bound(_py),
         )
     }
-
-    <span class="kw">fn </span>collapse&lt;<span class="lifetime">'py</span>&gt;(
+    <span class="attr">#[allow(clippy::type_complexity)]
+    </span><span class="kw">fn </span>collapse&lt;<span class="lifetime">'py</span>&gt;(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         _py: Python&lt;<span class="lifetime">'py</span>&gt;,
         axis: usize,
-    ) -&gt; (<span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray2&lt;f64&gt;, <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray2&lt;f64&gt;, <span class="kw-2">&amp;</span><span class="lifetime">'py </span>PyArray2&lt;f64&gt;) {
+    ) -&gt; (
+        Bound&lt;<span class="lifetime">'py</span>, PyArray2&lt;f64&gt;&gt;,
+        Bound&lt;<span class="lifetime">'py</span>, PyArray2&lt;f64&gt;&gt;,
+        Bound&lt;<span class="lifetime">'py</span>, PyArray2&lt;f64&gt;&gt;,
+    ) {
         (
             <span class="self">self</span>.grid.data[<span class="number">0</span>]
                 .collapse(axis)
                 .to_owned()
-                .into_pyarray(_py),
+                .into_pyarray_bound(_py),
             <span class="self">self</span>.grid.data[<span class="number">1</span>]
                 .collapse(axis)
                 .to_owned()
-                .into_pyarray(_py),
+                .into_pyarray_bound(_py),
             <span class="self">self</span>.grid.data[<span class="number">2</span>]
                 .collapse(axis)
                 .to_owned()
-                .into_pyarray(_py),
+                .into_pyarray_bound(_py),
         )
     }
 

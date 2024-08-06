@@ -35,7 +35,7 @@ import os
 import sys
 
 _HERE = os.path.dirname(__file__)
-_ROOT_DIR = os.path.abspath(os.path.join(_HERE, "../.."))
+_ROOT_DIR = os.path.abspath(os.path.join(_HERE, "../"))
 _PACKAGE_DIR = os.path.abspath(os.path.join(_HERE, "up4"))
 _SUBPACKAGE_DIR = os.path.abspath(os.path.join(_HERE, "up4/plotting"))
 sys.path.insert(0, _ROOT_DIR)
@@ -50,7 +50,7 @@ copyright = "2022, Dominik Werner and Daniel Weston"
 # The full version, including alpha/beta/rc tags
 # Load the package's __version__.py module as a dictionary.
 about = {}
-with open("../../up4/__version__.py") as f:
+with open("../up4/__version__.py") as f:
     exec(f.read(), about)
 
 release = about["__version__"]
@@ -91,7 +91,7 @@ source_suffix = ".rst"
 # source_encoding = 'utf-8-sig'
 
 # The root toctree document
-master_doc = "index"  # NOTE: will be changed to `root_doc` in sphinx 4
+master_doc = "source/index"  # NOTE: will be changed to `root_doc` in sphinx 4
 
 autosummary_generate = True
 
@@ -177,7 +177,7 @@ default_role = "py:obj"
 # a list of builtin themes.
 
 html_theme = "pydata_sphinx_theme"
-html_logo = "_static/logo.jpeg"
+html_logo = "source/_static/logo.jpeg"
 
 version_match = version if "dev" in version else "v" + version
 
@@ -205,7 +205,9 @@ html_theme_options = {
     #         "icon": "fas fa-arrow-circle-down",
     #     },
     # ],
-    "switcher": dict(json_url="./_static/version.json", version_match=version_match),
+    "switcher": dict(
+        json_url="./source/_static/version.json", version_match=version_match
+    ),
 }
 
 html_context = {
@@ -227,7 +229,7 @@ html_last_updated_fmt = "%b %d, %Y"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ["_static"]
+html_static_path = ["./source/_static"]
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied

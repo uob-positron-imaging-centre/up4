@@ -19,7 +19,7 @@ const MAX_FAILS: i64 = 500;
 // number of arguments is necessary to properly read csv files.
 #[allow(clippy::too_many_arguments)]
 pub fn csv_multi_file_time_step(
-    filenames: Vec<&str>,
+    filenames: &[String],
     outname: &str,
     columns: Vec<i64>,
     time_: Vec<f64>,

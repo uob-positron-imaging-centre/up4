@@ -2,7 +2,6 @@
 
 use std::os::raw::c_long;
 
-use ndarray::Array0;
 use pyo3::prelude::*;
 use pyo3::types::IntoPyDict;
 extern crate ndarray;
@@ -205,7 +204,7 @@ impl PyData {
     /// * ``ymax``: Maximum y coordinate.
     /// * ``zmin``: Minimum z coordinate.
     /// * ``zmax``: Maximum z coordinate.
-    fn dimensions<'py>(&self, py: Python<'py>) -> &'py pyo3::types::PyDict {
+    fn dimensions<'py>(&self, py: Python<'py>) -> Bound<'py, pyo3::types::PyDict> {
         let stats = self.data.global_stats();
         let dim = stats.dimensions();
         let key_vals: Vec<(&str, PyObject)> = vec![
@@ -216,7 +215,7 @@ impl PyData {
             ("zmin", dim[[0, 2]].to_object(py)),
             ("zmax", dim[[1, 2]].to_object(py)),
         ];
-        let dict = key_vals.into_py_dict(py);
+        let dict = key_vals.into_py_dict_bound(py);
         dict
     }
 
@@ -225,11 +224,11 @@ impl PyData {
     /// * ``0``: Minimum x coordinate.
     /// * ``1``: Minimum y coordinate.
     /// * ``2``: Minimum z coordinate.
-    fn min_position<'py>(&self, py: Python<'py>) -> &'py numpy::PyArray1<f64> {
+    fn min_position<'py>(&self, py: Python<'py>) -> Bound<'py, numpy::PyArray1<f64>> {
         let stats = self.data.global_stats();
         let dim = stats.dimensions();
         let min_pos = dim.row(0).to_owned();
-        min_pos.into_pyarray(py)
+        min_pos.into_pyarray_bound(py)
     }
 
     /// Return the max position of the system as a array
@@ -237,11 +236,11 @@ impl PyData {
     /// * ``0``: Maximum x coordinate.
     /// * ``1``: Maximum y coordinate.
     /// * ``2``: Maximum z coordinate.
-    fn max_position<'py>(&self, py: Python<'py>) -> &'py numpy::PyArray1<f64> {
+    fn max_position<'py>(&self, py: Python<'py>) -> Bound<'py, numpy::PyArray1<f64>> {
         let stats = self.data.global_stats();
         let dim = stats.dimensions();
         let max_pos = dim.row(1).to_owned();
-        max_pos.into_pyarray(py)
+        max_pos.into_pyarray_bound(py)
     }
 
     /// Number of particles in the system.
@@ -275,12 +274,12 @@ impl PyData {
     ///
     /// Array of time values.
     ///
-    fn time<'py>(&self, py: Python<'py>) -> &'py numpy::PyArray1<f64> {
+    fn time<'py>(&self, py: Python<'py>) -> Bound<'py, numpy::PyArray1<f64>> {
         self.data
             .global_stats()
             .time_array()
             .to_owned()
-            .into_pyarray(py)
+            .into_pyarray_bound(py)
     }
 
     /// Return velocity data as a vector field.
@@ -359,8 +358,10 @@ impl PyData {
         _py: Python<'py>,
         particle_id: usize,
         timestep: (usize, usize),
-    ) -> &'py PyArray2<f64> {
-        self.data.extract(particle_id, timestep).into_pyarray(_py)
+    ) -> Bound<'py, PyArray2<f64>> {
+        self.data
+            .extract(particle_id, timestep)
+            .into_pyarray_bound(_py)
     }
 
     /// Return the number density field.
@@ -508,7 +509,10 @@ impl PyData {
         property: &str,
         bins: usize,
         limit: f64,
-    ) -> (&'py numpy::PyArray1<f64>, &'py numpy::PyArray1<f64>) {
+    ) -> (
+        Bound<'py, numpy::PyArray1<f64>>,
+        Bound<'py, numpy::PyArray1<f64>>,
+    ) {
         let selector: &ParticleSelector =
             match self.selector.as_any().downcast_ref::<ParticleSelector>() {
                 Some(b) => b,
@@ -517,7 +521,10 @@ impl PyData {
         let (histogram, bin_edges) =
             self.data
                 .histogram(grid.grid.clone(), selector, property, limit, bins);
-        (histogram.into_pyarray(_py), bin_edges.into_pyarray(_py))
+        (
+            histogram.into_pyarray_bound(_py),
+            bin_edges.into_pyarray_bound(_py),
+        )
     }
 
     /// Calculate the granular temperature of the system.
@@ -588,7 +595,10 @@ impl PyData {
         type_a: usize,
         type_b: usize,
         threshold: usize,
-    ) -> (&'py numpy::PyArray1<f64>, &'py numpy::PyArray1<f64>) {
+    ) -> (
+        Bound<'py, numpy::PyArray1<f64>>,
+        Bound<'py, numpy::PyArray1<f64>>,
+    ) {
         print_debug!("Starting Lacey Mixing Index function");
         let selector: &ParticleSelector =
             match self.selector.as_any().downcast_ref::<ParticleSelector>() {
@@ -599,7 +609,10 @@ impl PyData {
             self.data
                 .lacey_mixing(grid.grid.clone(), selector, type_a, type_b, threshold);
 
-        (time.into_pyarray(_py), mixing_index.into_pyarray(_py))
+        (
+            time.into_pyarray_bound(_py),
+            mixing_index.into_pyarray_bound(_py),
+        )
     }
 
     /// Calculate the circulation time of a particle in a system.
@@ -777,7 +790,10 @@ impl PyData {
         min_time: f64,
         max_time: f64,
         steps: usize,
-    ) -> (&'py numpy::PyArray1<f64>, &'py numpy::PyArray1<f64>) {
+    ) -> (
+        Bound<'py, numpy::PyArray1<f64>>,
+        Bound<'py, numpy::PyArray1<f64>>,
+    ) {
         print_debug!("Starting MSD function");
         let selector: &ParticleSelector =
             match self.selector.as_any().downcast_ref::<ParticleSelector>() {
@@ -788,7 +804,7 @@ impl PyData {
             .data
             .msd(grid.grid.clone(), selector, min_time, max_time, steps);
 
-        (msd.into_pyarray(_py), time.into_pyarray(_py))
+        (msd.into_pyarray_bound(_py), time.into_pyarray_bound(_py))
     }
 
     /// set the rotation of the system
@@ -834,14 +850,13 @@ impl PyData {
     fn __getitem__(&mut self, idx: SliceIntOrVec, py: Python) -> PyResult<PyObject> {
         match idx {
             SliceIntOrVec::Int(index) => {
-                let _idx;
-                if index < 0 {
-                    _idx = *self.data.global_stats().timesteps() as isize + index;
+                let idx = if index < 0 {
+                    *self.data.global_stats().timesteps() as isize + index
                 } else {
-                    _idx = index;
-                }
+                    index
+                };
                 // Single index
-                let timestep = self.data.get_timestep(_idx as usize);
+                let timestep = self.data.get_timestep(idx as usize);
                 // make it an array
                 let position = timestep.position().to_owned();
                 let velocity = timestep.velocity().to_owned();
@@ -857,11 +872,11 @@ impl PyData {
                     let v_x: f64 = velocity[[i, 0]];
                     let v_y: f64 = velocity[[i, 1]];
                     let v_z: f64 = velocity[[i, 2]];
-                    let x = ndarray::array![id as f64, p_x, p_y, p_z, v_x, v_y, v_z];
+                    let x = ndarray::array![id, p_x, p_y, p_z, v_x, v_y, v_z];
                     result.row_mut(i).assign(&x);
                 }
 
-                Ok(result.into_pyarray(py).to_object(py))
+                Ok(result.into_pyarray_bound(py).to_object(py))
             }
             SliceIntOrVec::Vec(indices) => {
                 // Fancy indexing with a list of indices
@@ -872,13 +887,12 @@ impl PyData {
                     7,
                 ]);
                 for (i, index) in indices.iter().enumerate() {
-                    let _idx;
-                    if index < &0 {
-                        _idx = *self.data.global_stats().timesteps() as isize + index;
+                    let idx = if index < &0 {
+                        *self.data.global_stats().timesteps() as isize + index
                     } else {
-                        _idx = *index;
-                    }
-                    let timestep = self.data.get_timestep(_idx as usize);
+                        *index
+                    };
+                    let timestep = self.data.get_timestep(idx as usize);
                     // make it an array
                     let position = timestep.position().to_owned();
                     let velocity = timestep.velocity().to_owned();
@@ -892,11 +906,11 @@ impl PyData {
                         let v_x: f64 = velocity[[j, 0]];
                         let v_y: f64 = velocity[[j, 1]];
                         let v_z: f64 = velocity[[j, 2]];
-                        let x = ndarray::array![id as f64, p_x, p_y, p_z, v_x, v_y, v_z];
+                        let x = ndarray::array![id, p_x, p_y, p_z, v_x, v_y, v_z];
                         result.slice_mut(ndarray::s![i, j, ..]).assign(&x);
                     }
                 }
-                Ok(result.into_pyarray(py).to_object(py))
+                Ok(result.into_pyarray_bound(py).to_object(py))
                 // next: SLICE
             }
             SliceIntOrVec::Slice(slice) => {
@@ -929,15 +943,15 @@ impl PyData {
                         let v_x: f64 = velocity[[j, 0]];
                         let v_y: f64 = velocity[[j, 1]];
                         let v_z: f64 = velocity[[j, 2]];
-                        let x = ndarray::array![id as f64, p_x, p_y, p_z, v_x, v_y, v_z];
+                        let x = ndarray::array![id, p_x, p_y, p_z, v_x, v_y, v_z];
                         result.slice_mut(ndarray::s![i, j, ..]).assign(&x);
                     }
                 }
-                Ok(result.into_pyarray(py).to_object(py))
-            }
-            _ => Err(pyo3::exceptions::PyIndexError::new_err(
-                "Index must be an integer or a list of integers",
-            )),
+                Ok(result.into_pyarray_bound(py).to_object(py))
+            } // TODO: clippy says this is unreachable - this needs testing
+              // _ => Err(pyo3::exceptions::PyIndexError::new_err(
+              //     "Index must be an integer or a list of integers",
+              // )),
         }
     }
 
@@ -950,7 +964,7 @@ impl PyData {
 /// the `lib.name` setting in the `Cargo.toml`, else Python will not be able to
 /// import the module.
 #[pymodule]
-fn upppp_rust(_py: Python, m: &PyModule) -> PyResult<()> {
+fn upppp_rust(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<PyData>()?;
     m.add_class::<PyGrid>()?;
     m.add_class::<PyConverter>()?;

@@ -60,9 +60,9 @@ impl PyConverter {
     /// --------
     /// Convert legacy VTK files to HDF5
     ///
-    /// 
+    ///
     /// >>> from up4 import Converter
-    /// >>> 
+    /// >>>
     /// >>> Converter.vtk(
     /// >>>     filenames=["file1.vtk", "file2.vtk"],
     /// >>>     timestep=1e-5,
@@ -74,12 +74,12 @@ impl PyConverter {
     /// >>>     type_field_name="type",
     /// >>>     diameter_field_name=None,
     /// >>> )
-    /// 
+    ///
     /// Convert XML VTK (unstructured grid format) files to HDF5
     ///
-    /// 
+    ///
     /// >>> from up4 import Converter
-    /// >>> 
+    /// >>>
     /// >>> Converter.vtk(
     /// >>>     filenames=["file1.vtu", "file2.vtu"],
     /// >>>     timestep=1e-5,
@@ -90,13 +90,13 @@ impl PyConverter {
     /// >>>     type_field_name="type",
     /// >>>     diameter_field_name="diameter",
     /// >>> )
-    /// 
+    ///
     #[pyo3(signature = (filenames, timestep, outname, filter = "(\\d+).vtk", 
         velocity_field_name = "v", radius_field_name = "radius", 
         id_field_name = "id", type_field_name = "type", diameter_field_name = None))]
     #[staticmethod]
     fn vtk(
-        filenames: Vec<&str>,
+        filenames: Vec<String>,
         timestep: f64,
         outname: &str,
         filter: &str, // example r"vtk_(\d+).vtk"
@@ -123,7 +123,7 @@ impl PyConverter {
                     .add_type_field(type_field_name)
                     .add_velocity_field(velocity_field_name),
             };
-            converter.write_hdf5_from_files(filenames, timestep, outname, filter);
+            converter.write_hdf5_from_files(&filenames, timestep, outname, filter);
         } else if filter.contains(".vtu")
         // xml files to convert
         {
@@ -135,7 +135,7 @@ impl PyConverter {
                         .add_id_field(id_field_name)
                         .add_type_field(type_field_name)
                         .add_velocity_field(velocity_field_name);
-                    converter.write_hdf5_from_files(filenames, timestep, outname, filter);
+                    converter.write_hdf5_from_files(&filenames, timestep, outname, filter);
                 }
                 None => {
                     let converter = XMLVTKConverter::new(vtk_file_type)
@@ -143,7 +143,7 @@ impl PyConverter {
                         .add_radius_field(radius_field_name)
                         .add_type_field(type_field_name)
                         .add_velocity_field(velocity_field_name);
-                    converter.write_hdf5_from_files(filenames, timestep, outname, filter);
+                    converter.write_hdf5_from_files(&filenames, timestep, outname, filter);
                 }
             }
         } else if filter.contains(".vtp")
@@ -157,7 +157,7 @@ impl PyConverter {
                         .add_id_field(id_field_name)
                         .add_type_field(type_field_name)
                         .add_velocity_field(velocity_field_name);
-                    converter.write_hdf5_from_files(filenames, timestep, outname, filter);
+                    converter.write_hdf5_from_files(&filenames, timestep, outname, filter);
                 }
                 None => {
                     let converter = XMLVTKConverter::new(vtk_file_type)
@@ -165,7 +165,7 @@ impl PyConverter {
                         .add_radius_field(radius_field_name)
                         .add_type_field(type_field_name)
                         .add_velocity_field(velocity_field_name);
-                    converter.write_hdf5_from_files(filenames, timestep, outname, filter);
+                    converter.write_hdf5_from_files(&filenames, timestep, outname, filter);
                 }
             }
         }
@@ -210,9 +210,9 @@ impl PyConverter {
     /// Examples
     /// --------
     /// Convert legacy VTK files to HDF5
-    /// 
+    ///
     /// >>> from up4 import Converter
-    /// >>> 
+    /// >>>
     /// >>> Converter.vtk_from_folder(
     /// >>>     folder="folder",
     /// >>>     timestep=1e-5,
@@ -224,11 +224,11 @@ impl PyConverter {
     /// >>>     type_field_name="type",
     /// >>>     diameter_field_name=None,
     /// >>> )
-    /// 
+    ///
     /// Convert XML VTK (unstructured grid format) files to HDF5
-    /// 
+    ///
     /// >>> from up4 import Converter
-    /// >>> 
+    /// >>>
     /// >>> Converter.vtk_from_folder(
     /// >>>     folder="folder",
     /// >>>     timestep=1e-5,
@@ -239,7 +239,7 @@ impl PyConverter {
     /// >>>     type_field_name="type",
     /// >>>     diameter_field_name="diameter",
     /// >>> )
-    /// 
+    ///
     #[pyo3(signature = (folder, timestep, outname, filter = "(\\d+).vtk", 
     velocity_field_name = "v", radius_field_name = "radius", 
     id_field_name = "id", type_field_name = "type", diameter_field_name = None))]
@@ -320,7 +320,8 @@ impl PyConverter {
         }
     }
 
-    // TODO ensure this doesn't get accidentally swept up into doctests
+    // This docstring is for Python, and isn't valid Rust
+    /// ```ignore
     /// Convert CSV file to a HDF5 file.
     ///
     /// Parameters
@@ -402,7 +403,8 @@ impl PyConverter {
         )
     }
 
-    // TODO ensure this doesn't get accidentally swept up into doctests
+    // This docstring is for Python, and isn't valid Rust
+    /// ```ignore
     /// Convert CSV file containing multiple particles into a HDF5 file.
     ///
     /// There can be different ways how this is achieved, therefore the function
@@ -447,10 +449,10 @@ impl PyConverter {
     /// method : str, optional
     ///     Method to use to convert the CSV file. Can be one of the following:
     ///
-    ///     - `chain`: The particles are chained in the file, i.e. the first particle
+    ///     - `chain``: The particles are chained in the file, i.e. the first particle
     ///         is followed by the second, the second by the third, etc.
     ///         all particles are stored in one file
-    ///     -  id_line: This algorithm sorts the particles by their id column and
+    ///     -  `id_line``: This algorithm sorts the particles by their id column and
     ///         their time column. The `columns` argument must contain the
     ///         id column as the first element.
     ///
@@ -562,7 +564,7 @@ impl PyConverter {
     ))]
     #[staticmethod]
     fn csv_multi_files(
-        filenames: Vec<&str>,
+        filenames: Vec<String>,
         outname: &str,
         times: Vec<f64>,
         columns: Vec<i64>,
@@ -578,7 +580,7 @@ impl PyConverter {
         //    "Multi CSV reader is not implemented yet. This feature comes in future!",
         //));
         converter::csv_multi_file_time_step(
-            filenames,
+            &filenames,
             outname,
             columns,
             times,

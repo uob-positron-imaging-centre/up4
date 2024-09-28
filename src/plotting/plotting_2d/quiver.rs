@@ -6,9 +6,7 @@ use derive_getters::Getters;
 use itertools::izip;
 use ndarray::{Array1, Array2, Zip};
 use ndarray_stats::QuantileExt;
-use plotly::common::{
-    ColorBar, ColorScale, ColorScaleElement, Fill, Line, Marker, Mode,
-};
+use plotly::common::{ColorBar, ColorScale, ColorScaleElement, Fill, Line, Marker, Mode};
 use plotly::{Scatter, Trace};
 use std::f64::consts::PI;
 #[derive(Getters, Clone, Debug)]

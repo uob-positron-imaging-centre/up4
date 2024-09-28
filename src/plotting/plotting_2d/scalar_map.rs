@@ -120,7 +120,8 @@ impl ScalarMap {
             x.into_raw_vec(),
             y.into_raw_vec(),
             self.data.to_owned().into_raw_vec(),
-        ).color_scale(ColorScale::Vector(cmap));
+        )
+        .color_scale(ColorScale::Vector(cmap));
         let trace = vec![heatmap];
         trace
     }

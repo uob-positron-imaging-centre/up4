@@ -372,7 +372,7 @@ impl PyGrid {
         self.grid.collapse(axis).to_owned().into_pyarray_bound(_py)
     }
 
-    /// Collaps the grid along an axis
+    /// Collapse the grid along an axis
     /// This is basically cell based depth averaging.
     ///
     /// Parameters

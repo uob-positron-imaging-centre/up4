@@ -14,7 +14,7 @@ use std::fmt::Write;
 use std::path::Path;
 
 use crate::converter::convertertools;
-// Maximum amount of failiures in a row available for a process
+// Maximum amount of failures in a row available for a process
 const MAX_FAILS: i64 = 500;
 
 #[allow(clippy::too_many_arguments)]
@@ -66,14 +66,14 @@ pub fn csv_multi_chain(
         } else {
             panic!("No csv-columns specified!");
         }
-        // now go thorugh the data and find columns where the previous time is higher then the current
+        // now go through the data and find columns where the previous time is higher then the current
         let mut old_time = 0.0;
         let mut particles = 0;
         let mut indx_start = vec![0];
         let mut duration = vec![];
         let mut start_time = vec![0.0];
         let mut steps_per_particle = vec![];
-        // Find particle indexis by checking if the time is reseted
+        // Find particle index by checking if the time is reset
         for (i, time) in data.slice(ndarray::s![.., 0]).iter().enumerate() {
             if i > 0 && time < &old_time {
                 indx_start.push(i);
@@ -139,7 +139,7 @@ pub fn csv_multi_chain(
                 if temp_data.column(0).len() < 200000 {
                     temp_data = convertertools::velocity_polynom(temp_data, 9, 2);
                 } else {
-                    temp_data = convertertools::velocity_paralell::velocity_polynom_parallel(
+                    temp_data = convertertools::velocity_parallel::velocity_polynom_parallel(
                         temp_data, 9, 2,
                     );
                 }
@@ -212,7 +212,7 @@ pub fn csv_multi_chain(
                 if failcount > MAX_FAILS {
                     panic!(
                         "Maximum amount of points that are behind the current \
-                 time reached. Please Check wether your data contains multiple\
+                 time reached. Please Check whether your data contains multiple\
                  trajectories that are sorted in label.
                  "
                     )

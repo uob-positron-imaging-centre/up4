@@ -1,4 +1,4 @@
-//! Data Managment Module. Organizes file access.
+//! Data Management Module. Organizes file access.
 //use crate::functions::*;
 //use crate::functions::fields::*;
 use super::functions::conditional::Conditional;
@@ -47,7 +47,7 @@ pub trait DataManager {
 
 pub trait Manager: DataManager + Granular + Extraction + Mixing + Conditional {}
 
-/// Data-struct containing all necessery information for a timestep
+/// Data-struct containing all necessary information for a timestep
 #[derive(Debug, Default, Getters, Clone)]
 pub struct Timestep {
     time: f64,

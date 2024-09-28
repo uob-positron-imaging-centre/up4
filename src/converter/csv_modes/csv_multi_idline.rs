@@ -13,7 +13,7 @@ use regex::Regex;
 use std::{path::Path, process::id};
 
 use crate::converter::convertertools;
-// Maximum amount of failiures in a row available for a process
+// Maximum amount of failures in a row available for a process
 const MAX_FAILS: i64 = 500;
 
 //
@@ -101,11 +101,11 @@ pub fn csv_multi_idline(
                     )
                 }
                 // if condition to check weather to use the parallel version of the velocity computation
-                // currently turned of due to bug in parralel computation
+                // currently turned of due to bug in parallel computation
                 if true {
                     temp_data = convertertools::velocity_polynom(temp_data, 9, 2);
                 } else {
-                    temp_data = convertertools::velocity_paralell::velocity_polynom_parallel(
+                    temp_data = convertertools::velocity_parallel::velocity_polynom_parallel(
                         temp_data, 9, 2,
                     );
                 }
@@ -184,7 +184,7 @@ pub fn csv_multi_idline(
                 if failcount > MAX_FAILS {
                     panic!(
                         "Maximum amount of points that are behind the current \
-                 time reached. Please Check wether your data contains multiple\
+                 time reached. Please Check whether your data contains multiple\
                  trajectories that are sorted in label.
                  "
                     )

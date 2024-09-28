@@ -1,7 +1,7 @@
 extern crate ndarray;
 use super::{CellId, Dim, GridFunctions3D, Position, ThreeD};
-use crate::{print_debug, print_warning};
 use crate::utilities::{nan_mean, nan_std};
+use crate::{print_debug, print_warning};
 use derive_getters::Getters;
 use ndarray::{prelude::*, RemoveAxis};
 use ndarray_stats::QuantileExt;
@@ -37,7 +37,7 @@ impl CylindricalGrid3D {
             _ => panic!("Grid3D got limits for other then three dimensions."),
         };
         const PI: f64 = std::f64::consts::PI;
-        // the distance beween two angles is constant therefore the cell size in omega dimension is
+        // the distance between two angles is constant therefore the cell size in omega dimension is
         let ocellsize = (2.0 * PI) / cells[1] as f64;
         // height distance is also easy to calculate
         let zcellsize = (lim[2][1] - lim[2][0]) / cells[2] as f64;
@@ -85,7 +85,7 @@ impl CylindricalGrid3D {
                 // volume of a cell is pi*h*(r_o**2-r_i**2)*alpha/360
                 // new is the next outer radius calculated by
                 // new = (V +r_before**2).sqrt()
-                // V is the volume of a cell which is siply the volume defided by the num of cells
+                // V is the volume of a cell which is simply the volume defided by the num of cells
 
                 let new = (
                     outer_radius * outer_radius / cells[0] as f64 // volume
@@ -326,15 +326,15 @@ impl GridFunctions3D for CylindricalGrid3D {
         }
         let axis1 = Axis(axis1);
         let axis2 = Axis(axis2 - 1); // we removed axis1 so axis2 is now one smaller
-        let first_collaps = self.collapse(axis1.index());
-        let first_collaps_weight = self.collapse_weight(axis1.index());
-        let mut result: Array1<f64> = Array::zeros(first_collaps.raw_dim().remove_axis(axis2));
+        let first_collapse = self.collapse(axis1.index());
+        let first_collapse_weight = self.collapse_weight(axis1.index());
+        let mut result: Array1<f64> = Array::zeros(first_collapse.raw_dim().remove_axis(axis2));
         let mut result_weight: Array1<f64> =
-            Array::zeros(first_collaps.raw_dim().remove_axis(axis2));
+            Array::zeros(first_collapse.raw_dim().remove_axis(axis2));
 
-        for (data_arr, weight) in first_collaps
+        for (data_arr, weight) in first_collapse
             .axis_iter(axis2)
-            .zip(first_collaps_weight.axis_iter(axis2))
+            .zip(first_collapse_weight.axis_iter(axis2))
         {
             // check for nans
             let data_arr = data_arr.mapv(|x| if x.is_nan() { 0. } else { x });
@@ -358,11 +358,11 @@ impl GridFunctions3D for CylindricalGrid3D {
         }
         let axis1 = Axis(axis1);
         let axis2 = Axis(axis2 - 1);
-        let first_collaps_weight = self.collapse_weight(axis1.index());
+        let first_collapse_weight = self.collapse_weight(axis1.index());
         let mut result_weight: Array1<f64> =
-            Array::zeros(first_collaps_weight.raw_dim().remove_axis(axis2));
+            Array::zeros(first_collapse_weight.raw_dim().remove_axis(axis2));
 
-        for weight in first_collaps_weight.axis_iter(axis2) {
+        for weight in first_collapse_weight.axis_iter(axis2) {
             result_weight += &weight;
         }
         result_weight
@@ -512,4 +512,3 @@ impl GridFunctions3D for CylindricalGrid3D {
         }
     }
 }
-

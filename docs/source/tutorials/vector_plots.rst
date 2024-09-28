@@ -21,7 +21,7 @@ Available vector plotting options are:
 
 In the proceeding sections, we will focus on the visualisation of vector fields
 from a rotating drum, that rotates about the x-axis. The data for this can be found in
-the ``tests/fixtures`` directory of ``up4``. To avoid unnecessary code repitition,
+the ``tests/fixtures`` directory of ``up4``. To avoid unnecessary code repetition,
 each example assumes that above it is the following code block:
 
 .. code-block:: python

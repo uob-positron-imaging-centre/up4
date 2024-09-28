@@ -167,7 +167,7 @@ pub trait Conditional: DataManager {
                         mid_flag_array[particle] = 1;
                     } else if start_flag_array[particle] == 1 && mid_flag_array[particle] == 1 {
                         //up_times.push(current_time - mid_time_flag_array[particle]);
-                        // One more flag to make shure up time only counted once
+                        // One more flag to make sure up time only counted once
                     }
                 }
                 // particle crosses out of upper border

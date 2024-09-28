@@ -11,7 +11,7 @@ pub trait Mixing: DataManager {
         selector: &ParticleSelector,
         type_a: usize,
         type_b: usize,
-        threshhold: usize,
+        threshold: usize,
     ) -> (Array1<f64>, Array1<f64>) {
         //read the number of timesteps inside this hdf5file
         let global_stats = self.global_stats();
@@ -67,7 +67,7 @@ pub trait Mixing: DataManager {
                 }
                 if !grid.is_inside(position) {
                     // the particle is out of the field of view
-                    print_debug!("Particle {} is out of FoV", particle);
+                    print_debug!("Particle {} is out of FOV", particle);
                     continue;
                 }
                 print_debug!("Particle {} is in the grid", particle);
@@ -95,7 +95,7 @@ pub trait Mixing: DataManager {
                 .iter()
                 .zip((type_a_grid.get_weights() + type_b_grid.get_weights()).iter())
             {
-                if *num < threshhold as f64 {
+                if *num < threshold as f64 {
                     continue;
                 }
                 if conc.is_nan() {
@@ -170,7 +170,7 @@ pub trait Mixing: DataManager {
                 }
                 if !grid.is_inside(position) {
                     // the particle is out of the field of view
-                    print_debug!("Particle {} is out of FoV", particle);
+                    print_debug!("Particle {} is out of FOV", particle);
                     continue;
                 }
                 print_debug!("Particle {} is in the grid", particle);
@@ -261,7 +261,7 @@ pub trait Mixing: DataManager {
                 }
                 if !grid.is_inside(positions[particle]) {
                     // the particle is out of the field of view
-                    print_debug!("Particle {} is out of FoV", particle);
+                    print_debug!("Particle {} is out of FOV", particle);
                     continue;
                 }
                 let position_future_particle = position_future[particle];

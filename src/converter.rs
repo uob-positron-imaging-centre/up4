@@ -23,7 +23,7 @@ mod convertertools;
 mod csv_modes;
 mod legacytools;
 mod xmltools;
-// Maximum amount of failiures in a row available for a process
+// Maximum amount of failures in a row available for a process
 const MAX_FAILS: i64 = 500;
 // Shuffle for blosc filter
 const BLOSC_SHUFFLE: bool = true;
@@ -84,7 +84,7 @@ pub fn csv_converter(
             .deserialize_array2_dynamic()
             .expect("Unable to extract CSV data to ndarray! \nYour delimiter might be wrong.\n");
 
-        // slice the read array to only get the colums requested
+        // slice the read array to only get the columns requested
         if !columns.is_empty() {
             let mut temp_data = Array2::<f64>::from_elem((data.shape()[0], 7), f64::NAN);
             for (i, column) in columns.iter().enumerate() {
@@ -107,7 +107,7 @@ pub fn csv_converter(
         }
         if interpolate {
             let mut t = data.slice_mut(s![.., 0_usize]);
-            //set first timestep to 0 by substracting the first timestep from all timesteps
+            //set first timestep to 0 by subtracting the first timestep from all timesteps
             t -= t[0];
             let max_t = t[t.len() - 1];
             let steps = t.len();
@@ -128,7 +128,7 @@ pub fn csv_converter(
                 //data.column(0).len() < 100000000000 {
                 data = convertertools::velocity_polynom(data, sampling_steps, 2);
             } else {
-                data = convertertools::velocity_paralell::velocity_polynom_parallel(
+                data = convertertools::velocity_parallel::velocity_polynom_parallel(
                     data,
                     sampling_steps,
                     2,
@@ -195,7 +195,7 @@ pub fn csv_converter(
             if failcount > MAX_FAILS {
                 panic!(
                     "Maximum amount of points that are behind the current \
-                 time reached. Please Check wether your data contains multiple\
+                 time reached. Please Check whether your data contains multiple\
                  trajectories that are sorted in label.
                  "
                 )
@@ -493,7 +493,7 @@ impl XMLVTKConverter {
     /// Filename in format: vtk_(Number).vtk, important for filtering the time for each file
     /// whereas 'number' is the timestep of the simulation
     ///
-    /// see [regex](https://docs.rs/regex/1.5.4/regex/) for mor information about filtering
+    /// see [regex](https://docs.rs/regex/1.5.4/regex/) for more information about filtering
     /// ```ignore
     /// let vtk_type = VTKType::UnstructuredGrid;
     /// let converter = XMLVTKConverter::new(vtk_type)
@@ -568,7 +568,7 @@ impl XMLVTKConverter {
     /// Filename in format: vtk_(Number).vtk, important for filtering the time for each file
     /// whereas 'number' is the timestep of the simulation
     ///
-    /// see [regex](https://docs.rs/regex/1.5.4/regex/) for mor information about filtering
+    /// see [regex](https://docs.rs/regex/1.5.4/regex/) for more information about filtering
     /// ```ignore
     /// let vtk_type = VTKType::UnstructuredGrid;
     /// let converter = XMLVTKConverter::new(vtk_type)
@@ -927,7 +927,7 @@ impl LegacyVTKConverter {
     /// Filename in format: vtk_(Number).vtk, important for filtering the time for each file
     /// whereas 'number' is the timestep of the simulation
     ///
-    /// see [regex](https://docs.rs/regex/1.5.4/regex/) for mor information about filtering
+    /// see [regex](https://docs.rs/regex/1.5.4/regex/) for more information about filtering
     /// ```ignore
     /// let converter = LegacyVTKConverter::new()
     ///     .add_velocity_field("velocity")
@@ -996,7 +996,7 @@ impl LegacyVTKConverter {
     /// Filename in format: vtk_(Number).vtk, important for filtering the time for each file
     /// whereas 'number' is the timestep of the simulation
     ///
-    /// see [regex](https://docs.rs/regex/1.5.4/regex/) for mor information about filtering
+    /// see [regex](https://docs.rs/regex/1.5.4/regex/) for more information about filtering
     /// ```ignore
     /// let converter = LegacyVTKConverter::new()
     ///     .add_velocity_field("velocity")

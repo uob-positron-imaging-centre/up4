@@ -1,0 +1,95 @@
+name: Test Python
+
+on:
+  pull_request:
+    paths:
+      - Cargo.lock
+      - up4/**
+      - src/**
+      - src/pylib.rs
+      - .github/workflows/test-python.yml
+  push:
+    branches:
+      - main
+    paths:
+      - Cargo.lock
+      - up4/**
+      - src/pylib/**
+      - src/pylib.rs
+      - .github/workflows/test-python.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  RUSTFLAGS: -C debuginfo=0  # Do not produce debug symbols to keep memory usage down
+  RUST_BACKTRACE: 1
+  PYTHONUTF8: 1
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test-python:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ['3.8', '3.11', '3.12']
+        # include:
+        #   - os: windows-latest
+        #     python-version: '3.12'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Create virtual environment
+        env:
+          BIN: ${{ matrix.os == 'windows-latest' && 'Scripts' || 'bin' }}
+        run: |
+          python -m venv .venv
+          echo "$GITHUB_WORKSPACE/.venv/$BIN" >> $GITHUB_PATH
+          echo "VIRTUAL_ENV=$GITHUB_WORKSPACE/.venv" >> $GITHUB_ENV
+
+      - name: Install Python dependencies
+        run: |
+          pip install uv
+          uv pip install -r requirements.txt -r requirements_test.txt
+
+      - name: Set up Rust
+        run: rustup show
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          save-if: ${{ github.ref_name == 'uPPPP' }}
+
+      - name: Install up4
+        run: pip install .
+
+    # TODO add doctests
+    #   - name: Run doctests
+    #     if: github.ref_name != 'main' && matrix.python-version == '3.12' && matrix.os == 'ubuntu-latest'
+    #     run: |
+    #       python tests/docs/run_doctest.py
+    #       pytest tests/docs/test_user_guide.py -m docs
+
+      - name: Run tests
+        run: python3 -m pytest tests/test_all.py
+
+      - name: Trigger docs build and deploy
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          event-type: test-python
+          client-payload: >
+            {
+              "sha": "${{ github.event.client_payload.sha }}"
+            }

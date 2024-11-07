@@ -8,108 +8,139 @@ on:
   pull_request:
     paths-ignore:
       - 'docs/**'
-  #push:
-  #  paths-ignore:
-  #    - 'docs/**'
+  push:
+    paths-ignore:
+     - 'docs/**'
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
-  conda:
-    name: conda
-    runs-on: ${{matrix.os}}-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          #- {os: macos, version: 1.12.0, channel: conda-forge, rust: stable}
-          #- {os: windows, version: 1.12.0, channel: conda-forge, rust: stable}
-          - {os: ubuntu, version: 1.12.0, channel: conda-forge, rust: stable, python-version: 3.9}
-    defaults:
-      run:
-        shell: bash -l {0}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with: {submodules: true}
-      - name: Install Rust (${{matrix.rust}})
-        uses: actions-rs/toolchain@v1
-        with: {toolchain: '${{matrix.rust}}', profile: minimal, override: true}
-      - uses: "actions/checkout@v2"
-      - name: "Install miniconda"
-        run: |
-          if [[ ! -z $INSTALL_MINICONDA ]]; then source .github/workflows/install_miniconda.sh; fi
-      - name: Install conda
-        uses: conda-incubator/setup-miniconda@v3
-        with:
-          auto-update-conda: true
-          python-version: "${{ matrix.python-version }}"
-          channels: "conda-forge,anaconda"
-          activate-environment: testenv
-      - name: Install mamba
-        run: |
-          # hdf5 version 1.14 not currently supported yet so we restrict hdf5 to 1.13 at most
-          echo "hdf5<=1.13" > $CONDA_PREFIX/conda-meta/pinned
-          conda install -y -c ${{matrix.channel}} mamba
-      - name: Install HDF5 (${{matrix.version}}${{matrix.mpi && '-' || ''}}${{matrix.mpi}})
-        run: |
-          [ "${{matrix.mpi}}" != "" ] && MPICC_PKG=${{matrix.mpi}}-mpicc
-          mamba install -y -c ${{matrix.channel}} 'hdf5=${{matrix.version}}=*${{matrix.mpi}}*' $MPICC_PKG
-      - name: Build Rust version
-        run: |
-          export HDF5_DIR="$CONDA_PREFIX"
-          export PYO3_PYTHON=python3
-          [ "${{runner.os}}" != "Windows" ] && export RUSTFLAGS="-C link-args=-Wl,-rpath,$CONDA_PREFIX/lib"
-          cargo check
-      - name: "Install dependencies"
-        run: |
-          pwd
-          export HDF5_DIR="$CONDA_PREFIX"
-          export PYO3_PYTHON=python3
-          which python
-          python -VV
-          python -m site
-          python -m pip install --upgrade pip setuptools
-          [ "${{runner.os}}" != "Windows" ] && export RUSTFLAGS="-C link-args=-Wl,-rpath,$CONDA_PREFIX/lib"
-          mamba install --file requirements_test.txt
-      - name: Install up4 on python
-        run: |
-          export HDF5_DIR="$CONDA_PREFIX"
-          export PYO3_PYTHON=python3
-          python3 -m pip install .
-          python3 -c "import up4"
-          python3 -c "import upppp_rust; print(upppp_rust.__file__)"
-      - name: Run tests
-        run: |
-          export LD_LIBRARY_PATH="$CONDA_PREFIX/lib"
-          python3 -c "import up4; print(up4.__file__)"
-          python3 -m pytest tests/test_all.py
 
-      - name: Setup Sphinx
-        run: |
-          mamba install -y -c ${{matrix.channel}} --file docs/requirements.txt
-      - name: Generate Rust docs
-        run: |
-          export HDF5_DIR="$CONDA_PREFIX"
-          cargo doc --no-deps --target-dir docs/source/_static/
-      - name: Build HTML
-        run: |
-          pwd
-          export HDF5_DIR="$CONDA_PREFIX"
-          export PYO3_PYTHON=python3
-          export LD_LIBRARY_PATH="$CONDA_PREFIX/lib"
-          cd docs
-          python3 -c "import up4; print(up4.__file__)"
-          make html
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: html-doc
-          path: docs/build/html
+  # conda-setup:
+  #   defaults:
+  #     run:
+  #       shell: bash -l {0}
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: "Install miniconda"
+  #       run: |
+  #           if [[ ! -z $INSTALL_MINICONDA ]]; then source .github/workflows/install_miniconda.sh; fi
 
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@4.1.7
-        with:
-          branch: gh-pages
-          folder: docs/build/html
+  #     - name: Install conda
+  #       uses: conda-incubator/setup-miniconda@v3
+  #       with:
+  #         auto-update-conda: false
+  #         python-version: "3.9"
+  #         channels: "conda-forge"
+  #         activate-environment: testenv
+
+  #     - name: Cache conda
+  #       uses: actions/cache@v2
+  #       env:
+  #         cache-name: cache-conda
+  #       with:
+  #         path: $HOME
+  #         key: ubuntu-conda-${{ hashFiles('**/requirements.txt') }}
+  #         restore-keys: |
+  #           ubuntu-build-${{ env.cache-name }}-
+  #           ubuntu-build-
+  #           ubuntu-
+
+  #     - name: Install HDF5 (1.12) and other dependencies
+  #       run: |
+  #         conda env list
+  #         echo $CONDA_PREFIX
+  #         conda list -n testenv python
+  #         conda activate testenv
+  #         conda install -y -c conda-forge --file requirements.txt --file requirements_test.txt --file docs/requirements.txt 'hdf5=1.12' pip setuptools
+  #         echo "HDF5_DIR=$CONDA_PREFIX" >> $GITHUB_ENV
+  #         # Pin the version actually installed
+  #         mkdir -p $CONDA_PREFIX/conda-meta
+  #         echo "hdf5==1.12" > $CONDA_PREFIX/conda-meta/pinned
+
+  # lint-python:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+
+  #     - name: Get ruff version from requirements file
+  #       id: version
+  #       run: |
+  #         VERSION=$(grep -m 1 -oP 'ruff==\K(.*)' requirements_lint.txt)
+  #         echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+  #     - uses: chartboost/ruff-action@v1
+  #       with:
+  #         src: up4/
+  #         version: ${{ steps.version.outputs.version }}
+  #         args: check --no-fix
+
+  #     - uses: chartboost/ruff-action@v1
+  #       with:
+  #         src: up4/
+  #         version: ${{ steps.version.outputs.version }}
+  #         args: format --diff
+
+  # lint-rust:
+    
+    
+  # lint-global:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+      
+  #     - name: Lint Markdown and TOML
+  #       uses: dprint/check@v2.2
+
+  #     - name: Spell Check with Typos
+  #       uses: crate-ci/typos@v1.24.2
+
+  # tests:
+  #   defaults:
+  #     run:
+  #       shell: bash -l {0}
+  #   name: Run tests
+  #   # If we haven't linted properly - why run the tests???
+  #   needs: [lint-python, lint-rust, lint-global]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v2
+  #       with: {submodules: true}
+
+  #     - name: Switch to testenv
+  #       run: conda activate testenv
+
+  #     - name: Install up4 on python
+  #       run: |
+  #         python3 -m pip install .
+
+  #     - name: Run tests
+  #       run: |
+  #         python3 -m pytest tests/test_all.py
+
+  # docs:
+  #   name: Build and deploy docs
+  #   runs-on: ubuntu-latest
+  #   needs: [tests]
+  #   steps:
+  #     - uses: actions/checkout@v2
+
+  #     - name: Build Python docs
+  #       run: |
+  #           cd docs
+  #           make html
+
+  #     - name: Upload artifacts
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: html-doc
+  #         path: docs/build/html
+
+  #     - name: Deploy to GitHub Pages
+  #       uses: JamesIves/github-pages-deploy-action@4.1.7
+  #       with:
+  #         branch: gh-pages
+  #         folder: docs/build/html
 

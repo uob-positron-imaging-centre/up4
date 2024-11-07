@@ -38,7 +38,7 @@ jobs:
 
       - name: Install Python dependencies
         working-directory: docs
-        run: uv pip install -r docs/requirements.txt
+        run: uv pip install -r requirements.txt
 
       # Cache HDF5
       - uses: awalsh128/cache-apt-pkgs-action@latest

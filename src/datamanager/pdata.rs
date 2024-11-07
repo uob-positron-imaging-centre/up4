@@ -325,7 +325,7 @@ impl PData {
             particleid[particle_id] = part_id;
         }
 
-        print_debug!("PData: Data read. Saving new timestap and return reference.");
+        print_debug!("PData: Data read. Saving new timestep and return reference.");
         //let dt = Timestep::default();
         //self.single_data = dt;
         Timestep {
@@ -915,8 +915,8 @@ impl DataManager for PData {
         if timestep > self.range.1 - 1 {
             self.update((timestep, timestep + self.buffersize));
         } else if timestep < self.range.0 {
-            let chunck = ((timestep as f64) / (BUFFERSIZE as f64)).floor() as usize;
-            self.update((chunck * BUFFERSIZE, (chunck + 1) * BUFFERSIZE));
+            let chunk = ((timestep as f64) / (BUFFERSIZE as f64)).floor() as usize;
+            self.update((chunk * BUFFERSIZE, (chunk + 1) * BUFFERSIZE));
         }
 
         &self.buffer[timestep - self.range.0]
@@ -1199,12 +1199,12 @@ impl DataManager for PData {
 impl Manager for PData {}
 
 // TODO FUNCTIONS
-// Write another class to get the posibility to buffer data from the pept experiment
+// Write another class to get the possibility to buffer data from the pept experiment
 //
 
 // TODO PEPT/EXPERIMENTAL
 // Manage timeframes: HOW?
-// Solution1: define timestep in begining
+// Solution1: define timestep in beginning
 // For return: interpolate between two points
 // Solution2:
 // for each new timestep call for the time

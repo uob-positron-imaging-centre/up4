@@ -217,7 +217,6 @@ impl UnitVectorPlot {
         //     }
         //     z.push(inner_vec);
         // }
-        
 
         HeatMap::new(
             x.into_raw_vec(),

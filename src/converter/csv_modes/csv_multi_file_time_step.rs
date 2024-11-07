@@ -13,7 +13,7 @@ use regex::Regex;
 use std::{path::Path, process::id};
 
 use crate::converter::convertertools;
-// Maximum amount of failiures in a row available for a process
+// Maximum amount of failures in a row available for a process
 const MAX_FAILS: i64 = 500;
 
 // number of arguments is necessary to properly read csv files.

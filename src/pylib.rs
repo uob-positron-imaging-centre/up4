@@ -80,13 +80,13 @@ enum SliceIntOrVec<'a> {
 ///     Return the circulation time for the whole system, returns all times as one large array
 ///
 /// circulation_time_two_boundary:
-///     Return the circulation time for the whole system determined using two bounaries, returns all times as one large array
+///     Return the circulation time for the whole system determined using two boundaries, returns all times as one large array
 ///
 /// concentration_field:
 ///     Return the concentration field for the whole system
 ///
-/// homogenity_index:
-///     Return the homogenity index for the whole system, defiuned by two particle species
+/// homogeneity_index:
+///     Return the homogeneity index for the whole system, defiuned by two particle species
 ///
 /// msd_field:
 ///     Return the mean square displacement field for the whole system
@@ -717,7 +717,7 @@ impl PyData {
         PyGrid { grid }
     }
 
-    /// Calculate the homogenity index.
+    /// Calculate the homogeneity index.
     ///
     /// Parameters
     /// ----------
@@ -725,15 +725,15 @@ impl PyData {
     /// grid : PyGrid
     ///   The grid that defines the region of the system.
     #[pyo3(signature = (grid, min_vel = 0.0))]
-    fn homogenity_index<'py>(&mut self, _py: Python<'py>, grid: &PyGrid, min_vel: f64) -> f64 {
-        print_debug!("Starting Homogenity Index function");
+    fn homogeneity_index<'py>(&mut self, _py: Python<'py>, grid: &PyGrid, min_vel: f64) -> f64 {
+        print_debug!("Starting Homogeneity Index function");
         let selector: &ParticleSelector =
             match self.selector.as_any().downcast_ref::<ParticleSelector>() {
                 Some(b) => b,
                 None => panic!("Can not convert PyGrid to Grid1D as "),
             };
         self.data
-            .homogenity_index(grid.grid.clone(), selector, min_vel)
+            .homogeneity_index(grid.grid.clone(), selector, min_vel)
     }
 
     /// Calculate the mean squared displacement field of the system.

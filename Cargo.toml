@@ -1,8 +1,8 @@
 [package]
 name = "upppp_rust"
 version = "0.1.0"
-edition = "2021"
 authors = ["Dominik Werner, Daniel Weston"]
+edition = "2021"
 
 [lib]
 name = "upppp_rust"
@@ -15,7 +15,7 @@ colorous = "1.0.5"
 csv = "1.1.6"
 derive-getters = "0.4.0"
 dyn-clone = "1.0"
-#hdf5 = { version = "0.8.1" }#, features = ["blosc"]}
+# hdf5 = { version = "0.8.1" }#, features = ["blosc"]}
 hdf5 = { git = "https://github.com/aldanor/hdf5-rust.git" }
 indicatif = "=0.17.8"
 itertools = "0.13.0"
@@ -25,7 +25,7 @@ ndarray-csv = { version = "0.5.1" }
 ndarray-stats = "0.5.0"
 num-traits = "0.2.14"
 numpy = "0.21.0"
-#plotly = "0.8.4"
+# plotly = "0.8.4"
 plotly = { git = "https://github.com/DanW97/plotly.git" }
 polyfit-rs = "0.2.0"
 pyo3 = { version = "0.21.0", features = ["extension-module"] }
@@ -41,8 +41,7 @@ uPPPP_debug = []
 uPPPP_warning = []
 python = []
 blosc = []
-#[profile.dev]##opt-level = 0              # Use slightly better optimizations.
-
+# [profile.dev]##opt-level = 0              # Use slightly better optimizations.
 
 [profile.release]
 incremental = true

@@ -6,7 +6,7 @@ to more in-depth processing techniques.
 
 .. toctree::
    :maxdepth: 1
-   :caption: Getting Sarted
+   :caption: Getting Started
 
    basic_tutorial
 

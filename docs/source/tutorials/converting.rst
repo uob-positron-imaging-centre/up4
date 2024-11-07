@@ -28,7 +28,7 @@ CSV files can be converted in the following manner:
     )
 
 It is `strongly recommended` to interpolate the data. ``up4`` sometimes relies on the spacing between the data points to be constant. This also helps to remove the effects of
-sample rate when comparing between datasets accquired by different techniques.
+sample rate when comparing between datasets acquired by different techniques.
 If the csv contains velocity information you can read it in by simply extending the columns vector from 4 to 7 elements, pointing to t, x, y, z, vx, vy, vz.
 
 VTK

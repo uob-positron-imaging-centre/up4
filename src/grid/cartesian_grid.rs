@@ -366,15 +366,15 @@ impl GridFunctions3D for CartesianGrid3D {
         }
         let axis1 = Axis(axis1);
         let axis2 = Axis(axis2 - 1); // we removed axis1 so axis2 is now one smaller
-        let first_collaps = self.collapse(axis1.index());
-        let first_collaps_weight = self.collapse_weight(axis1.index());
-        let mut result: Array1<f64> = Array::zeros(first_collaps.raw_dim().remove_axis(axis2));
+        let first_collapse = self.collapse(axis1.index());
+        let first_collapse_weight = self.collapse_weight(axis1.index());
+        let mut result: Array1<f64> = Array::zeros(first_collapse.raw_dim().remove_axis(axis2));
         let mut result_weight: Array1<f64> =
-            Array::zeros(first_collaps.raw_dim().remove_axis(axis2));
+            Array::zeros(first_collapse.raw_dim().remove_axis(axis2));
 
-        for (data_arr, weight) in first_collaps
+        for (data_arr, weight) in first_collapse
             .axis_iter(axis2)
-            .zip(first_collaps_weight.axis_iter(axis2))
+            .zip(first_collapse_weight.axis_iter(axis2))
         {
             // check for nans
             let data_arr = data_arr.mapv(|x| if x.is_nan() { 0. } else { x });
@@ -398,11 +398,11 @@ impl GridFunctions3D for CartesianGrid3D {
         }
         let axis1 = Axis(axis1);
         let axis2 = Axis(axis2 - 1);
-        let first_collaps_weight = self.collapse_weight(axis1.index());
+        let first_collapse_weight = self.collapse_weight(axis1.index());
         let mut result_weight: Array1<f64> =
-            Array::zeros(first_collaps_weight.raw_dim().remove_axis(axis2));
+            Array::zeros(first_collapse_weight.raw_dim().remove_axis(axis2));
 
-        for weight in first_collaps_weight.axis_iter(axis2) {
+        for weight in first_collapse_weight.axis_iter(axis2) {
             result_weight += &weight;
         }
         result_weight

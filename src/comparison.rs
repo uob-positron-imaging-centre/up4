@@ -68,7 +68,7 @@ impl Comparison for Comparer {
             1.0
         };
         // move the grid a maximum of the half of the size of the grid in each dimension
-        // Actually, first i need to make sure thta the cell sizes of each grid are exactly the same size,
+        // Actually, first i need to make sure that the cell sizes of each grid are exactly the same size,
         // Therefore i need to make sure that the grid is the same size in each dimension
         // which is done by defining the dimensions by the max dimensions
         let max_x = f64::max(size[0], size2[0] * set2_adjustment);

@@ -36,7 +36,7 @@ jobs:
   test-python:
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os: [ubuntu-latest]
         python-version: ['3.8', '3.11', '3.12']
@@ -56,13 +56,13 @@ jobs:
         env:
           BIN: ${{ matrix.os == 'windows-latest' && 'Scripts' || 'bin' }}
         run: |
-          python -m venv .venv
+          python3 -m pip install uv
+          uv venv -p ${{ matrix.python-version }}
           echo "$GITHUB_WORKSPACE/.venv/$BIN" >> $GITHUB_PATH
           echo "VIRTUAL_ENV=$GITHUB_WORKSPACE/.venv" >> $GITHUB_ENV
 
       - name: Install Python dependencies
         run: |
-          pip install uv
           uv pip install -r requirements.txt -r requirements_test.txt
 
       - name: Set up Rust
@@ -72,9 +72,16 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           save-if: ${{ github.ref_name == 'uPPPP' }}
+      
+      # Cache HDF5
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        name: Cache apt packages
+        with:
+          packages: libhdf5-dev
+          version: 1.0
 
       - name: Install up4
-        run: pip install .
+        run: uv pip install .
 
     # TODO add doctests
     #   - name: Run doctests
@@ -83,7 +90,9 @@ jobs:
     #       python tests/docs/run_doctest.py
 
       - name: Run tests
-        run: python3 -m pytest tests/test_all.py
+        env: 
+          BIN: ${{ matrix.os == 'windows-latest' && 'Scripts/python.exe' || 'bin/python' }}
+        run: $VIRTUAL_ENV/$BIN -m pytest tests/test_all.py
 
       - name: Trigger docs build and deploy
         uses: peter-evans/repository-dispatch@v3

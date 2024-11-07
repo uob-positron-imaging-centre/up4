@@ -19,6 +19,11 @@ concurrency:
 
 jobs:
   build-python-docs:
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ['3.12']
+        
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,13 +31,23 @@ jobs:
       - name: Create virtual environment
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
-          uv venv
+          uv venv -p ${{ matrix.python-version }}
           echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
           echo "VIRTUAL_ENV=$GITHUB_WORKSPACE/.venv" >> $GITHUB_ENV
 
       - name: Install Python dependencies
         working-directory: docs
         run: uv pip install -r requirements-docs.txt
+
+      # Cache HDF5
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        name: Cache apt packages
+        with:
+          packages: libhdf5-dev
+          version: 1.0
+      
+      - name: Install up4
+        run: uv pip install .
 
       - name: Build Python documentation
         working-directory: docs

@@ -28,32 +28,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
-      # If rustup is a valid command, we can assume that rust is installed,
-      # this is to mainly assist with testing locally via act.
-      - name: Determine if Rust is installed
-        run: |
-          if ! command -v rustup &> /dev/null
-          then 
-            echo "RUNNING_LOCALLY=1" >> $GITHUB_ENV
-          else 
-            echo "RUNNING_LOCALLY=0" >> $GITHUB_ENV
-          fi
-      
-      # Rust doesn't already exist - need to install rustup and
-      # update apt packages to install libhdf5-dev locally 
-      # (https://github.com/awalsh128/cache-apt-pkgs-action/issues/125)
-      - if: env.RUNNING_LOCALLY == '1'
-        name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with: {toolchain: 'stable', profile: minimal, override: true}
-      
-      - if: env.RUNNING_LOCALLY == '1'
-        run: sudo apt-get update
-
-      # Rust already exists, so we can skip the installation
-      - if: env.RUNNING_LOCALLY == '0'
-        name: Set up Rust
+     
+      - name: Set up Rust
         run: rustup override set stable && rustup update
 
       - uses: awalsh128/cache-apt-pkgs-action@latest

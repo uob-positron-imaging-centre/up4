@@ -1,7 +1,7 @@
 <h1><img src="docs/source/_static/logo.jpeg" width = "70px", style = "float: right">up4: Universal Post-Processor for Particulate Processes</h1>
 
-![example workflow](https://github.com/uob-positron-imaging-centre/up4/actions/workflows/main.yaml/badge.svg)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Test Rust](https://github.com/uob-positron-imaging-centre/up4/actions/workflows/test-rust.yml/badge.svg)](https://github.com/uob-positron-imaging-centre/up4/actions/workflows/test-rust.yml)
+[![Test Python](https://github.com/uob-positron-imaging-centre/up4/actions/workflows/test-python.yml/badge.svg)](https://github.com/uob-positron-imaging-centre/up4/actions/workflows/test-python.yml)
 [![docs](https://img.shields.io/badge/docs-dev-blue)](https://uob-positron-imaging-centre.github.io/up4/)
 
 ## A fast _and_ flexible analysis toolset for particle data of all kinds

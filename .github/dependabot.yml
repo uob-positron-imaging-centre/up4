@@ -9,7 +9,7 @@ updates:
       - dependency-name: '*'
         update-types: ['version-update:semver-patch']
     commit-message:
-      prefix: ci
+      prefix: chore(ci)
     labels: ['skip changelog']
 
   # Rust
@@ -25,7 +25,7 @@ updates:
       - dependency-name: '*'
         update-types: ['version-update:semver-patch']
     commit-message:
-      prefix: build(rust)
+      prefix: chore(rust)
       prefix-development: chore(rust)
     labels: ['skip changelog']
 

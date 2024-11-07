@@ -17,6 +17,7 @@ on:
       - src/pylib/**
       - src/pylib.rs
       - .github/workflows/test-python.yml
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

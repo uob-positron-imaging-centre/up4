@@ -78,7 +78,7 @@ jobs:
           cargo clippy --all-targets
 
   rustfmt:
-    if: github.ref_name != 'main'
+    if: github.ref_name != 'uPPPP'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

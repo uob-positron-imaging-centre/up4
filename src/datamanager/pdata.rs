@@ -1124,7 +1124,8 @@ impl DataManager for PData {
             self.update_extra((timestep, timestep + self.buffersize), buffer_id);
         }
 
-        &self.buffer[timestep - self.range_extra[buffer_id].0]
+        &self.extra_buffers[buffer_id][timestep - self.range_extra[buffer_id].0]
+
     }
 
     fn info(&self) -> Result<String, &'static str> {

@@ -321,7 +321,6 @@ impl PyConverter {
     }
 
     // This docstring is for Python, and isn't valid Rust
-    /// ```ignore
     /// Convert CSV file to a HDF5 file.
     ///
     /// Parameters
@@ -404,7 +403,6 @@ impl PyConverter {
     }
 
     // This docstring is for Python, and isn't valid Rust
-    /// ```ignore
     /// Convert CSV file containing multiple particles into a HDF5 file.
     ///
     /// There can be different ways how this is achieved, therefore the function
@@ -447,16 +445,7 @@ impl PyConverter {
     ///     Radius of the particle, by default 0.0
     ///
     /// method : str, optional
-    ///     Method to use to convert the CSV file. Can be one of the following:
-    ///
-    ///     - `chain``: The particles are chained in the file, i.e. the first particle
-    ///         is followed by the second, the second by the third, etc.
-    ///         all particles are stored in one file
-    ///     -  `id_line``: This algorithm sorts the particles by their id column and
-    ///         their time column. The `columns` argument must contain the
-    ///         id column as the first element.
-    ///
-    ///     , by default chain
+    ///     Method to use to convert the CSV file (see method description), by default `chain`
     ///
     //#[allow(unreachable_code, unused_variables)]
     #[pyo3(signature = (
@@ -503,20 +492,7 @@ impl PyConverter {
         Ok(())
     }
 
-    /// Convert CSV file containing multiple particles into a HDF5 file.
-    ///
-    /// There can be different ways how this is achieved, therefore the function
-    /// takes an argument called `method` which can be one of the following:
-    ///
-    ///   - chain:   The particles are chained in the file, i.e. the first particle
-    ///         is followed by the second, the second by the third, etc.
-    ///         all particles are stored in one file.
-    ///   - id_line: This algorithm sorts the particles by their id column and
-    ///         their time column. The `columns` argument must contain the
-    ///         id column as the first element.
-    ///
-    /// no other method is implemented yet. If you want to use another method, please
-    /// contact the developers.
+    /// Convert multiple CSV files into a HDF5 file.
     ///
     /// Parameters
     /// ----------

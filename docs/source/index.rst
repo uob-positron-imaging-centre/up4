@@ -15,10 +15,13 @@ Has this ever happened to you:
 
 Fear not, this is *precisely* the aim of up4, the Universal Post Processor for Particulate Processes!
 
-|CI|
+|CI-Python| |CI-Rust| 
 
-.. |CI| image::  https://github.com/uob-positron-imaging-centre/up4/actions/workflows/main.yaml/badge.svg
-   :target: https://github.com/uob-positron-imaging-centre/up4/actions/workflows/main.yaml
+.. |CI-Rust| image::  https://github.com/uob-positron-imaging-centre/up4/actions/workflows/test-rust.yml/badge.svg
+   :target: https://github.com/uob-positron-imaging-centre/up4/actions/workflows/test-rust.yml
+
+.. |CI-Python| image::  https://github.com/uob-positron-imaging-centre/up4/actions/workflows/test-python.yml/badge.svg
+   :target: https://github.com/uob-positron-imaging-centre/up4/actions/workflows/test-python.yml
 
 Documentation
 =============

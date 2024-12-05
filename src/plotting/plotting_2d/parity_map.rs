@@ -206,9 +206,9 @@ impl ParityMap {
 
     pub fn create_parity_map(&self) -> Vec<Box<HeatMap<f64, f64, f64>>> {
         let heatmap = HeatMap::new(
-            self.x.to_owned().into_raw_vec(),
-            self.y.to_owned().into_raw_vec(),
-            self.delta.to_owned().into_raw_vec(),
+            self.x.to_owned().into_raw_vec_and_offset().0,
+            self.y.to_owned().into_raw_vec_and_offset().0,
+            self.delta.to_owned().into_raw_vec_and_offset().0,
         );
         let traces = vec![heatmap];
 

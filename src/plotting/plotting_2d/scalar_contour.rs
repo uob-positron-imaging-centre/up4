@@ -179,8 +179,8 @@ impl ScalarContour {
     ) -> Vec<Box<Contour<Vec<f64>>>> {
         let cmap = self.get_colour_map(colourmap);
         let contour = Contour::new(
-            self.x.to_owned().into_raw_vec(),
-            self.y.to_owned().into_raw_vec(),
+            self.x.to_owned().into_raw_vec_and_offset().0,
+            self.y.to_owned().into_raw_vec_and_offset().0,
             self.data.to_owned(),
         )
         .color_scale(ColorScale::Vector(cmap));

@@ -117,9 +117,9 @@ impl ScalarMap {
 
         let (x, y) = meshgrid(self.x(), self.y());
         let heatmap = HeatMap::new(
-            x.into_raw_vec(),
-            y.into_raw_vec(),
-            self.data.to_owned().into_raw_vec(),
+            x.into_raw_vec_and_offset().0,
+            y.into_raw_vec_and_offset().0,
+            self.data.to_owned().into_raw_vec_and_offset().0,
         )
         .color_scale(ColorScale::Vector(cmap));
         let trace = vec![heatmap];

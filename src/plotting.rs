@@ -9,7 +9,6 @@ pub use plotting_2d::*;
 pub fn plot(traces: Vec<Box<dyn Trace>>, layout: Layout) -> Plot {
     let mut plot: Plot = Plot::new();
     //use local render version
-    plot.use_local_plotly();
     for trace in traces {
         plot.add_trace(trace);
     }

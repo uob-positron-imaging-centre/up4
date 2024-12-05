@@ -219,9 +219,9 @@ impl UnitVectorPlot {
         // }
 
         HeatMap::new(
-            x.into_raw_vec(),
-            y.into_raw_vec(),
-            self.true_norm.to_owned().into_raw_vec(),
+            x.into_raw_vec_and_offset().0,
+            y.into_raw_vec_and_offset().0,
+            self.true_norm.to_owned().into_raw_vec_and_offset().0,
         )
         .color_scale(ColorScale::Vector(cmap))
     }

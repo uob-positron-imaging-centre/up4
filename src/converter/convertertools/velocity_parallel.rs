@@ -23,7 +23,7 @@ pub fn velocity_polynom_parallel(
         .into_iter()
         .map(|x| {
             println!("{:?}", x);
-            x.to_owned().into_shape((7, 7)).unwrap()
+            x.to_owned().into_shape_with_order((7, 7)).unwrap()
         })
         .collect();
 
@@ -103,5 +103,5 @@ fn to_array2<T: Copy>(source: Vec<ndarray::Array1<T>>) -> ndarray::Array2<T> {
     let width = source.len();
     let flattened: ndarray::Array1<T> = source.into_iter().flat_map(|row| row.to_vec()).collect();
     let height = flattened.len() / width;
-    flattened.into_shape((width, height)).unwrap()
+    flattened.into_shape_with_order((width, height)).unwrap()
 }

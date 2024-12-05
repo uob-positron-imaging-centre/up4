@@ -712,7 +712,9 @@ impl XMLVTKConverter {
                 )
             } else {
                 print_warning!("No type field specified, defaulting to 1");
-                Array1::<u64>::ones(particle_radius.len()).into_raw_vec()
+                Array1::<u64>::ones(particle_radius.len())
+                    .into_raw_vec_and_offset()
+                    .0
             };
             let builder = make_dataset_builder!(group);
             builder
@@ -1138,7 +1140,9 @@ impl LegacyVTKConverter {
                 )
             } else {
                 print_warning!("No type field specified, defaulting to 1");
-                Array1::<u64>::ones(particle_radius.len()).into_raw_vec()
+                Array1::<u64>::ones(particle_radius.len())
+                    .into_raw_vec_and_offset()
+                    .0
             };
             let builder = make_dataset_builder!(group);
             builder

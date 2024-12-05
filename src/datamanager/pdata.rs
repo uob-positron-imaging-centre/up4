@@ -119,7 +119,7 @@ impl PData {
                 })
                 .slice(s![timestep, ..])
                 .to_owned()
-                .into_shape((particles, 3))
+                .into_shape_with_order((particles, 3))
                 .unwrap_or_else(|_| {
                     panic!(
                         "Can not shape dataset \"position\" in file {} into a ({}, 3) array",
@@ -380,7 +380,7 @@ impl PData {
                     self.file.filename()))
                 .slice(s![range.0..range.1, ..])
                 .to_owned()
-                .into_shape((range.1-range.0, 3))
+                .to_shape((range.1-range.0, 3))
                 .unwrap_or_else(|_| panic!("Can not shape dataset \"position\" in file {} into a ({}, 3) array, range: {:?}",
                     self.file.filename(),
                     range.1-range.0,
@@ -642,7 +642,7 @@ impl PData {
                     self.file.filename()))
                 .slice(s![range.0..range.1, ..])
                 .to_owned()
-                .into_shape((range.1-range.0, 3))
+                .to_shape((range.1-range.0, 3))
                 .unwrap_or_else(|_| panic!("Can not shape dataset \"position\" in file {} into a ({}, 3) array, range: {:?}",
                     self.file.filename(),
                     range.1-range.0,
@@ -1125,7 +1125,6 @@ impl DataManager for PData {
         }
 
         &self.extra_buffers[buffer_id][timestep - self.range_extra[buffer_id].0]
-
     }
 
     fn info(&self) -> Result<String, &'static str> {

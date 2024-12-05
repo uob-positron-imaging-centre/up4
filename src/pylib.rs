@@ -1,9 +1,6 @@
 //! Create Python bindings for crate.
-
-use std::os::raw::c_long;
-
-use pyo3::prelude::*;
-use pyo3::types::IntoPyDict;
+use pyo3::types::{IntoPyDict, PySlice};
+use pyo3::{prelude::*, IntoPyObjectExt};
 extern crate ndarray;
 extern crate plotly;
 use crate::particleselector::*;
@@ -22,8 +19,8 @@ use libplot::*;
 
 // pyO3 helper:
 #[derive(FromPyObject)]
-enum SliceIntOrVec<'a> {
-    Slice(&'a pyo3::types::PySlice),
+enum SliceIntOrVec<'py> {
+    Slice(Bound<'py, PySlice>),
     Int(isize),
     Vec(Vec<isize>),
 }
@@ -96,8 +93,8 @@ enum SliceIntOrVec<'a> {
 ///
 #[pyclass(name = "Data")]
 struct PyData {
-    data: Box<dyn Manager + Send>,
-    selector: Box<dyn Selector + Send>,
+    data: Box<dyn Manager + Sync + Send>,
+    selector: Box<dyn Selector + Sync + Send>,
 }
 
 #[pymethods]
@@ -207,16 +204,17 @@ impl PyData {
     fn dimensions<'py>(&self, py: Python<'py>) -> Bound<'py, pyo3::types::PyDict> {
         let stats = self.data.global_stats();
         let dim = stats.dimensions();
-        let key_vals: Vec<(&str, PyObject)> = vec![
-            ("xmin", dim[[0, 0]].to_object(py)),
-            ("xmax", dim[[1, 0]].to_object(py)),
-            ("ymin", dim[[0, 1]].to_object(py)),
-            ("ymax", dim[[1, 1]].to_object(py)),
-            ("zmin", dim[[0, 2]].to_object(py)),
-            ("zmax", dim[[1, 2]].to_object(py)),
+        let key_vals: Vec<(&str, f64)> = vec![
+            ("xmin", dim[[0, 0]]),
+            ("xmax", dim[[1, 0]]),
+            ("ymin", dim[[0, 1]]),
+            ("ymax", dim[[1, 1]]),
+            ("zmin", dim[[0, 2]]),
+            ("zmax", dim[[1, 2]]),
         ];
-        let dict = key_vals.into_py_dict_bound(py);
-        dict
+        let dict = key_vals.into_py_dict(py);
+        // TODO error handling
+        dict.expect("Conversion failed.")
     }
 
     /// Return the min position of the system as a array
@@ -228,7 +226,7 @@ impl PyData {
         let stats = self.data.global_stats();
         let dim = stats.dimensions();
         let min_pos = dim.row(0).to_owned();
-        min_pos.into_pyarray_bound(py)
+        min_pos.into_pyarray(py)
     }
 
     /// Return the max position of the system as a array
@@ -240,7 +238,7 @@ impl PyData {
         let stats = self.data.global_stats();
         let dim = stats.dimensions();
         let max_pos = dim.row(1).to_owned();
-        max_pos.into_pyarray_bound(py)
+        max_pos.into_pyarray(py)
     }
 
     /// Number of particles in the system.
@@ -279,7 +277,7 @@ impl PyData {
             .global_stats()
             .time_array()
             .to_owned()
-            .into_pyarray_bound(py)
+            .into_pyarray(py)
     }
 
     /// Return velocity data as a vector field.
@@ -359,9 +357,7 @@ impl PyData {
         particle_id: usize,
         timestep: (usize, usize),
     ) -> Bound<'py, PyArray2<f64>> {
-        self.data
-            .extract(particle_id, timestep)
-            .into_pyarray_bound(_py)
+        self.data.extract(particle_id, timestep).into_pyarray(_py)
     }
 
     /// Return the number density field.
@@ -521,10 +517,7 @@ impl PyData {
         let (histogram, bin_edges) =
             self.data
                 .histogram(grid.grid.clone(), selector, property, limit, bins);
-        (
-            histogram.into_pyarray_bound(_py),
-            bin_edges.into_pyarray_bound(_py),
-        )
+        (histogram.into_pyarray(_py), bin_edges.into_pyarray(_py))
     }
 
     /// Calculate the granular temperature of the system.
@@ -609,10 +602,7 @@ impl PyData {
             self.data
                 .lacey_mixing(grid.grid.clone(), selector, type_a, type_b, threshold);
 
-        (
-            time.into_pyarray_bound(_py),
-            mixing_index.into_pyarray_bound(_py),
-        )
+        (time.into_pyarray(_py), mixing_index.into_pyarray(_py))
     }
 
     /// Calculate the circulation time of a particle in a system.
@@ -804,40 +794,8 @@ impl PyData {
             .data
             .msd(grid.grid.clone(), selector, min_time, max_time, steps);
 
-        (msd.into_pyarray_bound(_py), time.into_pyarray_bound(_py))
+        (msd.into_pyarray(_py), time.into_pyarray(_py))
     }
-
-    /// set the rotation of the system
-    /// The rotation is set by rotating the system around a axis specified by the user.
-    ///
-    /// Parameters
-    /// ----------
-    /// anker : list
-    ///     A point around which the system is rotated.
-    ///
-    /// angle : list
-    ///     The angle of rotation defined in 3 rotations around the x, y and z axis.
-    ///     The rotation is defined in radians.
-    ///
-    /// Returns
-    /// -------
-    /// None
-    // #[pyo3(signature = (anker, angle))]
-    // fn set_rotation(&mut self, anker: Vec<f64>, angle: Vec<f64>) {
-    //     print_debug!("Starting set_rotation function");
-
-    //     if anker.len() != 3 {
-    //         panic!("The anker must be a list of 3 elements");
-    //     }
-    //     if angle.len() != 3 {
-    //         panic!("The angle must be a list of 3 elements");
-    //     }
-    //     for i in 0..3 {
-    //         self.data.set_rotation_angle(angle[i], i);
-    //     }
-
-    //     self.data.set_rotation_anker([anker[0], anker[1], anker[2]]);
-    // }
 
     fn __str__(&self) -> PyResult<String> {
         Ok(self.data.info().expect("Could not get info"))
@@ -875,8 +833,7 @@ impl PyData {
                     let x = ndarray::array![id, p_x, p_y, p_z, v_x, v_y, v_z];
                     result.row_mut(i).assign(&x);
                 }
-
-                Ok(result.into_pyarray_bound(py).to_object(py))
+                result.into_pyarray(py).into_py_any(py)
             }
             SliceIntOrVec::Vec(indices) => {
                 // Fancy indexing with a list of indices
@@ -910,15 +867,12 @@ impl PyData {
                         result.slice_mut(ndarray::s![i, j, ..]).assign(&x);
                     }
                 }
-                Ok(result.into_pyarray_bound(py).to_object(py))
+                result.into_pyarray(py).into_py_any(py)
                 // next: SLICE
             }
             SliceIntOrVec::Slice(slice) => {
-                // On Windows, c_long is guaranteed to be *at least* 32 bits wide, however, on Linux it
-                // can be 64bits. PyO3 takes a long as the index, so rather than guessing its size, use
-                // c_long so we are using the size it expects.
                 let indices = slice
-                    .indices(*self.data.global_stats().timesteps() as c_long)
+                    .indices(*self.data.global_stats().timesteps() as isize)
                     .expect("Could not get indices");
                 let start = indices.start;
                 let stop = indices.stop;
@@ -947,7 +901,7 @@ impl PyData {
                         result.slice_mut(ndarray::s![i, j, ..]).assign(&x);
                     }
                 }
-                Ok(result.into_pyarray_bound(py).to_object(py))
+                result.into_pyarray(py).into_py_any(py)
             } // TODO: clippy says this is unreachable - this needs testing
               // _ => Err(pyo3::exceptions::PyIndexError::new_err(
               //     "Index must be an integer or a list of integers",
@@ -963,7 +917,7 @@ impl PyData {
 /// A Python module implemented in Rust. The name of this function must match
 /// the `lib.name` setting in the `Cargo.toml`, else Python will not be able to
 /// import the module.
-#[pymodule]
+#[pymodule(gil_used = false)]
 fn upppp_rust(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<PyData>()?;
     m.add_class::<PyGrid>()?;

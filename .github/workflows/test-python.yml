@@ -1,0 +1,104 @@
+name: Test Python
+
+on:
+  pull_request:
+    paths:
+      - Cargo.lock
+      - up4/**
+      - src/**
+      - src/pylib.rs
+      - .github/workflows/test-python.yml
+  push:
+    branches:
+      - main
+    paths:
+      - Cargo.lock
+      - up4/**
+      - src/pylib/**
+      - src/pylib.rs
+      - .github/workflows/test-python.yml
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  RUSTFLAGS: -C debuginfo=0  # Do not produce debug symbols to keep memory usage down
+  RUST_BACKTRACE: 1
+  PYTHONUTF8: 1
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  test-python:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ['3.8', '3.11', '3.12']
+        # include:
+        #   - os: windows-latest
+        #     python-version: '3.12'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Create virtual environment
+        env:
+          BIN: ${{ matrix.os == 'windows-latest' && 'Scripts' || 'bin' }}
+        run: |
+          python3 -m pip install uv
+          uv venv -p ${{ matrix.python-version }}
+          echo "$GITHUB_WORKSPACE/.venv/$BIN" >> $GITHUB_PATH
+          echo "VIRTUAL_ENV=$GITHUB_WORKSPACE/.venv" >> $GITHUB_ENV
+
+      - name: Install Python dependencies
+        run: |
+          uv pip install -r requirements.txt -r requirements_test.txt
+
+      - name: Set up Rust
+        run: rustup show
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          save-if: ${{ github.ref_name == 'uPPPP' }}
+      
+      # Cache HDF5
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        name: Cache apt packages
+        with:
+          packages: libhdf5-dev
+          version: 1.0
+
+      - name: Install up4
+        run: uv pip install .
+
+    # TODO add doctests
+    #   - name: Run doctests
+    #     if: github.ref_name != 'uPPPP' && matrix.python-version == '3.12' && matrix.os == 'ubuntu-latest'
+    #     run: |
+    #       python tests/docs/run_doctest.py
+
+      - name: Run tests
+        env: 
+          BIN: ${{ matrix.os == 'windows-latest' && 'Scripts/python.exe' || 'bin/python' }}
+        run: $VIRTUAL_ENV/$BIN -m pytest tests/test_all.py
+
+      - name: Trigger docs build and deploy
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          event-type: test-python
+          client-payload: >
+            {
+              "sha": "${{ github.event.client_payload.sha }}"
+            }

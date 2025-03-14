@@ -20,7 +20,7 @@ use pyo3::{exceptions::PyValueError, prelude::*};
 #[pyclass(name = "RustPlotter2D", subclass)]
 pub struct PyPlotter2D {
     plotting_string: String,
-    grid: Box<dyn GridFunctions3D>,
+    grid: Box<dyn GridFunctions3D + Send + Sync>,
 }
 
 #[pymethods]
@@ -271,7 +271,7 @@ impl PyPlotter2D {
                         Contours::new()
                             .start(min)
                             .end(max)
-                            .size((max - min) / n_contours.unwrap() as f64),
+                            .size(((max - min) / n_contours.unwrap() as f64) as usize),
                     )
                     .auto_contour(false),
             );

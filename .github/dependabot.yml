@@ -1,23 +1,62 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
-
 version: 2
 updates:
-  - package-ecosystem: "cargo" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  # GitHub Actions
+  - package-ecosystem: github-actions
+    directory: '/'
     schedule:
-      interval: "weekly"
+      interval: monthly
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-patch']
+    commit-message:
+      prefix: chore(ci)
+    labels: ['skip changelog']
+
+  # Rust
+  - package-ecosystem: cargo
+    directory: '/'
+    schedule:
+      interval: monthly
     groups:
       rust-crates:
         patterns:
           - "*"
-  - package-ecosystem: "pip" # See documentation for possible values
-    directory: "/" # Location of package manifests
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-patch']
+    commit-message:
+      prefix: chore(rust)
+      prefix-development: chore(rust)
+    labels: ['skip changelog']
+
+  # Python
+  - package-ecosystem: pip
+    directory: '/'
     schedule:
-      interval: "weekly"
+      interval: monthly
     groups:
       python-packages:
         patterns:
           - "*"
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-patch']
+    commit-message:
+      prefix: chore(python)
+    labels: ['skip changelog']
+
+  # Documentation
+  - package-ecosystem: pip
+    directory: docs
+    schedule:
+      interval: monthly
+    groups:
+      python-packages:
+        patterns:
+          - "*"
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-patch']
+    commit-message:
+      prefix: chore(python)
+    labels: ['skip changelog']

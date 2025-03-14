@@ -19,7 +19,7 @@ the simplest way to generate a grid is to use `up4.Grid`.
 Grid Generation
 ===============
 
-Grids, cylindical and cartesian, can be generated in a variety of ways.
+Grids, cylindrical and cartesian, can be generated in a variety of ways.
 To offer full flexiility one can generate grids in the following ways:
 
 - with an `up4.Data` object -> uses system dimensions to wrap around the region of interest

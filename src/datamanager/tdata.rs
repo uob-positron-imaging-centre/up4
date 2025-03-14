@@ -309,7 +309,7 @@ impl TData {
             })
             .to_owned();
 
-        print_debug!("TData: Data read. Saving new timestap and return reference.");
+        print_debug!("TData: Data read. Saving new timestep and return reference.");
         //let dt = Timestep::default();
         //self.single_data = dt;
         Timestep {
@@ -1182,12 +1182,12 @@ impl DataManager for TData {
 // Implement Manager which is just a sum of Granular + DataManager
 impl Manager for TData {}
 // TODO FUNCTIONS
-// Write another class to get the posibility to buffer data from the pept experiment
+// Write another class to get the possibility to buffer data from the pept experiment
 //
 
 // TODO PEPT/EXPERIMENTAL
 // Manage timeframes: HOW?
-// Solution1: define timestep in begining
+// Solution1: define timestep in beginning
 // For return: interpolate between two points
 // Solution2:
 // for each new timestep call for the time

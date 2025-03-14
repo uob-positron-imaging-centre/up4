@@ -1,0 +1,66 @@
+name: Lint Rust
+
+on:
+  pull_request:
+    paths:
+      - src/**
+      - Cargo.toml
+      - .github/workflows/lint-rust.yml
+  push:
+    branches:
+      - main
+    paths:
+        - src/**
+        - Cargo.toml
+        - .github/workflows/lint-rust.yml
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  RUSTFLAGS: -C debuginfo=0  # Do not produce debug symbols to keep memory usage down
+
+jobs:
+
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+     
+      - name: Set up Rust
+        run: rustup override set stable && rustup update
+
+      - uses: awalsh128/cache-apt-pkgs-action@latest
+        name: Cache apt packages
+        with:
+          packages: libhdf5-dev
+          version: 1.0
+
+      - name: Install clippy
+        run: rustup component add clippy rustfmt
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          save-if: ${{ github.ref_name == 'uPPPP' }}
+
+      - name: Run cargo fmt
+        run: cargo fmt --all --check
+      
+      - name: Run cargo clippy
+        run: |
+          cargo clippy --all-targets
+
+  rustfmt:
+    if: github.ref_name != 'uPPPP'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Rust
+        run: rustup component add rustfmt
+
+      - name: Run cargo fmt
+        run: cargo fmt --all --check

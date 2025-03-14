@@ -42,7 +42,7 @@ pub enum Dim {
 }
 
 //pub trait Grid: Debug {}
-pub trait GridFunctions3D: DynClone + std::fmt::Display + std::fmt::Debug + Send {
+pub trait GridFunctions3D: DynClone + std::fmt::Display + std::fmt::Debug + Send + Sync {
     //get value at this cell id
     fn get_value(&self, pos: Position) -> f64;
 

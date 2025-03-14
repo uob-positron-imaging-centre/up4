@@ -7,7 +7,7 @@ use std::any::Any;
 
 use super::{Dim, GridFunctions, OneD};
 
-/// One dimensional grid that allowes storage of `cells[0]` datapoints of type `<T: Clone + Debug>`
+/// One dimensional grid that allows storage of `cells[0]` datapoints of type `<T: Clone + Debug>`
 /// in the equally spaced range of `xlim`, such as velocity distributions.
 /// ```rust
 /// let grid = Grid1D::new(

@@ -5,6 +5,7 @@
 # Author   :   Daniel Weston
 # Version  :   0.1.0
 # Contact  :   dtw545@bham.ac.uk
+from __future__ import annotations
 
 from concurrent.futures import ThreadPoolExecutor as Executor
 import requests

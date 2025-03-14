@@ -41,7 +41,7 @@ use pyo3::prelude::*;
 ///
 #[pyclass(name = "RustGrid", subclass)]
 pub struct PyGrid {
-    pub grid: Box<dyn grid::GridFunctions3D>,
+    pub grid: Box<dyn grid::GridFunctions3D + Send + Sync>,
 }
 
 #[pymethods]
@@ -139,18 +139,9 @@ impl PyGrid {
         Bound<'py, PyArray1<f64>>,
     ) {
         (
-            self.grid
-                .get_xpositions()
-                .to_owned()
-                .into_pyarray_bound(_py),
-            self.grid
-                .get_ypositions()
-                .to_owned()
-                .into_pyarray_bound(_py),
-            self.grid
-                .get_zpositions()
-                .to_owned()
-                .into_pyarray_bound(_py),
+            self.grid.get_xpositions().to_owned().into_pyarray(_py),
+            self.grid.get_ypositions().to_owned().into_pyarray(_py),
+            self.grid.get_zpositions().to_owned().into_pyarray(_py),
         )
     }
 
@@ -304,7 +295,7 @@ impl PyGrid {
     /// grid : ndarray
     ///     A numpy array containing the grid-data with the same shape as grid
     fn to_numpy<'py>(&self, _py: Python<'py>) -> Bound<'py, PyArray3<f64>> {
-        self.grid.get_data().to_owned().into_pyarray_bound(_py)
+        self.grid.get_data().to_owned().into_pyarray(_py)
     }
 
     /// Return the weights of each cell as a numpy array.
@@ -314,7 +305,7 @@ impl PyGrid {
     /// weights : ndarray
     ///    A numpy array containing the weights of each cell with the same shape as grid
     fn weights_to_numpy<'py>(&self, _py: Python<'py>) -> Bound<'py, PyArray3<f64>> {
-        self.grid.get_weights().to_owned().into_pyarray_bound(_py)
+        self.grid.get_weights().to_owned().into_pyarray(_py)
     }
 
     /// Return a slice of the grid as a numpy array.
@@ -330,7 +321,7 @@ impl PyGrid {
         self.grid
             .slice_idx(axis, index)
             .to_owned()
-            .into_pyarray_bound(_py)
+            .into_pyarray(_py)
     }
 
     /// Return a slice of the grid as a numpy array at a given position and axis.
@@ -348,10 +339,7 @@ impl PyGrid {
         axis: usize,
         position: f64,
     ) -> Bound<'py, PyArray2<f64>> {
-        self.grid
-            .slice(axis, position)
-            .to_owned()
-            .into_pyarray_bound(_py)
+        self.grid.slice(axis, position).to_owned().into_pyarray(_py)
     }
 
     /// Collapse the grid along an axis.
@@ -369,10 +357,10 @@ impl PyGrid {
     ///     A numpy array containing the collapsed grid
     ///
     fn collapse<'py>(&self, _py: Python<'py>, axis: usize) -> Bound<'py, PyArray2<f64>> {
-        self.grid.collapse(axis).to_owned().into_pyarray_bound(_py)
+        self.grid.collapse(axis).to_owned().into_pyarray(_py)
     }
 
-    /// Collaps the grid along an axis
+    /// Collapse the grid along an axis
     /// This is basically cell based depth averaging.
     ///
     /// Parameters
@@ -397,7 +385,7 @@ impl PyGrid {
         self.grid
             .collapse_two(axis1, axis2)
             .to_owned()
-            .into_pyarray_bound(_py)
+            .into_pyarray(_py)
     }
 
     /// Return the x-positions of the grid.
@@ -408,10 +396,7 @@ impl PyGrid {
     /// x : ndarray
     ///     A numpy array containing the x-positions of the grid
     fn xpositions<'py>(&self, _py: Python<'py>) -> Bound<'py, PyArray1<f64>> {
-        self.grid
-            .get_xpositions()
-            .to_owned()
-            .into_pyarray_bound(_py)
+        self.grid.get_xpositions().to_owned().into_pyarray(_py)
     }
 
     /// Return the y-positions of the grid.
@@ -422,10 +407,7 @@ impl PyGrid {
     /// y : ndarray
     ///     A numpy array containing the y-positions of the grid
     fn ypositions<'py>(&self, _py: Python<'py>) -> Bound<'py, PyArray1<f64>> {
-        self.grid
-            .get_ypositions()
-            .to_owned()
-            .into_pyarray_bound(_py)
+        self.grid.get_ypositions().to_owned().into_pyarray(_py)
     }
 
     /// Return the z-positions of the grid.
@@ -436,10 +418,7 @@ impl PyGrid {
     /// z : ndarray
     ///     A numpy array containing the z-positions of the grid
     fn zpositions<'py>(&self, _py: Python<'py>) -> Bound<'py, PyArray1<f64>> {
-        self.grid
-            .get_zpositions()
-            .to_owned()
-            .into_pyarray_bound(_py)
+        self.grid.get_zpositions().to_owned().into_pyarray(_py)
     }
 
     /// Detect outliers and remove them depending on the mode
@@ -538,18 +517,9 @@ impl PyVecGrid {
         Bound<'py, PyArray3<f64>>,
     ) {
         (
-            self.grid.data[0]
-                .get_data()
-                .to_owned()
-                .into_pyarray_bound(_py),
-            self.grid.data[1]
-                .get_data()
-                .to_owned()
-                .into_pyarray_bound(_py),
-            self.grid.data[2]
-                .get_data()
-                .to_owned()
-                .into_pyarray_bound(_py),
+            self.grid.data[0].get_data().to_owned().into_pyarray(_py),
+            self.grid.data[1].get_data().to_owned().into_pyarray(_py),
+            self.grid.data[2].get_data().to_owned().into_pyarray(_py),
         )
     }
     #[allow(clippy::type_complexity)]
@@ -565,15 +535,15 @@ impl PyVecGrid {
             self.grid.data[0]
                 .get_xpositions()
                 .to_owned()
-                .into_pyarray_bound(_py),
+                .into_pyarray(_py),
             self.grid.data[0]
                 .get_ypositions()
                 .to_owned()
-                .into_pyarray_bound(_py),
+                .into_pyarray(_py),
             self.grid.data[0]
                 .get_zpositions()
                 .to_owned()
-                .into_pyarray_bound(_py),
+                .into_pyarray(_py),
         )
     }
     fn shape(&self) -> Vec<usize> {
@@ -594,15 +564,15 @@ impl PyVecGrid {
             self.grid.data[0]
                 .slice_idx(axis, index)
                 .to_owned()
-                .into_pyarray_bound(_py),
+                .into_pyarray(_py),
             self.grid.data[1]
                 .slice_idx(axis, index)
                 .to_owned()
-                .into_pyarray_bound(_py),
+                .into_pyarray(_py),
             self.grid.data[2]
                 .slice_idx(axis, index)
                 .to_owned()
-                .into_pyarray_bound(_py),
+                .into_pyarray(_py),
         )
     }
     #[allow(clippy::type_complexity)]
@@ -620,15 +590,15 @@ impl PyVecGrid {
             self.grid.data[0]
                 .slice(axis, position)
                 .to_owned()
-                .into_pyarray_bound(_py),
+                .into_pyarray(_py),
             self.grid.data[1]
                 .slice(axis, position)
                 .to_owned()
-                .into_pyarray_bound(_py),
+                .into_pyarray(_py),
             self.grid.data[2]
                 .slice(axis, position)
                 .to_owned()
-                .into_pyarray_bound(_py),
+                .into_pyarray(_py),
         )
     }
     #[allow(clippy::type_complexity)]
@@ -645,15 +615,15 @@ impl PyVecGrid {
             self.grid.data[0]
                 .collapse(axis)
                 .to_owned()
-                .into_pyarray_bound(_py),
+                .into_pyarray(_py),
             self.grid.data[1]
                 .collapse(axis)
                 .to_owned()
-                .into_pyarray_bound(_py),
+                .into_pyarray(_py),
             self.grid.data[2]
                 .collapse(axis)
                 .to_owned()
-                .into_pyarray_bound(_py),
+                .into_pyarray(_py),
         )
     }
 

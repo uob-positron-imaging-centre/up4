@@ -71,7 +71,6 @@ macro_rules! setup_bar {
     }};
 }
 
-
 // mean function for ndarrays but not counting in nans
 pub fn nan_mean(arr: &ndarray::Array3<f64>) -> f64 {
     let mut sum = 0.0;

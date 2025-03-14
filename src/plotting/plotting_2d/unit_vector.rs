@@ -32,10 +32,10 @@ impl UnitVectorPlot {
         } else {
             grid.get_xpositions().to_owned()
         };
-        let y = if axis == 0 || axis == 1 {
-            grid.get_zpositions().to_owned()
-        } else {
+        let y = if axis == 2 {
             grid.get_ypositions().to_owned()
+        } else {
+            grid.get_zpositions().to_owned()
         };
         let i = usize::from(axis == 0);
         let j = if axis == 0 || axis == 1 { 2 } else { 1 };
@@ -217,12 +217,11 @@ impl UnitVectorPlot {
         //     }
         //     z.push(inner_vec);
         // }
-        
 
         HeatMap::new(
-            x.into_raw_vec(),
-            y.into_raw_vec(),
-            self.true_norm.to_owned().into_raw_vec(),
+            x.into_raw_vec_and_offset().0,
+            y.into_raw_vec_and_offset().0,
+            self.true_norm.to_owned().into_raw_vec_and_offset().0,
         )
         .color_scale(ColorScale::Vector(cmap))
     }

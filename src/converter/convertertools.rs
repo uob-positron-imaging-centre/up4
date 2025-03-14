@@ -5,7 +5,7 @@ use indicatif::{ProgressBar, ProgressStyle};
 use itertools::{Itertools, TakeWhileRef};
 use ndarray::{self, ArrayView1};
 use polyfit_rs;
-pub mod velocity_paralell;
+pub mod velocity_parallel;
 pub fn interpolate(
     data: ndarray::Array2<f64>,
     max_time: f64,

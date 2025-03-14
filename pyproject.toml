@@ -1,2 +1,14 @@
 [build-system]
-requires = ["setuptools", "wheel", "setuptools-rust", "wheel" ,"numpy" ,"vtk" ,"natsort" ,"h5py" ,"tqdm" ,"plotly", "pandas"]
+requires = [
+  "setuptools",
+  "wheel",
+  "setuptools-rust",
+  "wheel",
+  "numpy",
+  "vtk",
+  "natsort",
+  "h5py",
+  "tqdm",
+  "plotly",
+  "pandas",
+]

@@ -40,15 +40,15 @@ impl QuiverPlot {
 
     pub fn from_vector_grid_depth_averaged(grid: VectorGrid, axis: usize) -> QuiverPlot {
         // select yz (0), xz (1) or xy (2) plane
-        let x = if axis == 0 || axis == 1 {
+        let x = if axis == 0 {
             grid.get_ypositions().to_owned()
         } else {
             grid.get_xpositions().to_owned()
         };
-        let y = if axis == 0 || axis == 1 {
-            grid.get_zpositions().to_owned()
-        } else {
+        let y = if axis == 2 {
             grid.get_ypositions().to_owned()
+        } else {
+            grid.get_zpositions().to_owned()
         };
         let i = usize::from(axis == 0);
         let j = if axis == 0 || axis == 1 { 2 } else { 1 };
@@ -81,10 +81,10 @@ impl QuiverPlot {
         } else {
             grid.get_xpositions().to_owned()
         };
-        let y = if axis == 0 || axis == 1 {
-            grid.get_zpositions().to_owned()
-        } else {
+        let y = if axis == 2 {
             grid.get_ypositions().to_owned()
+        } else {
+            grid.get_zpositions().to_owned()
         };
         let i = usize::from(axis == 0);
         let j = if axis == 0 || axis == 1 { 2 } else { 1 };

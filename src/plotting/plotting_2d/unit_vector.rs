@@ -32,10 +32,10 @@ impl UnitVectorPlot {
         } else {
             grid.get_xpositions().to_owned()
         };
-        let y = if axis == 0 || axis == 1 {
-            grid.get_zpositions().to_owned()
-        } else {
+        let y = if axis == 2 {
             grid.get_ypositions().to_owned()
+        } else {
+            grid.get_zpositions().to_owned()
         };
         let i = usize::from(axis == 0);
         let j = if axis == 0 || axis == 1 { 2 } else { 1 };

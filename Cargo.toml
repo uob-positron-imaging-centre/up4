@@ -18,14 +18,14 @@ dyn-clone = "1.0"
 # hdf5 = { version = "0.8.1" }#, features = ["blosc"]}
 hdf5 = { package = "hdf5-metno", git = "https://github.com/metno/hdf5-rust.git" }
 indicatif = "0.17.9"
-itertools = "0.13.0"
+itertools = "0.14.0"
 natord = "1.0.9"
 ndarray = "0.16.1"
 ndarray-csv = { version = "0.5.1" }
 ndarray-stats = "0.6.0"
 num-traits = "0.2.14"
 numpy = "0.23.0"
-plotly = { version = "0.10.0", features = ["plotly_embed_js"] }
+plotly = { version = "0.12.1", features = ["plotly_embed_js"] }
 # plotly = { git = "https://github.com/DanW97/plotly.git" }
 polyfit-rs = "0.2.0"
 pyo3 = { version = "0.23.3", features = ["extension-module"] }
@@ -48,5 +48,5 @@ incremental = true
 debug = true
 lto = "fat"
 
-[rust]
-debuginfo-level = 1
+[profile.dev]
+debug = 1

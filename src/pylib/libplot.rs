@@ -15,7 +15,7 @@ use crate::{
 use colorous::Gradient;
 
 use plotly::{contour::Contours, layout::themes::PLOTLY_WHITE, Layout, Plot, Trace};
-use pyo3::{exceptions::PyValueError, prelude::*};
+use pyo3::prelude::*;
 
 #[pyclass(name = "RustPlotter2D", subclass)]
 pub struct PyPlotter2D {
@@ -59,7 +59,7 @@ impl PyPlotter2D {
         min_size: Option<f64>,
         max_size: Option<f64>,
         colour_map: Option<&str>,
-    ) -> PyResult<()> {
+    ) {
         // Arguments are checked for validity at the Python layer, so we can relax
         // checks here.
         let vector_grid = self
@@ -110,8 +110,6 @@ impl PyPlotter2D {
         let plot: Plot = plot(quiver_traces, layout);
         let plotting_string = plot.to_json();
         self.plotting_string = plotting_string;
-
-        Ok(())
     }
 
     #[pyo3(signature = (axis, selection = "depth_average", index = None, scaling_mode = "none", min_size = None, max_size = None, colour_map = "viridis"))]
@@ -124,7 +122,7 @@ impl PyPlotter2D {
         min_size: Option<f64>,
         max_size: Option<f64>,
         colour_map: Option<&str>,
-    ) -> PyResult<()> {
+    ) {
         // Arguments are checked for validity at the Python layer, so we can relax
         // checks here.
         let vector_grid = self
@@ -171,8 +169,6 @@ impl PyPlotter2D {
         let plot: Plot = plot(unit_vector_traces, layout);
         let plotting_string = plot.to_json();
         self.plotting_string = plotting_string;
-
-        Ok(())
     }
 
     // BUG something isn't being done correctly as the square axes aren't behaving
@@ -185,7 +181,7 @@ impl PyPlotter2D {
         selection: &str,
         index: Option<usize>,
         colour_map: Option<&str>,
-    ) -> PyResult<()> {
+    ) {
         // Arguments are checked for validity at the Python layer, so we can relax
         // checks here.
         let cmap = self.get_gradient(colour_map);
@@ -219,12 +215,10 @@ impl PyPlotter2D {
         let plot: Plot = plot(traces, layout);
         let plotting_string = plot.to_json();
         self.plotting_string = plotting_string;
-
-        Ok(())
     }
 
     // BUG something isn't being done correctly as the square axes aren't behaving
-    // TODO do something with sizes because the default is SHITE for the contour plot (too big)
+    // TODO do something with sizes because the default is bad for the contour plot (too big)
     // this may mean figuring out some optimal spacing
     #[pyo3(signature = (grid_type, axis, selection = "depth_average", index = None, colour_map = "viridis", n_contours = 10))]
     fn _scalar_contour(
@@ -235,7 +229,7 @@ impl PyPlotter2D {
         index: Option<usize>,
         colour_map: Option<&str>,
         n_contours: Option<usize>,
-    ) -> PyResult<()> {
+    ) {
         // Arguments are checked for validity at the Python layer, so we can relax
         // checks here.
         let cmap = self.get_gradient(colour_map);
@@ -271,7 +265,7 @@ impl PyPlotter2D {
                         Contours::new()
                             .start(min)
                             .end(max)
-                            .size(((max - min) / n_contours.unwrap() as f64) as usize),
+                            .size((((max - min) / n_contours.unwrap() as f64) as usize) as f64),
                     )
                     .auto_contour(false),
             );
@@ -280,8 +274,6 @@ impl PyPlotter2D {
         let plot: Plot = plot(traces, layout);
         let plotting_string = plot.to_json();
         self.plotting_string = plotting_string;
-
-        Ok(())
     }
 
     #[pyo3(signature = (comparison_grid, axis, selection = "depth_average", index = None))]
@@ -291,7 +283,7 @@ impl PyPlotter2D {
         axis: usize,
         selection: &str,
         index: Option<usize>,
-    ) -> PyResult<()> {
+    ) {
         let ref_grid = self
             .grid
             .as_any()
@@ -307,13 +299,7 @@ impl PyPlotter2D {
         let parity_plotter = if selection == "depth_average" {
             ParityPlot::from_vector_grids_depth_averaged(ref_grid, comp_grid, axis)
         } else if selection == "plane" {
-            if let Some(index) = index {
-                ParityPlot::from_vector_grids_single_plane(ref_grid, comp_grid, axis, index)
-            } else {
-                return Err(PyValueError::new_err(
-                    "A valid index is required to select an individual plane.",
-                ));
-            }
+            ParityPlot::from_vector_grids_single_plane(ref_grid, comp_grid, axis, index.unwrap())
         } else {
             ParityPlot::from_vector_grids(ref_grid, comp_grid)
         };
@@ -326,8 +312,6 @@ impl PyPlotter2D {
         let plot: Plot = plot(traces, layout);
         let plotting_string = plot.to_json();
         self.plotting_string = plotting_string;
-
-        Ok(())
     }
 
     #[pyo3(signature = (comparison_grid, axis, selection = "depth_average", index = None))]
@@ -337,19 +321,13 @@ impl PyPlotter2D {
         axis: usize,
         selection: &str,
         index: Option<usize>,
-    ) -> PyResult<()> {
+    ) {
         let ref_grid = self.grid.clone();
         let comp_grid = comparison_grid.grid.clone();
         let parity_plotter = if selection == "depth_average" {
             ParityPlot::from_grids_depth_averaged(ref_grid, comp_grid, axis)
         } else if selection == "plane" {
-            if let Some(index) = index {
-                ParityPlot::from_grids_single_plane(ref_grid, comp_grid, axis, index)
-            } else {
-                return Err(PyValueError::new_err(
-                    "A valid index is required to select an individual plane.",
-                ));
-            }
+            ParityPlot::from_grids_single_plane(ref_grid, comp_grid, axis, index.unwrap())
         } else {
             ParityPlot::from_grids(ref_grid, comp_grid)
         };
@@ -362,8 +340,6 @@ impl PyPlotter2D {
         let plot: Plot = plot(traces, layout);
         let plotting_string = plot.to_json();
         self.plotting_string = plotting_string;
-
-        Ok(())
     }
 
     #[pyo3(signature = (comparison_grid, axis, selection = "depth_average", index = None))]
@@ -373,7 +349,7 @@ impl PyPlotter2D {
         axis: usize,
         selection: &str,
         index: Option<usize>,
-    ) -> PyResult<()> {
+    ) {
         let ref_grid = self
             .grid
             .as_any()
@@ -388,18 +364,8 @@ impl PyPlotter2D {
             .clone();
         let parity_plotter = if selection == "depth_average" {
             ParityMap::from_vector_grids_depth_averaged(ref_grid, comp_grid, axis)
-        } else if selection == "plane" {
-            if let Some(index) = index {
-                ParityMap::from_vector_grids_single_plane(ref_grid, comp_grid, axis, index)
-            } else {
-                return Err(PyValueError::new_err(
-                    "A valid index is required to select an individual plane.",
-                ));
-            }
         } else {
-            return Err(PyValueError::new_err(
-                "Valid selection modes are 'depth_average' and 'plane' only.",
-            ));
+            ParityMap::from_vector_grids_single_plane(ref_grid, comp_grid, axis, index.unwrap())
         };
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
         let parity_traces = parity_plotter.create_parity_map();
@@ -410,8 +376,6 @@ impl PyPlotter2D {
         let plot: Plot = plot(traces, layout);
         let plotting_string = plot.to_json();
         self.plotting_string = plotting_string;
-
-        Ok(())
     }
 
     #[pyo3(signature = (comparison_grid, axis, selection = "depth_average", index = None))]
@@ -421,23 +385,13 @@ impl PyPlotter2D {
         axis: usize,
         selection: &str,
         index: Option<usize>,
-    ) -> PyResult<()> {
+    ) {
         let ref_grid = self.grid.clone();
         let comp_grid = comparison_grid.grid.clone();
         let parity_plotter = if selection == "depth_average" {
             ParityMap::from_grids_depth_averaged(ref_grid, comp_grid, axis)
-        } else if selection == "plane" {
-            if let Some(index) = index {
-                ParityMap::from_grids_single_plane(ref_grid, comp_grid, axis, index)
-            } else {
-                return Err(PyValueError::new_err(
-                    "A valid index is required to select an individual plane.",
-                ));
-            }
         } else {
-            return Err(PyValueError::new_err(
-                "Valid selection modes are 'depth_average' and 'plane' only.",
-            ));
+            ParityMap::from_grids_single_plane(ref_grid, comp_grid, axis, index.unwrap())
         };
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
         let parity_traces = parity_plotter.create_parity_map();
@@ -448,8 +402,6 @@ impl PyPlotter2D {
         let plot: Plot = plot(traces, layout);
         let plotting_string = plot.to_json();
         self.plotting_string = plotting_string;
-
-        Ok(())
     }
 
     #[pyo3(signature = (comparison_grid, axis, selection = "depth_average", index = None))]
@@ -459,7 +411,7 @@ impl PyPlotter2D {
         axis: usize,
         selection: &str,
         index: Option<usize>,
-    ) -> PyResult<()> {
+    ) {
         let ref_grid = self
             .grid
             .as_any()
@@ -474,18 +426,8 @@ impl PyPlotter2D {
             .clone();
         let parity_plotter = if selection == "depth_average" {
             ParityContour::from_vector_grids_depth_averaged(ref_grid, comp_grid, axis)
-        } else if selection == "plane" {
-            if let Some(index) = index {
-                ParityContour::from_vector_grids_single_plane(ref_grid, comp_grid, axis, index)
-            } else {
-                return Err(PyValueError::new_err(
-                    "A valid index is required to select an individual plane.",
-                ));
-            }
         } else {
-            return Err(PyValueError::new_err(
-                "Valid selection modes are 'depth_average' and 'plane' only.",
-            ));
+            ParityContour::from_vector_grids_single_plane(ref_grid, comp_grid, axis, index.unwrap())
         };
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
         let parity_traces = parity_plotter.create_parity_contour();
@@ -496,8 +438,6 @@ impl PyPlotter2D {
         let plot: Plot = plot(traces, layout);
         let plotting_string = plot.to_json();
         self.plotting_string = plotting_string;
-
-        Ok(())
     }
 
     #[pyo3(signature = (comparison_grid, axis, selection = "depth_average", index = None))]
@@ -507,23 +447,13 @@ impl PyPlotter2D {
         axis: usize,
         selection: &str,
         index: Option<usize>,
-    ) -> PyResult<()> {
+    ) {
         let ref_grid = self.grid.clone();
         let comp_grid = comparison_grid.grid.clone();
         let parity_plotter = if selection == "depth_average" {
             ParityContour::from_grids_depth_averaged(ref_grid, comp_grid, axis)
-        } else if selection == "plane" {
-            if let Some(index) = index {
-                ParityContour::from_grids_single_plane(ref_grid, comp_grid, axis, index)
-            } else {
-                return Err(PyValueError::new_err(
-                    "A valid index is required to select an individual plane.",
-                ));
-            }
         } else {
-            return Err(PyValueError::new_err(
-                "Valid selection modes are 'depth_average' and 'plane' only.",
-            ));
+            ParityContour::from_grids_single_plane(ref_grid, comp_grid, axis, index.unwrap())
         };
         let mut traces: Vec<Box<dyn Trace>> = Vec::new();
         let heatmap_traces = parity_plotter.create_parity_contour();
@@ -534,8 +464,6 @@ impl PyPlotter2D {
         let plot: Plot = plot(traces, layout);
         let plotting_string = plot.to_json();
         self.plotting_string = plotting_string;
-
-        Ok(())
     }
 
     #[getter]

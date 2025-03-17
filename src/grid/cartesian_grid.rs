@@ -115,8 +115,7 @@ impl GridFunctions3D for CartesianGrid3D {
         self.limits
             .iter()
             .zip(pos.iter())
-            .map(|(lim, pos)| pos >= &lim[0] && pos <= &lim[1])
-            .all(|value| value)
+            .all(|(lim, pos)| pos >= &lim[0] && pos <= &lim[1])
     }
 
     fn cell_id(&self, pos: Position) -> Result<CellId> {

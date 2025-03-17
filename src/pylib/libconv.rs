@@ -472,7 +472,7 @@ impl PyConverter {
         interpolate: bool,
         radius: f64,
         method: &str,
-    ) -> PyResult<()> {
+    ) {
         //errors out immediately because of the function is not implemented
         //return Err(PyErr::new::<pyo3::exceptions::PyNotImplementedError, _>(
         //"Multi CSV reader is not implemented yet. This feature comes in future!",
@@ -489,7 +489,6 @@ impl PyConverter {
             radius,
             method,
         );
-        Ok(())
     }
 
     /// Convert multiple CSV files into a HDF5 file.
@@ -550,7 +549,7 @@ impl PyConverter {
         vel: bool,
         interpolate: bool,
         radius: f64,
-    ) -> PyResult<()> {
+    ) {
         // errors out immediately because of the function is not implemented
         //return Err(PyErr::new::<pyo3::exceptions::PyNotImplementedError, _>(
         //    "Multi CSV reader is not implemented yet. This feature comes in future!",
@@ -567,6 +566,5 @@ impl PyConverter {
             interpolate,
             radius,
         );
-        Ok(())
     }
 }

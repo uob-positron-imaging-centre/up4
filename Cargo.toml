@@ -48,5 +48,5 @@ incremental = true
 debug = true
 lto = "fat"
 
-[rust]
-debuginfo-level = 1
+[profile.dev]
+debug = 1

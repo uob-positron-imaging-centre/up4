@@ -723,7 +723,7 @@ impl PyData {
                 None => panic!("Can not convert PyGrid to Grid1D as "),
             };
         self.data
-            .homogeneity_index(grid.grid.clone(), selector, min_vel)
+            .homogenity_index(grid.grid.clone(), selector, min_vel)
     }
 
     /// Calculate the mean squared displacement field of the system.

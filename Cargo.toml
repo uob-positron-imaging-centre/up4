@@ -28,7 +28,7 @@ numpy = "0.23.0"
 plotly = { version = "0.12.1", features = ["plotly_embed_js"] }
 # plotly = { git = "https://github.com/DanW97/plotly.git" }
 polyfit-rs = "0.2.0"
-pyo3 = { version = "0.23.3", features = ["extension-module"] }
+pyo3 = { version = "0.23.5", features = ["extension-module"] }
 rayon = "1.5.3"
 regex = "1"
 vtkio = { git = "https://github.com/elrnv/vtkio", branch = "release-0.7" }

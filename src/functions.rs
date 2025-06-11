@@ -1,5 +1,6 @@
 pub mod conditional;
 pub mod extractions;
+use rustc_hash::FxHashMap;
 pub mod mixing;
 use crate::datamanager::DataManager;
 //use crate::utilities::print_debug;
@@ -516,7 +517,14 @@ pub trait Granular: DataManager {
             print_debug!("extracting position");
             let position_future = timestep_future.position();
             let ids_future = timestep_future.particleid();
-            let future_num_particles = position_future.len();
+            let future_num_particles = ids_future.len();
+            let mut future_particle_id_to_index: FxHashMap<usize, usize> = 
+                FxHashMap::with_capacity_and_hasher(future_num_particles, Default::default());
+
+            for i in 0..future_num_particles {
+                future_particle_id_to_index.insert(ids_future[i] as usize, i);
+            }
+
             print_debug!("Particles in next timestep: {}", future_num_particles);
             print_debug!("Starting particle loop");
 
@@ -549,25 +557,21 @@ pub trait Granular: DataManager {
                 // match the particle ids to get the future position
                 let particle_id = particle_ids[particle] as usize;
                 let mut future_particle = -1;
-                for i in 0..future_num_particles {
-                    if ids_future[i] as usize == particle_id {
-                        future_particle = i as isize;
-                        break;
-                    }
-                }
-                // if not found, continue
-                if future_particle == -1 {
-                    print_warning!("Dispersion: Particle {} not found in next timestep", particle);
+                let particle_id_usize = particle_ids[particle] as usize;
+                if let Some(&future_idx) = future_particle_id_to_index.get(&particle_id_usize){
+                    let position_future_particle = position_future[future_idx];
+                    squared_sum_x[cell_id] += position_future_particle[0] * position_future_particle[0];
+                    squared_sum_y[cell_id] += position_future_particle[1] * position_future_particle[1];
+                    squared_sum_z[cell_id] += position_future_particle[2] * position_future_particle[2];
+                    sum_x[cell_id] += position_future_particle[0];
+                    sum_y[cell_id] += position_future_particle[1];
+                    sum_z[cell_id] += position_future_particle[2];
+                    num_counts[cell_id] += 1.0;
+                } else {
+                    print_warning!("Dispersion: Particle {} not found in next timestep", particle_id_usize);
                     continue;
                 }
-                let position_future_particle = position_future[future_particle as usize];
-                squared_sum_x[cell_id] += position_future_particle[0] * position_future_particle[0];
-                squared_sum_y[cell_id] += position_future_particle[1] * position_future_particle[1];
-                squared_sum_z[cell_id] += position_future_particle[2] * position_future_particle[2];
-                sum_x[cell_id] += position_future_particle[0];
-                sum_y[cell_id] += position_future_particle[1];
-                sum_z[cell_id] += position_future_particle[2];
-                num_counts[cell_id] += 1.0;
+                
                 
                 
             }

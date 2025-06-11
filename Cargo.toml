@@ -31,6 +31,7 @@ polyfit-rs = "0.2.0"
 pyo3 = { version = "0.23.3", features = ["extension-module"] }
 rayon = "1.5.3"
 regex = "1"
+rustc-hash = "2.1.1"
 vtkio = { git = "https://github.com/elrnv/vtkio", branch = "release-0.7" }
 
 [features]

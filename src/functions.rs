@@ -73,7 +73,7 @@ pub trait Granular: DataManager {
                 //reset the position. the lowest value should be at 0,0,0
                 if !vectorgrid.is_inside(position) {
                     // the particle is out of the field of view
-                    print_debug!("Particle {} is out of FoV", particle);
+                    print_debug!("Particle {} is out of Field of View", particle);
                     continue;
                 }
                 let velocity = vectorgrid.velocity_calculation(position, velocity);
@@ -208,7 +208,7 @@ pub trait Granular: DataManager {
 
                 if !grid.is_inside(position) {
                     // the particle is out of the field of view
-                    print_debug!("Particle {} is out of FoV", particle);
+                    print_debug!("Particle {} is out of Field of View", particle);
                     continue;
                 }
                 if abs_vel < min_vel || abs_vel > max_vel {
@@ -281,7 +281,7 @@ pub trait Granular: DataManager {
 
                 if !grid.is_inside(position) {
                     // the particle is out of the field of view
-                    print_debug!("Particle {} is out of FoV", particle);
+                    print_debug!("Particle {} is out of Field of View", particle);
                     continue;
                 }
                 print_debug!("Particle {} is in the grid", particle);
@@ -317,7 +317,7 @@ pub trait Granular: DataManager {
         self.setup_buffer(0); //setup another buffer
         for timestep in 0..timesteps - 3 {
             let timestep_data = self.get_timestep(timestep).clone();
-            //BUG this is not working, try to acces a point in the buffer that doesnt excist
+            //BUG this is not working, try to access a point in the buffer that doesnt exist
             let next_timestep_data = self.get_timestep_buffer(timestep + 1, 0);
             let current_time = *timestep_data.time();
             let next_time = *next_timestep_data.time();
@@ -357,7 +357,7 @@ pub trait Granular: DataManager {
                 let position = positions[particle];
                 if !grid.is_inside(position) {
                     // the particle is out of the field of view
-                    print_debug!("Particle {} is out of FoV", particle);
+                    print_debug!("Particle {} is out of Field of View", particle);
                     continue;
                 }
                 print_debug!("Particle {} is in the grid", particle);
@@ -540,7 +540,7 @@ pub trait Granular: DataManager {
                 }
                 if !grid.is_inside(positions[particle]) {
                     // the particle is out of the field of view
-                    print_debug!("Particle {} is out of FoV", particle);
+                    print_debug!("Particle {} is out of Field of View", particle);
                     continue;
                 }
                 let cell_id = match grid.cell_id(positions[particle]) {
@@ -782,10 +782,10 @@ pub trait Granular: DataManager {
         selector: &ParticleSelector,
         mode: &str,
     ) -> Box<dyn GridFunctions3D> {
-        //read the number of timesteps inside this hdf5file
+        //read the number of timesteps inside this hdf5 file
         let global_stats = self.global_stats();
         let timesteps: &usize = global_stats.timesteps();
-        // calculating the mean fluicitaing velcity using a algroythm that allows
+        // calculating the mean fluctuating velocity using an algorithm that allows
         // to only use one loop over the data
         let mut squared_sum_x = grid.get_data().clone();
         let mut squared_sum_y = grid.get_data().clone();
@@ -834,7 +834,7 @@ pub trait Granular: DataManager {
                 let position = positions[particle];
                 if !grid.is_inside(position) {
                     // the particle is out of the field of view
-                    print_debug!("Particle {} is out of FoV", particle);
+                    print_debug!("Particle {} is out of Field of View", particle);
                     continue;
                 }
                 print_debug!("Particle {} is in the grid", particle);
@@ -885,7 +885,7 @@ pub trait Granular: DataManager {
         grantemp
     }
 
-    fn homogenity_index(
+    fn homogeneity_index(
         &mut self,
         grid: Box<dyn GridFunctions3D>,
         selector: &ParticleSelector,

@@ -122,7 +122,7 @@ pub trait Granular: DataManager {
             fn velocity_calculation(velocity: Array1<f64>) -> f64 {
                 let vx: f64 = velocity[0];
                 let vy: f64 = velocity[1];
-                
+
                 (vx.powi(2) + vy.powi(2)).sqrt()
             }
             velocity_calc = velocity_calculation;
@@ -130,7 +130,7 @@ pub trait Granular: DataManager {
             fn velocity_calculation(velocity: Array1<f64>) -> f64 {
                 let vx: f64 = velocity[0];
                 let vz: f64 = velocity[2];
-                
+
                 (vx.powi(2) + vz.powi(2)).sqrt()
             }
             velocity_calc = velocity_calculation;
@@ -138,7 +138,7 @@ pub trait Granular: DataManager {
             fn velocity_calculation(velocity: Array1<f64>) -> f64 {
                 let vy: f64 = velocity[1];
                 let vz: f64 = velocity[2];
-                
+
                 (vy.powi(2) + vz.powi(2)).sqrt()
             }
             velocity_calc = velocity_calculation;
@@ -518,7 +518,7 @@ pub trait Granular: DataManager {
             let position_future = timestep_future.position();
             let ids_future = timestep_future.particleid();
             let future_num_particles = ids_future.len();
-            let mut future_particle_id_to_index: FxHashMap<usize, usize> = 
+            let mut future_particle_id_to_index: FxHashMap<usize, usize> =
                 FxHashMap::with_capacity_and_hasher(future_num_particles, Default::default());
 
             for i in 0..future_num_particles {
@@ -558,24 +558,27 @@ pub trait Granular: DataManager {
                 let particle_id = particle_ids[particle] as usize;
                 let mut future_particle = -1;
                 let particle_id_usize = particle_ids[particle] as usize;
-                if let Some(&future_idx) = future_particle_id_to_index.get(&particle_id_usize){
+                if let Some(&future_idx) = future_particle_id_to_index.get(&particle_id_usize) {
                     let position_future_particle = position_future[future_idx];
-                    squared_sum_x[cell_id] += position_future_particle[0] * position_future_particle[0];
-                    squared_sum_y[cell_id] += position_future_particle[1] * position_future_particle[1];
-                    squared_sum_z[cell_id] += position_future_particle[2] * position_future_particle[2];
+                    squared_sum_x[cell_id] +=
+                        position_future_particle[0] * position_future_particle[0];
+                    squared_sum_y[cell_id] +=
+                        position_future_particle[1] * position_future_particle[1];
+                    squared_sum_z[cell_id] +=
+                        position_future_particle[2] * position_future_particle[2];
                     sum_x[cell_id] += position_future_particle[0];
                     sum_y[cell_id] += position_future_particle[1];
                     sum_z[cell_id] += position_future_particle[2];
                     num_counts[cell_id] += 1.0;
                 } else {
-                    print_warning!("Dispersion: Particle {} not found in next timestep", particle_id_usize);
+                    print_warning!(
+                        "Dispersion: Particle {} not found in next timestep",
+                        particle_id_usize
+                    );
                     continue;
                 }
-                
-                
-                
             }
-            
+
             check_signals!();
 
             // for loop over all 3 dimensions to get to each cell

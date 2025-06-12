@@ -121,7 +121,7 @@ pub trait Granular: DataManager {
             fn velocity_calculation(velocity: Array1<f64>) -> f64 {
                 let vx: f64 = velocity[0];
                 let vy: f64 = velocity[1];
-                
+
                 (vx.powi(2) + vy.powi(2)).sqrt()
             }
             velocity_calc = velocity_calculation;
@@ -129,7 +129,7 @@ pub trait Granular: DataManager {
             fn velocity_calculation(velocity: Array1<f64>) -> f64 {
                 let vx: f64 = velocity[0];
                 let vz: f64 = velocity[2];
-                
+
                 (vx.powi(2) + vz.powi(2)).sqrt()
             }
             velocity_calc = velocity_calculation;
@@ -137,7 +137,7 @@ pub trait Granular: DataManager {
             fn velocity_calculation(velocity: Array1<f64>) -> f64 {
                 let vy: f64 = velocity[1];
                 let vz: f64 = velocity[2];
-                
+
                 (vy.powi(2) + vz.powi(2)).sqrt()
             }
             velocity_calc = velocity_calculation;
@@ -557,7 +557,10 @@ pub trait Granular: DataManager {
                 }
                 // if not found, continue
                 if future_particle == -1 {
-                    print_warning!("Dispersion: Particle {} not found in next timestep", particle);
+                    print_warning!(
+                        "Dispersion: Particle {} not found in next timestep",
+                        particle
+                    );
                     continue;
                 }
                 let position_future_particle = position_future[future_particle as usize];
@@ -568,10 +571,8 @@ pub trait Granular: DataManager {
                 sum_y[cell_id] += position_future_particle[1];
                 sum_z[cell_id] += position_future_particle[2];
                 num_counts[cell_id] += 1.0;
-                
-                
             }
-            
+
             check_signals!();
 
             // for loop over all 3 dimensions to get to each cell

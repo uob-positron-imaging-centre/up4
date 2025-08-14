@@ -150,11 +150,8 @@ class Grid(RustGrid):
 
             # data is given and cell size is given
             elif data is not None and limits is not None:
-                # BUG limits can be negative. nobody say they cant
-                if not any(i < 0 for i in limits):
-                    return self.cartesian3d(np.asarray(num_cells), np.asarray(limits))
-                else:
-                    raise ValueError("limits must be positive")
+                return self.cartesian3d(np.asarray(num_cells), np.asarray(limits))
+
             # data is given and at least one of xlim,ylim,zlim is not none
             elif data is not None and (
                 xlim is not None or ylim is not None or zlim is not None

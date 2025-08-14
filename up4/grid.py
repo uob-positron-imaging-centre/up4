@@ -149,9 +149,6 @@ class Grid(RustGrid):
 
             # data is given and cell size is given
             elif data is not None and limits is not None:
-                # BUG limits can be negative. nobody say they cant
-                if any(i < 0 for i in limits):
-                    print("limits are negative")
                 return self.cartesian3d(np.asarray(num_cells), np.asarray(limits))
 
             # data is given and at least one of xlim,ylim,zlim is not none
@@ -175,8 +172,6 @@ class Grid(RustGrid):
                 )
             elif data is None:
                 if limits is not None:
-                    if any(i < 0 for i in limits):
-                        print("limits are negative")
                     return self.cartesian3d(
                             np.asarray(num_cells), np.asarray(limits)
                         )
@@ -204,8 +199,6 @@ class Grid(RustGrid):
 
             # data is given and cell size is given
             elif data is not None and limits is not None:
-                if any(i < 0 for i in limits):
-                    print("limits are negative")
                 return self.cylindrical3d(
                     np.asarray(num_cells, dtype=np.int64), np.asarray(limits)
                     )
@@ -230,8 +223,6 @@ class Grid(RustGrid):
                 )
             elif data is None:
                 if limits is not None:
-                    if any(i < 0 for i in limits):
-                        print("limits are negative")
                     return self.cylindrical3d(
                             np.asarray(num_cells, dtype=np.int64), np.asarray(limits)
                         )

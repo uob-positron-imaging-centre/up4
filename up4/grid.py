@@ -119,7 +119,6 @@ class Grid(RustGrid):
                     " in x,y,z direction. Units are in file units"
                 )
             num_cells = calc_num_cells(cell_size, data, limits, xlim, ylim, zlim)
-            print(num_cells)
 
         if data is None:
             # either limits or xlim,ylim,zlim must be given
@@ -173,12 +172,7 @@ class Grid(RustGrid):
                 )
             elif data is None:
                 if limits is not None:
-                    if not any(i < 0 for i in limits):
-                        return self.cartesian3d(
-                            np.asarray(num_cells), np.asarray(limits)
-                        )
-                    else:
-                        raise ValueError("limits must be positive")
+                    return self.cartesian3d(np.asarray(num_cells), np.asarray(limits))
                 elif xlim is not None and ylim is not None and zlim is not None:
                     dim = [xlim[0], xlim[1], ylim[0], ylim[1], zlim[0], zlim[1]]
                     return self.cartesian3d(np.asarray(num_cells), np.asarray(dim))
@@ -203,12 +197,9 @@ class Grid(RustGrid):
 
             # data is given and cell size is given
             elif data is not None and limits is not None:
-                if not any(i < 0 for i in limits):
-                    return self.cylindrical3d(
-                        np.asarray(num_cells, dtype=np.int64), np.asarray(limits)
-                    )
-                else:
-                    raise ValueError("limits must be positive")
+                return self.cylindrical3d(
+                    np.asarray(num_cells, dtype=np.int64), np.asarray(limits)
+                )
             # data is given and at least one of xlim,ylim,zlim is not none
             elif data is not None and (
                 xlim is not None or ylim is not None or zlim is not None
@@ -230,12 +221,9 @@ class Grid(RustGrid):
                 )
             elif data is None:
                 if limits is not None:
-                    if not any(i < 0 for i in limits):
-                        return self.cylindrical3d(
-                            np.asarray(num_cells, dtype=np.int64), np.asarray(limits)
-                        )
-                    else:
-                        raise ValueError("limits must be positive")
+                    return self.cylindrical3d(
+                        np.asarray(num_cells, dtype=np.int64), np.asarray(limits)
+                    )
                 elif xlim is not None and ylim is not None and zlim is not None:
                     dim = [xlim[0], xlim[1], ylim[0], ylim[1], zlim[0], zlim[1]]
                     return self.cylindrical3d(

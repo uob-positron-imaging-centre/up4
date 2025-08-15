@@ -172,9 +172,7 @@ class Grid(RustGrid):
                 )
             elif data is None:
                 if limits is not None:
-                    return self.cartesian3d(
-                        np.asarray(num_cells), np.asarray(limits)
-                    )
+                    return self.cartesian3d(np.asarray(num_cells), np.asarray(limits))
                 elif xlim is not None and ylim is not None and zlim is not None:
                     dim = [xlim[0], xlim[1], ylim[0], ylim[1], zlim[0], zlim[1]]
                     return self.cartesian3d(np.asarray(num_cells), np.asarray(dim))

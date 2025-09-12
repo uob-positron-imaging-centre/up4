@@ -29,7 +29,12 @@ pub fn interpolate(
 
     let maxtime = max_time;
     let timesteps = steps;
-    let dt = maxtime / timesteps as f64;
+    if timesteps == 0 {
+        return ndarray::Array2::<f64>::zeros((0, 4));
+    }
+    // Use (timesteps - 1) so the last synthetic step aligns with the last real time
+    let denom = if timesteps > 1 { (timesteps - 1) as f64 } else { 1.0 };
+    let dt = maxtime / denom;
     // First timestep:
     let mut interp_data = ndarray::Array2::<f64>::zeros((steps, 4));
     // first timestep:
@@ -45,7 +50,7 @@ pub fn interpolate(
     // loop over whole dataset and figure out the location at each timestep
     let mut real_step = 1;
     for step in 1..timesteps - 1 {
-        let time_new = step as f64 * dt;
+        let time_new = time[0] + step as f64 * dt;
         // find the next indx in the real data which may be the old one
         real_step = {
             // if the temporal distance between new time and old time is smaller

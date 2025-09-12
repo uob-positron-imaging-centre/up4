@@ -1,16 +1,14 @@
 use crate::{
     check_signals,
-    converter::convertertools::{make_sortlist, sort_by_array, sort_by_column},
+    converter::convertertools::{sort_by_column},
     print_debug, print_warning, setup_bar,
 };
 use csv;
 use hdf5::File;
 // use indicatif::{ProgressBar, ProgressStyle};
-use itertools::Itertools;
 use ndarray;
 use ndarray_csv::Array2Reader;
-use regex::Regex;
-use std::{path::Path, process::id};
+use std::path::Path;
 
 use crate::converter::convertertools;
 // Maximum amount of failures in a row available for a process
@@ -28,6 +26,7 @@ pub fn csv_multi_idline(
     vel: bool,
     interpolate: bool,
     radius: f64,
+    skip_small: usize,
 ) {
     // check if the column stack is either 5 or 8 long
     let bar = setup_bar!("CSV converter", 100);
@@ -55,7 +54,7 @@ pub fn csv_multi_idline(
         .comment(Some(comment.as_bytes()[0]))
         .from_path(filename)
         .expect("Unable to open CSV file.");
-    print_debug!("{:?}", rdr);
+    print_debug!("CSV reader configured");
     bar.inc(1);
     let particle_data: Vec<ndarray::Array2<f64>> = {
         // read in the data from the csv file
@@ -88,9 +87,22 @@ pub fn csv_multi_idline(
             // remove id column because it was not implemented
             temp_data = remove_columns(temp_data, vec![1]);
             if interpolate {
-                temp_data = convertertools::interpolate(temp_data, max_t, max_steps);
+                // Interpolate per particle using its local time span and step count
+                let t_col = temp_data.slice(ndarray::s![.., 0]).to_owned();
+                let local_steps = t_col.len();
+                let local_max_t = if local_steps > 0 { t_col[local_steps - 1] - t_col[0_usize] } else { 0.0 };
+                temp_data = convertertools::interpolate(temp_data, local_max_t, local_steps);
             }
-            println!("Data after interpolation: {:?}", temp_data);
+            // Skip small trajectories if requested
+            if skip_small > 0 && temp_data.nrows() < skip_small {
+                print_warning!(
+                    "Skipping trajectory with {} steps (< skip_small={})",
+                    temp_data.nrows(),
+                    skip_small
+                );
+                continue;
+            }
+            // print_debug!("Data after interpolation: {:?}", temp_data);
             if vel {
                 if columns.len() > 5 {
                     panic!(
@@ -103,14 +115,38 @@ pub fn csv_multi_idline(
                 // if condition to check weather to use the parallel version of the velocity computation
                 // currently turned of due to bug in parallel computation
                 if true {
-                    temp_data = convertertools::velocity_polynom(temp_data, 9, 2);
+                    // adapt sampling window if trajectory is short
+                    let mut win = 9usize;
+                    let len = temp_data.nrows();
+                    if len < 3 {
+                        panic!(
+                            "Not enough timesteps ({}) to compute velocity. Provide more data or disable vel.",
+                            len
+                        );
+                    }
+                    if len < win {
+                        // ensure odd window and at least 3
+                        win = if len % 2 == 1 { len } else { len - 1 };
+                        if win < 3 {
+                            panic!(
+                                "Not enough timesteps ({}) to compute velocity. Provide more data or disable vel.",
+                                len
+                            );
+                        }
+                        print_warning!(
+                            "Velocity window reduced to {} due to short trajectory (len={}).",
+                            win,
+                            len
+                        );
+                    }
+                    temp_data = convertertools::velocity_polynom(temp_data, win, 2);
                 } else {
                     temp_data = convertertools::velocity_parallel::velocity_polynom_parallel(
                         temp_data, 9, 2,
                     );
                 }
             }
-            println!("Data after velocity calc: {:?}", temp_data);
+            // print_debug!("Data after velocity calc: {:?}", temp_data);
             // push the current particle data into the vector
             particle_data.push(temp_data);
         }
@@ -141,38 +177,41 @@ pub fn csv_multi_idline(
     velocity_mag[0] = f64::MAX;
     velocity_mag[2] = f64::MIN;
     // ######### arrays for Attributes:
-    let mut timesteps: usize = 0;
+    // Determine global timesteps (maximum length across particles) before writing
+    let mut timesteps: usize = particle_data
+        .iter()
+        .map(|d| d.nrows())
+        .max()
+        .unwrap_or(0);
     let mut time: ndarray::Array1<f64> = ndarray::Array1::<f64>::zeros(2);
     let mut sample_rate: f64 = 0.0;
     let mut time_array = ndarray::Array1::<f64>::zeros(100); // random value as it will be overwritten anyways
+    let mut n_written_particles: usize = 0;
     bar.inc(10);
     for (p_id, data) in particle_data.iter().enumerate() {
         // progress bar
-        println!("{:?}", data.shape());
+        // print_debug!("Per-particle shape: {:?}", data.shape());
         let data_length = data.column(0).len();
-        if data_length > timesteps {
-            timesteps = data_length;
-        }
         // Attributes
         // arrays that will be saved:
-        time_array = ndarray::Array1::<f64>::zeros(data_length);
-        let mut particle_id_array = ndarray::Array1::<f64>::ones(data_length);
+        time_array = ndarray::Array1::<f64>::zeros(timesteps);
+        let mut particle_id_array = ndarray::Array1::<f64>::ones(timesteps);
         particle_id_array.fill(p_id as f64);
-        let particle_radius_array = ndarray::Array1::from_elem(data_length, radius);
-        let ppclouds_array = ndarray::Array1::<f64>::ones(data_length);
-        let particle_type_array = ndarray::Array1::<f64>::zeros(data_length);
-        let mut vel_array = ndarray::Array2::<f64>::zeros((data_length, 3));
-        let mut pos_array = ndarray::Array2::<f64>::zeros((data_length, 3));
+        let particle_radius_array = ndarray::Array1::from_elem(timesteps, radius);
+        let ppclouds_array = ndarray::Array1::<f64>::ones(timesteps);
+        let particle_type_array = ndarray::Array1::<f64>::zeros(timesteps);
+        let mut vel_array = ndarray::Array2::<f64>::zeros((timesteps, 3));
+        let mut pos_array = ndarray::Array2::<f64>::zeros((timesteps, 3));
         let mut failcount = 0;
-        let mut old_time = 0.0; // TIme of the last falid timestep
+        let mut old_time = f64::NEG_INFINITY; // time of the last valid timestep
 
         print_debug!("Creating a new group \"particle {}\"", p_id);
         let group = hdf5file
             .create_group(&format!("particle {}", p_id))
             .unwrap_or_else(|_| panic!("Can not create group particle {}", p_id));
 
-        if data[[0, 6]].is_nan() {
-            panic!("Velocity information required")
+        if !vel && data[[0, 6]].is_nan() {
+            panic!("Velocity information required (enable vel=True or provide vx,vy,vz)")
         }
         // Go through every line of the csv file
         for (line_id, line) in data.outer_iter().enumerate() {
@@ -192,9 +231,8 @@ pub fn csv_multi_idline(
                 continue;
             }
             time_array[line_id] = current_time;
-            // resetfailcount. we only dont allow them do be in a row!
+            // reset failcount. we only don't allow them to be in a row!
             failcount = 0;
-            old_time = current_time;
             let pos_x = line[1];
             let pos_y = line[2];
             let pos_z = line[3];
@@ -202,7 +240,7 @@ pub fn csv_multi_idline(
             pos_array[[line_id, 0]] = pos_x;
             pos_array[[line_id, 1]] = pos_y;
             pos_array[[line_id, 2]] = pos_z;
-            println!("{:?}", line);
+            // print_debug!("{:?}", line);
             let v_x = line[4];
             let v_y = line[5];
             let v_z = line[6];
@@ -248,7 +286,12 @@ pub fn csv_multi_idline(
             }
             //step += 1;
             mean_counter += 1;
-            sample_rate = current_time - old_time;
+            if old_time.is_finite() {
+                let dt = current_time - old_time;
+                if dt > 0.0 {
+                    sample_rate = dt;
+                }
+            }
             if current_time > time[1] {
                 time[1] = current_time;
             }
@@ -257,6 +300,31 @@ pub fn csv_multi_idline(
                 check_signals!();
             }
         } // end filename forloop
+        // Pad remaining rows, if any, by carrying forward last valid values
+        if data_length < timesteps {
+            let start = data_length;
+            for i in start..timesteps {
+                // time: extend uniformly using sample_rate if available, else repeat last
+                if i == start {
+                    if old_time.is_finite() {
+                        time_array[i] = if sample_rate > 0.0 { old_time + sample_rate } else { old_time };
+                    } else {
+                        time_array[i] = 0.0;
+                    }
+                } else {
+                    time_array[i] = if sample_rate > 0.0 { time_array[i - 1] + sample_rate } else { time_array[i - 1] };
+                }
+                // pos/vel: repeat last known values
+                if start > 0 {
+                    pos_array[[i, 0]] = pos_array[[start - 1, 0]];
+                    pos_array[[i, 1]] = pos_array[[start - 1, 1]];
+                    pos_array[[i, 2]] = pos_array[[start - 1, 2]];
+                    vel_array[[i, 0]] = vel_array[[start - 1, 0]];
+                    vel_array[[i, 1]] = vel_array[[start - 1, 1]];
+                    vel_array[[i, 2]] = vel_array[[start - 1, 2]];
+                }
+            }
+        }
           // write data into HDF5 file
         let builder = group.new_dataset_builder();
         builder
@@ -303,6 +371,7 @@ pub fn csv_multi_idline(
             .unwrap_or_else(|_| {
                 panic!("Unable to create dataset \"position\" in file {}", filename)
             });
+        n_written_particles += 1;
     }
     bar.inc(20);
     velocity_mag[1] /= mean_counter as f64;
@@ -326,7 +395,7 @@ pub fn csv_multi_idline(
         .new_attr::<u64>()
         .create("particle number")
         .unwrap()
-        .write_scalar(&1_usize)
+        .write_scalar(&n_written_particles)
         .unwrap();
     hdf5file
         .new_attr::<u64>()
@@ -355,9 +424,16 @@ pub fn csv_multi_idline(
         .with_data(&velocity_mag)
         .create("velocity magnitude")
         .unwrap();
+    // Provide a global time array for compatibility with PData reader expectations.
+    // Construct a uniform time vector using the reported timesteps and sample_rate.
+    let global_time_array: ndarray::Array1<f64> = if timesteps > 0 {
+        ndarray::Array1::from_iter((0..timesteps).map(|i| i as f64 * sample_rate))
+    } else {
+        ndarray::Array1::<f64>::zeros(0)
+    };
     hdf5file
         .new_dataset_builder()
-        .with_data(&time_array)
+        .with_data(&global_time_array)
         .create("time array")
         .unwrap();
     bar.finish()

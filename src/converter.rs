@@ -389,6 +389,7 @@ pub fn csv_multi_converter(
     interpolate: bool,
     radius: f64,
     mode: &str,
+    skip_small: usize,
 ) {
     //unimplemented!("CSV Multi Converter is not implemented yet");
     println!(
@@ -424,6 +425,7 @@ pub fn csv_multi_converter(
             vel,
             interpolate,
             radius,
+            skip_small,
         );
     } else {
         println!("Mode not recognized! Please use \"chain\" or \"id_line\".");

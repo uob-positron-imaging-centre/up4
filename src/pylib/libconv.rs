@@ -458,7 +458,8 @@ impl PyConverter {
         vel = false,
         interpolate = false,
         radius = 0.0,
-        method = "\"id_line\""
+        method = "\"id_line\"",
+        skip_small = 3
     ))]
     #[staticmethod]
     fn csv_multi(
@@ -472,6 +473,7 @@ impl PyConverter {
         interpolate: bool,
         radius: f64,
         method: &str,
+        skip_small: usize,
     ) {
         //errors out immediately because of the function is not implemented
         //return Err(PyErr::new::<pyo3::exceptions::PyNotImplementedError, _>(
@@ -488,6 +490,7 @@ impl PyConverter {
             interpolate,
             radius,
             method,
+            skip_small,
         );
     }
 

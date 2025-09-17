@@ -267,8 +267,7 @@ pub trait Mixing: DataManager {
                 let position_future_particle = position_future[particle];
                 let dist = ((positions[particle][0] - position_future_particle[0]).powi(2)
                     + (positions[particle][1] - position_future_particle[1]).powi(2)
-                    + (positions[particle][2] - position_future_particle[2]).powi(2))
-                .sqrt();
+                    + (positions[particle][2] - position_future_particle[2]).powi(2));
                 distance.add_value(positions[particle], dist); // add the distance traveled to the cell id of the current particle
             }
             check_signals!();
@@ -283,7 +282,7 @@ pub trait Mixing: DataManager {
         let data = data
             .iter()
             .zip(weights.iter())
-            .map(|(x, y)| if *y > 0.0 { (x * x) / y } else { 0.0 })
+            .map(|(x, y)| if *y > 0.0 { (x) / y } else { 0.0 })
             .collect::<Vec<f64>>();
         let data = ndarray::Array::from_shape_vec((cells[0], cells[1], cells[2]), data).unwrap();
         grid.set_data(data);

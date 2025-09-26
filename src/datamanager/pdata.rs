@@ -2,7 +2,7 @@
 //!
 //! Implementation of reading + buffering functions.
 
-use super::{DataManager, GlobalStats, Manager, Timestep};
+use super::{DataManager, GlobalStats, Manager, Timestep, DEFAULT_BUFFER_SIZE};
 
 extern crate ndarray;
 use crate::particleselector::Selector;
@@ -13,7 +13,6 @@ use crate::{print_debug, print_warning};
 use hdf5::filters::blosc_set_nthreads;
 use ndarray::prelude::*;
 use std::time::Instant;
-const BUFFERSIZE: usize = 20000;
 
 //#[pyclass]
 pub struct PData {
@@ -33,22 +32,30 @@ pub struct PData {
     rotation: [f64; 3],
     rotation_center: [f64; 3],
     external_buffer_names: Vec<usize>,
+    default_buffer_size: usize,
 }
 
 impl PData {
     ///new conste
     pub fn new(filename: &str) -> Self {
+        Self::with_buffer_size(filename, DEFAULT_BUFFER_SIZE)
+    }
+
+    pub fn with_buffer_size(filename: &str, buffer_size: usize) -> Self {
+        if buffer_size == 0 {
+            panic!("Buffer size must be greater than zero");
+        }
         #[cfg(feature = "blosc")]
         blosc_set_nthreads(8);
         print_debug!(
             "PData: Generating new instance with file: {}\
             and buffersize: {}",
             &filename,
-            BUFFERSIZE
+            buffer_size
         );
         let file = hdf5::File::open(filename)
             .unwrap_or_else(|_| panic!("Can not read HDF5 file {}. ", &filename));
-        let buffer = vec![Timestep::default(); BUFFERSIZE];
+        let buffer = vec![Timestep::default(); buffer_size];
         let mut data = PData {
             file,
             buffer,
@@ -56,7 +63,7 @@ impl PData {
             extra_buffers: vec![],
             range: (0, 0),
             range_extra: vec![],
-            buffersize: BUFFERSIZE,
+            buffersize: buffer_size,
             buffersize_extra: vec![],
             single_data: Timestep::default(),
             global_stats_: GlobalStats::default(),
@@ -64,6 +71,7 @@ impl PData {
             rotation: [0.0, 0.0, 0.0],
             rotation_center: [0.0, 0.0, 0.0],
             external_buffer_names: vec![],
+            default_buffer_size: buffer_size,
         };
         print_debug!(
             "PData: Generation complete. First buffer update starting, buffer size: {}",
@@ -915,8 +923,10 @@ impl DataManager for PData {
         if timestep > self.range.1 - 1 {
             self.update((timestep, timestep + self.buffersize));
         } else if timestep < self.range.0 {
-            let chunk = ((timestep as f64) / (BUFFERSIZE as f64)).floor() as usize;
-            self.update((chunk * BUFFERSIZE, (chunk + 1) * BUFFERSIZE));
+            let chunk = timestep / self.default_buffer_size;
+            let start = chunk * self.default_buffer_size;
+            let end = (chunk + 1) * self.default_buffer_size;
+            self.update((start, end));
         }
 
         &self.buffer[timestep - self.range.0]
@@ -1080,7 +1090,7 @@ impl DataManager for PData {
 
     /// setup a new buffer
     fn setup_buffer(&mut self, external_buffer_id: usize) {
-        let range = (0usize, BUFFERSIZE);
+        let range = (0usize, self.default_buffer_size);
         let buffer_id;
         if self.external_buffer_names.contains(&external_buffer_id) {
             // buffer is already know and will be reset
@@ -1093,10 +1103,10 @@ impl DataManager for PData {
         } else {
             // new buffer. Allocate new memory and load the first bit of data
             self.extra_buffers
-                .push(vec![Timestep::default(); BUFFERSIZE]);
+                .push(vec![Timestep::default(); self.default_buffer_size]);
             buffer_id = self.extra_buffers.len() - 1;
             self.range_extra.push(range);
-            self.buffersize_extra.push(BUFFERSIZE);
+            self.buffersize_extra.push(self.default_buffer_size);
             self.external_buffer_names.push(external_buffer_id)
         }
         self.update_extra(range, buffer_id)
@@ -1113,15 +1123,15 @@ impl DataManager for PData {
             self.range_extra[buffer_id]
         );
         if timestep > self.range_extra[buffer_id].1 - 1 {
-            self.update_extra((timestep, timestep + self.buffersize), buffer_id);
+            self.update_extra((timestep, timestep + self.default_buffer_size), buffer_id);
         } else if self.range_extra[buffer_id].1 == self.global_stats_.ntimesteps
             && timestep < self.range_extra[buffer_id].0
         {
-            self.update_extra((0, BUFFERSIZE), buffer_id);
+            self.update_extra((0, self.default_buffer_size), buffer_id);
         }
         // If a timestep below the current range is requested, update buffer
         if timestep < self.range_extra[buffer_id].0 {
-            self.update_extra((timestep, timestep + self.buffersize), buffer_id);
+            self.update_extra((timestep, timestep + self.default_buffer_size), buffer_id);
         }
 
         &self.extra_buffers[buffer_id][timestep - self.range_extra[buffer_id].0]

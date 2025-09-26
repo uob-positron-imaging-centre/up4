@@ -11,7 +11,7 @@ pub mod libcomp;
 pub mod libconv;
 pub mod libgrid;
 pub mod libplot;
-use crate::datamanager::{Manager, PData, TData};
+use crate::datamanager::{Manager, PData, TData, DEFAULT_BUFFER_SIZE};
 
 use libconv::*;
 use libgrid::*;
@@ -110,8 +110,9 @@ impl PyData {
     /// -------
     /// up4.Data
     ///     Data class.
+    #[pyo3(signature = (filename, *, buffer_size=None))]
     #[new]
-    fn constructor(filename: &str) -> Self {
+    fn constructor(filename: &str, buffer_size: Option<usize>) -> Self {
         let file = hdf5::File::open(filename)
             .unwrap_or_else(|_| panic!("Unable to open file {}. Check if file exists.", filename));
         let hdf5type: i32 = file
@@ -132,9 +133,9 @@ impl PyData {
         file.close().expect("Unable to close file");
         let data;
         if hdf5type == 0x1_i32 {
-            data = PyData::from_tdata(filename)
+            data = PyData::from_tdata(filename, buffer_size)
         } else if hdf5type == 0x2_i32 {
-            data = PyData::from_pdata(filename)
+            data = PyData::from_pdata(filename, buffer_size)
         } else {
             panic!("Unknown hdf5 type {}", hdf5type);
         }
@@ -152,9 +153,11 @@ impl PyData {
     /// -------
     /// up4.Data
     ///     Data class
+    #[pyo3(signature = (filename, *, buffer_size=None))]
     #[staticmethod]
-    fn from_pdata(filename: &str) -> Self {
-        let pdata = PData::new(filename);
+    fn from_pdata(filename: &str, buffer_size: Option<usize>) -> Self {
+        let buffersize = PyData::resolve_buffer_size(buffer_size);
+        let pdata = PData::with_buffer_size(filename, buffersize);
         let selector = ParticleSelector::default();
         PyData {
             data: Box::new(pdata),
@@ -173,16 +176,17 @@ impl PyData {
     /// -------
     /// up4.Data
     ///     Data class
+    #[pyo3(signature = (filename, *, buffer_size=None))]
     #[staticmethod]
-    fn from_tdata(filename: &str) -> Self {
-        let tdata = TData::new(filename);
+    fn from_tdata(filename: &str, buffer_size: Option<usize>) -> Self {
+        let buffersize = PyData::resolve_buffer_size(buffer_size);
+        let tdata = TData::with_buffer_size(filename, buffersize);
         let selector = ParticleSelector::default();
         PyData {
             data: Box::new(tdata),
             selector: Box::new(selector),
         }
     }
-
     /// Calculate statistics of the dataset and print to terminal. Currently these are:
     /// * System dimensions.
     /// * Maximum time.
@@ -911,6 +915,12 @@ impl PyData {
 
     fn __len__(&self) -> usize {
         self.data.global_stats().timesteps().to_owned()
+    }
+}
+
+impl PyData {
+    fn resolve_buffer_size(buffer_size: Option<usize>) -> usize {
+        buffer_size.unwrap_or(DEFAULT_BUFFER_SIZE)
     }
 }
 

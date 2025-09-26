@@ -9,6 +9,8 @@ use crate::{print_warning, types::*};
 use derive_getters::Getters;
 use ndarray::prelude::*;
 
+pub const DEFAULT_BUFFER_SIZE: usize = 20_000;
+
 pub mod pdata;
 pub use pdata::PData;
 pub mod tdata;

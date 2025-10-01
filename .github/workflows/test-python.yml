@@ -97,7 +97,7 @@ jobs:
         run: $VIRTUAL_ENV/$BIN -m pytest tests/test_all.py
 
       - name: Trigger docs build and deploy
-        uses: peter-evans/repository-dispatch@v3
+        uses: peter-evans/repository-dispatch@v4
         with:
           event-type: test-python
           client-payload: >

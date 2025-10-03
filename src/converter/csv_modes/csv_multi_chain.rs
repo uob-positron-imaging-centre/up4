@@ -69,18 +69,18 @@ pub fn csv_multi_chain(
         // now go through the data and find columns where the previous time is higher then the current
         let mut old_time = 0.0;
         let mut particles = 0;
-        let mut indx_start = vec![0];
+        let mut index_start = vec![0];
         let mut duration = vec![];
         let mut start_time = vec![0.0];
         let mut steps_per_particle = vec![];
         // Find particle index by checking if the time is reset
         for (i, time) in data.slice(ndarray::s![.., 0]).iter().enumerate() {
             if i > 0 && time < &old_time {
-                indx_start.push(i);
+                index_start.push(i);
                 particles += 1;
                 duration.push(old_time);
                 start_time.push(*time);
-                steps_per_particle.push(i - indx_start[particles - 1]);
+                steps_per_particle.push(i - index_start[particles - 1]);
             }
             old_time = *time;
         }
@@ -88,39 +88,39 @@ pub fn csv_multi_chain(
         let max_steps = steps_per_particle
             .iter()
             .fold(0, |a, &b| if a > b { a } else { b });
-        indx_start.push(data.shape()[0]);
+        index_start.push(data.shape()[0]);
         let mut particle_data: Vec<ndarray::Array2<f64>> = Vec::new();
         // go through each particle and save its data into a Vector
         for idx in 0..particles {
-            if (indx_start[idx + 1] - indx_start[idx]) < 10 {
-                print_warning!("First trajectory has only {} timesteps. This is not enough to calculate the velocity. Skipping this particle.", indx_start[idx + 1] - indx_start[idx]);
+            if (index_start[idx + 1] - index_start[idx]) < 10 {
+                print_warning!("First trajectory has only {} timesteps. This is not enough to calculate the velocity. Skipping this particle.", index_start[idx + 1] - index_start[idx]);
                 continue;
             }
             let mut temp_data = ndarray::Array2::<f64>::from_elem(
-                (indx_start[idx + 1] - indx_start[idx], 7),
+                (index_start[idx + 1] - index_start[idx], 7),
                 f64::NAN,
             );
             temp_data
                 .slice_mut(ndarray::s![.., 0])
-                .assign(&data.slice(ndarray::s![indx_start[idx]..indx_start[idx + 1], 0]));
+                .assign(&data.slice(ndarray::s![index_start[idx]..index_start[idx + 1], 0]));
             temp_data
                 .slice_mut(ndarray::s![.., 1])
-                .assign(&data.slice(ndarray::s![indx_start[idx]..indx_start[idx + 1], 1]));
+                .assign(&data.slice(ndarray::s![index_start[idx]..index_start[idx + 1], 1]));
             temp_data
                 .slice_mut(ndarray::s![.., 2])
-                .assign(&data.slice(ndarray::s![indx_start[idx]..indx_start[idx + 1], 2]));
+                .assign(&data.slice(ndarray::s![index_start[idx]..index_start[idx + 1], 2]));
             temp_data
                 .slice_mut(ndarray::s![.., 3])
-                .assign(&data.slice(ndarray::s![indx_start[idx]..indx_start[idx + 1], 3]));
+                .assign(&data.slice(ndarray::s![index_start[idx]..index_start[idx + 1], 3]));
             temp_data
                 .slice_mut(ndarray::s![.., 4])
-                .assign(&data.slice(ndarray::s![indx_start[idx]..indx_start[idx + 1], 4]));
+                .assign(&data.slice(ndarray::s![index_start[idx]..index_start[idx + 1], 4]));
             temp_data
                 .slice_mut(ndarray::s![.., 5])
-                .assign(&data.slice(ndarray::s![indx_start[idx]..indx_start[idx + 1], 5]));
+                .assign(&data.slice(ndarray::s![index_start[idx]..index_start[idx + 1], 5]));
             temp_data
                 .slice_mut(ndarray::s![.., 6])
-                .assign(&data.slice(ndarray::s![indx_start[idx]..indx_start[idx + 1], 6]));
+                .assign(&data.slice(ndarray::s![index_start[idx]..index_start[idx + 1], 6]));
             if interpolate {
                 if !vel {
                     panic!("Interpolation is activated but velocity computation is not. Currently this will lead to a loss of information. Please activate velocity computation or deactivate interpolation.");

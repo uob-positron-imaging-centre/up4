@@ -10,7 +10,6 @@ updates:
         update-types: ['version-update:semver-patch']
     commit-message:
       prefix: chore(ci)
-    labels: ['skip changelog']
 
   # Rust
   - package-ecosystem: cargo
@@ -27,7 +26,6 @@ updates:
     commit-message:
       prefix: chore(rust)
       prefix-development: chore(rust)
-    labels: ['skip changelog']
 
   # Python
   - package-ecosystem: pip
@@ -43,7 +41,6 @@ updates:
         update-types: ['version-update:semver-patch']
     commit-message:
       prefix: chore(python)
-    labels: ['skip changelog']
 
   # Documentation
   - package-ecosystem: pip
@@ -59,4 +56,3 @@ updates:
         update-types: ['version-update:semver-patch']
     commit-message:
       prefix: chore(python)
-    labels: ['skip changelog']

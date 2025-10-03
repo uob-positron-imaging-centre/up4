@@ -46,7 +46,7 @@ pub fn interpolate(
     let mut real_step = 1;
     for step in 1..timesteps - 1 {
         let time_new = step as f64 * dt;
-        // find the next indx in the real data which may be the old one
+        // find the next index in the real data which may be the old one
         real_step = {
             // if the temporal distance between new time and old time is smaller
             // then distance between new time and next time return old timestep

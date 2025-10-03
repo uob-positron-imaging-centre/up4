@@ -196,7 +196,7 @@ pub trait Conditional: DataManager {
                 }
 
                 //println!("Middle_check done");
-                ///// same vor lower border
+                ///// same for lower border
                 // particle crosses into low border
                 if pos < boundary_position.0 && old_pos > boundary_position.0 {
                     //println!("particle in lower");

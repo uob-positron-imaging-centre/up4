@@ -3,12 +3,14 @@
 # File:     test.py
 # Date:     20.11.21
 
-import up4
-import numpy as np
+import os
 from glob import glob
+
+import numpy as np
 import pytest
 from natsort import natsorted
-import os
+
+import up4
 
 destination = os.path.join(os.path.dirname(__file__), "data")
 
@@ -36,7 +38,7 @@ def data(request):
 @pytest.fixture
 def grid(request):
     """Returns a instance of pdata with the experiment test data in data/"""
-    if request.param == "cylidrical":
+    if request.param == "cylindrical":
         return up4.Grid.cylindrical3d_from_data
     elif request.param == "cartesian":
         return up4.Grid.cartesian3d_from_data
@@ -56,7 +58,9 @@ class TestVtk:
     def test_generated(self, extension):
         """Test if the hdf5 file is written and that it is readable"""
         if os.path.exists(
-            hdf5_dir := os.path.join(destination, extension, "rotating-drum", "drum.hdf5")
+            hdf5_dir := os.path.join(
+                destination, extension, "rotating-drum", "drum.hdf5"
+            )
         ):
             os.remove(hdf5_dir)
         filenames = natsorted(
@@ -76,16 +80,16 @@ class TestVtk:
             filter=rf"(\d+).{extension}",
         )
         try:
-            up4.Data.from_tdata(
-                hdf5_dir
-            )
+            up4.Data.from_tdata(hdf5_dir)
         except Exception as e:
             pytest.fail(e)
 
     def test_generated_folder(self, extension):
         """Test if the hdf5 file is written and that it is readable"""
         if os.path.exists(
-            hdf5_file := os.path.join(destination, extension, "rotating-drum", "drum.hdf5")
+            hdf5_file := os.path.join(
+                destination, extension, "rotating-drum", "drum.hdf5"
+            )
         ):
             os.remove(hdf5_file)
         up4.Converter.vtk_from_folder(
@@ -95,9 +99,7 @@ class TestVtk:
             filter=rf"(\d+).{extension}",
         )
         try:
-            up4.Data.from_tdata(
-                hdf5_file
-            )
+            up4.Data.from_tdata(hdf5_file)
         except Exception as e:
             pytest.fail(e)
 
@@ -143,7 +145,7 @@ class TestCSV:
 
 
 @pytest.mark.parametrize("data", ["exp2", "sim", "sim2"], indirect=True)
-@pytest.mark.parametrize("grid", ["cylidrical", "cartesian"], indirect=True)
+@pytest.mark.parametrize("grid", ["cylindrical", "cartesian"], indirect=True)
 class TestFields:
     def test_velocityfield(self, data, grid):
         grid = grid(data, cells=[10, 10, 10])
@@ -181,7 +183,7 @@ class TestFields:
         assert field.shape() == [10, 10, 10]
 
 
-@pytest.mark.parametrize("grid", ["cylidrical", "cartesian"], indirect=True)
+@pytest.mark.parametrize("grid", ["cylindrical", "cartesian"], indirect=True)
 @pytest.mark.parametrize("extension", ["vtk", "vtu"], indirect=True)
 class TestGrid:
     def test_slice(self, grid, extension):
@@ -243,7 +245,7 @@ class TestGrid:
 
 
 @pytest.mark.parametrize("data", ["exp2", "sim", "sim2"], indirect=True)
-@pytest.mark.parametrize("grid", ["cylidrical", "cartesian"], indirect=True)
+@pytest.mark.parametrize("grid", ["cylindrical", "cartesian"], indirect=True)
 class TestFunctions:
     def histogram(self, data, grid):
         hist, bins = data.histogram(grid)
@@ -252,7 +254,7 @@ class TestFunctions:
 
 
 @pytest.mark.parametrize("data", ["sim", "sim2"], indirect=True)
-@pytest.mark.parametrize("grid", ["cylidrical", "cartesian"], indirect=True)
+@pytest.mark.parametrize("grid", ["cylindrical", "cartesian"], indirect=True)
 class TestMixing:
     def test_lacey(self, data, grid):
         grid = grid(data, cells=[10, 10, 10])

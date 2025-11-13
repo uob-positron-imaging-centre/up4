@@ -3,6 +3,7 @@ extern crate ndarray;
 extern crate numpy;
 
 use super::*;
+use rustc_hash::FxHashMap;
 
 pub trait Mixing: DataManager {
     fn lacey_mixing(
@@ -230,12 +231,11 @@ pub trait Mixing: DataManager {
             next_timestep =
                 match global_stats.timestep_at_seconds_closest(current_time + time_for_msd) {
                     Ok(x) => x,
-                    Err(s) => {
-                        let _message = s.to_string();
+                    Err(_s) => {
                         print_warning!(
                             "Dispersion: No timestep found for time {}, \n error: {}",
                             current_time + time_for_msd,
-                            message
+                            _s
                         );
                         continue;
                     }
@@ -247,6 +247,12 @@ pub trait Mixing: DataManager {
             let timestep_future = self.get_timestep_buffer(next_timestep, 0);
             print_debug!("extracting position");
             let position_future = timestep_future.position();
+            let ids_future = timestep_future.particleid();
+            let mut future_particle_id_to_index: FxHashMap<usize, usize> =
+                FxHashMap::with_capacity_and_hasher(ids_future.len(), Default::default());
+            for (idx, id) in ids_future.iter().enumerate() {
+                future_particle_id_to_index.insert(*id as usize, idx);
+            }
             print_debug!("Starting particle loop");
 
             for particle in 0..particles {
@@ -264,10 +270,31 @@ pub trait Mixing: DataManager {
                     print_debug!("Particle {} is out of FOV", particle);
                     continue;
                 }
-                let position_future_particle = position_future[particle];
-                let dist = ((positions[particle][0] - position_future_particle[0]).powi(2)
+                let particle_id_usize = particle_ids[particle] as usize;
+                let future_idx = match future_particle_id_to_index.get(&particle_id_usize) {
+                    Some(idx) => *idx,
+                    None => {
+                        print_warning!(
+                            "MSD: Particle {} not found in timestep {}",
+                            particle_id_usize,
+                            next_timestep
+                        );
+                        continue;
+                    }
+                };
+                if future_idx >= position_future.len() {
+                    print_warning!(
+                        "MSD: Particle {} future index {} out of bounds (len {})",
+                        particle_id_usize,
+                        future_idx,
+                        position_future.len()
+                    );
+                    continue;
+                }
+                let position_future_particle = position_future[future_idx];
+                let dist = (positions[particle][0] - position_future_particle[0]).powi(2)
                     + (positions[particle][1] - position_future_particle[1]).powi(2)
-                    + (positions[particle][2] - position_future_particle[2]).powi(2));
+                    + (positions[particle][2] - position_future_particle[2]).powi(2);
                 distance.add_value(positions[particle], dist); // add the distance traveled to the cell id of the current particle
             }
             check_signals!();

@@ -27,7 +27,7 @@ jobs:
   clippy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
      
       - name: Set up Rust
         run: rustup override set stable && rustup update
@@ -57,7 +57,7 @@ jobs:
     if: github.ref_name != 'uPPPP'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Set up Rust
         run: rustup component add rustfmt

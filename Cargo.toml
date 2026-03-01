@@ -12,7 +12,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 anyhow = "1.0.94"
 colorous = "1.0.15"
-csv = "1.3.1"
+csv = "1.4.0"
 derive-getters = "0.5.0"
 dyn-clone = "1.0"
 # hdf5 = { version = "0.8.1" }#, features = ["blosc"]}
@@ -20,12 +20,12 @@ hdf5 = { package = "hdf5-metno", git = "https://github.com/metno/hdf5-rust.git" 
 indicatif = "0.18.0"
 itertools = "0.14.0"
 natord = "1.0.9"
-ndarray = "0.16.1"
+ndarray = "0.17.2"
 ndarray-csv = { version = "0.5.1" }
-ndarray-stats = "0.6.0"
+ndarray-stats = "0.7.0"
 num-traits = "0.2.14"
 numpy = "0.23.0"
-plotly = { version = "0.13.5", features = ["plotly_embed_js"] }
+plotly = { version = "0.14.1", features = ["plotly_embed_js"] }
 # plotly = { git = "https://github.com/DanW97/plotly.git" }
 polyfit-rs = "0.2.0"
 pyo3 = { version = "0.23.5", features = ["extension-module"] }

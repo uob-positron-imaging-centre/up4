@@ -409,7 +409,7 @@ fn sort_by_id(data: ndarray::Array2<f64>) -> (Vec<ndarray::Array2<f64>>, f64, us
             .zip(ids_timesteps.iter())
             .map(|(a, b)| (*a, *b))
             .collect::<Vec<(usize, usize)>>();
-        ids_and_steps.sort_by(|a, b| a.0.cmp(&b.0));
+        ids_and_steps.sort_by_key(|a| a.0);
 
         (ids_and_steps, min_id, max_id, max_steps, max_t)
     };

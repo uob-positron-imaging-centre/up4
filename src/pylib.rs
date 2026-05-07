@@ -805,7 +805,7 @@ impl PyData {
         Ok(self.data.info().expect("Could not get info"))
     }
 
-    fn __getitem__(&mut self, idx: SliceIntOrVec, py: Python) -> PyResult<PyObject> {
+    fn __getitem__(&mut self, idx: SliceIntOrVec, py: Python) -> PyResult<Py<PyAny>> {
         match idx {
             SliceIntOrVec::Int(index) => {
                 let idx = if index < 0 {

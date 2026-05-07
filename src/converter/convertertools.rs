@@ -128,7 +128,7 @@ pub fn velocity_polynom(
     sampling_steps: usize,
     degree: usize,
 ) -> ndarray::Array2<f64> {
-    if sampling_steps % 2 == 0 {
+    if sampling_steps.is_multiple_of(2) {
         panic!(
             "Sampling_steps must be a uneven number. not {}",
             sampling_steps

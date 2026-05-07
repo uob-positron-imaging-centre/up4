@@ -385,7 +385,7 @@ impl PyConverter {
         sampling_steps: usize,
     ) {
         // check if sampling_steps is odd
-        if sampling_steps % 2 == 0 {
+        if sampling_steps.is_multiple_of(2) {
             panic!("Sampling steps must be a odd number!");
         }
         csv_converter(

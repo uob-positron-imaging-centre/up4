@@ -109,10 +109,6 @@ pub trait Conditional: DataManager {
         let mut mid_time_flag_array = Array1::<f64>::zeros(particle_number + 1);
 
         let mut old_timestep = self.get_timestep(0).to_owned();
-        // Clippy is generating a false positive here, I think.
-        // TODO confirm whether this is the case or not.
-        #[allow(unused_variables)]
-        let mut count = 0;
         for timestep in 1..timesteps - 1 {
             let timestep_data = self.get_timestep(timestep);
             let current_time = *timestep_data.time();
@@ -155,7 +151,6 @@ pub trait Conditional: DataManager {
                 let pos = positions[particle][axis];
                 let old_pos = old_positions[particle][axis];
                 if pos > boundary_position.1 && old_pos < boundary_position.1 {
-                    count += 1;
                     //println!("particle inside upper ");
 
                     // if particle before was below

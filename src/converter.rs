@@ -173,11 +173,10 @@ pub fn csv_converter(
     let mut mean_counter: usize = 0;
     let mut failcount = 0;
     let mut old_time = 0.0; // TIme of the last falid timestep
-    let mut step = 0;
-    print_debug!("Creating a new group \"particle {}\"", step);
+    print_debug!("Creating a new group \"particle {}\"", mean_counter);
     let group = hdf5file
-        .create_group(&format!("particle {}", step))
-        .unwrap_or_else(|_| panic!("Can not create group particle {}", step));
+        .create_group(&format!("particle {}", mean_counter))
+        .unwrap_or_else(|_| panic!("Can not create group particle {}", mean_counter));
 
     if data[[0, 6]].is_nan() {
         panic!("Velocity information required")
@@ -256,7 +255,6 @@ pub fn csv_converter(
         } else if pos[2] > dimensions[[1, 2]] {
             dimensions[[1, 2]] = pos[2];
         }
-        step += 1;
         mean_counter += 1;
         sample_rate = current_time - old_time;
         if current_time > time[1] {

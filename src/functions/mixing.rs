@@ -265,9 +265,9 @@ pub trait Mixing: DataManager {
                     continue;
                 }
                 let position_future_particle = position_future[particle];
-                let dist = ((positions[particle][0] - position_future_particle[0]).powi(2)
+                let dist = (positions[particle][0] - position_future_particle[0]).powi(2)
                     + (positions[particle][1] - position_future_particle[1]).powi(2)
-                    + (positions[particle][2] - position_future_particle[2]).powi(2));
+                    + (positions[particle][2] - position_future_particle[2]).powi(2);
                 distance.add_value(positions[particle], dist); // add the distance traveled to the cell id of the current particle
             }
             check_signals!();

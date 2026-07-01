@@ -18,7 +18,7 @@ dyn-clone = "1.0"
 # hdf5 = { version = "0.8.1" }#, features = ["blosc"]}
 hdf5 = { package = "hdf5-metno", git = "https://github.com/metno/hdf5-rust.git" }
 indicatif = "0.18.0"
-itertools = "0.14.0"
+itertools = "0.15.0"
 natord = "1.0.9"
 ndarray = "0.17.2"
 ndarray-csv = { version = "0.5.4" }

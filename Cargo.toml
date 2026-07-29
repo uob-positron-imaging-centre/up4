@@ -15,8 +15,7 @@ colorous = "1.0.15"
 csv = "1.4.0"
 derive-getters = "0.5.0"
 dyn-clone = "1.0"
-# hdf5 = { version = "0.8.1" }#, features = ["blosc"]}
-hdf5 = { package = "hdf5-metno", git = "https://github.com/metno/hdf5-rust.git" }
+hdf5 = { version = "0.14", package = "hdf5-metno", features = ["static"] }
 indicatif = "0.18.0"
 itertools = "0.14.0"
 natord = "1.0.9"

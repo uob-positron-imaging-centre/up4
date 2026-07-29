@@ -47,7 +47,7 @@ pub fn csv_converter(
     sampling_steps: usize,
 ) {
     if !Path::new(&filename).exists() {
-        panic!("CSV file {} does not exist.", &filename);
+        panic!("CSV file {} does not exist.", filename);
     }
 
     // TODO: CHeck if we can buffer that for big datafiles!
@@ -397,7 +397,7 @@ pub fn csv_multi_converter(
     );
     // continue with the "Chain" mode
     if !Path::new(&filename).exists() {
-        panic!("CSV file {} does not exist.", &filename);
+        panic!("CSV file {} does not exist.", filename);
     }
     if mode == "chain" {
         csv_modes::csv_multi_chain(

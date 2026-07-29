@@ -23,11 +23,11 @@ ndarray = "0.17.2"
 ndarray-csv = { version = "0.5.4" }
 ndarray-stats = "0.7.0"
 num-traits = "0.2.14"
-numpy = "0.28.0"
+numpy = "0.29"
 plotly = { version = "0.14.1", features = ["plotly_embed_js"] }
 # plotly = { git = "https://github.com/DanW97/plotly.git" }
 polyfit-rs = "0.2.0"
-pyo3 = { version = "0.28.3", features = ["extension-module"] }
+pyo3 = { version = "0.29", features = ["extension-module"] }
 rayon = "1.12.0"
 regex = "1"
 rustc-hash = "2.1.1"

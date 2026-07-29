@@ -44,7 +44,7 @@ impl TData {
             BUFFERSIZE
         );
         let file = hdf5::File::open(filename)
-            .unwrap_or_else(|_| panic!("Can not read HDF5 file {}. ", &filename));
+            .unwrap_or_else(|_| panic!("Can not read HDF5 file {}. ", filename));
         let buffer = vec![Timestep::default(); BUFFERSIZE];
         let mut data = TData {
             file,

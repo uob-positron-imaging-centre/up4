@@ -1,6 +1,6 @@
-numpy>=1.17.3
-plotly>=4.4.1
-tqdm>=4.41.1
-h5py>=2.1.0
-vtk>=9.1.0
+numpy>=2.4.6
+plotly>=6.7.0
+tqdm>=4.67.3
+h5py>=3.16.0
+vtk>=9.6.2
 natsort

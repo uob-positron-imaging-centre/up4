@@ -1,8 +1,8 @@
-numpy>=2.4.6
-plotly>=6.7.0
-tqdm>=4.67.3
+numpy>=2.5.2
+plotly>=7.0.0
+tqdm>=4.70.0
 h5py>=3.16.0
-vtk>=9.6.2
+vtk>=9.7.0
 natsort
 pytest
 pytest-html

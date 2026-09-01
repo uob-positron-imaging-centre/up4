@@ -1,4 +1,4 @@
 sphinx!=6.1.2,>=9.1.0
-pydata-sphinx-theme>=0.18.0,<0.19
+pydata-sphinx-theme>=0.21.0,<0.22
 numpydoc>=1.10.0
 sphinx-copybutton>=0.5.0
